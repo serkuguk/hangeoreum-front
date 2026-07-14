@@ -1,0 +1,68 @@
+<div class="imwrap">
+  @if (facade.proRequired()) {
+    <div class="panel centerpanel">
+      <div class="ghost kr">몰입</div>
+      <h2 class="pagettl">Immerse — Pro-фича</h2>
+      <p class="pagesub">Лента коротких видео носителей: субтитры, слова в один тап.</p>
+      <a class="cta" routerLink="/billing">Открыть с Pro</a>
+    </div>
+  } @else if (facade.error(); as error) {
+    <div class="panel centerpanel">
+      <p class="pagesub">{{ error }}</p>
+      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+    </div>
+  } @else if (facade.clips().length === 0 && !facade.loading()) {
+    <div class="panel centerpanel">
+      <div class="ghost kr">서울</div>
+      <h2 class="pagettl">Клипы уже в пути</h2>
+      <p class="pagesub">Носители записывают видео — лента скоро наполнится.</p>
+      <a class="ghostbtn" routerLink="/dashboard">На дашборд</a>
+    </div>
+  } @else {
+    <div class="subtoggle">
+      <button type="button" [class.is-active]="subMode() === 'ko'" (click)="subMode.set('ko')">한국어</button>
+      <button type="button" [class.is-active]="subMode() === 'ru'" (click)="subMode.set('ru')">Перевод</button>
+      <button type="button" [class.is-active]="subMode() === 'both'" (click)="subMode.set('both')">Оба</button>
+    </div>
+
+    <div class="feed">
+      @for (clip of facade.clips(); track clip.id) {
+        <section class="clip">
+          @if (clip.videoUrl) {
+            <video [attr.data-clip-id]="clip.id" [src]="clip.videoUrl"
+                   [poster]="clip.thumbnailUrl ?? ''" loop playsinline preload="none"
+                   (click)="togglePlay($event)"></video>
+          } @else {
+            <div class="novid"><span class="ghost kr">말</span></div>
+          }
+
+          <div class="subs">
+            @if (subMode() !== 'ru' && subtitle(clip, 'ko'); as ko) {
+              <div class="kr kotext">{{ ko }}</div>
+            }
+            @if (subMode() !== 'ko' && subtitle(clip, 'ru'); as ru) {
+              <div class="rutext">{{ ru }}</div>
+            }
+          </div>
+
+          <div class="actions">
+            <button type="button" [class.liked]="clip.liked" (click)="facade.toggleLike(clip)"
+                    [attr.aria-label]="clip.liked ? 'Убрать лайк' : 'Нравится'">
+              {{ clip.liked ? '❤️' : '🤍' }}
+            </button>
+            @if (clip.wordId) {
+              <button type="button" (click)="addWord(clip)"
+                      [disabled]="addedWords().has(clip.wordId!)"
+                      aria-label="Слово в словарь">
+                {{ addedWords().has(clip.wordId!) ? '✓' : '＋' }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+      @if (facade.loading()) {
+        <div class="feedload">Загружаем…</div>
+      }
+    </div>
+  }
+</div>

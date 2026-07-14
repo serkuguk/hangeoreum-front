@@ -1,0 +1,166 @@
+// =============================================================
+// 한걸음 (Hangeoreum) — Design Tokens
+// Единый источник правды по цвету, типографике, отступам, радиусам.
+// Подключить в Angular: styles.scss → @use 'hangeoreum-design-tokens';
+// либо добавить путь в angular.json → "styles": ["src/styles/hangeoreum-design-tokens.scss", ...]
+//
+// Все переменные продублированы как CSS custom properties (:root),
+// поэтому их можно читать/менять и в рантайме:
+//   document.documentElement.style.setProperty('--hg-blue', '#3B6BFF');
+// Это удобно для панели настроек темы (размер/цвет) в Angular —
+// достаточно записывать значения через ThemeService, без пересборки.
+// =============================================================
+
+// ---------- SCSS-переменные (для compile-time использования: darken(), map.get() и т.п.) ----------
+$hg-ink:     #13121A;
+$hg-ink-2:   #1C1B26;
+$hg-card:    #211F2E;
+$hg-card-2:  #2A2838;
+$hg-line:    rgba(255,255,255,.07);
+$hg-txt:     #ECEAF4;
+$hg-muted:   #9A96AE;
+$hg-paper:   #F4F0E4;
+
+// акценты 오방색 (obangsaek)
+$hg-blue:    #3B6BFF; // 청 — основной / ссылки / прогресс
+$hg-red:     #FF4D5E; // 홍·적 — ошибки, "сложное", удаление
+$hg-yellow:  #FFC23C; // 황 — награды, XP, серия
+$hg-jade:    #1FC79B; // доп. зелёный — "выучено", успех
+
+$hg-colors: (
+  "ink":    $hg-ink,
+  "ink-2":  $hg-ink-2,
+  "card":   $hg-card,
+  "card-2": $hg-card-2,
+  "line":   $hg-line,
+  "txt":    $hg-txt,
+  "muted":  $hg-muted,
+  "paper":  $hg-paper,
+  "blue":   $hg-blue,
+  "red":    $hg-red,
+  "yellow": $hg-yellow,
+  "jade":   $hg-jade,
+);
+
+// ---------- Радиусы ----------
+$hg-radius-sm:   12px;  // мелкие элементы: инпуты, теги
+$hg-radius-md:   16px;  // карточки среднего размера, диалоговые строки
+$hg-radius-lg:   22px;  // основные панели/карты (--radius в прототипах)
+$hg-radius-pill: 99px;  // пилюли, переключатели, круглые кнопки
+
+// ---------- Отступы (шкала 4px) ----------
+$hg-space-xs:   6px;
+$hg-space-sm:   10px;
+$hg-space-md:   16px;
+$hg-space-lg:   24px;
+$hg-space-xl:   32px;
+$hg-space-2xl:  48px;
+$hg-space-3xl:  64px;
+
+// ---------- Типографика ----------
+$hg-font-display: "Black Han Sans", "Noto Sans KR", sans-serif; // крупная хангыль: логотип, слово дня
+$hg-font-kr:      "Noto Sans KR", sans-serif;                    // корейский текст в теле
+$hg-font-ui:      "Space Grotesk", "Noto Sans KR", sans-serif;   // латиница / UI / цифры
+
+$hg-fs-2xs:  11px;  // eyebrow, лейблы
+$hg-fs-xs:   12px;  // подписи, romanization
+$hg-fs-sm:   13.5px;// вторичный текст
+$hg-fs-base: 15px;  // тело
+$hg-fs-md:   16px;  // акцентный текст в карточках
+$hg-fs-lg:   18px;  // заголовки блоков (h3)
+$hg-fs-xl:   22px;  // подзаголовки
+$hg-fs-2xl:  28px;  // заголовки страниц (h2.pagettl)
+$hg-fs-3xl:  38px;  // крупные заголовки (auth brand h2)
+$hg-fs-display-sm: 44px; // флеш-карта "big", крупная хангыль среднего размера
+$hg-fs-display-md: 52px; // слово дня
+$hg-fs-display-lg: 64px; // hero h1 (landing)
+$hg-fs-display-xl: 88px; // флешкарта — самая крупная хангыль
+
+// ---------- Тени ----------
+$hg-shadow-cta:  0 10px 28px rgba(59,107,255,.4);
+$hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
+
+// =============================================================
+// CSS custom properties — то, что реально импортируется в HTML/Angular
+// компоненты через var(--hg-*). Держите имена в синхроне с $hg-* выше.
+// =============================================================
+:root{
+  // цвета
+  --hg-ink:     #{$hg-ink};
+  --hg-ink-2:   #{$hg-ink-2};
+  --hg-card:    #{$hg-card};
+  --hg-card-2:  #{$hg-card-2};
+  --hg-line:    #{$hg-line};
+  --hg-txt:     #{$hg-txt};
+  --hg-muted:   #{$hg-muted};
+  --hg-paper:   #{$hg-paper};
+  --hg-blue:    #{$hg-blue};
+  --hg-red:     #{$hg-red};
+  --hg-yellow:  #{$hg-yellow};
+  --hg-jade:    #{$hg-jade};
+
+  // радиусы
+  --hg-radius-sm:   #{$hg-radius-sm};
+  --hg-radius-md:   #{$hg-radius-md};
+  --hg-radius-lg:   #{$hg-radius-lg};
+  --hg-radius-pill: #{$hg-radius-pill};
+
+  // отступы
+  --hg-space-xs:  #{$hg-space-xs};
+  --hg-space-sm:  #{$hg-space-sm};
+  --hg-space-md:  #{$hg-space-md};
+  --hg-space-lg:  #{$hg-space-lg};
+  --hg-space-xl:  #{$hg-space-xl};
+  --hg-space-2xl: #{$hg-space-2xl};
+  --hg-space-3xl: #{$hg-space-3xl};
+
+  // шрифты
+  --hg-font-display: #{$hg-font-display};
+  --hg-font-kr:      #{$hg-font-kr};
+  --hg-font-ui:      #{$hg-font-ui};
+
+  // размеры шрифта
+  --hg-fs-2xs:  #{$hg-fs-2xs};
+  --hg-fs-xs:   #{$hg-fs-xs};
+  --hg-fs-sm:   #{$hg-fs-sm};
+  --hg-fs-base: #{$hg-fs-base};
+  --hg-fs-md:   #{$hg-fs-md};
+  --hg-fs-lg:   #{$hg-fs-lg};
+  --hg-fs-xl:   #{$hg-fs-xl};
+  --hg-fs-2xl:  #{$hg-fs-2xl};
+  --hg-fs-3xl:  #{$hg-fs-3xl};
+  --hg-fs-display-sm: #{$hg-fs-display-sm};
+  --hg-fs-display-md: #{$hg-fs-display-md};
+  --hg-fs-display-lg: #{$hg-fs-display-lg};
+  --hg-fs-display-xl: #{$hg-fs-display-xl};
+
+  // тени
+  --hg-shadow-cta:  #{$hg-shadow-cta};
+  --hg-shadow-card: #{$hg-shadow-card};
+
+  // фоновая подложка (используется на body во всех прототипах)
+  --hg-bg-gradient:
+    radial-gradient(1200px 600px at 85% -10%, rgba(59,107,255,.18), transparent 60%),
+    radial-gradient(900px 500px at -5% 110%, rgba(255,77,94,.14), transparent 55%),
+    var(--hg-ink);
+}
+
+// =============================================================
+// Пример использования в Angular-компоненте (для справки, не исполняется):
+//
+//   // theme.service.ts
+//   setAccent(hex: string) {
+//     document.documentElement.style.setProperty('--hg-blue', hex);
+//   }
+//   setScale(px: string) {
+//     document.documentElement.style.setProperty('--hg-fs-base', px);
+//   }
+//
+//   // component.scss
+//   .card {
+//     background: var(--hg-card);
+//     border-radius: var(--hg-radius-lg);
+//     padding: var(--hg-space-lg);
+//     font-size: var(--hg-fs-base);
+//   }
+// =============================================================

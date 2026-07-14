@@ -1,0 +1,35 @@
+<div class="user-panel-root">
+  <button class="user-trigger" (click)="userMenuToggle()" [class.user-trigger--open]="showPanel()">
+    <span class="user-trigger__avatar" [style.background]="roleColor()">
+      {{ userInitials() }}
+    </span>
+    <span class="user-trigger__info">
+      <span class="user-trigger__name">{{ (userData$ | async)?.username ?? 'Пользователь' }}</span>
+      <span class="user-trigger__role">{{ roleLabel() }}</span>
+    </span>
+    <svg class="user-trigger__chevron" [class.user-trigger__chevron--open]="showPanel()"
+      width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+
+  @if (showPanel()) {
+    <div class="user-dropdown">
+      <div class="user-dropdown__header">
+        <span class="user-dropdown__label">Вы вошли как</span>
+        <span class="user-dropdown__name">{{ (userData$ | async)?.username ?? 'Пользователь' }}</span>
+        <span class="user-dropdown__role" [style.color]="roleColor()">{{ roleLabel() }}</span>
+      </div>
+      <button class="user-dropdown__action" (click)="logout()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Сменить пользователя</span>
+      </button>
+    </div>
+  }
+</div>

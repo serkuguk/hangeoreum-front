@@ -1,0 +1,88 @@
+:host-context(.form-field_error) {
+  .app-input {
+    border-color: var(--color-danger) !important;
+  }
+}
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.basic-input {
+  width: 100%;
+}
+
+// ── Float label mode (forms) ──────────────────────────────────────────
+:host ::ng-deep .p-floatlabel {
+  display: block;
+}
+
+:host ::ng-deep .p-floatlabel label {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--color-text-faint);
+}
+
+.app-input {
+  width: 100%;
+  min-height: 2.75rem;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 0.95rem 0.35rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--color-text-primary);
+  transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
+
+  &::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  &:hover {
+    border-color: var(--color-accent-light);
+  }
+
+  &:focus,
+  &:focus-visible {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+    outline: none;
+  }
+
+  &_disabled {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-faint);
+    cursor: not-allowed;
+  }
+}
+
+// ── Plain mode (no float label — used in header search, etc.) ────────
+.app-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__icon {
+    position: absolute;
+    left: 11px;
+    display: flex;
+    align-items: center;
+    color: var(--color-text-faint);
+    font-size: 13px;
+    pointer-events: none;
+  }
+
+  .app-input--plain {
+    padding: 0 0.75rem;
+    min-height: 2.25rem;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+  }
+
+  &--icon .app-input--plain {
+    padding-left: 2rem;
+  }
+}

@@ -1,0 +1,95 @@
+<div class="wrap fcbox">
+  @if (facade.loading()) {
+    <div class="panel loadpanel">Готовим карточки…</div>
+  } @else if (facade.error(); as error) {
+    <div class="panel loadpanel">
+      <p>{{ error }}</p>
+      <a class="ghostbtn" routerLink="/review">К режимам</a>
+    </div>
+  } @else if (facade.result(); as result) {
+    <!-- Сводка сессии -->
+    <div class="panel rewcard">
+      <div class="ghost kr">기억</div>
+      <div class="rew-han kr">수고했어요!</div>
+      <h2 class="pagettl">Сессия завершена</h2>
+      <p class="pagesub">SM-2 обновил интервалы для {{ result.total }} слов</p>
+      <div class="rewstats">
+        <div class="rewstat"><b class="bl">{{ result.total }}</b><span>повторено</span></div>
+        <div class="rewstat"><b class="j">{{ result.correct }}</b><span>крепко в памяти</span></div>
+        <div class="rewstat"><b class="r">{{ facade.hardWords().length }}</b><span>сложных</span></div>
+        <div class="rewstat"><b class="y">+{{ result.xp }}</b><span>XP</span></div>
+      </div>
+      @if (facade.hardWords().length > 0) {
+        <div class="hardlist">
+          <div class="eyebrow">Стоит повторить ещё раз</div>
+          @for (word of facade.hardWords(); track word.id) {
+            <div class="hardrow">
+              <span class="kr hw">{{ word.word.hangul }}</span>
+              <span class="tr">{{ word.word.translation }}</span>
+              <span class="pill p-r">снова завтра</span>
+            </div>
+          }
+        </div>
+      }
+      <div class="rewbtns">
+        <button class="cta grow" (click)="again()">К режимам повторения</button>
+        <a class="ghostbtn" routerLink="/dashboard">На дашборд</a>
+      </div>
+    </div>
+  } @else if (facade.current(); as card) {
+    <div class="fc-top">
+      <span class="cnt">{{ facade.index() + 1 }} / {{ facade.total() }}</span>
+      <div class="bar"><i [style.width.%]="(facade.index()) / facade.total() * 100"></i></div>
+      <span class="pill p-j">{{ accuracy() }}%</span>
+    </div>
+
+    <div class="flip-scene">
+      <div class="flip-card" [class.is-flipped]="isFlipped()" (click)="flip()"
+           tabindex="0" role="button" aria-label="Перевернуть карточку">
+        <div class="flip-face flip-face--front">
+          <div class="ghost kr">{{ card.word.hangul.charAt(0) }}</div>
+          @if (card.word.imageUrl) {
+            <img class="ill" [src]="card.word.imageUrl" alt="">
+          }
+          <div class="big kr">{{ card.word.hangul }}</div>
+          <div class="rom">{{ card.word.romanization }}</div>
+          <hg-audio-button [text]="card.word.hangul" [audioUrl]="card.word.audioUrl"/>
+        </div>
+        <div class="flip-face flip-face--back">
+          <div class="mean">{{ card.word.translation }}</div>
+          @if (card.word.partOfSpeech) {
+            <span class="pill p-b">{{ card.word.partOfSpeech }}</span>
+          }
+          @if (card.word.exampleKo) {
+            <div class="exm kr">
+              {{ card.word.exampleKo }}<br>
+              <span class="extr">{{ card.word.exampleTranslation }}</span>
+            </div>
+          }
+          @if (card.word.grammarNote) {
+            <div class="gram">{{ card.word.grammarNote }}</div>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (!isFlipped()) {
+      <div class="hint">Клик, тап или пробел — переворот</div>
+      <button class="cta showbtn" (click)="flip()">Показать ответ</button>
+    } @else {
+      <div class="hint">Оцени, насколько легко вспомнилось · клавиши 1–4</div>
+      <div class="srs">
+        @for (rating of ratings; track rating.quality) {
+          <button type="button" [class]="rating.cls" (click)="rate(rating.quality)">
+            {{ rating.label }}<small>{{ facade.intervalLabel(rating.quality) }}</small>
+          </button>
+        }
+      </div>
+    }
+  } @else {
+    <div class="panel loadpanel">
+      <p>Пока нечего повторять — пройди урок, и слова появятся здесь.</p>
+      <a class="cta" routerLink="/learn">К урокам</a>
+    </div>
+  }
+</div>

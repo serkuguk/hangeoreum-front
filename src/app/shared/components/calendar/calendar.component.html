@@ -1,0 +1,16 @@
+<div class="app-calendar input-group input-group-sm">
+  <p-floatlabel variant="on">
+    <p-datepicker
+         [ngModel]="value()"
+         (ngModelChange)="onChanged($event)"
+         [inputId]="'calendar_' + (placeholder() || 'on_label')"
+         showIcon
+         iconDisplay="input"
+         [minDate]="minDate()"
+         [maxDate]="maxDate()"
+         [disabled]="disabled()"
+         (onBlur)="onClosed()"
+    ></p-datepicker>
+    <label>{{ placeholder() || 'On Label' }}</label>
+  </p-floatlabel>
+</div>

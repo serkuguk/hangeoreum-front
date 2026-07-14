@@ -1,0 +1,106 @@
+<div class="wrap dashwrap">
+  @if (facade.loading()) {
+    <div class="skeleton-grid" aria-label="Загрузка">
+      @for (block of [1, 2, 3, 4]; track block) {
+        <div class="panel skeleton"></div>
+      }
+    </div>
+  } @else if (facade.error(); as error) {
+    <div class="panel errpanel">
+      <p>{{ error }}</p>
+      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+    </div>
+  } @else if (facade.data(); as dash) {
+    <div class="dash-top">
+      <div class="panel greet">
+        <div class="eyebrow">{{ today }}</div>
+        <h1>С возвращением, {{ auth.user()?.name }} 👋</h1>
+        <p>
+          @if (dash.streak > 0) {
+            Серия <b class="y">{{ dash.streak }} дн.</b> ·
+          }
+          сегодня {{ dash.goal.earnedXp }} из {{ dash.goal.goalXp }} XP.
+          @if (dash.goal.reached) {
+            Цель дня закрыта — 잘했어요!
+          } @else {
+            Ещё немного — и цель дня закрыта.
+          }
+        </p>
+      </div>
+      <div class="panel goalpanel">
+        <hg-progress-ring [percent]="goalPercent()" [size]="84">
+          <div><b>{{ goalPercent() }}%</b><span>цель дня</span></div>
+        </hg-progress-ring>
+        <div class="goalstats">
+          <div class="row"><span>XP сегодня</span><b>{{ dash.goal.earnedXp }} / {{ dash.goal.goalXp }}</b></div>
+          <div class="row"><span>Серия</span><b>🔥 {{ dash.streak }} дн.</b></div>
+          <div class="row"><span>Всего XP</span><b>{{ dash.totalXp }}</b></div>
+        </div>
+      </div>
+    </div>
+
+    @if (dash.wordOfDay; as word) {
+      <div class="panel wod">
+        <div class="ghost kr">{{ word.hangul.charAt(0) }}</div>
+        <hg-audio-button [text]="word.hangul" [audioUrl]="word.audioUrl"/>
+        <div>
+          <div class="eyebrow">Слово дня</div>
+          <div class="big kr">{{ word.hangul }}</div>
+          <div class="rom">{{ word.romanization }}</div>
+          <div class="mean">{{ word.translation }}</div>
+          @if (word.exampleKo) {
+            <div class="ex kr">{{ word.exampleKo }} <span class="extr">— {{ word.exampleTranslation }}</span></div>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="dash-mid">
+      <div class="panel">
+        <div class="eyebrow">Повторение сегодня</div>
+        @if (dash.dueWords > 0) {
+          <p class="duecount"><b class="y">{{ dash.dueWords }}</b> слов ждут повторения</p>
+          <a class="cta fullw" routerLink="/review">Начать повторение</a>
+        } @else {
+          <p class="duecount">Пока нечего повторять — пройди урок, и SRS подберёт слова.</p>
+          <a class="ghostbtn fullw" routerLink="/learn">К урокам</a>
+        }
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Твои уроки</div>
+        @if (dash.nextLessons.length > 0) {
+          <div class="lessonlist">
+            @for (lesson of dash.nextLessons; track lesson.id) {
+              <a class="llrow" [routerLink]="['/learn', lesson.id, 'tip']">
+                <div class="nic kr">{{ lesson.title.charAt(0) }}</div>
+                <div><b>{{ lesson.title }}</b><small>{{ lesson.type === 'STORY' ? 'Story · видео носителя' : 'Урок' }}</small></div>
+                <span class="st">Начать →</span>
+              </a>
+            }
+          </div>
+        } @else {
+          <p class="duecount">Курс пройден — загляни в повторение!</p>
+        }
+        <a class="ghostbtn fullw" routerLink="/learn">Открыть дерево уроков</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow">XP за неделю</div>
+      <div class="wchart">
+        @for (bar of weekBars(); track bar.label) {
+          <div class="bar" [class.today]="bar.isToday" [title]="bar.xp + ' XP'">
+            <i [style.height.%]="bar.height"></i>
+            <span>{{ bar.label }}</span>
+          </div>
+        }
+      </div>
+      <div class="dash-stats">
+        <div class="dstat"><b class="j">{{ dash.wordsLearned }}</b><span>слов выучено</span></div>
+        <div class="dstat"><b class="y">{{ dash.streak }}</b><span>дней серии</span></div>
+        <div class="dstat"><b class="bl">{{ dash.lessonsCompleted }}</b><span>уроков пройдено</span></div>
+        <div class="dstat"><b class="r">{{ dash.totalXp }}</b><span>всего XP</span></div>
+      </div>
+    </div>
+  }
+</div>

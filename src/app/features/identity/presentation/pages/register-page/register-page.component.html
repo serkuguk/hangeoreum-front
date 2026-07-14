@@ -1,0 +1,60 @@
+<div class="formbox">
+  <div class="eyebrow">회원가입 · Регистрация</div>
+  <h1>Создать аккаунт</h1>
+  <p class="sub">Займёт меньше минуты.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="name">Имя</label>
+      <input id="name" type="text" formControlName="name" placeholder="Сергей"
+             autocomplete="name" [class.invalid]="invalid('name')">
+      @if (invalid('name')) {
+        <div class="fielderr">Как тебя зовут?</div>
+      }
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="you@email.com"
+             autocomplete="email" [class.invalid]="invalid('email')">
+      @if (invalid('email')) {
+        <div class="fielderr">Введи корректный email</div>
+      }
+    </div>
+
+    <div class="field">
+      <label for="password">Пароль</label>
+      <input id="password" type="password" formControlName="password" placeholder="Минимум 8 символов"
+             autocomplete="new-password" [class.invalid]="invalid('password')">
+      @if (invalid('password')) {
+        <div class="fielderr">Пароль — минимум 8 символов</div>
+      }
+    </div>
+
+    <div class="row">
+      <label>
+        <input type="checkbox" formControlName="consent">
+        Принимаю условия и политику
+      </label>
+    </div>
+    @if (invalid('consent')) {
+      <div class="apierr">Нужно принять условия, чтобы продолжить</div>
+    }
+
+    @if (facade.error(); as error) {
+      <div class="apierr">{{ error }}</div>
+    }
+
+    <button class="btn" type="submit" [disabled]="facade.loading()">
+      {{ facade.loading() ? 'Создаём…' : 'Создать аккаунт' }}
+    </button>
+  </form>
+
+  <div class="sep">или через</div>
+  <div class="social">
+    <button type="button" (click)="facade.loginWithProvider('google')">Google</button>
+    <button type="button" (click)="facade.loginWithProvider('kakao')">Kakao</button>
+  </div>
+
+  <div class="alt">Уже есть аккаунт? <a routerLink="/auth/login">Войти</a></div>
+</div>

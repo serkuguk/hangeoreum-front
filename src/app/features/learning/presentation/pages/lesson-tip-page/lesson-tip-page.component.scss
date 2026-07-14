@@ -1,0 +1,63 @@
+:host { display: block; }
+
+.tipbox { max-width: 640px; }
+
+.loadpanel {
+  text-align: center;
+  padding: 40px;
+  color: var(--hg-muted);
+
+  p { margin-bottom: 16px; }
+  .cta { display: inline-block; text-decoration: none; color: #fff; }
+}
+
+.tipcard {
+  padding: 34px;
+
+  .ghost { right: -20px; bottom: -50px; font-size: 200px; }
+}
+
+.rule {
+  background: var(--hg-card-2);
+  border: 1px solid var(--hg-line);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin: 20px 0;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-line; // ponytail: markdown рендерим как текст с переносами; md-парсер — если контент потребует
+}
+
+.ex-line {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hg-line);
+  font-size: 15px;
+  line-height: 1.7;
+
+  &:last-of-type { border: none; }
+
+  .kr { font-size: 19px; }
+
+  ::ng-deep .p {
+    color: var(--hg-jade);
+    font-weight: 700;
+    background: rgba(31, 199, 155, .1);
+    border-radius: 6px;
+    padding: 0 4px;
+  }
+
+  small { display: block; color: var(--hg-muted); font-size: 13px; margin-top: 4px; }
+}
+
+.tipbtns {
+  display: flex;
+  gap: 12px;
+  margin-top: 26px;
+
+  .cta {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+  }
+}

@@ -1,0 +1,70 @@
+<div class="wrap cab">
+  @if (facade.loading()) {
+    <div class="panel loadpanel">Загружаем профиль…</div>
+  } @else if (facade.error(); as error) {
+    <div class="panel loadpanel">
+      <p>{{ error }}</p>
+      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+    </div>
+  } @else if (facade.profile(); as profile) {
+    <div class="panel cab-head">
+      <div class="ghost kr">복</div>
+      <label class="bigav" [title]="uploading() ? 'Загружаем…' : 'Сменить аватар'">
+        @if (profile.avatarUrl) {
+          <img [src]="profile.avatarUrl" alt="Аватар">
+        } @else {
+          {{ profile.name.charAt(0).toUpperCase() }}
+        }
+        <input type="file" accept="image/*" (change)="onAvatar($event)" hidden>
+        <span class="cam">📷</span>
+      </label>
+      <div class="who">
+        <h1>{{ profile.name }}</h1>
+        <div class="pill p-y">⭐ {{ profile.levelTitle || ('Уровень ' + profile.level) }} · {{ profile.totalXp }} XP</div>
+        <p class="kr">한국어 · изучает корейский с {{ profile.memberSince | date:'LLLL y' }}</p>
+      </div>
+      <a class="editbtn" routerLink="/settings">Настройки</a>
+    </div>
+
+    @if (profile.xpToNext !== null) {
+      <div class="panel levelbox">
+        <div class="lt">
+          <b>До следующего уровня</b>
+          <span>{{ profile.totalXp }} / {{ profile.totalXp + profile.xpToNext }} XP</span>
+        </div>
+        <div class="track"><div class="fill" [style.width.%]="facade.levelPercent()"></div></div>
+      </div>
+    }
+
+    <div class="cgrid">
+      <div class="panel cstat"><b class="j">{{ profile.wordsLearned }}</b><span>слов выучено</span></div>
+      <div class="panel cstat"><b class="y">{{ profile.streak }}</b><span>дней серии (рекорд {{ profile.longestStreak }})</span></div>
+      <div class="panel cstat"><b class="bl">{{ profile.lessonsCompleted }}</b><span>уроков пройдено</span></div>
+      <div class="panel cstat"><b class="r">{{ profile.achievementsEarned }}</b><span>достижений</span></div>
+    </div>
+
+    <div class="panel block">
+      <h3>Достижения</h3>
+      @if (facade.achievements().length === 0) {
+        <p class="empty">Достижения появятся после первых уроков.</p>
+      }
+      <div class="ach">
+        @for (achievement of facade.achievements(); track achievement.id) {
+          <div class="a" [class.got]="achievement.earnedAt" [class.locked]="!achievement.earnedAt"
+               [title]="achievement.description">
+            <div class="ic">{{ achievement.icon || '🏅' }}</div>
+            {{ achievement.title }}
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="panel block subrow">
+      <div>
+        <h3>Подписка</h3>
+        <p class="empty">Управление тарифом и оплатой</p>
+      </div>
+      <a class="cta" routerLink="/billing">Открыть</a>
+    </div>
+  }
+</div>

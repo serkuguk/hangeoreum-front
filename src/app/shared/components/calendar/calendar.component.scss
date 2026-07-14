@@ -1,0 +1,64 @@
+:host-context(.form-field_error) {
+  .p-datepicker-input {
+    border-color: #dc2626 !important;
+  }
+}
+
+.app-calendar {
+  width: 100%;
+}
+
+:host ::ng-deep .p-floatlabel {
+  display: block;
+}
+
+:host ::ng-deep .p-floatlabel label {
+  color: #64748b;
+}
+
+:host ::ng-deep .p-datepicker {
+  width: 100%;
+}
+
+:host ::ng-deep .p-datepicker .p-inputtext,
+:host ::ng-deep .p-datepicker-input {
+  min-height: 2.75rem;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.85rem;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+:host ::ng-deep .p-datepicker .p-inputtext:hover,
+:host ::ng-deep .p-datepicker-input:hover {
+  border-color: #93c5fd;
+}
+
+:host ::ng-deep .p-datepicker .p-inputtext:focus,
+:host ::ng-deep .p-datepicker-input:focus,
+:host ::ng-deep .p-datepicker .p-inputtext:focus-visible,
+:host ::ng-deep .p-datepicker-input:focus-visible {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.16);
+  outline: none;
+}
+
+:host ::ng-deep .p-datepicker:has(.p-datepicker-input:focus),
+:host ::ng-deep .p-datepicker:has(.p-inputtext:focus) {
+  border-radius: 0.85rem;
+}
+
+:host ::ng-deep .p-datepicker.p-disabled .p-inputtext,
+:host ::ng-deep .p-datepicker .p-inputtext:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
+:host ::ng-deep .p-datepicker-dropdown,
+:host ::ng-deep .p-datepicker-input-icon-container {
+  color: #64748b;
+}

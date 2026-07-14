@@ -1,0 +1,77 @@
+<div class="wrap mapbox">
+  <h2 class="pagettl">Дерево уроков</h2>
+  <p class="pagesub">Твой путь: юнит за юнитом, каждый завершается Story носителя.</p>
+
+  <!-- Алфавит — фундамент, всегда в начале пути -->
+  <div class="unit">
+    <div class="unit-head">
+      <div class="n han c-jade">가</div>
+      <div>
+        <h3>Алфавит хангыль</h3>
+        <small>Фундамент · 자모 · 40 букв</small>
+      </div>
+      <a class="pill p-j headpill" routerLink="/learn/alphabet">Открыть →</a>
+    </div>
+  </div>
+
+  @if (facade.loading()) {
+    <div class="panel loadpanel">Загружаем карту курса…</div>
+  } @else if (facade.error(); as error) {
+    <div class="panel loadpanel">
+      <p>{{ error }}</p>
+      <button class="ghostbtn" (click)="facade.invalidate()">Повторить</button>
+    </div>
+  } @else if (facade.map(); as map) {
+    @if (map.units.length === 0) {
+      <div class="panel loadpanel">
+        <p>Курс ещё наполняется контентом. Начни с алфавита — он уже доступен!</p>
+        <a class="cta" routerLink="/learn/alphabet">К алфавиту</a>
+      </div>
+    }
+    @for (unit of map.units; track unit.id) {
+      <div class="unit">
+        <div class="unit-head">
+          <div class="n han" [style.background]="'rgba(59,107,255,.15)'"
+               [style.color]="unit.color || 'var(--hg-blue)'">{{ unit.title.charAt(0) }}</div>
+          <div>
+            <h3>{{ unit.title }}</h3>
+            @if (unit.description) {
+              <small>{{ unit.description }}</small>
+            }
+          </div>
+          <span class="pill p-b headpill">{{ unitProgress(unit.lessons) }}</span>
+        </div>
+        <div class="path">
+          @for (lesson of unit.lessons; track lesson.id) {
+            <div class="node"
+                 [class.done]="lesson.status === 'COMPLETED'"
+                 [class.now]="lesson.status === 'AVAILABLE' && lesson.hasAccess"
+                 [class.locked]="lesson.status === 'LOCKED'"
+                 [class.story]="lesson.type === 'STORY'">
+              <button type="button" class="nc" [disabled]="lesson.status === 'LOCKED'" (click)="open(lesson)">
+                <div class="nic han"
+                     [class.ic-done]="lesson.status === 'COMPLETED'"
+                     [class.ic-now]="lesson.status !== 'COMPLETED'">
+                  {{ lesson.type === 'STORY' ? '🎬' : lesson.title.charAt(0) }}
+                </div>
+                <div class="txt">
+                  <b>{{ lesson.title }}</b>
+                  <small>
+                    @if (lesson.type === 'STORY') {
+                      Видео носителя · финал юнита
+                    } @else {
+                      +{{ lesson.xpReward }} XP
+                    }
+                  </small>
+                </div>
+                <span class="st"
+                      [class.st-done]="lesson.status === 'COMPLETED'"
+                      [class.st-now]="lesson.status === 'AVAILABLE'">{{ statusLabel(lesson) }}</span>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

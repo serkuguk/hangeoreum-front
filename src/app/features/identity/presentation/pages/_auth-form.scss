@@ -1,0 +1,117 @@
+// Общие стили форм входа/регистрации (по hangeoreum-auth.html)
+.formbox {
+  width: 100%;
+  max-width: 380px;
+
+  h1 { font-size: var(--hg-fs-2xl); font-weight: 600; margin-bottom: 6px; }
+  .sub { color: var(--hg-muted); font-size: 14px; margin-bottom: 28px; }
+}
+
+.field {
+  margin-bottom: 16px;
+
+  label { display: block; font-size: 13px; color: var(--hg-muted); margin-bottom: 7px; }
+
+  input {
+    width: 100%;
+    background: var(--hg-card);
+    border: 1px solid var(--hg-line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: var(--hg-txt);
+    font-family: inherit;
+    font-size: 15px;
+    transition: .2s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--hg-blue);
+      box-shadow: 0 0 0 3px rgba(59, 107, 255, .18);
+    }
+
+    &.invalid { border-color: var(--hg-red); }
+  }
+
+  .fielderr { color: var(--hg-red); font-size: 12px; margin-top: 6px; }
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 22px;
+
+  label { color: var(--hg-muted); display: flex; align-items: center; gap: 7px; cursor: pointer; }
+}
+
+.apierr {
+  background: rgba(255, 77, 94, .12);
+  border: 1px solid rgba(255, 77, 94, .35);
+  color: var(--hg-red);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+}
+
+.btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--hg-blue), #5a2bcf);
+  color: #fff;
+  border: none;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 15px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: .2s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--hg-shadow-cta);
+  }
+
+  &:disabled { opacity: .55; cursor: default; }
+}
+
+.sep {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--hg-muted);
+  font-size: 12px;
+  margin: 22px 0;
+
+  &::before, &::after { content: ""; flex: 1; height: 1px; background: var(--hg-line); }
+}
+
+.social {
+  display: flex;
+  gap: 10px;
+
+  button {
+    flex: 1;
+    background: var(--hg-card);
+    border: 1px solid var(--hg-line);
+    color: var(--hg-txt);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: .2s;
+
+    &:hover { border-color: rgba(255, 255, 255, .2); }
+  }
+}
+
+.alt {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--hg-muted);
+
+  a { color: var(--hg-yellow); font-weight: 600; cursor: pointer; }
+}

@@ -1,0 +1,30 @@
+<div class="wrap tipbox">
+  @if (facade.loading()) {
+    <div class="panel loadpanel">Загружаем подсказку…</div>
+  } @else if (facade.error(); as error) {
+    <div class="panel loadpanel">
+      <p>{{ error }}</p>
+      <a class="cta" [routerLink]="['/learn', id()]">Сразу к уроку</a>
+    </div>
+  } @else if (facade.tip(); as tip) {
+    <div class="panel tipcard">
+      <div class="ghost kr">{{ tip.title.charAt(0) }}</div>
+      <div class="eyebrow">Learning Tip · перед уроком</div>
+      <h2 class="pagettl">{{ tip.title }}</h2>
+      <p class="pagesub">Одна минута — и упражнения станут понятными.</p>
+      <div class="rule">{{ tip.bodyMd }}</div>
+      @for (example of tip.examples ?? []; track example.ko) {
+        <div class="ex-line">
+          <span class="kr" [innerHTML]="highlighted(example)"></span>
+          @if (example.translation || example.note) {
+            <small>{{ example.translation }}@if (example.note) { · {{ example.note }}}</small>
+          }
+        </div>
+      }
+      <div class="tipbtns">
+        <a class="cta" [routerLink]="['/learn', id()]">Понятно, начать урок</a>
+        <button type="button" class="ghostbtn" (click)="back()">Позже</button>
+      </div>
+    </div>
+  }
+</div>

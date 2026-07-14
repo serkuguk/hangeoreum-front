@@ -1,0 +1,72 @@
+<div class="wrap obbox">
+  <div class="obdots" aria-hidden="true">
+    @for (dot of [1, 2, 3]; track dot) {
+      <i [class.is-active]="step() === dot"></i>
+    }
+  </div>
+
+  @switch (step()) {
+    @case (1) {
+      <h2 class="pagettl center">Какой у тебя уровень?</h2>
+      <p class="pagesub center">Подберём стартовую точку курса.</p>
+      <div class="oblist">
+        @for (option of levels; track option.value) {
+          <button type="button" class="obcard" [class.is-picked]="level() === option.value"
+                  (click)="level.set(option.value)">
+            <span class="obic han" [class]="'obic han c-' + option.color">{{ option.han }}</span>
+            <span><b>{{ option.title }}</b><small>{{ option.hint }}</small></span>
+          </button>
+        }
+      </div>
+      <div class="obbtns">
+        <button class="cta" (click)="step.set(2)">Далее</button>
+      </div>
+    }
+    @case (2) {
+      <h2 class="pagettl center">Сколько минут в день?</h2>
+      <p class="pagesub center">Цель дня. Всегда можно изменить в настройках.</p>
+      <div class="oblist">
+        @for (option of goals; track option.xp) {
+          <button type="button" class="obcard" [class.is-picked]="goal() === option.xp"
+                  (click)="goal.set(option.xp)">
+            <span class="obic" [class]="'obic c-' + option.color">{{ option.icon }}</span>
+            <span><b>{{ option.title }}</b><small>{{ option.hint }}</small></span>
+            <span class="tail" [class]="'tail t-' + option.color">{{ option.xp }} XP</span>
+          </button>
+        }
+      </div>
+      <div class="obbtns">
+        <button class="ghostbtn" (click)="step.set(1)">Назад</button>
+        <button class="cta" (click)="step.set(3)">Далее</button>
+      </div>
+    }
+    @case (3) {
+      <h2 class="pagettl center">Напомнить о занятии?</h2>
+      <p class="pagesub center">Серия живёт, пока занимаешься каждый день.</p>
+      <div class="panel">
+        <div class="setrow">
+          Напоминания
+          <button type="button" class="toggle" [class.off]="!remindersEnabled()"
+                  role="switch" [attr.aria-checked]="remindersEnabled()"
+                  (click)="remindersEnabled.set(!remindersEnabled())"></button>
+        </div>
+        @if (remindersEnabled()) {
+          <div class="setrow noborder"><span>Удобное время</span></div>
+          <div class="obtime">
+            @for (option of times; track option) {
+              <button type="button" [class.is-picked]="time() === option" (click)="time.set(option)">
+                {{ option }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <div class="obbtns">
+        <button class="ghostbtn" (click)="step.set(2)">Назад</button>
+        <button class="cta" [disabled]="saving()" (click)="finish()">
+          {{ saving() ? 'Сохраняем…' : 'Начать учиться →' }}
+        </button>
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,41 @@
+<header class="topbar">
+  <a class="logo han" routerLink="/dashboard">한걸음</a>
+
+  <nav class="mainnav" aria-label="Основная навигация">
+    @for (item of nav; track item.link) {
+      <a [routerLink]="item.link" routerLinkActive="is-active">{{ item.label }}</a>
+    }
+  </nav>
+
+  <div class="userbox">
+    @if (isAdmin()) {
+      <a class="pill p-r adminlink" routerLink="/admin">Админ</a>
+    }
+    <button type="button" class="userbtn" (click)="menuOpen.set(!menuOpen())"
+            aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
+      @if (facade.user()?.avatarUrl; as avatar) {
+        <img class="av" [src]="avatar" alt="">
+      } @else {
+        <span class="av">{{ initial() }}</span>
+      }
+      <span class="uname">{{ facade.user()?.name }}</span>
+      <span class="chev">▾</span>
+    </button>
+
+    @if (menuOpen()) {
+      <div class="backdrop" (click)="menuOpen.set(false)"></div>
+      <div class="usermenu" role="menu">
+        <a routerLink="/profile" role="menuitem" (click)="menuOpen.set(false)">Кабинет</a>
+        <a routerLink="/settings" role="menuitem" (click)="menuOpen.set(false)">Настройки</a>
+        <a routerLink="/billing" role="menuitem" (click)="menuOpen.set(false)">Подписка</a>
+        <button type="button" class="exit" role="menuitem" (click)="logout()">Выйти</button>
+      </div>
+    }
+  </div>
+</header>
+
+<main class="content">
+  <router-outlet/>
+</main>
+
+<hg-paywall-dialog/>

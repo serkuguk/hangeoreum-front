@@ -1,0 +1,105 @@
+:host { display: block; }
+
+.storybox { max-width: 680px; }
+
+.loadpanel {
+  text-align: center;
+  padding: 40px;
+  color: var(--hg-muted);
+
+  p { margin-bottom: 16px; }
+  .cta { display: inline-block; text-decoration: none; color: #fff; margin-right: 10px; }
+}
+
+.modes {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+
+  button {
+    background: var(--hg-card);
+    border: 1px solid var(--hg-line);
+    color: var(--hg-muted);
+    font-size: 13px;
+    padding: 9px 18px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: .2s;
+
+    &.is-active { background: var(--hg-blue); color: #fff; border-color: transparent; }
+  }
+}
+
+.player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--hg-radius-lg);
+  border: 1px solid var(--hg-line);
+  background: linear-gradient(140deg, #2a2140, #1a1826);
+  margin-bottom: 18px;
+}
+
+.listenpanel {
+  text-align: center;
+  padding: 30px;
+  margin-bottom: 18px;
+
+  .ghost { font-size: 160px; right: -20px; bottom: -50px; }
+
+  audio { width: 100%; }
+
+  .hint { color: var(--hg-muted); font-size: 12.5px; margin-top: 10px; }
+}
+
+.lines { padding: 12px; }
+
+.dline {
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: .2s;
+
+  &:hover, &.open { background: var(--hg-card-2); }
+  &.active { outline: 2px solid rgba(59, 107, 255, .5); }
+
+  .av {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 15px;
+    background: rgba(59, 107, 255, .2);
+    color: var(--hg-blue);
+  }
+
+  .body { flex: 1; }
+  .kr { font-size: 17px; line-height: 1.55; }
+  .tr { color: var(--hg-muted); font-size: 13.5px; margin-top: 6px; line-height: 1.5; }
+
+  .bd {
+    font-size: 13px;
+    color: var(--hg-muted);
+    margin-top: 8px;
+
+    b { color: var(--hg-jade); font-size: 15px; }
+    .addw { margin-left: 8px; border: none; cursor: pointer; }
+  }
+}
+
+.finishbtn { width: 100%; margin-top: 18px; }
+
+.donebar {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  color: var(--hg-jade);
+  font-weight: 600;
+}

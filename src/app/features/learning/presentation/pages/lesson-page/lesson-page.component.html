@@ -1,0 +1,83 @@
+<div class="wrap lessonbox">
+  @if (facade.loading()) {
+    <div class="panel loadpanel">Загружаем урок…</div>
+  } @else if (facade.error(); as error) {
+    <div class="panel loadpanel">
+      <p>{{ error }}</p>
+      <button class="ghostbtn" (click)="exit()">К дереву уроков</button>
+    </div>
+  } @else if (facade.result(); as result) {
+    <!-- Экран награды -->
+    <div class="panel rewcard">
+      <div class="ghost kr">축하</div>
+      <div class="rew-han kr">참 잘했어요!</div>
+      <h2 class="pagettl">Урок пройден</h2>
+      <p class="pagesub">«{{ facade.lesson()?.title }}»</p>
+      <div class="rewstats">
+        <div class="rewstat"><b class="y">+{{ result.xp }}</b><span>XP</span></div>
+        <div class="rewstat"><b class="bl">+{{ result.newWords.length }}</b><span>новых слов</span></div>
+        <div class="rewstat"><b class="r">🔥 {{ result.streak }}</b><span>дней серии</span></div>
+        <div class="rewstat"><b class="j">{{ result.goalReached ? '✓' : '…' }}</b><span>цель дня</span></div>
+      </div>
+      @if (result.newWords.length > 0) {
+        <div class="rewwords">
+          @for (word of result.newWords; track word.id) {
+            <span class="pill p-b kr">{{ word.hangul }}</span>
+          }
+        </div>
+        <p class="pagesub">Новые слова уже в словаре — SRS напомнит о них завтра.</p>
+      }
+      <div class="rewbtns">
+        <button class="cta grow" (click)="exit()">К дереву уроков</button>
+      </div>
+    </div>
+  } @else if (facade.current(); as exercise) {
+    <div class="l-top">
+      <button type="button" class="x" aria-label="Выйти из урока" (click)="exit()">✕</button>
+      <div class="segs">
+        @for (done of facade.progressSegments(); track $index) {
+          <i [class.d]="done" [class.c]="!done && $index === facade.solved()"></i>
+        }
+      </div>
+      <span class="pill p-b">{{ facade.solved() }} / {{ facade.total() }}</span>
+    </div>
+
+    @switch (exercise.kind) {
+      @case ('CHOICE') {
+        <hg-exercise-choice [payload]="asChoice(exercise.payload)" (result)="facade.answered($event)"/>
+      }
+      @case ('LISTEN_CHOICE') {
+        <hg-exercise-listen [payload]="asListen(exercise.payload)" (result)="facade.answered($event)"/>
+      }
+      @case ('WORD_ORDER') {
+        <hg-exercise-word-order [payload]="asWordOrder(exercise.payload)" (result)="facade.answered($event)"/>
+      }
+      @case ('FILL_BLANK') {
+        <hg-exercise-fill-blank [payload]="asFillBlank(exercise.payload)" (result)="facade.answered($event)"/>
+      }
+      @case ('MATCH_PAIRS') {
+        <hg-exercise-match [payload]="asMatch(exercise.payload)" (result)="facade.answered($event)"/>
+      }
+      @case ('TYPE_WORD') {
+        <hg-exercise-type [payload]="asType(exercise.payload)" (result)="facade.answered($event)"/>
+      }
+    }
+
+    @if (facade.feedback(); as feedback) {
+      <div class="fb" [class.ok]="feedback.correct" [class.bad]="!feedback.correct" role="status">
+        <div>{{ feedback.correct ? '✅' : '❌' }}</div>
+        <div>
+          <b>{{ feedback.correct ? 'Верно!' : 'Не совсем.' }}</b>
+          @if (!feedback.correct && feedback.expected) {
+            <small>Правильно: <span class="kr">{{ feedback.expected }}</span>. Без штрафа — вопрос вернётся в конце урока.</small>
+          } @else if (!feedback.correct) {
+            <small>Без штрафа — вопрос вернётся в конце урока.</small>
+          }
+        </div>
+        <button type="button" class="next" (click)="facade.next()">Дальше</button>
+      </div>
+    }
+  } @else if (facade.finishing()) {
+    <div class="panel loadpanel">Считаем результат…</div>
+  }
+</div>

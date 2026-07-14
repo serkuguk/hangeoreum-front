@@ -1,0 +1,73 @@
+<div class="wrap billbox">
+  <h2 class="pagettl center">Hangeoreum Pro</h2>
+  <p class="pagesub center">Весь курс, Story, Immerse и повторение без лимитов.</p>
+
+  @if (result() === 'success') {
+    <div class="banner ok">🎉 Оплата прошла! Pro активируется в течение минуты.</div>
+  } @else if (result() === 'cancel') {
+    <div class="banner">Оплата отменена — ничего не списано.</div>
+  }
+
+  @if (facade.error(); as error) {
+    <div class="banner bad">{{ error }}</div>
+  }
+
+  @if (facade.subscription(); as sub) {
+    @if (sub.isActive) {
+      <div class="panel subpanel">
+        <div>
+          <b>Подписка активна · {{ sub.planCode }}</b>
+          @if (sub.currentPeriodEnd) {
+            <small>Действует до {{ sub.currentPeriodEnd.slice(0, 10) }}</small>
+          }
+        </div>
+        <button type="button" class="ghostbtn" [disabled]="facade.redirecting()" (click)="facade.openPortal()">
+          Управлять подпиской
+        </button>
+      </div>
+    }
+  }
+
+  <div class="freevspro panel">
+    <div class="col">
+      <h3>Free</h3>
+      <ul>
+        <li>Алфавит хангыль полностью</li>
+        <li>Первые юниты курса</li>
+        <li>Карточки-повторение</li>
+        <li>1 урок и 3 игры в день</li>
+      </ul>
+    </div>
+    <div class="col pro">
+      <h3>Pro ⭐</h3>
+      <ul>
+        <li>Все уроки и Story носителей</li>
+        <li>Лента Immerse</li>
+        <li>Повторение без лимитов</li>
+        <li>Полная статистика</li>
+      </ul>
+    </div>
+  </div>
+
+  @if (facade.loading()) {
+    <div class="panel loadpanel">Загружаем тарифы…</div>
+  } @else if (facade.plans().length === 0) {
+    <div class="panel loadpanel">Тарифы скоро появятся.</div>
+  } @else {
+    <div class="plans">
+      @for (plan of facade.plans(); track plan.id) {
+        <div class="panel plancard" [class.best]="plan.interval === 'YEAR'">
+          @if (plan.interval === 'YEAR') {
+            <span class="pill p-y best-pill">−50% · Популярный</span>
+          }
+          <h3>{{ plan.name }}</h3>
+          <div class="price">{{ price(plan) }}<small> {{ intervalLabel(plan) }}</small></div>
+          <button type="button" class="cta" [disabled]="facade.redirecting()" (click)="facade.checkout(plan.code)">
+            {{ facade.redirecting() ? 'Открываем оплату…' : 'Выбрать' }}
+          </button>
+        </div>
+      }
+    </div>
+    <p class="secure">🔒 Оплата через Stripe · карты не хранятся у нас · отмена в один клик</p>
+  }
+</div>

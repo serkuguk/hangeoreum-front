@@ -1,0 +1,56 @@
+// Общие стили упражнений (по hangeoreum-full.html, экран урока)
+:host { display: block; }
+
+.q-kind {
+  color: var(--hg-muted);
+  font-size: 12.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.q-word {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+
+  .w { font-family: var(--hg-font-display); font-size: var(--hg-fs-display-sm); }
+  .r { color: var(--hg-muted); font-size: 14px; }
+}
+
+.opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.opt {
+  background: var(--hg-card);
+  border: 2px solid var(--hg-line);
+  border-radius: 18px;
+  padding: 22px;
+  text-align: center;
+  cursor: pointer;
+  transition: .18s;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--hg-txt);
+
+  &:hover:not(:disabled) { border-color: rgba(255, 255, 255, .22); transform: translateY(-2px); }
+  &:disabled { cursor: default; }
+  &.pick { border-color: var(--hg-jade); background: rgba(31, 199, 155, .1); }
+  &.wrong { border-color: var(--hg-red); background: rgba(255, 77, 94, .1); animation: shake .3s; }
+
+  .oi { display: block; font-size: 34px; margin-bottom: 10px; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@media (max-width: 880px) {
+  .opts { grid-template-columns: 1fr; }
+}

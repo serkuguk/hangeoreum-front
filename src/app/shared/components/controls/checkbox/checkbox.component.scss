@@ -1,0 +1,80 @@
+app-checkbox {
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .checkbox-label {
+      color: #334155;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+  }
+
+  // Стили для PrimeNG checkbox
+  .p-checkbox {
+    display: inline-flex;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: bottom;
+    position: relative;
+  }
+
+  .p-checkbox-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    border-radius: 4px !important;
+    transition: all 0.2s !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .p-checkbox:not(.p-disabled):hover .p-checkbox-box {
+    border-color: #1e40af !important;
+    background: #f0f7ff !important;
+  }
+
+  .p-checkbox-box.p-highlight {
+    border-color: #1e40af !important;
+    background: #1e40af !important;
+  }
+
+  .p-checkbox:not(.p-disabled):hover .p-checkbox-box.p-highlight {
+    border-color: #1e3a8a !important;
+    background: #1e3a8a !important;
+  }
+
+  .p-checkbox-box.p-focus {
+    outline: 2px solid #93c5fd !important;
+    outline-offset: 2px !important;
+    box-shadow: none !important;
+  }
+
+  .p-checkbox-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 12px !important;
+    height: 12px !important;
+    font-size: 12px !important;
+    color: #ffffff !important;
+    transition: all 0.2s !important;
+  }
+
+  .p-checkbox.p-disabled .p-checkbox-box {
+    background: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+  }
+
+  .p-checkbox.p-disabled {
+    cursor: not-allowed !important;
+  }
+}

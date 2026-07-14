@@ -1,0 +1,106 @@
+:host { display: block; }
+
+.abox { max-width: 860px; }
+
+.loadpanel {
+  text-align: center;
+  padding: 40px;
+  color: var(--hg-muted);
+
+  p { margin-bottom: 16px; }
+}
+
+.proghead {
+  margin-bottom: 26px;
+  padding: 20px 24px;
+
+  .progtxt {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+
+    b { font-size: 22px; font-weight: 700; }
+    span { color: var(--hg-muted); font-size: 13px; }
+  }
+
+  .progbar {
+    height: 10px;
+    background: var(--hg-card-2);
+    border-radius: 99px;
+    overflow: hidden;
+
+    i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--hg-blue), var(--hg-jade));
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+  }
+
+  .confetti {
+    position: absolute;
+    right: 20px;
+    top: 14px;
+    font-size: 34px;
+    animation: pop .5s;
+  }
+
+  .congrats { margin-top: 12px; color: var(--hg-jade); font-weight: 600; font-size: 14px; }
+}
+
+@keyframes pop {
+  0% { transform: scale(.3); }
+  70% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.lgroup {
+  margin-bottom: 30px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 14px;
+
+    .cnt { color: var(--hg-muted); font-weight: 400; font-size: 13px; margin-left: 6px; }
+  }
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  position: relative;
+  background: var(--hg-card);
+  border: 2px solid var(--hg-line);
+  border-radius: 18px;
+  padding: 18px 8px 14px;
+  cursor: pointer;
+  transition: .18s;
+  color: var(--hg-txt);
+  text-align: center;
+
+  &:hover { border-color: rgba(255, 255, 255, .22); transform: translateY(-2px); }
+
+  &.learned {
+    border-color: var(--hg-jade);
+    background: rgba(31, 199, 155, .08);
+  }
+
+  .jamo { display: block; font-size: 40px; line-height: 1.1; }
+  .rom { display: block; font-size: 12px; color: var(--hg-muted); margin-top: 6px; }
+
+  .check {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    color: var(--hg-jade);
+    font-weight: 700;
+    font-size: 13px;
+  }
+}

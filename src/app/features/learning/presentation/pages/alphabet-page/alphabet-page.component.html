@@ -1,0 +1,46 @@
+<div class="wrap abox">
+  <h2 class="pagettl">Алфавит хангыль</h2>
+  <p class="pagesub">자모 · тапни букву — услышишь звук и отметишь её изученной.</p>
+
+  @if (facade.loading()) {
+    <div class="panel loadpanel">Загружаем алфавит…</div>
+  } @else if (facade.error(); as error) {
+    <div class="panel loadpanel">
+      <p>{{ error }}</p>
+      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+    </div>
+  } @else if (facade.alphabet(); as alphabet) {
+    @if (alphabet.total === 0) {
+      <div class="panel loadpanel">Буквы ещё загружаются в курс — загляни чуть позже.</div>
+    } @else {
+      <div class="panel proghead">
+        <div class="progtxt">
+          <b>{{ alphabet.learnedCount }} / {{ alphabet.total }}</b>
+          <span>букв изучено</span>
+        </div>
+        <div class="progbar"><i [style.width.%]="percent()"></i></div>
+        @if (facade.justCompleted()) {
+          <div class="confetti" aria-hidden="true">🎉</div>
+          <div class="congrats">모두 완료! Алфавит пройден — XP уже начислен.</div>
+        }
+      </div>
+
+      @for (group of facade.groups(); track group.group) {
+        <section class="lgroup">
+          <h3>{{ group.title }} <span class="cnt">{{ group.letters.length }}</span></h3>
+          <div class="tiles">
+            @for (letter of group.letters; track letter.id) {
+              <button type="button" class="tile" [class.learned]="letter.learned" (click)="tap(letter)">
+                <span class="jamo han kr">{{ letter.jamo }}</span>
+                <span class="rom">{{ letter.romanization }}</span>
+                @if (letter.learned) {
+                  <span class="check" aria-label="Изучена">✓</span>
+                }
+              </button>
+            }
+          </div>
+        </section>
+      }
+    }
+  }
+</div>

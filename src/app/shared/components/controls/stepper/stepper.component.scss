@@ -1,0 +1,371 @@
+/**
+ * Stepper Control Component Styles
+ *
+ * This is the shared stepper control used across the application.
+ * Critical: Contains visibility fixes for PrimeNG stepper on white backgrounds.
+ *
+ * @component StepperControlComponent
+ * @location shared/components/controls/stepper
+ */
+
+// =============================================================================
+// Design Tokens
+// =============================================================================
+
+// Text colors - CRITICAL: Must be visible on white backgrounds
+$stepper-text-primary: #18181b;           // zinc-900
+$stepper-text-secondary: #52525b;         // zinc-600
+$stepper-text-muted: #71717a;             // zinc-500
+$stepper-text-active: #059669;            // emerald-600
+$stepper-text-completed: #10b981;         // emerald-500
+
+// Background colors
+$stepper-bg-active: rgba(5, 150, 105, 0.1);
+$stepper-bg-hover: rgba(24, 24, 27, 0.05);
+$stepper-bg-step-number: #e4e4e7;         // zinc-200
+$stepper-bg-step-active: #059669;         // emerald-600
+$stepper-bg-step-completed: #10b981;      // emerald-500
+
+// Spacing
+$stepper-gap-sm: 0.5rem;
+$stepper-gap-md: 0.75rem;
+$stepper-gap-lg: 1rem;
+$stepper-padding-sm: 0.5rem;
+$stepper-padding-md: 0.75rem;
+$stepper-padding-lg: 1rem;
+
+// Borders
+$stepper-border-color: #e4e4e7;           // zinc-200
+$stepper-border-active: #059669;          // emerald-600
+
+// Focus (accessibility)
+$stepper-focus-ring: rgba(5, 150, 105, 0.5);
+
+// =============================================================================
+// Wrapper Styles
+// =============================================================================
+
+.stepper-control-wrapper {
+    width: 100%;
+
+    &.stepper-control--disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+}
+
+// =============================================================================
+// Horizontal Orientation
+// =============================================================================
+
+.stepper-control--horizontal {
+    .step-content {
+        padding: $stepper-padding-lg 0;
+    }
+
+    .step-navigation {
+        display: flex;
+        justify-content: flex-end;
+        gap: $stepper-gap-sm;
+        margin-top: $stepper-gap-lg;
+        padding-top: $stepper-gap-lg;
+        border-top: 1px solid var(--p-surface-200, $stepper-border-color);
+    }
+}
+
+// =============================================================================
+// Vertical Orientation
+// =============================================================================
+
+.stepper-control--vertical {
+    .step-content--vertical {
+        padding: $stepper-padding-lg 0 $stepper-padding-lg 1.5rem;
+        border-left: 2px solid var(--p-surface-200, $stepper-border-color);
+        margin-left: $stepper-gap-md;
+    }
+
+    .step-navigation--vertical {
+        display: flex;
+        gap: $stepper-gap-sm;
+        margin-top: $stepper-gap-lg;
+    }
+}
+
+// =============================================================================
+// Step Label
+// =============================================================================
+
+.step-label {
+    margin-left: $stepper-gap-sm;
+    color: inherit;
+}
+
+// =============================================================================
+// PrimeNG Stepper Overrides - CRITICAL VISIBILITY FIXES
+// =============================================================================
+
+:host ::ng-deep {
+    .p-stepper {
+        width: 100%;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Header - Add proper padding and spacing
+    // -------------------------------------------------------------------------
+
+    .p-step-header {
+        display: flex;
+        align-items: center;
+        gap: $stepper-gap-md;
+        padding: $stepper-padding-md $stepper-padding-lg;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+
+        // Focus state for accessibility
+        &:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px $stepper-focus-ring;
+        }
+
+        &:hover:not(.p-disabled) {
+            background-color: $stepper-bg-hover;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Number Circle
+    // -------------------------------------------------------------------------
+
+    .p-step-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        font-size: 0.875rem;
+        font-weight: 600;
+        flex-shrink: 0;
+        background-color: $stepper-bg-step-number;
+        color: $stepper-text-secondary;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Title - CRITICAL FIX: Visible text on white background
+    // -------------------------------------------------------------------------
+
+    .p-step-title {
+        font-size: 0.9375rem;
+        font-weight: 500;
+        transition: color 0.2s ease;
+
+        // CRITICAL: Force dark text color, overriding PrimeNG theme defaults
+        color: $stepper-text-secondary !important;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Component States
+    // -------------------------------------------------------------------------
+
+    .p-step {
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        // Active step
+        &.p-step-active {
+            .p-step-header {
+                background-color: $stepper-bg-active;
+            }
+
+            .p-step-number {
+                background-color: $stepper-bg-step-active;
+                color: #ffffff;
+            }
+
+            .p-step-title {
+                color: $stepper-text-active !important;
+                font-weight: 600;
+            }
+        }
+
+        // Completed step
+        &.p-step-completed {
+            .p-step-number {
+                background-color: $stepper-bg-step-completed;
+                color: #ffffff;
+            }
+
+            .p-step-title {
+                color: $stepper-text-completed !important;
+            }
+        }
+
+        // Inactive step - CRITICAL: Override white/transparent text
+        &:not(.p-step-active):not(.p-step-completed) {
+            .p-step-title {
+                color: $stepper-text-secondary !important;
+                opacity: 1 !important;
+            }
+
+            .p-step-number {
+                background-color: $stepper-bg-step-number;
+                color: $stepper-text-secondary;
+            }
+        }
+
+        // Hover state (non-disabled)
+        &:hover:not(.p-disabled) {
+            .p-step-header {
+                background-color: $stepper-bg-hover;
+            }
+        }
+
+        // Disabled state
+        &.p-disabled {
+            cursor: not-allowed;
+
+            .p-step-header {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .p-step-title {
+                color: $stepper-text-muted !important;
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Separator Line
+    // -------------------------------------------------------------------------
+
+    .p-step-separator {
+        flex: 1;
+        height: 2px;
+        background-color: $stepper-border-color;
+        margin: 0 $stepper-gap-sm;
+
+        &.p-step-separator-completed {
+            background-color: $stepper-text-completed;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Step List Container
+    // -------------------------------------------------------------------------
+
+    .p-step-list {
+        display: flex;
+        align-items: center;
+        margin-bottom: $stepper-gap-lg;
+        padding: $stepper-padding-sm 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Panel (Content Area) - CRITICAL: Override dark backgrounds
+    // -------------------------------------------------------------------------
+
+    .p-step-panel,
+    .p-step-panels {
+        padding: $stepper-padding-lg 0;
+        background-color: #ffffff !important;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Panel Content (p-steppanel) - Fix black background issue
+    // -------------------------------------------------------------------------
+
+    .p-steppanel {
+        background-color: #ffffff !important;
+        color: $stepper-text-primary !important;
+        padding: $stepper-padding-lg;
+        padding-left: calc($stepper-gap-lg + $stepper-padding-lg);
+
+        // Ensure all text inside panels is readable
+        p,
+        span,
+        div {
+            color: $stepper-text-secondary;
+        }
+
+        // Active panel styling
+        &.p-steppanel-active {
+            background-color: #ffffff !important;
+        }
+    }
+
+    // Additional selector for step panel content wrapper
+    .p-steppanel-content {
+        background-color: #ffffff !important;
+        color: $stepper-text-primary !important;
+
+        p {
+            color: $stepper-text-secondary;
+        }
+    }
+
+    // Override any stepper content area that may have dark backgrounds
+    .p-stepper-content {
+        background-color: #ffffff !important;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step Item (Vertical)
+    // -------------------------------------------------------------------------
+
+    .p-step-item {
+        margin-bottom: $stepper-gap-sm;
+    }
+
+    // -------------------------------------------------------------------------
+    // Vertical Stepper Specifics
+    // -------------------------------------------------------------------------
+
+    .p-stepper-vertical {
+        .p-step-list {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .p-step-separator {
+            width: 2px;
+            height: 2rem;
+            margin: 0.25rem 0 0.25rem 1rem;
+        }
+
+        .p-step-item {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .p-step-header {
+            width: 100%;
+        }
+    }
+}
+
+// =============================================================================
+// Responsive Adjustments
+// =============================================================================
+
+@media (max-width: 768px) {
+    :host ::ng-deep {
+        .p-step-header {
+            padding: $stepper-padding-sm $stepper-padding-md;
+            gap: $stepper-gap-sm;
+        }
+
+        .p-step-title {
+            font-size: 0.875rem;
+        }
+
+        .p-step-number {
+            width: 1.75rem;
+            height: 1.75rem;
+            font-size: 0.75rem;
+        }
+    }
+}

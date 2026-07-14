@@ -1,0 +1,73 @@
+<h2 class="pagettl">Медиа / Story</h2>
+<p class="pagesub">
+  Клипы носителей: видео для Immerse (kind=IMMERSE) и Story (kind=STORY).
+  Story-линии привязываются к уроку в конструкторе.
+  @if (flash(); as f) {
+    <span style="color: var(--hg-jade)">✓ {{ f }}</span>
+  }
+</p>
+
+@if (error()) {
+  <div class="errbar">{{ error() }}</div>
+}
+
+<section class="panel">
+  <div class="eyebrow">Спикеры</div>
+  @for (speaker of speakers(); track speaker.id) {
+    <div class="sprow">
+      <span class="grow">{{ speaker.name }}</span>
+      <button type="button" class="rowbtn danger" (click)="removeSpeaker(speaker)">Удалить</button>
+    </div>
+  } @empty {
+    <div class="empty">Спикеров нет.</div>
+  }
+  <div class="addrow">
+    <input placeholder="Имя носителя (지민…)" [(ngModel)]="newSpeakerName" (keydown.enter)="addSpeaker()">
+    <button type="button" class="rowbtn" (click)="addSpeaker()">+ Спикер</button>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="eyebrow">Клипы</div>
+  @for (clip of clips(); track clip.id) {
+    <div class="cliprow">
+      <span class="pill p-b">{{ clip.kind }}</span>
+      <span class="grow muted">
+        {{ speakerName(clip.speakerId) }} ·
+        {{ clip.videoUrl ? '🎬 видео' : 'без видео' }} ·
+        {{ clip.audioUrl ? '🔊 аудио' : 'без аудио' }}
+      </span>
+      <label class="rowbtn" [class.on]="clip.videoUrl">
+        🎬 <input type="file" accept="video/*" hidden (change)="upload(clip, $event, 'video')">
+      </label>
+      <label class="rowbtn" [class.on]="clip.audioUrl">
+        🔊 <input type="file" accept="audio/*" hidden (change)="upload(clip, $event, 'audio')">
+      </label>
+      <label class="rowbtn" [class.on]="clip.thumbnailUrl">
+        🖼 <input type="file" accept="image/*" hidden (change)="upload(clip, $event, 'thumbnail')">
+      </label>
+      <button type="button" class="rowbtn" (click)="openSubtitles(clip)">Сабы</button>
+      <button type="button" class="rowbtn" [class.on]="clip.published" (click)="togglePublish(clip)">
+        {{ clip.published ? '👁' : '🚫' }}
+      </button>
+      <button type="button" class="rowbtn danger" (click)="removeClip(clip)">✕</button>
+
+      @if (subtitlesFor() === clip.id) {
+        <div class="subsbox">
+          <textarea [(ngModel)]="subsDraft" spellcheck="false"></textarea>
+          <button type="button" class="rowbtn" (click)="saveSubtitles(clip)">Сохранить субтитры</button>
+        </div>
+      }
+    </div>
+  } @empty {
+    <div class="empty">Клипов нет — создай первый.</div>
+  }
+  <div class="addrow">
+    <select [(ngModel)]="newClipKind">
+      <option value="IMMERSE">IMMERSE</option>
+      <option value="STORY">STORY</option>
+      <option value="WORD">WORD</option>
+    </select>
+    <button type="button" class="rowbtn" (click)="addClip()">+ Клип</button>
+  </div>
+</section>

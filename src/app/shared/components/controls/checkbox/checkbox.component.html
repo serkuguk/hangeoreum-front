@@ -1,0 +1,12 @@
+<div class="checkbox-wrapper">
+    <p-checkbox
+        [formControl]="checkboxControl"
+        [binary]="binary()"
+        [readonly]="readonly()"
+        (onChange)="onValueChange($event.checked)"
+        (onBlur)="onBlur()"
+    />
+    @if (label()) {
+        <label class="checkbox-label">{{ label() }}</label>
+    }
+</div>

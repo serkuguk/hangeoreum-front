@@ -1,0 +1,33 @@
+<div class="multiselect">
+  <p-multiSelect
+    [options]="items()"
+    [optionLabel]="'label'"
+    [optionValue]="'value'"
+    [panelStyle]="{minWidth:'12em'}"
+    [filter]="filter()"
+    [selectedItemsLabel]="selectedItems()"
+    [displaySelectedLabel]="displaySelectedLabel()"
+    [maxSelectedLabels]="maxSelectedLabels()"
+    [style]="style()"
+    [showClear]="showClear()"
+    [placeholder]="placeholder()"
+    [resetFilterOnHide]="resetFilterOnHide()"
+    [virtualScroll]="virtualScroll()"
+    [formControl]="multiSelectControl"
+    (onBlur)="onBlur()"
+    (onChange)="onChanged($event)">
+    <ng-template let-option #item>
+      <div class="multiselect-option">
+        @if (showIcon() && option.icon?.src) {
+          <img
+            class="multiselect-option__icon"
+            [class]="option.icon?.cssClass"
+            [src]="option.icon?.src"
+            [alt]="option.label"
+          />
+        }
+        <span class="multiselect-option__label">{{ option.label }}</span>
+      </div>
+    </ng-template>
+  </p-multiSelect>
+</div>

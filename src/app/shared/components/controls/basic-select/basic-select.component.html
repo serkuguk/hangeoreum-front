@@ -1,0 +1,33 @@
+<div class="select_wrapper" [class.select_disabled]="isDisabled">
+  <p-floatlabel>
+    <p-select
+      class="select"
+      [options]="items()"
+      [disabled]="isDisabled()"
+      [placeholder]="placeholder()"
+      [resetFilterOnHide]="resetFilterOnHide()"
+      [filter]="filter()"
+      [showClear]="showClearState()"
+      [optionLabel]="'name'"
+      [ngModel]="value()"
+      (onChange)="onChanged($event)">
+      @if (showIcon()) {
+        <ng-template #selectedItem let-selectedOption>
+          <div class="flex items-center gap-2">
+            <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png"
+                 [class]="'flag flag-' + value()" style="width: 18px" alt=""/>
+            <div>{{ selectedOption.name }}</div>
+          </div>
+        </ng-template>
+        <ng-template let-country #item>
+          <div class="flex items-center gap-2">
+            <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png"
+                 [class]="'flag flag-' + country.code.toLowerCase()" style="width: 18px"  alt=""/>
+            <div>{{ country.name }}</div>
+          </div>
+        </ng-template>
+      }
+    </p-select>
+    <label [for]="labelType()">{{placeholder()}}</label>
+  </p-floatlabel>
+</div>

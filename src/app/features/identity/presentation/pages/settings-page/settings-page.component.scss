@@ -1,0 +1,135 @@
+:host { display: block; }
+
+.setbox {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.savedtoast {
+  position: fixed;
+  top: 84px;
+  right: 24px;
+  z-index: 60;
+  background: rgba(31, 199, 155, .16);
+  border: 1px solid rgba(31, 199, 155, .4);
+  color: var(--hg-jade);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 10px 18px;
+  border-radius: 12px;
+}
+
+.apierr {
+  background: rgba(255, 77, 94, .12);
+  border: 1px solid rgba(255, 77, 94, .35);
+  color: var(--hg-red);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.inline {
+  background: var(--hg-card-2);
+  border: 1px solid var(--hg-line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: var(--hg-txt);
+  font-size: 14px;
+  text-align: right;
+  max-width: 220px;
+
+  &:focus { outline: none; border-color: var(--hg-blue); }
+}
+
+.linkbtn {
+  background: none;
+  border: none;
+  color: var(--hg-yellow);
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+
+  &.danger { color: var(--hg-red); }
+}
+
+.pwbox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+
+  input {
+    background: var(--hg-card-2);
+    border: 1px solid var(--hg-line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--hg-txt);
+    font-size: 14px;
+
+    &:focus { outline: none; border-color: var(--hg-blue); }
+  }
+
+  .smcta { padding: 12px; align-self: flex-start; }
+}
+
+.segpick {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  button {
+    background: var(--hg-card-2);
+    border: 1px solid var(--hg-line);
+    color: var(--hg-muted);
+    font-size: 12.5px;
+    padding: 7px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &.on { border-color: var(--hg-blue); background: rgba(59, 107, 255, .12); color: var(--hg-txt); font-weight: 600; }
+  }
+}
+
+.swatches { display: flex; gap: 8px; }
+
+.swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: .15s;
+
+  &.on { border-color: #fff; transform: scale(1.12); }
+}
+
+.toggle {
+  width: 42px;
+  height: 24px;
+  background: var(--hg-blue);
+  border: none;
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  &.off {
+    background: var(--hg-card-2);
+
+    &::after { left: 3px; right: auto; }
+  }
+}

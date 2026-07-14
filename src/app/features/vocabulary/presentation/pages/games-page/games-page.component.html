@@ -1,0 +1,102 @@
+<div class="wrap gamebox">
+  @switch (facade.phase()) {
+    @case ('pick') {
+      <h2 class="pagettl">Мини-игры</h2>
+      <p class="pagesub">Пять минут в день. Выбери игру — таймер пойдёт сразу.</p>
+      @if (facade.loadError(); as error) {
+        <div class="panel errpanel">{{ error }} <a routerLink="/billing">Открыть Pro →</a></div>
+      }
+      <div class="gpick">
+        @for (game of games; track game.mode) {
+          <button type="button" class="panel gcard" (click)="start(game.mode)">
+            <span class="gic">{{ game.icon }}</span>
+            <h3>{{ game.title }}</h3>
+            <p>{{ game.hint }}</p>
+          </button>
+        }
+      </div>
+      @if (facade.loading()) {
+        <p class="pagesub loadhint">Готовим слова…</p>
+      }
+    }
+    @case ('playing') {
+      <div class="g-top">
+        <div class="timer" [class.low]="facade.timeLeft() < 15">{{ clock() }}</div>
+        <div class="combo">🔥 Комбо ×{{ facade.combo() }} · {{ facade.score() }} очков</div>
+        <button type="button" class="ghostbtn exitbtn" (click)="facade.backToPick()">Выйти</button>
+      </div>
+
+      @switch (facade.mode()) {
+        @case ('MATCH') {
+          <div class="match">
+            @for (cell of facade.matchCells(); track cell.wordId + cell.side) {
+              <button type="button" class="mcell"
+                      [class.kr]="cell.side === 'ko'"
+                      [class.hit]="facade.matchHits().has(cell.wordId + cell.side)"
+                      [class.sel]="facade.matchSelected() === cell"
+                      [class.miss]="facade.matchMiss() === cell"
+                      (click)="facade.pickMatch(cell)">
+                {{ cell.text }}
+              </button>
+            }
+          </div>
+        }
+        @case ('LISTEN') {
+          @if (facade.currentWord(); as word) {
+            <div class="listenbox">
+              <button type="button" class="bigsnd" (click)="play()" aria-label="Прослушать">🔊</button>
+              <div class="opts">
+                @for (option of facade.options(); track option) {
+                  <button type="button" class="mcell"
+                          [class.hit]="facade.lastAnswer() === 'ok' && option === word.word.translation"
+                          [class.miss]="facade.lastAnswer() === 'bad' && option === word.word.translation"
+                          (click)="facade.pickOption(option)">
+                    {{ option }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+        @case ('SPELL') {
+          @if (facade.currentWord(); as word) {
+            <div class="spellbox">
+              <div class="task">«{{ word.word.translation }}»</div>
+              <div class="typed kr" [class.ok]="facade.lastAnswer() === 'ok'" [class.bad]="facade.lastAnswer() === 'bad'">
+                @if (facade.typed().length === 0) {
+                  <span class="ph">Собери слово из слогов</span>
+                }
+                {{ facade.typed().join('') }}
+              </div>
+              <div class="bank">
+                @for (syllable of facade.bank(); track $index) {
+                  <button type="button" class="mcell kr syl" (click)="facade.pickSyllable($index)">{{ syllable }}</button>
+                }
+              </div>
+              <button type="button" class="ghostbtn" (click)="facade.resetTyped()">Сбросить</button>
+            </div>
+          }
+        }
+      }
+    }
+    @case ('done') {
+      <div class="panel rewcard">
+        <div class="ghost kr">놀이</div>
+        <div class="rew-han kr">잘 놀았어요!</div>
+        <h2 class="pagettl">Раунд завершён</h2>
+        @if (facade.result(); as result) {
+          <div class="rewstats">
+            <div class="rewstat"><b class="y">{{ facade.score() }}</b><span>очков</span></div>
+            <div class="rewstat"><b class="bl">{{ result.total }}</b><span>слов</span></div>
+            <div class="rewstat"><b class="j">{{ result.correct }}</b><span>верно</span></div>
+            <div class="rewstat"><b class="r">+{{ result.xp }}</b><span>XP</span></div>
+          </div>
+        }
+        <div class="rewbtns">
+          <button class="cta grow" (click)="facade.backToPick()">Ещё раунд</button>
+          <a class="ghostbtn" routerLink="/review">К режимам</a>
+        </div>
+      </div>
+    }
+  }
+</div>

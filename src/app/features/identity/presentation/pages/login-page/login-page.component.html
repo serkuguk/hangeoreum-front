@@ -1,0 +1,41 @@
+<div class="formbox">
+  <div class="eyebrow">로그인 · Вход</div>
+  <h1>Войти в аккаунт</h1>
+  <p class="sub">Рад снова видеть тебя 👋</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="you@email.com"
+             autocomplete="email" [class.invalid]="invalid('email')">
+      @if (invalid('email')) {
+        <div class="fielderr">Введи корректный email</div>
+      }
+    </div>
+
+    <div class="field">
+      <label for="password">Пароль</label>
+      <input id="password" type="password" formControlName="password" placeholder="••••••••"
+             autocomplete="current-password" [class.invalid]="invalid('password')">
+      @if (invalid('password')) {
+        <div class="fielderr">Введи пароль</div>
+      }
+    </div>
+
+    @if (facade.error(); as error) {
+      <div class="apierr">{{ error }}</div>
+    }
+
+    <button class="btn" type="submit" [disabled]="facade.loading()">
+      {{ facade.loading() ? 'Входим…' : 'Войти' }}
+    </button>
+  </form>
+
+  <div class="sep">или через</div>
+  <div class="social">
+    <button type="button" (click)="facade.loginWithProvider('google')">Google</button>
+    <button type="button" (click)="facade.loginWithProvider('kakao')">Kakao</button>
+  </div>
+
+  <div class="alt">Нет аккаунта? <a routerLink="/auth/register">Зарегистрироваться</a></div>
+</div>

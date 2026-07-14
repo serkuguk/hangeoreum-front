@@ -1,0 +1,143 @@
+<div
+    class="stepper-control-wrapper"
+    [class.stepper-control--horizontal]="orientation() === 'horizontal'"
+    [class.stepper-control--vertical]="orientation() === 'vertical'"
+    [class.stepper-control--disabled]="isDisabled()"
+    [class]="styleClass()">
+
+    @if (orientation() === 'horizontal') {
+        <p-stepper [value]="activeStep()" [linear]="linear()">
+            <p-step-list>
+                @for (step of steps(); track step.value) {
+                    <p-step
+                        [value]="step.value"
+                        [disabled]="step.disabled || isDisabled()"
+                        (click)="onStepClick(step)">
+                        @if (step.icon) {
+                            <i [class]="step.icon"></i>
+                        }
+                        <span class="step-label">{{ step.label }}</span>
+                    </p-step>
+                }
+            </p-step-list>
+
+            <p-step-panels>
+                @for (step of steps(); track step.value) {
+                    <p-step-panel [value]="step.value">
+                        <ng-template #content let-activateCallback="activateCallback">
+                            <div class="step-content">
+                                @if (getStepTemplate(step.value)) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="getStepTemplate(step.value)"
+                                        [ngTemplateOutletContext]="{
+                                            activateCallback: goToStep.bind(this),
+                                            step: step.value,
+                                            isActive: isStepActive(step.value),
+                                            index: $index
+                                        }">
+                                    </ng-container>
+                                }
+
+                                @if (showNavigation()) {
+                                    <div class="step-navigation">
+                                        @if (!isFirstStep()) {
+                                            <p-button
+                                                [label]="backLabel()"
+                                                [outlined]="true"
+                                                [disabled]="isDisabled()"
+                                                (onClick)="previousStep()"
+                                                severity="secondary">
+                                            </p-button>
+                                        }
+
+                                        @if (!isLastStep()) {
+                                            <p-button
+                                                [label]="nextLabel()"
+                                                [disabled]="isDisabled()"
+                                                (onClick)="nextStep()">
+                                            </p-button>
+                                        }
+
+                                        @if (isLastStep()) {
+                                            <p-button
+                                                [label]="finishLabel()"
+                                                [disabled]="isDisabled()"
+                                                (onClick)="onFinish()"
+                                                severity="success">
+                                            </p-button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </ng-template>
+                    </p-step-panel>
+                }
+            </p-step-panels>
+        </p-stepper>
+    } @else {
+        <p-stepper [value]="activeStep()" [linear]="linear()">
+            @for (step of steps(); track step.value) {
+                <p-step-item [value]="step.value">
+                    <p-step
+                        [value]="step.value"
+                        [disabled]="step.disabled || isDisabled()"
+                        (click)="onStepClick(step)">
+                        @if (step.icon) {
+                            <i [class]="step.icon"></i>
+                        }
+                        <span class="step-label">{{ step.label }}</span>
+                    </p-step>
+
+                    <p-step-panel [value]="step.value">
+                        <ng-template #content let-activateCallback="activateCallback">
+                            <div class="step-content step-content--vertical">
+                                @if (getStepTemplate(step.value)) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="getStepTemplate(step.value)"
+                                        [ngTemplateOutletContext]="{
+                                            activateCallback: goToStep.bind(this),
+                                            step: step.value,
+                                            isActive: isStepActive(step.value),
+                                            index: $index
+                                        }">
+                                    </ng-container>
+                                }
+
+                                @if (showNavigation()) {
+                                    <div class="step-navigation step-navigation--vertical">
+                                        @if (!isFirstStep()) {
+                                            <p-button
+                                                [label]="backLabel()"
+                                                [outlined]="true"
+                                                [disabled]="isDisabled()"
+                                                (onClick)="previousStep()"
+                                                severity="secondary">
+                                            </p-button>
+                                        }
+
+                                        @if (!isLastStep()) {
+                                            <p-button
+                                                [label]="nextLabel()"
+                                                [disabled]="isDisabled()"
+                                                (onClick)="nextStep()">
+                                            </p-button>
+                                        }
+
+                                        @if (isLastStep()) {
+                                            <p-button
+                                                [label]="finishLabel()"
+                                                [disabled]="isDisabled()"
+                                                (onClick)="onFinish()"
+                                                severity="success">
+                                            </p-button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </ng-template>
+                    </p-step-panel>
+                </p-step-item>
+            }
+        </p-stepper>
+    }
+</div>

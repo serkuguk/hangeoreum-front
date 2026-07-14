@@ -1,0 +1,150 @@
+<p-table #table class="custom-table"
+         [columns]="dataSourceColumns()"
+         [value]="enrichedDataSource()"
+         [paginator]="paginator()"
+         [scrollable]="scrollable()"
+         [resizableColumns]="resizableColumns()"
+         [selection]="selectedRowValue()"
+         [selectionMode]="selectionMode()"
+         [customSort]="customSortFun"
+         [rowsPerPageOptions]="[10, 25, 100]"
+         (onRowSelect)="onSelectedRow($event)"
+         (onRowUnselect)="onRowUnselect()"
+         (onSort)="onCustomSort($event)"
+         [rows]="rows">
+  <ng-template #header let-columns pTemplate="header">
+    <tr >
+      @for (col of columns; track $index) {
+        <th pResizableColumn
+            [pSortableColumn]="col.field"
+            [hidden]="!col.visible"
+            [style]="{'min-width': col.minWidth || '100px', 'width': col.width, 'text-align': col.textAlign}"
+            scope="col"
+        >
+          {{ col.header | translate }}
+          @if (showIconSort() && col.field !== showFilterCondition) {
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          }
+        </th>
+      }
+
+      @if (showRowActions()) {
+        <th
+             scope="col"
+             [attr.id]="'actions-col'"
+             [style]="{ width: '7%' }"
+        >
+            <span class="sr-only">
+              {{ 'Action' | translate }}
+            </span>
+        </th>
+      }
+    </tr>
+  </ng-template>
+  <ng-template #body let-rowData let-rowIndex="rowIndex" let-columns="columns" pTemplate="body">
+    <tr [pSelectableRow]="rowData"
+        [pSelectableRowIndex]="rowIndex"
+    >
+      @for (col of columns; track $index) {
+        <td  [style]="{'min-width': col.minWidth || '100px', 'width': col.width, 'text-align': col.textAlign}"
+             [hidden]="!col.visible"
+        >
+          @if (customCellTemplate && col.type === 'especial') {
+            <ng-container
+                 *ngTemplateOutlet="customCellTemplate; context: { $implicit: rowData, col: col }"></ng-container>
+          } @else {
+              @if (rowData._editing && col.modificable) {
+
+                <form [formGroup]="initialForm" (keydown.enter)="confirmEdit(rowData)">
+                  <app-form-field
+                       [required]="true"
+                       [field]="initialForm.controls.inputValue">
+                    <app-basic-input
+                         [placeholder]="''"
+                         [control]="initialForm.controls.inputValue"
+                    ></app-basic-input>
+                  </app-form-field>
+                </form>
+
+              } @else {
+                <ng-container *ngTemplateOutlet="
+                                      shouldUseCustomCell(col)
+                                        ? customCell
+                                        : defaultCell;
+                                      context: { $implicit: rowData, col: col }
+                                    "></ng-container>
+              }
+          }
+        </td>
+      }
+
+      @if (showRowActions()) {
+        <td class="action-cell"
+            [attr.headers]="'actions-col'"
+        >
+          <div class="button-cell">
+            @if (!rowData._editing) {
+              <app-button (click)="startEdit(rowData, rowIndex)"
+                          [iconPos]="'left'"
+                          [icon]="'pi pi-pencil'"
+                          [disabled]="rowData._editing"
+              ></app-button>
+            }
+
+            @if (rowData._editing) {
+              <app-button (click)="confirmEdit(rowData)"
+                          [iconPos]="'left'"
+                          [icon]="'pi pi-check'"
+              ></app-button>
+              <app-button
+                   (click)="cancelEdit(rowData)"
+                   [iconPos]="'left'"
+                   [icon]="'pi pi-times'"
+              ></app-button>
+            }
+          </div>
+        </td>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template #customCell let-rowData="$implicit" let-col="col">
+    @switch (col.type) {
+      @case ('datetime') {
+        <span>{{ rowData[col.field] | date:'dd-MM-yyyy HH:mm' }}</span>
+      }
+      @case ('date-mes') {
+        <span>{{ rowData[col.field] | date:'MM-yyyy' }}</span>
+      }
+      @case ('date') {
+        <span>{{ rowData[col.field] }}</span>
+      }
+      @case ('date-reverse') {
+        <span>{{ rowData[col.field] | date:'YYYY-MM-DD' }}</span>
+      }
+      @case ('decimal') {
+        <span>{{ rowData[col.field] }}</span>
+      }
+      @case ('icon') {
+        @if (rowData[col.field] === showIconCondition()) {
+          <div>
+            <div class="tooltip-wrapper">
+              <em [class]="iconClass()"
+                  [style]="{ color: iconColor() }"></em>
+              <span class="tooltip-text">{{ rowData.ToolTipMsg || msgTooltip | translate }}</span>
+            </div>
+          </div>
+        }
+      }
+      @case ('clickable') {
+        <span class="clickable" (click)="startEdit(rowData, col.rowIndex)">{{ rowData[col.field] }}</span>
+      }
+    }
+  </ng-template>
+
+  <ng-template #defaultCell let-rowData="$implicit" let-col="col">
+    @if (rowData !== null) {
+      <span>{{ rowData[col.field] }}</span>
+    }
+  </ng-template>
+</p-table>

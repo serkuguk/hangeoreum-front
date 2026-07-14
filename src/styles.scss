@@ -1,0 +1,190 @@
+@use 'styles/hangeoreum-design-tokens';
+
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+// Старые переменные библиотечного шаблона, на которые завязаны shared-компоненты.
+// Ремап на тёмную палитру Hangeoreum вместо правки каждого компонента.
+:root {
+  --color-bg:           var(--hg-ink);
+  --color-surface:      var(--hg-card);
+  --color-surface-2:    var(--hg-card-2);
+  --color-border:       var(--hg-line);
+
+  --color-text-primary: var(--hg-txt);
+  --color-text-muted:   var(--hg-muted);
+  --color-text-faint:   var(--hg-muted);
+
+  --color-accent:       var(--hg-blue);
+  --color-accent-light: #5a83ff;
+  --color-accent-bg:    rgba(59, 107, 255, .14);
+
+  --color-warm:         var(--hg-yellow);
+  --color-warm-bg:      rgba(255, 194, 60, .14);
+
+  --color-danger:       var(--hg-red);
+  --color-danger-bg:    rgba(255, 77, 94, .12);
+  --color-warning:      var(--hg-yellow);
+  --color-warning-bg:   rgba(255, 194, 60, .14);
+
+  --radius-sm: var(--hg-radius-sm);
+  --radius-md: var(--hg-radius-md);
+  --radius-lg: var(--hg-radius-lg);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  background: var(--hg-bg-gradient);
+  color: var(--hg-txt);
+  font-family: var(--hg-font-ui);
+  font-size: var(--hg-fs-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: var(--hg-blue);
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--hg-yellow);
+  outline-offset: 2px;
+}
+
+// ---------- Типографика-хелперы ----------
+.kr { font-family: var(--hg-font-kr); }
+.han { font-family: var(--hg-font-display); }
+
+h2.pagettl {
+  font-size: var(--hg-fs-2xl);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.pagesub {
+  color: var(--hg-muted);
+  font-size: var(--hg-fs-sm);
+  margin-bottom: 28px;
+}
+
+// ---------- Общие блоки прототипа ----------
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+.panel {
+  background: var(--hg-card);
+  border: 1px solid var(--hg-line);
+  border-radius: var(--hg-radius-lg);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.eyebrow {
+  font-size: var(--hg-fs-2xs);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--hg-muted);
+  margin-bottom: 14px;
+}
+
+.ghost {
+  position: absolute;
+  font-family: var(--hg-font-display);
+  color: rgba(255, 255, 255, .04);
+  line-height: .8;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--hg-fs-xs);
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--hg-radius-pill);
+}
+
+.p-y { background: rgba(255, 194, 60, .14); color: var(--hg-yellow); }
+.p-j { background: rgba(31, 199, 155, .12); color: var(--hg-jade); }
+.p-b { background: rgba(59, 107, 255, .14); color: var(--hg-blue); }
+.p-r { background: rgba(255, 77, 94, .12); color: var(--hg-red); }
+
+.cta {
+  background: linear-gradient(135deg, var(--hg-blue), #5a2bcf);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: var(--hg-fs-base);
+  padding: 15px 28px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: .2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hg-shadow-cta);
+  }
+
+  &:disabled {
+    opacity: .55;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.ghostbtn {
+  background: var(--hg-card);
+  border: 1px solid var(--hg-line);
+  color: var(--hg-txt);
+  font-size: 14px;
+  padding: 14px 24px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: .2s;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, .2);
+  }
+}
+
+.setrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--hg-line);
+  font-size: 14px;
+
+  &:last-child { border: none; }
+
+  span { color: var(--hg-muted); }
+}
+
+// ---------- Доступность ----------
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
