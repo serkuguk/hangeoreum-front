@@ -51,10 +51,13 @@
               @for (item of line.breakdown ?? []; track item.token) {
                 <div class="bd">
                   <b class="kr">{{ item.token }}</b> — {{ item.note }}
-                  @if (item.wordId && !addedWords().has(item.wordId)) {
-                    <button type="button" class="pill p-y addw" (click)="addWord(item.wordId)">+ в словарь</button>
-                  } @else if (item.wordId) {
+                  @if (item.wordId && vocabulary.addState(item.wordId) === 'saved') {
                     <span class="pill p-j addw">✓ в словаре</span>
+                  } @else if (item.wordId) {
+                    <button type="button" class="pill p-y addw" [disabled]="vocabulary.addState(item.wordId) === 'saving'"
+                            (click)="addWord(item.wordId)">
+                      {{ vocabulary.addState(item.wordId) === 'saving' ? 'Сохраняем…' : vocabulary.addState(item.wordId) === 'error' ? 'Повторить' : '+ в словарь' }}
+                    </button>
                   }
                 </div>
               }
@@ -65,7 +68,12 @@
     </div>
 
     @if (!facade.completed()) {
-      <button class="cta finishbtn" (click)="complete()">Story пройдена ✓</button>
+      @if (facade.completionError(); as completionError) {
+        <p class="saveerror" role="alert">{{ completionError }}</p>
+      }
+      <button class="cta finishbtn" [disabled]="facade.completing()" (click)="complete()">
+        {{ facade.completing() ? 'Сохраняем…' : facade.completionError() ? 'Повторить сохранение' : 'Story пройдена ✓' }}
+      </button>
     } @else {
       <div class="panel donebar">
         <span>🎉 Story пройдена — прогресс сохранён.</span>

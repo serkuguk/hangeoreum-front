@@ -8,24 +8,23 @@ import {VocabularyFacade} from './application/facades/vocabulary.facade';
 export const reviewRoutes: Routes = [
   {
     path: '',
-    providers: [
-      {provide: VOCABULARY_REPOSITORY, useClass: VocabularyHttpRepository},
-      ReviewFacade,
-      GamesFacade,
-    ],
+    providers: [{provide: VOCABULARY_REPOSITORY, useClass: VocabularyHttpRepository}],
     children: [
       {
         path: '',
+        providers: [ReviewFacade],
         loadComponent: () => import('./presentation/pages/review-hub-page/review-hub-page.component')
           .then(c => c.ReviewHubPageComponent),
       },
       {
         path: 'flashcards',
+        providers: [ReviewFacade],
         loadComponent: () => import('./presentation/pages/flashcards-page/flashcards-page.component')
           .then(c => c.FlashcardsPageComponent),
       },
       {
         path: 'games',
+        providers: [ReviewFacade, GamesFacade],
         loadComponent: () => import('./presentation/pages/games-page/games-page.component')
           .then(c => c.GamesPageComponent),
       },

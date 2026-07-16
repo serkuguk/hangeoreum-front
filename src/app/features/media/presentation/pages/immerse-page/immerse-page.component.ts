@@ -34,7 +34,6 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   private host = inject(ElementRef<HTMLElement>);
 
   readonly subMode = signal<SubMode>('both');
-  readonly addedWords = signal<Set<string>>(new Set());
 
   private observer: IntersectionObserver | null = null;
 
@@ -83,9 +82,7 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   addWord(clip: Clip): void {
     if (!clip.wordId) return;
     const wordId = clip.wordId;
-    this.vocabulary.addWordToVocabulary(wordId).subscribe({
-      next: () => this.addedWords.update(set => new Set(set).add(wordId)),
-    });
+    this.vocabulary.addWordToVocabulary(wordId);
   }
 
   togglePlay(event: Event): void {

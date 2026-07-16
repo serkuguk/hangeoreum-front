@@ -1,32 +1,43 @@
-import {Injectable, computed, inject, signal} from '@angular/core';
+import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {LEARNING_REPOSITORY} from '../../domain/repositories/learning.repository';
 import {Story, StoryLine} from '../../domain/entities/story.entity';
+import {LearnMapFacade} from './learn-map.facade';
 
 export type StoryMode = 'watch' | 'read' | 'listen';
 
-/** Владеет load/playback/completion Story. Добавление слов остаётся во VocabularyFacade — не дублируется здесь. */
+/** Владеет load/playback/completion Story. Добавление слов остаётся во VocabularyFacade. */
 @Injectable()
 export class StoryFacade {
-  private repository = inject(LEARNING_REPOSITORY);
+  private readonly repository = inject(LEARNING_REPOSITORY);
+  private readonly map = inject(LearnMapFacade);
+  private readonly destroyRef = inject(DestroyRef);
+  private attemptId: string | null = null;
 
   readonly story = signal<Story | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly mode = signal<StoryMode>('watch');
   readonly openLine = signal<number | null>(null);
-  readonly activeLine = signal<number | null>(null); // подсветка по таймкодам
+  readonly activeLine = signal<number | null>(null);
   readonly completed = signal(false);
+  readonly completing = signal(false);
+  readonly completionError = signal<string | null>(null);
 
   readonly hasVideo = computed(() => !!this.story()?.clip?.videoUrl);
 
   load(lessonId: string): void {
     this.loading.set(true);
     this.error.set(null);
-    this.repository.story(lessonId).subscribe({
+    this.completed.set(false);
+    this.completing.set(false);
+    this.completionError.set(null);
+    this.attemptId = null;
+    this.repository.story(lessonId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: story => {
         this.story.set(story);
         this.loading.set(false);
-        if (!story.clip?.videoUrl) this.mode.set('read'); // fallback без видео
+        if (!story.clip?.videoUrl) this.mode.set('read');
       },
       error: err => {
         this.error.set(err?.status === 403
@@ -50,10 +61,24 @@ export class StoryFacade {
   }
 
   complete(lessonId: string): void {
-    // story завершается «просмотром» — очков нет
-    this.repository.complete(lessonId, 100, 100).subscribe({
-      next: () => this.completed.set(true),
-      error: () => this.completed.set(true),
+    if (this.completing() || this.completed()) return;
+    this.attemptId ??= crypto.randomUUID();
+    this.completing.set(true);
+    this.completionError.set(null);
+    this.repository.complete(lessonId, {
+      attemptId: this.attemptId,
+      score: 100,
+      accuracy: 100,
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.completed.set(true);
+        this.completing.set(false);
+        this.map.invalidate();
+      },
+      error: () => {
+        this.completing.set(false);
+        this.completionError.set('Не получилось сохранить прогресс Story. Повторите попытку.');
+      },
     });
   }
 }

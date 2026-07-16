@@ -1,4 +1,5 @@
-import {Injectable, computed, inject, signal} from '@angular/core';
+import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {SrsQuality, UserWord} from '../../domain/entities/user-word.entity';
 import {previewLabel} from '../../domain/services/srs';
 import {
@@ -11,6 +12,7 @@ import {
 @Injectable()
 export class ReviewFacade {
   private repository = inject(VOCABULARY_REPOSITORY);
+  private destroyRef = inject(DestroyRef);
 
   readonly summary = signal<ReviewSummary | null>(null);
   readonly loading = signal(false);
@@ -26,6 +28,8 @@ export class ReviewFacade {
   readonly correctCount = signal(0);
   readonly hardWords = signal<UserWord[]>([]);
   readonly result = signal<FinishResult | null>(null);
+  readonly saving = signal(false);
+  readonly saveError = signal<string | null>(null);
 
   loadSummary(): void {
     this.loading.set(true);
@@ -45,6 +49,8 @@ export class ReviewFacade {
     this.loading.set(true);
     this.error.set(null);
     this.result.set(null);
+    this.saving.set(false);
+    this.saveError.set(null);
     this.answers = [];
     this.correctCount.set(0);
     this.hardWords.set([]);
@@ -79,7 +85,7 @@ export class ReviewFacade {
 
   rate(quality: SrsQuality): void {
     const word = this.current();
-    if (!word) return;
+    if (!word || this.saving()) return;
 
     this.answers.push({wordId: word.word.id, quality});
     if (quality >= 3) {
@@ -102,16 +108,21 @@ export class ReviewFacade {
     this.finish();
   }
 
+  retryFinish(): void {
+    this.finish();
+  }
+
   private finish(): void {
     const sessionId = this.sessionId;
-    if (!sessionId) return;
-    this.loading.set(true);
-    this.repository.submitAnswers(sessionId, this.answers).subscribe({
+    if (!sessionId || this.saving()) return;
+    this.saving.set(true);
+    this.saveError.set(null);
+    this.repository.submitAnswers(sessionId, this.answers).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.repository.finishSession(sessionId).subscribe({
+        this.repository.finishSession(sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: result => {
             this.result.set(result);
-            this.loading.set(false);
+            this.saving.set(false);
             this.sessionId = null;
           },
           error: () => this.failFinish(),
@@ -122,9 +133,7 @@ export class ReviewFacade {
   }
 
   private failFinish(): void {
-    // сеть подвела — показываем локальную сводку без серверного XP
-    this.result.set({total: this.answers.length, correct: this.correctCount(), xp: 0, streak: 0});
-    this.loading.set(false);
-    this.sessionId = null;
+    this.saving.set(false);
+    this.saveError.set('Не получилось сохранить повторение. Повторите попытку.');
   }
 }

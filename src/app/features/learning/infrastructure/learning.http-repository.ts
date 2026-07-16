@@ -9,6 +9,7 @@ import {Lesson, Tip} from '../domain/entities/exercise.entity';
 import {Story} from '../domain/entities/story.entity';
 import {
   CompleteResult,
+  CompleteRequest,
   LearningRepository,
   LetterLearnedResult,
 } from '../domain/repositories/learning.repository';
@@ -31,8 +32,8 @@ export class LearningHttpRepository implements LearningRepository {
     return this.http.get<Tip>(`${this.base}/lessons/${lessonId}/tip`);
   }
 
-  complete(lessonId: string, score: number, accuracy: number): Observable<CompleteResult> {
-    return this.http.post<CompleteResult>(`${this.base}/lessons/${lessonId}/complete`, {score, accuracy});
+  complete(lessonId: string, request: CompleteRequest): Observable<CompleteResult> {
+    return this.http.post<CompleteResult>(`${this.base}/lessons/${lessonId}/complete`, request);
   }
 
   story(lessonId: string): Observable<Story> {

@@ -36,6 +36,13 @@
         <a class="ghostbtn" routerLink="/dashboard">На дашборд</a>
       </div>
     </div>
+  } @else if (facade.saving()) {
+    <div class="panel loadpanel" aria-live="polite">Сохраняем повторение…</div>
+  } @else if (facade.saveError(); as saveError) {
+    <div class="panel loadpanel" role="alert">
+      <p>{{ saveError }}</p>
+      <button type="button" class="cta" (click)="facade.retryFinish()">Повторить</button>
+    </div>
   } @else if (facade.current(); as card) {
     <div class="fc-top">
       <span class="cnt">{{ facade.index() + 1 }} / {{ facade.total() }}</span>
