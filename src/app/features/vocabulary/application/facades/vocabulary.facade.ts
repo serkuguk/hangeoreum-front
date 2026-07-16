@@ -58,8 +58,9 @@ export class VocabularyFacade {
     });
   }
 
-  addWordToVocabulary(wordId: string): void {
-    this.repository.addWord(wordId).subscribe();
+  /** Вызывающий подписывается сам, чтобы честно показать "добавлено" только после успеха сервера. */
+  addWordToVocabulary(wordId: string) {
+    return this.repository.addWord(wordId);
   }
 
   loadDecks(): void {

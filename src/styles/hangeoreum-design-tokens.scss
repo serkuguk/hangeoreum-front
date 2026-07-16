@@ -138,11 +138,67 @@ $hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
   --hg-shadow-cta:  #{$hg-shadow-cta};
   --hg-shadow-card: #{$hg-shadow-card};
 
-  // фоновая подложка (используется на body во всех прототипах)
-  --hg-bg-gradient:
-    radial-gradient(1200px 600px at 85% -10%, rgba(59,107,255,.18), transparent 60%),
-    radial-gradient(900px 500px at -5% 110%, rgba(255,77,94,.14), transparent 55%),
-    var(--hg-ink);
+  // ---------- Семантические токены (light — дефолтная тема продукта) ----------
+  --hg-bg:            oklch(97% 0.016 88);
+  --hg-surface:       oklch(99.5% 0.006 92);
+  --hg-surface-muted: oklch(94% 0.018 88);
+  --hg-text:          oklch(25% 0.030 260);
+  --hg-text-muted:    oklch(45% 0.030 260);
+  --hg-border:        oklch(86% 0.022 88);
+
+  --hg-route:         oklch(45% 0.190 257);
+  --hg-on-route:      oklch(99% 0.005 90);
+  --hg-route-soft:    oklch(92% 0.040 257);
+
+  --hg-success:       oklch(47% 0.135 165);
+  --hg-on-success:    oklch(99% 0.005 90);
+  --hg-success-soft:  oklch(92% 0.040 165);
+
+  --hg-reward:        oklch(76% 0.145 82);
+  --hg-on-reward:     oklch(25% 0.035 70);
+  --hg-reward-soft:   oklch(94% 0.040 82);
+
+  --hg-danger:        oklch(50% 0.200 25);
+  --hg-on-danger:     oklch(99% 0.005 90);
+  --hg-danger-soft:   oklch(93% 0.040 25);
+
+  --hg-focus:         oklch(58% 0.205 250);
+
+  // spacing / radius / content-width / motion (общая шкала для нового дизайна)
+  --hg-space-1: 4px;  --hg-space-2: 8px;  --hg-space-3: 12px; --hg-space-4: 16px;
+  --hg-space-5: 24px; --hg-space-6: 32px; --hg-space-7: 48px; --hg-space-8: 64px;
+  --hg-radius-control: 8px; --hg-radius-block: 12px; --hg-radius-scene: 20px; --hg-radius-pill-new: 999px;
+  --hg-content-lesson: 720px; --hg-content-main: 1120px;
+  --hg-touch-min: 44px;
+  --hg-motion-feedback: 120ms; --hg-motion-nav: 180ms; --hg-motion-route: 280ms;
+
+  // ---------- Легаси-ремап (транзитный слой) ----------
+  // Старые --hg-* имена теперь резолвятся через новые семантические токены,
+  // чтобы 40 файлов, которые их уже читают (exercises, learn-map, story, immerse, games...),
+  // корректно отображались в обеих темах без точечных правок.
+  --hg-ink:    var(--hg-bg);
+  --hg-ink-2:  var(--hg-surface-muted);
+  --hg-card:   var(--hg-surface);
+  --hg-card-2: var(--hg-surface-muted);
+  --hg-line:   var(--hg-border);
+  --hg-txt:    var(--hg-text);
+  --hg-muted:  var(--hg-text-muted);
+  --hg-blue:   var(--hg-route);
+  --hg-red:    var(--hg-danger);
+  --hg-yellow: var(--hg-reward);
+  --hg-jade:   var(--hg-success);
+}
+
+// ---------- Тёмная тема ----------
+// route/success/reward/danger (+on-/soft-) переиспользуют light-значения как
+// временный placeholder: полная калибровка dark-семантики — задача P2 ("вечерний тест").
+[data-theme='dark'] {
+  --hg-bg:            oklch(18% 0.025 260);
+  --hg-surface:       oklch(23% 0.025 260);
+  --hg-surface-muted: oklch(28% 0.025 260);
+  --hg-text:          oklch(94% 0.012 88);
+  --hg-text-muted:    oklch(74% 0.020 88);
+  --hg-border:        oklch(34% 0.025 260);
 }
 
 // =============================================================

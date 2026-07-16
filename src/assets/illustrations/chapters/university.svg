@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img">
+  <!--
+    한걸음 chapter illustration: university / 학교 (school, studying)
+    Learner beside an open book; a pencil marks study. Object + gesture driven.
+    Palette: surface #fffdf9, text #192230, route #004dbb, success #007147 (book cover).
+  -->
+  <rect x="16" y="16" width="208" height="208" rx="28" fill="#fffdf9"/>
+  <g stroke="#192230" stroke-opacity="0.16" stroke-width="2" stroke-linecap="round">
+    <line x1="120" y1="40" x2="120" y2="176"/>
+    <line x1="40" y1="176" x2="200" y2="176"/>
+  </g>
+
+  <!-- learner (left) reading -->
+  <g>
+    <rect x="50" y="132" width="42" height="44" rx="14" fill="#004dbb"/>
+    <rect x="54" y="86" width="34" height="34" rx="12" fill="#192230"/>
+    <path d="M71 82 q6 -10 12 -2 q-6 -3 -12 2 Z" fill="#192230"/>
+    <line x1="90" y1="142" x2="112" y2="150" stroke="#192230" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- open book (right) -->
+  <g>
+    <!-- covers -->
+    <path d="M110 128 L146 120 L146 172 L110 176 Z" fill="#007147"/>
+    <path d="M182 128 L146 120 L146 172 L182 176 Z" fill="#007147"/>
+    <!-- pages -->
+    <path d="M114 132 L146 126 L146 168 L114 172 Z" fill="#fffdf9" stroke="#192230" stroke-width="2"/>
+    <path d="M178 132 L146 126 L146 168 L178 172 Z" fill="#fffdf9" stroke="#192230" stroke-width="2"/>
+    <!-- text lines as neutral strokes (not letters) -->
+    <g stroke="#192230" stroke-opacity="0.16" stroke-width="2" stroke-linecap="round">
+      <line x1="120" y1="140" x2="140" y2="137"/>
+      <line x1="120" y1="148" x2="140" y2="145"/>
+      <line x1="152" y1="137" x2="172" y2="140"/>
+      <line x1="152" y1="145" x2="172" y2="148"/>
+    </g>
+  </g>
+
+  <!-- pencil = studying (upper right) -->
+  <g transform="rotate(-38 176 78)">
+    <rect x="160" y="72" width="34" height="12" rx="2" fill="#dfa72a" stroke="#192230" stroke-width="2"/>
+    <path d="M194 72 l10 6 l-10 6 Z" fill="#192230"/>
+  </g>
+</svg>

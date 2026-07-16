@@ -1,7 +1,9 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, afterNextRender, inject} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {LearnMapFacade} from '../../../application/facades/learn-map.facade';
-import {LessonNode} from '../../../domain/entities/course-map.entity';
+import {LessonNode, UnitNode} from '../../../domain/entities/course-map.entity';
+
+type UnitState = 'completed' | 'current' | 'locked';
 
 @Component({
   selector: 'hg-learn-map-page',
@@ -10,21 +12,19 @@ import {LessonNode} from '../../../domain/entities/course-map.entity';
   styleUrl: './learn-map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LearnMapPageComponent implements AfterViewInit {
+export class LearnMapPageComponent {
   readonly facade = inject(LearnMapFacade);
   private router = inject(Router);
   private host = inject(ElementRef<HTMLElement>);
 
   constructor() {
     this.facade.load();
-  }
-
-  ngAfterViewInit(): void {
-    // автоскролл к первому доступному узлу после отрисовки данных
-    setTimeout(() => {
+    // Скроллит к текущему узлу как только он реально появится в DOM —
+    // без гадания с фиксированной задержкой под сетевую задержку загрузки карты.
+    afterNextRender(() => {
       this.host.nativeElement.querySelector('.node.now')
         ?.scrollIntoView({block: 'center', behavior: 'smooth'});
-    }, 300);
+    });
   }
 
   open(lesson: LessonNode): void {
@@ -42,6 +42,13 @@ export class LearnMapPageComponent implements AfterViewInit {
     }
   }
 
+  /** Состояние юнита целиком — какую главу раскрывать, какую сворачивать, какую блокировать. */
+  unitState(unit: UnitNode): UnitState {
+    if (unit.lessons.every(l => l.status === 'COMPLETED')) return 'completed';
+    if (unit.lessons.some(l => l.status === 'AVAILABLE' || l.status === 'COMPLETED')) return 'current';
+    return 'locked';
+  }
+
   unitProgress(lessons: LessonNode[]): string {
     const done = lessons.filter(l => l.status === 'COMPLETED').length;
     return `${done} / ${lessons.length}`;
@@ -54,5 +61,20 @@ export class LearnMapPageComponent implements AfterViewInit {
       case 'AVAILABLE': return 'Начать';
       default: return '🔒';
     }
+  }
+
+  /** Условие открытия locked-юнита — почему он закрыт, не просто иконка замка. */
+  lockedReason(unit: UnitNode, previous: UnitNode | undefined): string {
+    if (!previous) return 'Пока недоступно';
+    return `Заверши «${previous.title}», чтобы открыть`;
+  }
+
+  // ponytail: статический маппинг сцен первого курса по позиции юнита;
+  // серверное поле situation появится вместе с read model из lessons plan
+  private static readonly CHAPTER_SCENES = ['intro', 'cafe', 'metro', 'shop', 'home', 'university'];
+
+  sceneUrl(index: number): string | null {
+    const scene = LearnMapPageComponent.CHAPTER_SCENES[index];
+    return scene ? `assets/illustrations/chapters/${scene}.svg` : null;
   }
 }

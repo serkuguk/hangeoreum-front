@@ -30,16 +30,26 @@ export const DEFAULT_THEME: ThemeChoice = {accent: '#3B6BFF', fontScale: 1.0, ra
 
 const THEME_KEY = 'hg_theme';
 
+export type ColorMode = 'light' | 'dark' | 'system';
+
+const MODE_KEY = 'hg_color_mode';
+
 /**
  * Пишет варианты из hangeoreum-theme-config.json в --hg-* custom properties.
  * Локально кэшируется в localStorage; сервер (user_settings.theme) — источник
  * между устройствами, применяется через apply() после загрузки настроек.
+ *
+ * ColorMode (light/dark/system) — отдельный concern от ThemeChoice (акцент/масштаб/радиус):
+ * управляет --hg-* семантическими токенами через data-theme/.hg-dark, а не отдельными свойствами.
  */
 @Injectable({providedIn: 'root'})
 export class ThemeService {
+  private readonly mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  private systemListenerAttached = false;
 
   init(): void {
     this.apply(this.stored());
+    this.applyMode(this.storedMode());
   }
 
   apply(theme: ThemeChoice): void {
@@ -56,6 +66,29 @@ export class ThemeService {
       return raw ? {...DEFAULT_THEME, ...JSON.parse(raw)} : DEFAULT_THEME;
     } catch {
       return DEFAULT_THEME;
+    }
+  }
+
+  setMode(mode: ColorMode): void {
+    localStorage.setItem(MODE_KEY, mode);
+    this.applyMode(mode);
+  }
+
+  storedMode(): ColorMode {
+    const raw = localStorage.getItem(MODE_KEY);
+    return raw === 'light' || raw === 'dark' || raw === 'system' ? raw : 'system';
+  }
+
+  private applyMode(mode: ColorMode): void {
+    const resolved = mode === 'system' ? (this.mediaQuery.matches ? 'dark' : 'light') : mode;
+    const root = document.documentElement;
+    root.setAttribute('data-theme', resolved);
+    root.classList.toggle('hg-dark', resolved === 'dark');
+    root.style.colorScheme = resolved;
+
+    if (mode === 'system' && !this.systemListenerAttached) {
+      this.mediaQuery.addEventListener('change', () => this.applyMode(this.storedMode()));
+      this.systemListenerAttached = true; // ponytail: singleton root service, one-shot idempotency guard, no cleanup needed
     }
   }
 }

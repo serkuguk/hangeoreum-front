@@ -30,7 +30,8 @@
         <section class="clip">
           @if (clip.videoUrl) {
             <video [attr.data-clip-id]="clip.id" [src]="clip.videoUrl"
-                   [poster]="clip.thumbnailUrl ?? ''" loop playsinline preload="none"
+                   [poster]="clip.thumbnailUrl ?? ''" loop playsinline muted controls preload="none"
+                   [attr.aria-label]="'Видео: ' + (subtitle(clip, 'ru') ?? subtitle(clip, 'ko') ?? 'клип')"
                    (click)="togglePlay($event)"></video>
           } @else {
             <div class="novid"><span class="ghost kr">말</span></div>

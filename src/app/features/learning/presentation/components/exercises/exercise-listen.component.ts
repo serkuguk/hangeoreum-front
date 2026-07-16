@@ -28,21 +28,6 @@ import {Feedback} from '../../../application/facades/lesson.facade';
     </div>
   `,
   styleUrl: './exercise-shared.scss',
-  styles: `
-    .bigsnd {
-      width: 72px;
-      height: 72px;
-      border-radius: 20px;
-      border: none;
-      background: linear-gradient(135deg, var(--hg-blue), #5a2bcf);
-      color: #fff;
-      font-size: 28px;
-      cursor: pointer;
-      transition: .2s;
-
-      &:hover { transform: scale(1.05); }
-    }
-  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExerciseListenComponent {

@@ -27,41 +27,30 @@ interface MatchCell {
       }
     </div>
   `,
+  styleUrl: './exercise-shared.scss',
   styles: `
-    :host { display: block; }
-
-    .q-kind {
-      color: var(--hg-muted);
-      font-size: 12.5px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .match { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .match { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hg-space-3); }
 
     .mcell {
-      background: var(--hg-card);
-      border: 2px solid var(--hg-line);
-      border-radius: 16px;
-      padding: 20px;
+      background: var(--hg-surface);
+      border: 2px solid var(--hg-border);
+      border-radius: var(--hg-radius-block);
+      padding: var(--hg-space-5);
+      min-height: var(--hg-touch-min);
       text-align: center;
       cursor: pointer;
-      transition: .18s;
-      font-size: 16px;
-      color: var(--hg-txt);
+      transition: border-color var(--hg-motion-feedback);
+      font-size: var(--hg-fs-md);
+      color: var(--hg-text);
 
       &.kr { font-family: var(--hg-font-display); font-size: 26px; }
-      &:hover:not(:disabled) { border-color: rgba(255, 255, 255, .22); }
-      &.hit { border-color: var(--hg-jade); background: rgba(31, 199, 155, .1); opacity: .55; cursor: default; }
-      &.sel { border-color: var(--hg-blue); }
-      &.miss { border-color: var(--hg-red); animation: shake .3s; }
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
+      &:hover:not(:disabled) { border-color: var(--hg-route); }
+      // matched — permanently correct
+      &.hit { border-color: var(--hg-success); background: var(--hg-success-soft); opacity: .55; cursor: default; }
+      // selected — waiting for second pick
+      &.sel { border-color: var(--hg-route); }
+      // incorrect pair
+      &.miss { border-color: var(--hg-danger); animation: shake .3s; }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

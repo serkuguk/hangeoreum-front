@@ -55,39 +55,39 @@ import {ReviewFacade} from '../../../application/facades/review.facade';
   styles: `
     :host { display: block; }
     .hubbox { max-width: 820px; }
-    .y { color: var(--hg-yellow); }
+    .y { color: var(--hg-reward); }
 
-    .dojo { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .dojo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hg-space-5); }
 
     .dtile {
       padding: 30px;
       cursor: pointer;
-      transition: .2s;
+      transition: transform var(--hg-motion-nav), border-color var(--hg-motion-nav);
       text-decoration: none;
-      color: var(--hg-txt);
+      color: var(--hg-text);
 
-      &:hover { transform: translateY(-4px); border-color: rgba(255, 255, 255, .18); }
+      &:hover { transform: translateY(-4px); border-color: var(--hg-route); }
 
       .ghost { right: -16px; bottom: -40px; font-size: 150px; }
 
       .ic {
         width: 52px;
         height: 52px;
-        border-radius: 16px;
+        border-radius: var(--hg-radius-block);
         display: grid;
         place-items: center;
         font-size: 25px;
-        margin-bottom: 18px;
+        margin-bottom: var(--hg-space-5);
 
-        &.c-b { background: rgba(59, 107, 255, .15); }
-        &.c-y { background: rgba(255, 194, 60, .15); }
-        &.c-j { background: rgba(31, 199, 155, .15); }
-        &.c-r { background: rgba(255, 77, 94, .15); }
+        &.c-b { background: var(--hg-route-soft); }
+        &.c-y { background: var(--hg-reward-soft); }
+        &.c-j { background: var(--hg-success-soft); }
+        &.c-r { background: var(--hg-danger-soft); }
       }
 
       h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-      p { font-size: 13.5px; color: var(--hg-muted); line-height: 1.55; }
-      .cnt { margin-top: 16px; }
+      p { font-size: 13.5px; color: var(--hg-text-muted); line-height: 1.55; }
+      .cnt { margin-top: var(--hg-space-4); }
     }
 
     @media (max-width: 880px) {

@@ -1,11 +1,11 @@
 :host { display: block; }
 
-.lessonbox { max-width: 640px; }
+.lessonbox { max-width: var(--hg-content-lesson); }
 
 .loadpanel {
   text-align: center;
   padding: 40px;
-  color: var(--hg-muted);
+  color: var(--hg-text-muted);
 
   p { margin-bottom: 16px; }
 }
@@ -13,14 +13,16 @@
 .l-top {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 30px;
+  gap: var(--hg-space-4);
+  margin-bottom: var(--hg-space-6);
 
   .x {
     background: none;
     border: none;
-    color: var(--hg-muted);
+    color: var(--hg-text-muted);
     font-size: 22px;
+    min-width: var(--hg-touch-min);
+    min-height: var(--hg-touch-min);
     cursor: pointer;
   }
 }
@@ -33,56 +35,70 @@
   i {
     flex: 1;
     height: 8px;
-    border-radius: 99px;
-    background: var(--hg-card-2);
+    border-radius: var(--hg-radius-pill-new);
+    background: var(--hg-surface-muted);
 
-    &.d { background: var(--hg-jade); }
-    &.c { background: var(--hg-blue); box-shadow: 0 0 10px rgba(59, 107, 255, .5); }
+    &.d { background: var(--hg-success); }
+    &.c { background: var(--hg-route); box-shadow: 0 0 10px var(--hg-route-soft); }
   }
 }
 
+// Feedback bar — единственный визуальный центр после ответа. На мобильном
+// закреплён над safe-area, чтобы не потеряться при скролле/клавиатуре.
 .fb {
-  margin-top: 24px;
-  border-radius: 18px;
-  padding: 18px 20px;
+  margin-top: var(--hg-space-5);
+  border-radius: var(--hg-radius-block);
+  padding: var(--hg-space-4) var(--hg-space-5);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--hg-space-3);
 
-  b { font-size: 15px; }
-  small { color: var(--hg-muted); display: block; margin-top: 2px; font-size: 13px; }
+  b { font-size: var(--hg-fs-md); }
+  small { color: var(--hg-text-muted); display: block; margin-top: 2px; font-size: var(--hg-fs-sm); }
 
   &.ok {
-    background: rgba(31, 199, 155, .12);
-    border: 1px solid rgba(31, 199, 155, .3);
+    background: var(--hg-success-soft);
+    border: 1px solid var(--hg-success);
 
-    b { color: var(--hg-jade); }
+    b { color: var(--hg-success); }
   }
 
   &.bad {
-    background: rgba(255, 77, 94, .12);
-    border: 1px solid rgba(255, 77, 94, .35);
+    background: var(--hg-danger-soft);
+    border: 1px solid var(--hg-danger);
 
-    b { color: var(--hg-red); }
-    .next { background: var(--hg-red); color: #fff; }
+    b { color: var(--hg-danger); }
+    .next { background: var(--hg-danger); color: var(--hg-on-danger); }
   }
 
   .next {
     margin-left: auto;
-    background: var(--hg-jade);
-    color: #0d2a22;
+    background: var(--hg-success);
+    color: var(--hg-on-success);
     border: none;
     font-weight: 700;
-    padding: 11px 22px;
-    border-radius: 12px;
+    min-height: var(--hg-touch-min);
+    padding: 11px var(--hg-space-5);
+    border-radius: var(--hg-radius-control);
     cursor: pointer;
     flex-shrink: 0;
   }
 }
 
-// награда
+@media (max-width: 767px) {
+  .fb {
+    position: sticky;
+    bottom: 0;
+    margin: var(--hg-space-4) calc(-1 * var(--hg-space-4)) 0;
+    padding-bottom: calc(var(--hg-space-4) + env(safe-area-inset-bottom, 0px));
+    border-radius: var(--hg-radius-block) var(--hg-radius-block) 0 0;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .12);
+  }
+}
+
+// награда — появляется только после подтверждённого ответа сервера (result())
 .rewcard {
-  padding: 46px 36px;
+  padding: var(--hg-space-7) var(--hg-space-6);
   text-align: center;
 
   .ghost { font-size: 240px; right: -50px; bottom: -80px; }
@@ -91,7 +107,7 @@
 .rew-han {
   font-family: var(--hg-font-display);
   font-size: 54px;
-  color: var(--hg-yellow);
+  color: var(--hg-reward);
   margin-bottom: 10px;
   line-height: 1.1;
 }
@@ -99,35 +115,35 @@
 .rewstats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin: 28px 0 20px;
+  gap: var(--hg-space-2);
+  margin: var(--hg-space-6) 0 var(--hg-space-5);
 }
 
 .rewstat {
-  background: var(--hg-card-2);
-  border-radius: 16px;
-  padding: 16px 8px;
+  background: var(--hg-surface-muted);
+  border-radius: var(--hg-radius-block);
+  padding: var(--hg-space-4) var(--hg-space-2);
 
   b { font-size: 20px; font-weight: 700; display: block; }
-  span { font-size: 11.5px; color: var(--hg-muted); }
+  span { font-size: 11.5px; color: var(--hg-text-muted); }
 }
 
-.y { color: var(--hg-yellow); }
-.j { color: var(--hg-jade); }
-.r { color: var(--hg-red); }
-.bl { color: var(--hg-blue); }
+.y { color: var(--hg-reward); }
+.j { color: var(--hg-success); }
+.r { color: var(--hg-danger); }
+.bl { color: var(--hg-route); }
 
 .rewwords {
   display: flex;
-  gap: 8px;
+  gap: var(--hg-space-2);
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 18px;
+  margin-bottom: var(--hg-space-4);
 }
 
 .rewbtns {
   display: flex;
-  gap: 12px;
+  gap: var(--hg-space-3);
 
   .grow { flex: 1; }
 }

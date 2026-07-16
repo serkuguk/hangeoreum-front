@@ -26,7 +26,8 @@ import {ThemeService} from '@core/services/theme.service';
         span {
           position: absolute;
           font-family: var(--hg-font-display);
-          color: rgba(255, 255, 255, .04);
+          color: var(--hg-text);
+          opacity: .04;
           line-height: .8;
           white-space: nowrap;
           user-select: none;

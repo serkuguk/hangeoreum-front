@@ -35,50 +35,23 @@ interface BankToken {
       Проверить
     </button>
   `,
+  styleUrl: './exercise-shared.scss',
   styles: `
-    :host { display: block; }
-
-    .q-kind {
-      color: var(--hg-muted);
-      font-size: 12.5px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .taskpanel { padding: 18px 20px; margin-bottom: 14px; color: var(--hg-muted); font-size: 14px; }
-
     .assembled {
-      min-height: 62px;
-      border: 2px dashed rgba(255, 255, 255, .18);
-      border-radius: 16px;
-      padding: 10px;
+      min-height: var(--hg-touch-min);
+      border: 2px dashed var(--hg-border);
+      border-radius: var(--hg-radius-block);
+      padding: var(--hg-space-2);
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: var(--hg-space-2);
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: var(--hg-space-4);
 
-      .placeholder { color: var(--hg-muted); font-size: 13px; padding-left: 6px; }
+      .placeholder { color: var(--hg-text-muted); font-size: var(--hg-fs-sm); padding-left: var(--hg-space-2); }
     }
 
-    .wbank { display: flex; flex-wrap: wrap; gap: 10px; }
-
-    .wtok {
-      background: var(--hg-card);
-      border: 1px solid var(--hg-line);
-      border-radius: 12px;
-      padding: 10px 16px;
-      font-size: 15px;
-      color: var(--hg-txt);
-      cursor: pointer;
-      transition: .15s;
-
-      &:hover:not(:disabled) { border-color: rgba(255, 255, 255, .25); }
-      &:disabled { cursor: default; opacity: .7; }
-    }
-
-    .checkbtn { margin-top: 22px; }
+    .wbank { display: flex; flex-wrap: wrap; gap: var(--hg-space-3); }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

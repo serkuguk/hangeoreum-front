@@ -37,14 +37,14 @@
     } @else {
       <div class="panel">
         @for (word of facade.words(); track word.id) {
-          <div class="vrow" [class.open]="expandedId() === word.id">
+          <div class="vrow" [class]="'state-' + wordState(word)" [class.open]="expandedId() === word.id">
             <button type="button" class="rowmain" (click)="toggleExpand(word)">
               <span class="kr wh">{{ word.word.hangul }}</span>
               <span class="rom">{{ word.word.romanization }}</span>
               <span class="tr">{{ word.word.translation }}</span>
             </button>
             <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl" size="sm"/>
-            <span class="stars" [style.color]="levelColor(word)" [title]="'Уровень ' + word.level">{{ stars(word) }}</span>
+            <span class="stars" [title]="'Уровень ' + word.level">{{ stars(word) }}</span>
             <span class="due">{{ dueLabel(word) }}</span>
             <button type="button" class="diffbtn" [class.on]="word.isDifficult"
                     (click)="facade.toggleDifficult(word)"

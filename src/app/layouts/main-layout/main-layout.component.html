@@ -1,12 +1,6 @@
 <header class="topbar">
   <a class="logo han" routerLink="/dashboard">한걸음</a>
 
-  <nav class="mainnav" aria-label="Основная навигация">
-    @for (item of nav; track item.link) {
-      <a [routerLink]="item.link" routerLinkActive="is-active">{{ item.label }}</a>
-    }
-  </nav>
-
   <div class="userbox">
     @if (isAdmin()) {
       <a class="pill p-r adminlink" routerLink="/admin">Админ</a>
@@ -33,6 +27,15 @@
     }
   </div>
 </header>
+
+<nav class="mainnav" aria-label="Основная навигация">
+  @for (item of nav; track item.link) {
+    <a [routerLink]="item.link" routerLinkActive="is-active" [title]="item.label">
+      <i class="pi {{ item.icon }}" aria-hidden="true"></i>
+      <span class="navlabel">{{ item.label }}</span>
+    </a>
+  }
+</nav>
 
 <main class="content">
   <router-outlet/>

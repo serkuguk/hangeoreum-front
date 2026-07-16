@@ -16,38 +16,26 @@ import {Feedback} from '../../../application/facades/lesson.facade';
       Проверить
     </button>
   `,
+  styleUrl: './exercise-shared.scss',
   styles: `
-    :host { display: block; }
-
-    .q-kind {
-      color: var(--hg-muted);
-      font-size: 12.5px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .taskpanel { padding: 18px 20px; margin-bottom: 14px; font-size: 15px; }
-
     .krinput {
       width: 100%;
-      background: var(--hg-card);
-      border: 2px solid var(--hg-line);
-      border-radius: 16px;
-      padding: 18px 20px;
-      color: var(--hg-txt);
+      min-height: var(--hg-touch-min);
+      background: var(--hg-surface);
+      border: 2px solid var(--hg-border);
+      border-radius: var(--hg-radius-block);
+      padding: var(--hg-space-4) var(--hg-space-5);
+      color: var(--hg-text);
       font-size: 26px;
       text-align: center;
-      transition: .2s;
+      transition: border-color var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
 
-      &:focus {
+      &:focus-visible {
         outline: none;
-        border-color: var(--hg-blue);
-        box-shadow: 0 0 0 3px rgba(59, 107, 255, .18);
+        border-color: var(--hg-focus);
+        box-shadow: 0 0 0 3px var(--hg-route-soft);
       }
     }
-
-    .checkbtn { margin-top: 22px; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

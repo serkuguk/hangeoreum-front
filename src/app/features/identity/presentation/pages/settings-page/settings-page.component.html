@@ -61,13 +61,13 @@
         </div>
       }
       <div class="setrow">
-        Автозвук в карточках
-        <button type="button" class="toggle" [class.off]="!s.soundEnabled" role="switch"
+        Автозвук в карточках <span class="soon">скоро</span>
+        <button type="button" class="toggle" disabled [class.off]="!s.soundEnabled" role="switch"
                 [attr.aria-checked]="s.soundEnabled" (click)="patch({soundEnabled: !s.soundEnabled})"></button>
       </div>
       <div class="setrow">
-        Романизация в карточках
-        <button type="button" class="toggle" [class.off]="!s.showRomanization" role="switch"
+        Романизация в карточках <span class="soon">скоро</span>
+        <button type="button" class="toggle" disabled [class.off]="!s.showRomanization" role="switch"
                 [attr.aria-checked]="s.showRomanization" (click)="patch({showRomanization: !s.showRomanization})"></button>
       </div>
     </div>
@@ -83,14 +83,22 @@
         </div>
       </div>
       <div class="setrow">
-        Автовоспроизведение
-        <button type="button" class="toggle" [class.off]="!s.autoplayAudio" role="switch"
+        Автовоспроизведение <span class="soon">скоро</span>
+        <button type="button" class="toggle" disabled [class.off]="!s.autoplayAudio" role="switch"
                 [attr.aria-checked]="s.autoplayAudio" (click)="patch({autoplayAudio: !s.autoplayAudio})"></button>
       </div>
     </div>
 
     <div class="panel">
       <div class="eyebrow">Тема</div>
+      <div class="setrow">
+        <span>Оформление</span>
+        <div class="segpick">
+          <button type="button" [class.on]="mode() === 'light'" (click)="setMode('light')">Светлая</button>
+          <button type="button" [class.on]="mode() === 'dark'" (click)="setMode('dark')">Тёмная</button>
+          <button type="button" [class.on]="mode() === 'system'" (click)="setMode('system')">Системная</button>
+        </div>
+      </div>
       <div class="setrow">
         <span>Акцент</span>
         <div class="swatches">

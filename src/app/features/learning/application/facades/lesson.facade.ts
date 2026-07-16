@@ -25,6 +25,7 @@ export class LessonFacade {
   readonly feedback = signal<Feedback | null>(null);
   readonly result = signal<CompleteResult | null>(null);
   readonly finishing = signal(false);
+  readonly saveError = signal(false);
 
   readonly progressSegments = computed(() =>
     Array.from({length: this.total()}, (_, i) => i < this.solved()));
@@ -100,18 +101,23 @@ export class LessonFacade {
     if (!lesson || !session) return;
 
     this.finishing.set(true);
+    this.saveError.set(false);
     this.repository.complete(lesson.id, session.score, session.accuracy).subscribe({
       next: result => {
         this.result.set(result);
         this.finishing.set(false);
-        this.session = null;
+        this.session = null; // обнуляем только при подтверждённом успехе
       },
       error: () => {
-        // результат не сохранился — показываем экран награды без серверных цифр
-        this.result.set({xp: 0, newWords: [], streak: 0, goalReached: false});
         this.finishing.set(false);
-        this.session = null;
+        this.saveError.set(true);
+        // session намеренно сохраняется — нужна retryFinish() для повторной попытки
       },
     });
+  }
+
+  /** Повторная попытка сохранить результат после saveError. */
+  retryFinish(): void {
+    this.finish();
   }
 }

@@ -1,48 +1,97 @@
-// Общие стили упражнений (по hangeoreum-full.html, экран урока)
+// Общая оболочка всех 6 exercise-компонентов: одна сетка, один набор
+// idle/selected/correct/incorrect состояний, никаких буквальных цветов —
+// только семантические --hg-* токены, чтобы light/dark темы работали одинаково.
 :host { display: block; }
 
 .q-kind {
-  color: var(--hg-muted);
-  font-size: 12.5px;
+  color: var(--hg-text-muted);
+  font-size: var(--hg-fs-xs);
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: var(--hg-space-3);
 }
 
 .q-word {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: var(--hg-space-4);
+  margin-bottom: var(--hg-space-6);
 
   .w { font-family: var(--hg-font-display); font-size: var(--hg-fs-display-sm); }
-  .r { color: var(--hg-muted); font-size: 14px; }
+  .r { color: var(--hg-text-muted); font-size: var(--hg-fs-sm); }
 }
 
+// ---------- Карточка-подсказка задания (перевод/фраза над упражнением) ----------
+.taskpanel {
+  padding: var(--hg-space-4) var(--hg-space-5);
+  margin-bottom: var(--hg-space-4);
+  color: var(--hg-text-muted);
+  font-size: var(--hg-fs-base);
+}
+
+// ---------- Сетка вариантов (choice/listen) ----------
 .opts {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--hg-space-3);
 }
 
 .opt {
-  background: var(--hg-card);
-  border: 2px solid var(--hg-line);
-  border-radius: 18px;
-  padding: 22px;
+  background: var(--hg-surface);
+  border: 2px solid var(--hg-border);
+  border-radius: var(--hg-radius-block);
+  padding: var(--hg-space-5);
+  min-height: var(--hg-touch-min);
   text-align: center;
   cursor: pointer;
-  transition: .18s;
-  font-size: 16px;
+  transition: transform var(--hg-motion-feedback), border-color var(--hg-motion-feedback), background var(--hg-motion-feedback);
+  font-size: var(--hg-fs-md);
   font-weight: 500;
-  color: var(--hg-txt);
+  color: var(--hg-text);
 
-  &:hover:not(:disabled) { border-color: rgba(255, 255, 255, .22); transform: translateY(-2px); }
+  &:hover:not(:disabled) { border-color: var(--hg-route); transform: translateY(-2px); }
   &:disabled { cursor: default; }
-  &.pick { border-color: var(--hg-jade); background: rgba(31, 199, 155, .1); }
-  &.wrong { border-color: var(--hg-red); background: rgba(255, 77, 94, .1); animation: shake .3s; }
 
-  .oi { display: block; font-size: 34px; margin-bottom: 10px; }
+  // correct
+  &.pick { border-color: var(--hg-success); background: var(--hg-success-soft); color: var(--hg-success); }
+  // incorrect
+  &.wrong { border-color: var(--hg-danger); background: var(--hg-danger-soft); color: var(--hg-danger); animation: shake .3s; }
+
+  .oi { display: block; font-size: 34px; margin-bottom: var(--hg-space-2); }
+}
+
+// ---------- Токены слов (word-order: собранное предложение + банк) ----------
+.wtok {
+  background: var(--hg-surface);
+  border: 1px solid var(--hg-border);
+  border-radius: var(--hg-radius-control);
+  padding: var(--hg-space-2) var(--hg-space-4);
+  min-height: var(--hg-touch-min);
+  font-size: var(--hg-fs-md);
+  color: var(--hg-text);
+  cursor: pointer;
+  transition: border-color var(--hg-motion-feedback);
+
+  &:hover:not(:disabled) { border-color: var(--hg-route); }
+  &:disabled { cursor: default; opacity: .7; }
+}
+
+// ---------- Кнопка "Проверить" (word-order, type) — тот же .cta, локальный отступ ----------
+.checkbtn { margin-top: var(--hg-space-5); }
+
+// ---------- Крупная кнопка воспроизведения (listen) ----------
+.bigsnd {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--hg-radius-block);
+  border: none;
+  background: var(--hg-route);
+  color: var(--hg-on-route);
+  font-size: 28px;
+  cursor: pointer;
+  transition: transform var(--hg-motion-feedback);
+
+  &:hover { transform: scale(1.05); }
 }
 
 @keyframes shake {

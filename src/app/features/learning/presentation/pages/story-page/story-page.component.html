@@ -1,30 +1,31 @@
 <div class="wrap storybox">
-  @if (loading()) {
+  @if (facade.loading()) {
     <div class="panel loadpanel">Загружаем story…</div>
-  } @else if (error(); as err) {
+  } @else if (facade.error(); as err) {
     <div class="panel loadpanel">
       <p>{{ err }}</p>
       <a class="cta" routerLink="/billing">Тарифы</a>
       <button class="ghostbtn" (click)="back()">К урокам</button>
     </div>
-  } @else if (story(); as st) {
+  } @else if (facade.story(); as st) {
     <h2 class="pagettl">Story · {{ st.title }}</h2>
     <p class="pagesub">Тапни строку — увидишь перевод и разбор.</p>
 
     <div class="modes">
-      @if (hasVideo()) {
-        <button type="button" [class.is-active]="mode() === 'watch'" (click)="mode.set('watch')">▶ Смотреть</button>
+      @if (facade.hasVideo()) {
+        <button type="button" [class.is-active]="facade.mode() === 'watch'" (click)="facade.mode.set('watch')">▶ Смотреть</button>
       }
-      <button type="button" [class.is-active]="mode() === 'read'" (click)="mode.set('read')">📖 Читать</button>
-      @if (st.clip?.audioUrl || hasVideo()) {
-        <button type="button" [class.is-active]="mode() === 'listen'" (click)="mode.set('listen')">🎧 Слушать</button>
+      <button type="button" [class.is-active]="facade.mode() === 'read'" (click)="facade.mode.set('read')">📖 Читать</button>
+      @if (st.clip?.audioUrl || facade.hasVideo()) {
+        <button type="button" [class.is-active]="facade.mode() === 'listen'" (click)="facade.mode.set('listen')">🎧 Слушать</button>
       }
     </div>
 
-    @if (mode() === 'watch' && st.clip?.videoUrl) {
-      <video class="player" controls [src]="st.clip!.videoUrl!" [poster]="st.clip!.thumbnailUrl ?? ''"
+    @if (facade.mode() === 'watch' && st.clip?.videoUrl) {
+      <video class="player" controls muted [src]="st.clip!.videoUrl!" [poster]="st.clip!.thumbnailUrl ?? ''"
+             [attr.aria-label]="'Видео: ' + st.title"
              preload="metadata" (timeupdate)="onTime($event)"></video>
-    } @else if (mode() === 'listen') {
+    } @else if (facade.mode() === 'listen') {
       <div class="panel listenpanel">
         <div class="ghost kr">듣기</div>
         <audio controls [src]="st.clip?.audioUrl || st.clip?.videoUrl || ''" (timeupdate)="onTime($event)"></audio>
@@ -35,13 +36,15 @@
     <div class="panel lines">
       @for (line of st.lines; track line.position) {
         <div class="dline"
-             [class.open]="openLine() === line.position || mode() === 'read' && openLine() === line.position"
-             [class.active]="activeLine() === line.position"
-             (click)="toggleLine(line)">
-          <div class="av">{{ (line.speaker || '?').charAt(0) }}</div>
-          <div class="body">
+             [class.open]="facade.openLine() === line.position"
+             [class.active]="facade.activeLine() === line.position">
+          <button type="button" class="dline-toggle" (click)="toggleLine(line)"
+                  [attr.aria-expanded]="facade.openLine() === line.position">
+            <div class="av" aria-hidden="true">{{ (line.speaker || '?').charAt(0) }}</div>
             <div class="kr">{{ line.textKo }}</div>
-            @if (openLine() === line.position) {
+          </button>
+          @if (facade.openLine() === line.position) {
+            <div class="body">
               @if (line.textTranslation) {
                 <div class="tr">{{ line.textTranslation }}</div>
               }
@@ -49,20 +52,19 @@
                 <div class="bd">
                   <b class="kr">{{ item.token }}</b> — {{ item.note }}
                   @if (item.wordId && !addedWords().has(item.wordId)) {
-                    <button type="button" class="pill p-y addw"
-                            (click)="addWord(item.wordId); $event.stopPropagation()">+ в словарь</button>
+                    <button type="button" class="pill p-y addw" (click)="addWord(item.wordId)">+ в словарь</button>
                   } @else if (item.wordId) {
                     <span class="pill p-j addw">✓ в словаре</span>
                   }
                 </div>
               }
-            }
-          </div>
+            </div>
+          }
         </div>
       }
     </div>
 
-    @if (!completed()) {
+    @if (!facade.completed()) {
       <button class="cta finishbtn" (click)="complete()">Story пройдена ✓</button>
     } @else {
       <div class="panel donebar">

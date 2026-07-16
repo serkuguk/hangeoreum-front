@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img">
+  <!--
+    한걸음 chapter illustration: cafe / 카페 (ordering a drink)
+    Learner holds a takeaway cup; steam rises. Object-driven, no text.
+    Palette: surface #fffdf9, text #192230, reward #dfa72a (warm drink accent).
+  -->
+  <rect x="16" y="16" width="208" height="208" rx="28" fill="#fffdf9"/>
+  <g stroke="#192230" stroke-opacity="0.16" stroke-width="2" stroke-linecap="round">
+    <line x1="120" y1="40" x2="120" y2="176"/>
+    <line x1="40" y1="176" x2="200" y2="176"/>
+  </g>
+
+  <!-- learner (left region) -->
+  <g>
+    <rect x="52" y="132" width="42" height="44" rx="14" fill="#004dbb"/>
+    <rect x="56" y="86" width="34" height="34" rx="12" fill="#192230"/>
+    <path d="M73 82 q6 -10 12 -2 q-6 -3 -12 2 Z" fill="#192230"/>
+    <!-- arm reaching toward the cup -->
+    <line x1="90" y1="140" x2="118" y2="150" stroke="#192230" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- takeaway cup (right region) -->
+  <g>
+    <!-- cup body: slight trapezoid via path -->
+    <path d="M126 128 h44 l-5 46 h-34 Z" fill="#fffdf9" stroke="#192230" stroke-width="3" stroke-linejoin="round"/>
+    <!-- lid -->
+    <rect x="122" y="118" width="52" height="12" rx="4" fill="#192230"/>
+    <!-- sleeve band -->
+    <rect x="127" y="144" width="42" height="14" fill="#dfa72a"/>
+    <!-- steam -->
+    <g stroke="#dfa72a" stroke-width="3" stroke-linecap="round" fill="none">
+      <path d="M140 108 q-5 -8 0 -16"/>
+      <path d="M156 108 q5 -8 0 -16"/>
+    </g>
+  </g>
+</svg>

@@ -77,7 +77,12 @@
         <button type="button" class="next" (click)="facade.next()">Дальше</button>
       </div>
     }
+  } @else if (facade.saveError()) {
+    <div class="panel loadpanel" role="alert" aria-live="polite">
+      <p>Не получилось сохранить результат урока.</p>
+      <button type="button" class="cta" (click)="facade.retryFinish()">Повторить</button>
+    </div>
   } @else if (facade.finishing()) {
-    <div class="panel loadpanel">Считаем результат…</div>
+    <div class="panel loadpanel" aria-live="polite">Сохраняем результат…</div>
   }
 </div>

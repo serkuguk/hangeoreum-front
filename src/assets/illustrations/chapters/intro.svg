@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img">
+  <!--
+    한걸음 chapter illustration: intro / 인사 (greeting, introductions)
+    System: rounded "syllable-block" frame divided by faint 초성/중성 split lines.
+    Two figures greet with a bow — the only scene using the pair; all others use the single learner.
+    Palette (light-theme tokens as hex): surface #fffdf9, text #192230, route #004dbb, route-soft #d4e6ff.
+  -->
+  <!-- syllable-block frame -->
+  <rect x="16" y="16" width="208" height="208" rx="28" fill="#fffdf9"/>
+  <!-- internal split lines: vertical (left-right block) + a batchim band, drawn faint -->
+  <g stroke="#192230" stroke-opacity="0.16" stroke-width="2" stroke-linecap="round">
+    <line x1="120" y1="40" x2="120" y2="176"/>
+    <line x1="40" y1="176" x2="200" y2="176"/>
+  </g>
+
+  <!-- LEFT figure = the learner (recurring character): route accent -->
+  <g>
+    <!-- torso block -->
+    <rect x="58" y="132" width="42" height="44" rx="14" fill="#004dbb"/>
+    <!-- head block -->
+    <rect x="62" y="86" width="34" height="34" rx="12" fill="#192230"/>
+    <!-- single hair tuft = stable identity marker -->
+    <path d="M79 82 q6 -10 12 -2 q-6 -3 -12 2 Z" fill="#192230"/>
+    <!-- raised hand waving (greeting gesture) -->
+    <circle cx="106" cy="120" r="7" fill="#192230"/>
+    <line x1="98" y1="130" x2="106" y2="121" stroke="#192230" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- RIGHT figure = the other person, bowing slightly: neutral text tone -->
+  <g>
+    <rect x="140" y="134" width="42" height="42" rx="14" fill="#d4e6ff"/>
+    <rect x="146" y="92" width="34" height="34" rx="12" fill="#192230" transform="rotate(8 163 109)"/>
+    <path d="M150 90 q6 -9 12 -1 q-6 -3 -12 1 Z" fill="#192230" transform="rotate(8 163 109)"/>
+  </g>
+
+  <!-- small connective mark between them = the exchanged greeting (route dot) -->
+  <circle cx="120" cy="112" r="4" fill="#004dbb"/>
+</svg>

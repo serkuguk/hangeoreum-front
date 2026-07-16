@@ -18,11 +18,11 @@ export class MainLayoutComponent {
   readonly initial = computed(() => this.facade.user()?.name?.charAt(0)?.toUpperCase() ?? '?');
 
   readonly nav = [
-    {link: '/dashboard', label: 'Дашборд'},
-    {link: '/learn', label: 'Учить'},
-    {link: '/review', label: 'Повторение'},
-    {link: '/immerse', label: 'Погружение'},
-    {link: '/vocabulary', label: 'Словарь'},
+    {link: '/dashboard', label: 'Сегодня', icon: 'pi-home'},
+    {link: '/learn', label: 'Курс', icon: 'pi-map'},
+    {link: '/review', label: 'Повторить', icon: 'pi-refresh'},
+    {link: '/immerse', label: 'Погружение', icon: 'pi-play-circle'},
+    {link: '/vocabulary', label: 'Словарь', icon: 'pi-book'},
   ];
 
   logout(): void {

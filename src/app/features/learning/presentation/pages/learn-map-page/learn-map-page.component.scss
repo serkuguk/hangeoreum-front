@@ -1,6 +1,6 @@
 :host { display: block; }
 
-.mapbox { max-width: 760px; }
+.mapbox { max-width: var(--hg-content-main); display: flex; flex-direction: column; gap: var(--hg-space-4); }
 
 .loadpanel {
   text-align: center;
@@ -11,36 +11,91 @@
   .cta { display: inline-block; text-decoration: none; color: #fff; }
 }
 
-.unit { margin-bottom: 26px; }
-
-.unit-head {
+// ---------- Компактная строка юнита: алфавит, завершённые и locked главы ----------
+.unit-row {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 16px;
+  padding: var(--hg-space-4);
+  background: var(--hg-surface);
+  border: 1px solid var(--hg-border);
+  border-radius: var(--hg-radius-block);
+  text-decoration: none;
+  color: var(--hg-text);
+  transition: transform var(--hg-motion-nav);
+
+  &.foundation:hover { transform: translateX(4px); }
+  &.done { opacity: .85; }
+  &.locked { opacity: .55; }
 
   .n {
-    font-size: 22px;
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
+    font-size: 20px;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--hg-radius-control);
     display: grid;
     place-items: center;
     flex-shrink: 0;
+    background: var(--hg-surface-muted);
+    color: var(--hg-text-muted);
 
-    &.c-jade { background: rgba(31, 199, 155, .15); color: var(--hg-jade); }
+    &.c-jade { background: var(--hg-success-soft); color: var(--hg-success); }
+    &.ic-done { background: var(--hg-success-soft); color: var(--hg-success); }
   }
-
-  h3 { font-size: 17px; font-weight: 600; }
-  small { display: block; font-size: 12.5px; color: var(--hg-muted); margin-top: 2px; }
-  .headpill { margin-left: auto; text-decoration: none; }
 }
 
-.path {
+.unit-row-body {
+  flex: 1;
+  min-width: 0;
+
+  b { font-size: 14.5px; font-weight: 600; display: block; }
+  small { display: block; font-size: 12.5px; color: var(--hg-text-muted); margin-top: 2px; }
+}
+
+.lockpill {
+  background: var(--hg-surface-muted);
+  color: var(--hg-text-muted);
+}
+
+// ---------- Раскрытая сцена текущей главы — единственный визуальный центр экрана ----------
+.unit-scene {
+  background: var(--hg-surface);
+  border: 1px solid var(--hg-border);
+  border-radius: var(--hg-radius-scene);
+  padding: var(--hg-space-5);
+}
+
+.scene-head {
+  display: flex;
+  align-items: center;
+  gap: var(--hg-space-4);
+  margin-bottom: var(--hg-space-5);
+
+  h3 { font-size: var(--hg-fs-xl); font-weight: 600; margin-top: 2px; }
+  .scene-desc { font-size: var(--hg-fs-sm); color: var(--hg-text-muted); margin-top: 4px; }
+  .headpill { margin-left: auto; flex-shrink: 0; text-decoration: none; }
+}
+
+.scene-illustration {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--hg-radius-block);
+  background: var(--hg-route-soft);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  .han { font-size: 30px; }
+
+  img { width: 100%; height: 100%; display: block; }
+}
+
+.steps {
   position: relative;
   margin-left: 22px;
   padding-left: 34px;
-  border-left: 2px dashed rgba(255, 255, 255, .1);
+  border-left: 2px dashed var(--hg-border);
 }
 
 .node {
@@ -59,25 +114,26 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--hg-card-2);
-    border: 2px solid var(--hg-line);
+    background: var(--hg-surface-muted);
+    border: 2px solid var(--hg-border);
   }
 
-  &.done::before { background: var(--hg-jade); border-color: var(--hg-jade); }
-  &.now::before { background: var(--hg-blue); border-color: var(--hg-blue); box-shadow: 0 0 0 5px rgba(59, 107, 255, .2); }
+  &.done::before { background: var(--hg-success); border-color: var(--hg-success); }
+  &.now::before { background: var(--hg-route); border-color: var(--hg-route); box-shadow: 0 0 0 5px var(--hg-route-soft); }
 
   .nc {
     flex: 1;
-    background: var(--hg-card);
-    border: 1px solid var(--hg-line);
-    border-radius: 16px;
+    background: var(--hg-surface);
+    border: 1px solid var(--hg-border);
+    border-radius: var(--hg-radius-block);
     padding: 14px 18px;
     display: flex;
     align-items: center;
     gap: 14px;
-    transition: .2s;
+    min-height: var(--hg-touch-min);
+    transition: transform var(--hg-motion-nav);
     cursor: pointer;
-    color: var(--hg-txt);
+    color: var(--hg-text);
     text-align: left;
 
     &:hover:not(:disabled) { transform: translateX(4px); }
@@ -85,35 +141,40 @@
 
   &.locked .nc { opacity: .45; cursor: default; }
   &.story .nc {
-    background: linear-gradient(135deg, rgba(255, 77, 94, .12), rgba(90, 43, 207, .14));
-    border-color: rgba(255, 77, 94, .25);
+    background: var(--hg-reward-soft);
+    border-color: var(--hg-reward);
   }
 
   .nic {
     font-size: 19px;
     width: 40px;
     height: 40px;
-    border-radius: 12px;
+    border-radius: var(--hg-radius-control);
     display: grid;
     place-items: center;
     flex-shrink: 0;
 
-    &.ic-done { background: rgba(31, 199, 155, .15); color: var(--hg-jade); }
-    &.ic-now { background: rgba(59, 107, 255, .15); color: var(--hg-blue); }
+    &.ic-done { background: var(--hg-success-soft); color: var(--hg-success); }
+    &.ic-now { background: var(--hg-route-soft); color: var(--hg-route); }
   }
 
   .txt { flex: 1; }
   b { font-size: 14.5px; font-weight: 600; display: block; }
-  small { font-size: 12px; color: var(--hg-muted); }
+  small { font-size: 12px; color: var(--hg-text-muted); }
 
   .st {
     margin-left: auto;
     font-size: 12px;
     font-weight: 600;
-    color: var(--hg-muted);
+    color: var(--hg-text-muted);
     flex-shrink: 0;
 
-    &.st-done { color: var(--hg-jade); }
-    &.st-now { color: var(--hg-blue); }
+    &.st-done { color: var(--hg-success); }
+    &.st-now { color: var(--hg-route); }
   }
+}
+
+@media (max-width: 680px) {
+  .scene-head { flex-wrap: wrap; }
+  .headpill { margin-left: 0 !important; }
 }

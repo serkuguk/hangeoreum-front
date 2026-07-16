@@ -77,10 +77,12 @@ export class VocabularyPageComponent {
     return '★'.repeat(Math.min(5, word.level)) + '☆'.repeat(Math.max(0, 5 - word.level));
   }
 
-  levelColor(word: UserWord): string {
-    if (word.level >= 4) return 'var(--hg-jade)';
-    if (word.level >= 2) return 'var(--hg-yellow)';
-    return 'var(--hg-red)';
+  /** Состояние слова для визуального разделения строки — не только цвет звёзд. */
+  wordState(word: UserWord): 'new' | 'difficult' | 'due' | 'learned' {
+    if (word.level === 0) return 'new';
+    if (word.isDifficult) return 'difficult';
+    if (new Date(word.dueDate).getTime() <= Date.now()) return 'due';
+    return 'learned';
   }
 
   dueLabel(word: UserWord): string {

@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {
+  ColorMode,
   DEFAULT_THEME,
   THEME_ACCENTS,
   THEME_FONT_SCALES,
@@ -35,6 +36,7 @@ export class SettingsPageComponent {
   readonly fontScales = THEME_FONT_SCALES;
   readonly radii = THEME_RADII;
   readonly theme = signal<ThemeChoice>(this.themeService.stored());
+  readonly mode = signal<ColorMode>(this.themeService.storedMode());
 
   // смена имени/пароля
   readonly nameDraft = signal('');
@@ -55,11 +57,15 @@ export class SettingsPageComponent {
       next: settings => {
         this.settings.set(settings);
         // тема с сервера главнее локальной (синк между устройствами)
-        const serverTheme = settings.theme as Partial<ThemeChoice> | null;
+        const serverTheme = settings.theme as (Partial<ThemeChoice> & {mode?: ColorMode}) | null;
         if (serverTheme && typeof serverTheme === 'object') {
           const merged = {...DEFAULT_THEME, ...serverTheme};
           this.theme.set(merged);
           this.themeService.apply(merged);
+          if (serverTheme.mode) {
+            this.mode.set(serverTheme.mode);
+            this.themeService.setMode(serverTheme.mode);
+          }
         }
         this.tts.setRate(settings.playbackSpeed);
       },
@@ -80,7 +86,13 @@ export class SettingsPageComponent {
     const next = {...this.theme(), ...patch};
     this.theme.set(next);
     this.themeService.apply(next);
-    this.patch({theme: next});
+    this.patch({theme: {...next, mode: this.mode()}});
+  }
+
+  setMode(mode: ColorMode): void {
+    this.mode.set(mode);
+    this.themeService.setMode(mode);
+    this.patch({theme: {...this.theme(), mode}});
   }
 
   /** Автосохранение с дебаунсом 600мс. */

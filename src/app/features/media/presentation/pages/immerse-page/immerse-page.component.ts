@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  OnDestroy,
   effect,
   inject,
   signal,
@@ -27,7 +28,7 @@ type SubMode = 'ko' | 'ru' | 'both';
   styleUrl: './immerse-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ImmersePageComponent implements AfterViewInit {
+export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   readonly facade = inject(ImmerseFacade);
   private vocabulary = inject(VocabularyFacade);
   private host = inject(ElementRef<HTMLElement>);
@@ -71,14 +72,20 @@ export class ImmersePageComponent implements AfterViewInit {
       .forEach((v: Element) => this.observer?.observe(v));
   }
 
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
+
   subtitle(clip: Clip, lang: string): string | null {
     return clip.subtitles.find(s => s.lang === lang)?.text ?? null;
   }
 
   addWord(clip: Clip): void {
     if (!clip.wordId) return;
-    this.vocabulary.addWordToVocabulary(clip.wordId);
-    this.addedWords.update(set => new Set(set).add(clip.wordId!));
+    const wordId = clip.wordId;
+    this.vocabulary.addWordToVocabulary(wordId).subscribe({
+      next: () => this.addedWords.update(set => new Set(set).add(wordId)),
+    });
   }
 
   togglePlay(event: Event): void {

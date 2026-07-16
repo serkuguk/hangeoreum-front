@@ -44,8 +44,8 @@ html {
 body {
   position: relative;
   min-height: 100vh;
-  background: var(--hg-bg-gradient);
-  color: var(--hg-txt);
+  background: var(--hg-bg);
+  color: var(--hg-text);
   font-family: var(--hg-font-ui);
   font-size: var(--hg-fs-base);
   -webkit-font-smoothing: antialiased;
@@ -61,7 +61,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--hg-yellow);
+  outline: 2px solid var(--hg-focus);
   outline-offset: 2px;
 }
 
@@ -108,7 +108,8 @@ h2.pagettl {
 .ghost {
   position: absolute;
   font-family: var(--hg-font-display);
-  color: rgba(255, 255, 255, .04);
+  color: var(--hg-text);
+  opacity: .04;
   line-height: .8;
   pointer-events: none;
   user-select: none;

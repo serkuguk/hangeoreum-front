@@ -1,18 +1,16 @@
 <div class="wrap mapbox">
-  <h2 class="pagettl">Дерево уроков</h2>
-  <p class="pagesub">Твой путь: юнит за юнитом, каждый завершается Story носителя.</p>
+  <h2 class="pagettl">Курс</h2>
+  <p class="pagesub">Живой маршрут по ситуациям: знакомство, кафе, метро — каждая глава заканчивается Story носителя.</p>
 
-  <!-- Алфавит — фундамент, всегда в начале пути -->
-  <div class="unit">
-    <div class="unit-head">
-      <div class="n han c-jade">가</div>
-      <div>
-        <h3>Алфавит хангыль</h3>
-        <small>Фундамент · 자모 · 40 букв</small>
-      </div>
-      <a class="pill p-j headpill" routerLink="/learn/alphabet">Открыть →</a>
+  <!-- Алфавит — фундамент, компактная строка в начале пути -->
+  <a class="unit-row foundation" routerLink="/learn/alphabet">
+    <div class="n han c-jade">가</div>
+    <div class="unit-row-body">
+      <b>Алфавит хангыль</b>
+      <small>Фундамент · 자모 · 40 букв</small>
     </div>
-  </div>
+    <span class="pill p-j">Открыть →</span>
+  </a>
 
   @if (facade.loading()) {
     <div class="panel loadpanel">Загружаем карту курса…</div>
@@ -28,50 +26,82 @@
         <a class="cta" routerLink="/learn/alphabet">К алфавиту</a>
       </div>
     }
-    @for (unit of map.units; track unit.id) {
-      <div class="unit">
-        <div class="unit-head">
-          <div class="n han" [style.background]="'rgba(59,107,255,.15)'"
-               [style.color]="unit.color || 'var(--hg-blue)'">{{ unit.title.charAt(0) }}</div>
-          <div>
-            <h3>{{ unit.title }}</h3>
-            @if (unit.description) {
-              <small>{{ unit.description }}</small>
+    @for (unit of map.units; track unit.id; let i = $index) {
+      @let state = unitState(unit);
+
+      @if (state === 'completed') {
+        <!-- Завершённая глава — компактная строка с результатом, не раскрытая сцена. -->
+        <div class="unit-row done">
+          <div class="n han ic-done">{{ unit.title.charAt(0) }}</div>
+          <div class="unit-row-body">
+            <b>{{ unit.title }}</b>
+            <small>Пройдено · {{ unitProgress(unit.lessons) }}</small>
+          </div>
+          <span class="pill p-j">✓ Готово</span>
+        </div>
+      } @else if (state === 'locked') {
+        <!-- Locked-глава — видна как обещание, условие открытия объяснено текстом. -->
+        <div class="unit-row locked" [attr.aria-label]="lockedReason(unit, map.units[i - 1])">
+          <div class="n han">{{ unit.title.charAt(0) }}</div>
+          <div class="unit-row-body">
+            <b>{{ unit.title }}</b>
+            <small>{{ lockedReason(unit, map.units[i - 1]) }}</small>
+          </div>
+          <span class="pill lockpill">🔒</span>
+        </div>
+      } @else {
+        <!-- Текущая глава — единственная раскрытая сцена на экране. -->
+        <section class="unit-scene" [attr.aria-label]="unit.title">
+          <div class="scene-head">
+            <div class="scene-illustration" [style.color]="unit.color || 'var(--hg-route)'" aria-hidden="true">
+              @if (sceneUrl(i); as scene) {
+                <img [src]="scene" alt="" width="64" height="64">
+              } @else {
+                <span class="han">{{ unit.title.charAt(0) }}</span>
+              }
+            </div>
+            <div>
+              <div class="eyebrow">Сейчас проходишь</div>
+              <h3>{{ unit.title }}</h3>
+              @if (unit.description) {
+                <p class="scene-desc">{{ unit.description }}</p>
+              }
+            </div>
+            <span class="pill p-b headpill">{{ unitProgress(unit.lessons) }}</span>
+          </div>
+
+          <div class="steps">
+            @for (lesson of unit.lessons; track lesson.id) {
+              <div class="node"
+                   [class.done]="lesson.status === 'COMPLETED'"
+                   [class.now]="lesson.status === 'AVAILABLE' && lesson.hasAccess"
+                   [class.locked]="lesson.status === 'LOCKED'"
+                   [class.story]="lesson.type === 'STORY'">
+                <button type="button" class="nc" [disabled]="lesson.status === 'LOCKED'" (click)="open(lesson)">
+                  <div class="nic han"
+                       [class.ic-done]="lesson.status === 'COMPLETED'"
+                       [class.ic-now]="lesson.status !== 'COMPLETED'">
+                    {{ lesson.type === 'STORY' ? '🎬' : lesson.title.charAt(0) }}
+                  </div>
+                  <div class="txt">
+                    <b>{{ lesson.title }}</b>
+                    <small>
+                      @if (lesson.type === 'STORY') {
+                        Видео носителя · финал главы
+                      } @else {
+                        +{{ lesson.xpReward }} XP
+                      }
+                    </small>
+                  </div>
+                  <span class="st"
+                        [class.st-done]="lesson.status === 'COMPLETED'"
+                        [class.st-now]="lesson.status === 'AVAILABLE'">{{ statusLabel(lesson) }}</span>
+                </button>
+              </div>
             }
           </div>
-          <span class="pill p-b headpill">{{ unitProgress(unit.lessons) }}</span>
-        </div>
-        <div class="path">
-          @for (lesson of unit.lessons; track lesson.id) {
-            <div class="node"
-                 [class.done]="lesson.status === 'COMPLETED'"
-                 [class.now]="lesson.status === 'AVAILABLE' && lesson.hasAccess"
-                 [class.locked]="lesson.status === 'LOCKED'"
-                 [class.story]="lesson.type === 'STORY'">
-              <button type="button" class="nc" [disabled]="lesson.status === 'LOCKED'" (click)="open(lesson)">
-                <div class="nic han"
-                     [class.ic-done]="lesson.status === 'COMPLETED'"
-                     [class.ic-now]="lesson.status !== 'COMPLETED'">
-                  {{ lesson.type === 'STORY' ? '🎬' : lesson.title.charAt(0) }}
-                </div>
-                <div class="txt">
-                  <b>{{ lesson.title }}</b>
-                  <small>
-                    @if (lesson.type === 'STORY') {
-                      Видео носителя · финал юнита
-                    } @else {
-                      +{{ lesson.xpReward }} XP
-                    }
-                  </small>
-                </div>
-                <span class="st"
-                      [class.st-done]="lesson.status === 'COMPLETED'"
-                      [class.st-now]="lesson.status === 'AVAILABLE'">{{ statusLabel(lesson) }}</span>
-              </button>
-            </div>
-          }
-        </div>
-      </div>
+        </section>
+      }
     }
   }
 </div>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img">
+  <!--
+    한걸음 chapter illustration: metro / 지하철 (taking the subway)
+    Learner stands on a platform; a subway car with windows and doors arrives.
+    Palette: surface #fffdf9, text #192230, route #004dbb (transit), route-soft #d4e6ff (windows).
+  -->
+  <rect x="16" y="16" width="208" height="208" rx="28" fill="#fffdf9"/>
+  <!-- platform edge line + tactile band (batchim band doubles as platform floor) -->
+  <g stroke="#192230" stroke-opacity="0.16" stroke-width="2" stroke-linecap="round">
+    <line x1="40" y1="188" x2="200" y2="188"/>
+  </g>
+
+  <!-- subway car (upper 2/3 = the "vowel" region of the block) -->
+  <g>
+    <rect x="40" y="52" width="160" height="86" rx="18" fill="#d4e6ff" stroke="#192230" stroke-width="3"/>
+    <!-- windows: three even panes -->
+    <g fill="#fffdf9" stroke="#192230" stroke-width="2">
+      <rect x="54" y="66" width="34" height="30" rx="6"/>
+      <rect x="103" y="66" width="34" height="30" rx="6"/>
+      <rect x="152" y="66" width="34" height="30" rx="6"/>
+    </g>
+    <!-- door seam -->
+    <line x1="120" y1="108" x2="120" y2="138" stroke="#192230" stroke-width="3"/>
+    <!-- route stripe along the car -->
+    <rect x="40" y="120" width="160" height="8" fill="#004dbb"/>
+  </g>
+
+  <!-- learner waiting on platform (lower region) -->
+  <g>
+    <rect x="150" y="150" width="38" height="38" rx="13" fill="#004dbb"/>
+    <rect x="154" y="112" width="30" height="30" rx="11" fill="#192230"/>
+    <path d="M169 108 q5 -9 11 -2 q-6 -3 -11 2 Z" fill="#192230"/>
+  </g>
+</svg>
