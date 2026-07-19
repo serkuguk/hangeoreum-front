@@ -15,8 +15,15 @@
   <div class="eyebrow">Спикеры</div>
   @for (speaker of speakers(); track speaker.id) {
     <div class="sprow">
-      <span class="grow">{{ speaker.name }}</span>
-      <button type="button" class="rowbtn danger" (click)="removeSpeaker(speaker)">Удалить</button>
+      @if (editingSpeaker() === speaker.id) {
+        <input class="grow" [(ngModel)]="speakerDraft" (keydown.enter)="saveSpeaker(speaker)">
+        <button type="button" class="rowbtn" (click)="saveSpeaker(speaker)">✓ Сохранить</button>
+        <button type="button" class="rowbtn" (click)="editingSpeaker.set(null)">Отмена</button>
+      } @else {
+        <span class="grow">{{ speaker.name }}</span>
+        <button type="button" class="rowbtn" (click)="startEditSpeaker(speaker)">✎</button>
+        <button type="button" class="rowbtn danger" (click)="removeSpeaker(speaker)">Удалить</button>
+      }
     </div>
   } @empty {
     <div class="empty">Спикеров нет.</div>
@@ -46,11 +53,41 @@
       <label class="rowbtn" [class.on]="clip.thumbnailUrl">
         🖼 <input type="file" accept="image/*" hidden (change)="upload(clip, $event, 'thumbnail')">
       </label>
+      <button type="button" class="rowbtn" [class.on]="editingClip() === clip.id" (click)="openEdit(clip)">✎</button>
       <button type="button" class="rowbtn" (click)="openSubtitles(clip)">Сабы</button>
       <button type="button" class="rowbtn" [class.on]="clip.published" (click)="togglePublish(clip)">
         {{ clip.published ? '👁' : '🚫' }}
       </button>
       <button type="button" class="rowbtn danger" (click)="removeClip(clip)">✕</button>
+
+      @if (editingClip() === clip.id) {
+        <div class="editbox">
+          <select [(ngModel)]="clipDraft.kind">
+            <option value="IMMERSE">IMMERSE</option>
+            <option value="STORY">STORY</option>
+            <option value="WORD">WORD</option>
+          </select>
+          <select [(ngModel)]="clipDraft.speakerId">
+            <option [ngValue]="null">без спикера</option>
+            @for (speaker of speakers(); track speaker.id) {
+              <option [ngValue]="speaker.id">{{ speaker.name }}</option>
+            }
+          </select>
+          <input type="number" placeholder="Длительность, мс" [(ngModel)]="clipDraft.durationMs">
+          <div class="wordpick">
+            @if (clipDraft.wordId) {
+              <span class="pill p-b">{{ clipWordLabel }}</span>
+              <button type="button" class="rowbtn" (click)="clearWord()">✕ слово</button>
+            } @else {
+              <input placeholder="Поиск слова…" [ngModel]="wordSearch" (ngModelChange)="searchWords($event)">
+              @for (word of foundWords(); track word.id) {
+                <button type="button" class="rowbtn" (click)="pickWord(word)">{{ word.hangul }} — {{ word.translation }}</button>
+              }
+            }
+          </div>
+          <button type="button" class="rowbtn" (click)="saveClip(clip)">Сохранить клип</button>
+        </div>
+      }
 
       @if (subtitlesFor() === clip.id) {
         <div class="subsbox">

@@ -296,6 +296,10 @@ export class AdminApi {
     return this.http.post<Speaker>(`${this.base}/speakers`, request);
   }
 
+  updateSpeaker(id: string, request: {name: string; avatarUrl?: string | null; bio?: string | null}): Observable<Speaker> {
+    return this.http.put<Speaker>(`${this.base}/speakers/${id}`, request);
+  }
+
   deleteSpeaker(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/speakers/${id}`);
   }
@@ -308,6 +312,10 @@ export class AdminApi {
     return this.http.post<AdminClip>(`${this.base}/clips`, request);
   }
 
+  updateClip(id: string, request: {kind: string; speakerId?: string | null; wordId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
+    return this.http.put<AdminClip>(`${this.base}/clips/${id}`, request);
+  }
+
   deleteClip(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/clips/${id}`);
   }
@@ -315,12 +323,16 @@ export class AdminApi {
   uploadClipMedia(id: string, file: File, kind: 'video' | 'audio' | 'thumbnail'): Observable<AdminClip> {
     const form = new FormData();
     form.append('file', file);
-    form.append('kind', kind);
+    form.append('type', kind); // бэкенд читает @RequestParam("type"); с 'kind' аудио/обложка затирали videoUrl
     return this.http.post<AdminClip>(`${this.base}/clips/${id}/media`, form);
   }
 
   publishClip(id: string, isPublished: boolean): Observable<AdminClip> {
     return this.http.patch<AdminClip>(`${this.base}/clips/${id}/publish`, {isPublished});
+  }
+
+  getSubtitles(clipId: string): Observable<{lang: string; position: number; text: string; startMs: number; endMs: number}[]> {
+    return this.http.get<{lang: string; position: number; text: string; startMs: number; endMs: number}[]>(`${this.base}/clips/${clipId}/subtitles`);
   }
 
   putSubtitles(clipId: string, subtitles: {lang: string; position: number; text: string; startMs: number; endMs: number}[]): Observable<void> {

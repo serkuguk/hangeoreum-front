@@ -1,6 +1,13 @@
-:host { display: block; }
+:host { display: block; height: 100%; }
 
-.imwrap { max-width: 480px; margin: 0 auto; padding: 0 16px; }
+.imwrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
 .centerpanel {
   text-align: center;
@@ -37,7 +44,8 @@
 }
 
 .feed {
-  height: calc(100vh - 140px);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   border-radius: 28px;

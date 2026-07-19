@@ -3,5 +3,10 @@
     "target": "http://localhost:8082",
     "secure": false,
     "changeOrigin": true
+  },
+  "/media": {
+    "target": "http://localhost:8082",
+    "secure": false,
+    "changeOrigin": true
   }
 }

@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {Word} from '@features/vocabulary/domain/entities/word.entity';
 import {AdminApi, AdminClip, Speaker} from '../../infrastructure/admin.api';
 
 @Component({
@@ -12,6 +13,7 @@ import {AdminApi, AdminClip, Speaker} from '../../infrastructure/admin.api';
 
     .sprow, .cliprow {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 10px;
       padding: 10px 0;
@@ -42,6 +44,31 @@ import {AdminApi, AdminClip, Speaker} from '../../infrastructure/admin.api';
       input { flex: 1; min-width: 140px; }
     }
 
+    .sprow input, .editbox input, .editbox select {
+      background: var(--hg-card-2);
+      border: 1px solid var(--hg-line);
+      border-radius: 10px;
+      padding: 9px 12px;
+      color: var(--hg-txt);
+      font-size: 13px;
+    }
+
+    .editbox {
+      flex-basis: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+
+      .wordpick {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
     .subsbox {
       flex-basis: 100%;
       margin-top: 8px;
@@ -69,10 +96,21 @@ export class AdminMediaPageComponent {
   readonly error = signal<string | null>(null);
   readonly flash = signal<string | null>(null);
   readonly subtitlesFor = signal<string | null>(null); // clipId с открытым редактором сабов
+  readonly editingClip = signal<string | null>(null); // clipId с открытым редактором полей
+  readonly editingSpeaker = signal<string | null>(null);
+  readonly foundWords = signal<Word[]>([]);
+
+  // сигнал: наполняется асинхронно из getSubtitles, иначе zoneless CD не перерисует textarea
+  readonly subsDraft = signal('');
 
   newSpeakerName = '';
   newClipKind = 'IMMERSE';
-  subsDraft = '';
+  speakerDraft = '';
+  clipDraft: {kind: string; speakerId: string | null; wordId: string | null; durationMs: number | null} =
+    {kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: null};
+  clipWordLabel = '';
+  wordSearch = '';
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.load();
@@ -103,6 +141,25 @@ export class AdminMediaPageComponent {
     this.api.deleteSpeaker(speaker.id).subscribe(() => this.load());
   }
 
+  startEditSpeaker(speaker: Speaker): void {
+    this.editingSpeaker.set(speaker.id);
+    this.speakerDraft = speaker.name;
+  }
+
+  saveSpeaker(speaker: Speaker): void {
+    const name = this.speakerDraft.trim();
+    if (!name) return;
+    // avatarUrl/bio отправляем как есть — PUT перезаписывает все поля
+    this.api.updateSpeaker(speaker.id, {name, avatarUrl: speaker.avatarUrl, bio: speaker.bio}).subscribe({
+      next: () => {
+        this.editingSpeaker.set(null);
+        this.showFlash('Спикер обновлён');
+        this.load();
+      },
+      error: err => this.fail('Не получилось обновить спикера', err),
+    });
+  }
+
   speakerName(id: string | null): string {
     return this.speakers().find(s => s.id === id)?.name ?? '—';
   }
@@ -117,8 +174,58 @@ export class AdminMediaPageComponent {
   }
 
   togglePublish(clip: AdminClip): void {
-    this.api.publishClip(clip.id, !clip.published).subscribe(updated =>
-      this.clips.update(list => list.map(c => c.id === clip.id ? updated : c)));
+    this.api.publishClip(clip.id, !clip.published).subscribe({
+      next: updated =>
+        this.clips.update(list => list.map(c => c.id === clip.id ? updated : c)),
+      error: err => this.fail('Не получилось изменить публикацию', err),
+    });
+  }
+
+  openEdit(clip: AdminClip): void {
+    if (this.editingClip() === clip.id) {
+      this.editingClip.set(null);
+      return;
+    }
+    this.editingClip.set(clip.id);
+    this.clipDraft = {kind: clip.kind, speakerId: clip.speakerId, wordId: clip.wordId, durationMs: clip.durationMs};
+    this.clipWordLabel = clip.wordId ? `ID ${clip.wordId.slice(0, 8)}…` : '';
+    this.wordSearch = '';
+    this.foundWords.set([]);
+  }
+
+  searchWords(value: string): void {
+    this.wordSearch = value;
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => {
+      if (!value.trim()) {
+        this.foundWords.set([]);
+        return;
+      }
+      this.api.words(value, 0).subscribe(result => this.foundWords.set(result.content));
+    }, 300);
+  }
+
+  pickWord(word: Word): void {
+    this.clipDraft.wordId = word.id;
+    this.clipWordLabel = `${word.hangul} — ${word.translation}`;
+    this.wordSearch = '';
+    this.foundWords.set([]);
+  }
+
+  clearWord(): void {
+    this.clipDraft.wordId = null;
+    this.clipWordLabel = '';
+  }
+
+  saveClip(clip: AdminClip): void {
+    this.api.updateClip(clip.id, this.clipDraft).subscribe({
+      next: () => {
+        this.editingClip.set(null);
+        this.showFlash('Клип обновлён');
+        this.load();
+      },
+      error: err => this.fail('Не получилось обновить клип', err),
+    });
   }
 
   upload(clip: AdminClip, event: Event, kind: 'video' | 'audio' | 'thumbnail'): void {
@@ -140,16 +247,24 @@ export class AdminMediaPageComponent {
       return;
     }
     this.subtitlesFor.set(clip.id);
-    this.subsDraft = JSON.stringify([
+    // шаблон-заглушка; заменяется реальными сабами, когда они есть
+    this.subsDraft.set(JSON.stringify([
       {lang: 'ko', position: 1, text: '오늘 날씨가 진짜 좋아요!', startMs: 0, endMs: 3000},
       {lang: 'ru', position: 1, text: 'Сегодня погода правда отличная!', startMs: 0, endMs: 3000},
-    ], null, 2);
+    ], null, 2));
+    this.api.getSubtitles(clip.id).subscribe(subtitles => {
+      if (subtitles.length && this.subtitlesFor() === clip.id) {
+        this.subsDraft.set(JSON.stringify(
+          subtitles.map(({lang, position, text, startMs, endMs}) => ({lang, position, text, startMs, endMs})),
+          null, 2));
+      }
+    });
   }
 
   saveSubtitles(clip: AdminClip): void {
     let subtitles: {lang: string; position: number; text: string; startMs: number; endMs: number}[];
     try {
-      subtitles = JSON.parse(this.subsDraft);
+      subtitles = JSON.parse(this.subsDraft());
     } catch {
       this.error.set('Субтитры — некорректный JSON.');
       return;
@@ -159,12 +274,16 @@ export class AdminMediaPageComponent {
         this.showFlash('Субтитры сохранены');
         this.subtitlesFor.set(null);
       },
-      error: () => this.error.set('Не получилось сохранить субтитры.'),
+      error: err => this.fail('Не получилось сохранить субтитры', err),
     });
   }
 
   private showFlash(text: string): void {
     this.flash.set(text);
     setTimeout(() => this.flash.set(null), 1600);
+  }
+
+  private fail(prefix: string, err: {error?: {message?: string}; status?: number}): void {
+    this.error.set(`${prefix}: ${err?.error?.message ?? err?.status ?? 'ошибка'}`);
   }
 }
