@@ -53,9 +53,9 @@
             </button>
             @if (clip.wordId) {
               <button type="button" (click)="addWord(clip)"
-                      [disabled]="addedWords().has(clip.wordId!)"
+                      [disabled]="vocabulary.addState(clip.wordId) !== 'idle'"
                       aria-label="Слово в словарь">
-                {{ addedWords().has(clip.wordId!) ? '✓' : '＋' }}
+                {{ vocabulary.addState(clip.wordId) === 'saved' ? '✓' : '＋' }}
               </button>
             }
           </div>

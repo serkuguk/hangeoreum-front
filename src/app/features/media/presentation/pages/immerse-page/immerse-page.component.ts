@@ -30,7 +30,7 @@ type SubMode = 'ko' | 'ru' | 'both';
 })
 export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   readonly facade = inject(ImmerseFacade);
-  private vocabulary = inject(VocabularyFacade);
+  readonly vocabulary = inject(VocabularyFacade);
   private host = inject(ElementRef<HTMLElement>);
 
   readonly subMode = signal<SubMode>('both');
