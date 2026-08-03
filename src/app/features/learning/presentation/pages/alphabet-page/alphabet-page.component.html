@@ -7,7 +7,7 @@
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
     </div>
   } @else if (facade.alphabet(); as alphabet) {
     @if (alphabet.total === 0) {
@@ -30,7 +30,9 @@
           <h3>{{ group.title }} <span class="cnt">{{ group.letters.length }}</span></h3>
           <div class="tiles">
             @for (letter of group.letters; track letter.id) {
-              <button type="button" class="tile" [class.learned]="letter.learned" (click)="tap(letter)">
+              <button type="button" data-domain-control class="tile" [class.learned]="letter.learned"
+                      [attr.aria-label]="letter.jamo + ', ' + letter.romanization"
+                      [attr.aria-pressed]="letter.learned" (click)="tap(letter)">
                 <span class="jamo han kr">{{ letter.jamo }}</span>
                 <span class="rom">{{ letter.romanization }}</span>
                 @if (letter.learned) {

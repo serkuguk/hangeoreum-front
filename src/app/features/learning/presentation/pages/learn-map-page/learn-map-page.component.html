@@ -17,7 +17,7 @@
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <button class="ghostbtn" (click)="facade.invalidate()">Повторить</button>
+      <hg-button label="Повторить" variant="ghost" (pressed)="facade.invalidate()"/>
     </div>
   } @else if (facade.map(); as map) {
     @if (map.units.length === 0) {
@@ -77,7 +77,8 @@
                    [class.now]="lesson.status === 'AVAILABLE' && lesson.hasAccess"
                    [class.locked]="lesson.status === 'LOCKED'"
                    [class.story]="lesson.type === 'STORY'">
-                <button type="button" class="nc" [disabled]="lesson.status === 'LOCKED'" (click)="open(lesson)">
+                <button type="button" data-domain-control class="nc" [disabled]="lesson.status === 'LOCKED'"
+                        [attr.aria-label]="lesson.title + ': ' + statusLabel(lesson)" (click)="open(lesson)">
                   <div class="nic han"
                        [class.ic-done]="lesson.status === 'COMPLETED'"
                        [class.ic-now]="lesson.status !== 'COMPLETED'">

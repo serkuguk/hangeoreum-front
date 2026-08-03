@@ -1,12 +1,14 @@
 import {ChangeDetectionStrategy, Component, HostListener, computed, inject, input, signal} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {HgAudioButtonComponent} from '@shared/components/hg';
+import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
+import {HgButtonComponent} from '@shared/components/controls';
 import {ReviewFacade} from '../../../application/facades/review.facade';
 import {SrsQuality} from '../../../domain/entities/user-word.entity';
+import {FinishResult} from '../../../domain/repositories/vocabulary.repository';
 
 @Component({
   selector: 'hg-flashcards-page',
-  imports: [RouterLink, HgAudioButtonComponent],
+  imports: [RouterLink, HgAudioButtonComponent, HgButtonComponent, HgSessionResultCardComponent],
   templateUrl: './flashcards-page.component.html',
   styleUrl: './flashcards-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,14 +54,18 @@ export class FlashcardsPageComponent {
     this.router.navigate(['/review']);
   }
 
+  resultStats(result: FinishResult): readonly HgSessionStat[] {
+    return [
+      {label: 'повторено', value: result.total, tone: 'info'},
+      {label: 'крепко в памяти', value: result.correct, tone: 'success'},
+      {label: 'сложных', value: this.facade.hardWords().length, tone: 'danger'},
+      {label: 'XP', value: `+${result.xp}`, tone: 'reward'},
+    ];
+  }
+
   @HostListener('window:keydown', ['$event'])
   onKey(event: KeyboardEvent): void {
-    if (!this.facade.current()) return;
-    if (event.code === 'Space') {
-      event.preventDefault();
-      this.flip();
-    }
-    if (this.isFlipped() && ['1', '2', '3', '4'].includes(event.key)) {
+    if (this.facade.current() && this.isFlipped() && ['1', '2', '3', '4'].includes(event.key)) {
       this.rate(this.ratings[+event.key - 1].quality);
     }
   }

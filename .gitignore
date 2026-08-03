@@ -11,8 +11,6 @@
 npm-debug.log
 yarn-error.log
 
-pnpm-lock.yaml
-
 # IDEs and editors
 .idea/
 .angular/
@@ -24,7 +22,6 @@ pnpm-lock.yaml
 *.sublime-workspace
 
 .npmrc
-.yarnrc
 
 # Visual Studio Code
 .vscode/*

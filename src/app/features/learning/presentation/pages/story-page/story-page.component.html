@@ -5,21 +5,14 @@
     <div class="panel loadpanel">
       <p>{{ err }}</p>
       <a class="cta" routerLink="/billing">Тарифы</a>
-      <button class="ghostbtn" (click)="back()">К урокам</button>
+      <hg-button label="К урокам" variant="ghost" (pressed)="back()"/>
     </div>
   } @else if (facade.story(); as st) {
     <h2 class="pagettl">Story · {{ st.title }}</h2>
     <p class="pagesub">Тапни строку — увидишь перевод и разбор.</p>
 
-    <div class="modes">
-      @if (facade.hasVideo()) {
-        <button type="button" [class.is-active]="facade.mode() === 'watch'" (click)="facade.mode.set('watch')">▶ Смотреть</button>
-      }
-      <button type="button" [class.is-active]="facade.mode() === 'read'" (click)="facade.mode.set('read')">📖 Читать</button>
-      @if (st.clip?.audioUrl || facade.hasVideo()) {
-        <button type="button" [class.is-active]="facade.mode() === 'listen'" (click)="facade.mode.set('listen')">🎧 Слушать</button>
-      }
-    </div>
+    <hg-segmented-control class="modes" label="Режим Story" [options]="modeOptions()"
+                          [(ngModel)]="facade.mode"/>
 
     @if (facade.mode() === 'watch' && st.clip?.videoUrl) {
       <video class="player" controls muted [src]="st.clip!.videoUrl!" [poster]="st.clip!.thumbnailUrl ?? ''"
@@ -38,7 +31,7 @@
         <div class="dline"
              [class.open]="facade.openLine() === line.position"
              [class.active]="facade.activeLine() === line.position">
-          <button type="button" class="dline-toggle" (click)="toggleLine(line)"
+          <button type="button" data-domain-control class="dline-toggle" (click)="toggleLine(line)"
                   [attr.aria-expanded]="facade.openLine() === line.position">
             <div class="av" aria-hidden="true">{{ (line.speaker || '?').charAt(0) }}</div>
             <div class="kr">{{ line.textKo }}</div>
@@ -54,10 +47,10 @@
                   @if (item.wordId && vocabulary.addState(item.wordId) === 'saved') {
                     <span class="pill p-j addw">✓ в словаре</span>
                   } @else if (item.wordId) {
-                    <button type="button" class="pill p-y addw" [disabled]="vocabulary.addState(item.wordId) === 'saving'"
-                            (click)="addWord(item.wordId)">
-                      {{ vocabulary.addState(item.wordId) === 'saving' ? 'Сохраняем…' : vocabulary.addState(item.wordId) === 'error' ? 'Повторить' : '+ в словарь' }}
-                    </button>
+                    <hg-button class="addw" size="sm" variant="secondary"
+                               [loading]="vocabulary.addState(item.wordId) === 'saving'"
+                               [label]="vocabulary.addState(item.wordId) === 'error' ? 'Повторить' : '+ в словарь'"
+                               (pressed)="addWord(item.wordId)"/>
                   }
                 </div>
               }
@@ -71,13 +64,13 @@
       @if (facade.completionError(); as completionError) {
         <p class="saveerror" role="alert">{{ completionError }}</p>
       }
-      <button class="cta finishbtn" [disabled]="facade.completing()" (click)="complete()">
-        {{ facade.completing() ? 'Сохраняем…' : facade.completionError() ? 'Повторить сохранение' : 'Story пройдена ✓' }}
-      </button>
+      <hg-button class="finishbtn" [loading]="facade.completing()"
+                 [label]="facade.completionError() ? 'Повторить сохранение' : 'Story пройдена ✓'"
+                 (pressed)="complete()"/>
     } @else {
       <div class="panel donebar">
         <span>🎉 Story пройдена — прогресс сохранён.</span>
-        <button class="ghostbtn" (click)="back()">К дереву уроков</button>
+        <hg-button label="К дереву уроков" variant="ghost" (pressed)="back()"/>
       </div>
     }
   }

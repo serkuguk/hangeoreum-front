@@ -1,6 +1,8 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {StartLevel} from '../../../domain/user.entity';
+import {HgButtonComponent, HgSegmentedControlComponent, HgToggleComponent} from '@shared/components/controls';
 
 interface LevelOption {
   value: StartLevel;
@@ -20,6 +22,7 @@ interface GoalOption {
 
 @Component({
   selector: 'hg-onboarding-page',
+  imports: [FormsModule, HgButtonComponent, HgSegmentedControlComponent, HgToggleComponent],
   templateUrl: './onboarding-page.component.html',
   styleUrl: './onboarding-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +43,17 @@ export class OnboardingPageComponent {
   ];
 
   readonly times = ['09:00', '12:00', '19:00', '21:00'];
+  readonly levelOptions = this.levels.map(option => ({
+    value: option.value,
+    label: `${option.han} ${option.title}`,
+    description: option.hint,
+  }));
+  readonly goalOptions = this.goals.map(option => ({
+    value: option.xp,
+    label: `${option.icon} ${option.title} · ${option.xp} XP`,
+    description: option.hint,
+  }));
+  readonly timeOptions = this.times.map(value => ({value, label: value}));
 
   readonly step = signal(1);
   readonly level = signal<StartLevel>('BEGINNER');

@@ -10,25 +10,25 @@
   <div class="panel">
     <div class="eyebrow">Профиль</div>
     <div class="setrow">
-      <span>Имя</span>
-      <input class="inline" type="text" [ngModel]="nameDraft()" (ngModelChange)="nameDraft.set($event)"
-             (blur)="saveName()" (keydown.enter)="saveName()">
+      <hg-input class="inline" type="text" label="Имя" [ngModel]="nameDraft()"
+                (ngModelChange)="nameDraft.set($event)" (blur)="saveName()" (keydown.enter)="saveName()"/>
     </div>
     <div class="setrow"><span>Email</span><b>{{ auth.user()?.email }}</b></div>
     <div class="setrow">
       <span>Пароль</span>
-      <button type="button" class="linkbtn" (click)="showPassword.set(!showPassword())">Изменить</button>
+      <hg-button label="Изменить" variant="ghost" size="sm"
+                 (pressed)="showPassword.set(!showPassword())"/>
     </div>
     @if (showPassword()) {
       <div class="pwbox">
-        <input type="password" placeholder="Текущий пароль" autocomplete="current-password"
-               [ngModel]="passwordCurrent()" (ngModelChange)="passwordCurrent.set($event)">
-        <input type="password" placeholder="Новый пароль (≥8 символов)" autocomplete="new-password"
-               [ngModel]="passwordNext()" (ngModelChange)="passwordNext.set($event)">
+        <hg-input type="password" label="Текущий пароль" autocomplete="current-password"
+                  [ngModel]="passwordCurrent()" (ngModelChange)="passwordCurrent.set($event)"/>
+        <hg-input type="password" label="Новый пароль" hint="Минимум 8 символов" autocomplete="new-password"
+                  [ngModel]="passwordNext()" (ngModelChange)="passwordNext.set($event)"/>
         @if (passwordError(); as pwError) {
           <div class="apierr">{{ pwError }}</div>
         }
-        <button type="button" class="cta smcta" (click)="changePassword()">Сменить пароль</button>
+        <hg-button label="Сменить пароль" size="sm" (pressed)="changePassword()"/>
       </div>
     }
   </div>
@@ -37,95 +37,56 @@
     <div class="panel">
       <div class="eyebrow">Обучение</div>
       <div class="setrow">
-        <span>Цель в день</span>
-        <div class="segpick">
-          @for (goal of goals; track goal) {
-            <button type="button" [class.on]="s.dailyGoalXp === goal" (click)="patch({dailyGoalXp: goal})">{{ goal }} XP</button>
-          }
-        </div>
+        <hg-segmented-control class="segpick" label="Цель в день" [options]="goalOptions"
+                              [ngModel]="s.dailyGoalXp" (ngModelChange)="updateGoal($event)"/>
       </div>
       <div class="setrow">
-        Напоминания
-        <button type="button" class="toggle" [class.off]="!s.remindersEnabled" role="switch"
-                [attr.aria-checked]="s.remindersEnabled"
-                (click)="patch({remindersEnabled: !s.remindersEnabled})"></button>
+        <hg-toggle label="Напоминания" [ngModel]="s.remindersEnabled"
+                   (ngModelChange)="patch({remindersEnabled: $event})"/>
       </div>
       @if (s.remindersEnabled) {
         <div class="setrow">
-          <span>Время напоминания</span>
-          <div class="segpick">
-            @for (time of times; track time) {
-              <button type="button" [class.on]="s.reminderTime?.startsWith(time)" (click)="patch({reminderTime: time})">{{ time }}</button>
-            }
-          </div>
+          <hg-segmented-control class="segpick" label="Время напоминания" [options]="timeOptions"
+                                [ngModel]="s.reminderTime?.slice(0, 5)"
+                                (ngModelChange)="updateReminderTime($event)"/>
         </div>
       }
       <div class="setrow">
-        Автозвук в карточках <span class="soon">скоро</span>
-        <button type="button" class="toggle" disabled [class.off]="!s.soundEnabled" role="switch"
-                [attr.aria-checked]="s.soundEnabled" (click)="patch({soundEnabled: !s.soundEnabled})"></button>
+        <hg-toggle label="Автозвук в карточках" hint="скоро" disabled [ngModel]="s.soundEnabled"/>
       </div>
       <div class="setrow">
-        Романизация в карточках <span class="soon">скоро</span>
-        <button type="button" class="toggle" disabled [class.off]="!s.showRomanization" role="switch"
-                [attr.aria-checked]="s.showRomanization" (click)="patch({showRomanization: !s.showRomanization})"></button>
+        <hg-toggle label="Романизация в карточках" hint="скоро" disabled [ngModel]="s.showRomanization"/>
       </div>
     </div>
 
     <div class="panel">
       <div class="eyebrow">Аудио и видео</div>
       <div class="setrow">
-        <span>Скорость речи</span>
-        <div class="segpick">
-          @for (speed of speeds; track speed) {
-            <button type="button" [class.on]="s.playbackSpeed === speed" (click)="patch({playbackSpeed: speed})">{{ speed }}×</button>
-          }
-        </div>
+        <hg-segmented-control class="segpick" label="Скорость речи" [options]="speedOptions"
+                              [ngModel]="s.playbackSpeed" (ngModelChange)="updatePlaybackSpeed($event)"/>
       </div>
       <div class="setrow">
-        Автовоспроизведение <span class="soon">скоро</span>
-        <button type="button" class="toggle" disabled [class.off]="!s.autoplayAudio" role="switch"
-                [attr.aria-checked]="s.autoplayAudio" (click)="patch({autoplayAudio: !s.autoplayAudio})"></button>
+        <hg-toggle label="Автовоспроизведение" hint="скоро" disabled [ngModel]="s.autoplayAudio"/>
       </div>
     </div>
 
     <div class="panel">
       <div class="eyebrow">Тема</div>
       <div class="setrow">
-        <span>Оформление</span>
-        <div class="segpick">
-          <button type="button" [class.on]="mode() === 'light'" (click)="setMode('light')">Светлая</button>
-          <button type="button" [class.on]="mode() === 'dark'" (click)="setMode('dark')">Тёмная</button>
-          <button type="button" [class.on]="mode() === 'system'" (click)="setMode('system')">Системная</button>
-        </div>
+        <hg-segmented-control class="segpick" label="Оформление" [options]="modeOptions"
+                              [ngModel]="mode()" (ngModelChange)="updateMode($event)"/>
       </div>
       <div class="setrow">
-        <span>Акцент</span>
-        <div class="swatches">
-          @for (accent of accents; track accent.value) {
-            <button type="button" class="swatch" [style.background]="accent.value"
-                    [class.on]="theme().accent === accent.value" [title]="accent.name"
-                    (click)="setTheme({accent: accent.value})"></button>
-          }
-        </div>
+        <hg-segmented-control class="segpick" label="Акцент" [options]="accentOptions"
+                              [ngModel]="theme().accent" (ngModelChange)="updateAccent($event)"/>
       </div>
       <div class="setrow">
-        <span>Размер текста</span>
-        <div class="segpick">
-          @for (scale of fontScales; track scale.value) {
-            <button type="button" [class.on]="theme().fontScale === scale.value"
-                    (click)="setTheme({fontScale: scale.value})">{{ scale.name }}</button>
-          }
-        </div>
+        <hg-segmented-control class="segpick" label="Размер текста" [options]="fontScaleOptions"
+                              [ngModel]="theme().fontScale" (ngModelChange)="updateFontScale($event)"/>
       </div>
       <div class="setrow">
-        <span>Скругления</span>
-        <div class="segpick">
-          @for (radius of radii; track radius.value) {
-            <button type="button" [class.on]="theme().radius === radius.value"
-                    (click)="setTheme({radius: radius.value})">{{ radius.name }}</button>
-          }
-        </div>
+        <hg-segmented-control class="segpick" label="Скругления" [options]="radiusOptions"
+                              [ngModel]="theme().radius" (ngModelChange)="updateRadius($event)"/>
       </div>
     </div>
   }
@@ -134,11 +95,11 @@
     <div class="eyebrow">Аккаунт</div>
     <div class="setrow">
       <span>Выйти из аккаунта</span>
-      <button type="button" class="linkbtn" (click)="logout()">Выйти</button>
+      <hg-button label="Выйти" variant="ghost" size="sm" (pressed)="logout()"/>
     </div>
     <div class="setrow">
       <span>Удалить аккаунт</span>
-      <button type="button" class="linkbtn danger" (click)="deleteAccount()">Удалить навсегда</button>
+      <hg-button label="Удалить навсегда" variant="danger" size="sm" (pressed)="deleteAccount()"/>
     </div>
   </div>
 </div>

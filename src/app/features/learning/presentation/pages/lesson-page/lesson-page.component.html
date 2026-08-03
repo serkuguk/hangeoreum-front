@@ -4,36 +4,27 @@
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <button class="ghostbtn" (click)="exit()">К дереву уроков</button>
+      <hg-button label="К дереву уроков" variant="ghost" (pressed)="exit()"/>
     </div>
   } @else if (facade.result(); as result) {
     <!-- Экран награды -->
-    <div class="panel rewcard">
-      <div class="ghost kr">축하</div>
-      <div class="rew-han kr">참 잘했어요!</div>
-      <h2 class="pagettl">Урок пройден</h2>
-      <p class="pagesub">«{{ facade.lesson()?.title }}»</p>
-      <div class="rewstats">
-        <div class="rewstat"><b class="y">+{{ result.xp }}</b><span>XP</span></div>
-        <div class="rewstat"><b class="bl">+{{ result.newWords.length }}</b><span>новых слов</span></div>
-        <div class="rewstat"><b class="r">🔥 {{ result.streak }}</b><span>дней серии</span></div>
-        <div class="rewstat"><b class="j">{{ result.goalReached ? '✓' : '…' }}</b><span>цель дня</span></div>
-      </div>
+    <hg-session-result-card eyebrow="축하" koreanTitle="참 잘했어요!" title="Урок пройден"
+                            [subtitle]="'«' + facade.lesson()?.title + '»'" [stats]="resultStats(result)">
       @if (result.newWords.length > 0) {
-        <div class="rewwords">
+        <div result-details class="rewwords">
           @for (word of result.newWords; track word.id) {
             <span class="pill p-b kr">{{ word.hangul }}</span>
           }
+          <p class="pagesub">Новые слова уже в словаре — SRS напомнит о них завтра.</p>
         </div>
-        <p class="pagesub">Новые слова уже в словаре — SRS напомнит о них завтра.</p>
       }
-      <div class="rewbtns">
-        <button class="cta grow" (click)="exit()">К дереву уроков</button>
+      <div result-actions>
+        <hg-button class="grow" label="К дереву уроков" (pressed)="exit()"/>
       </div>
-    </div>
+    </hg-session-result-card>
   } @else if (facade.current(); as exercise) {
     <div class="l-top">
-      <button type="button" class="x" aria-label="Выйти из урока" (click)="exit()">✕</button>
+      <hg-button class="x" icon="✕" ariaLabel="Выйти из урока" variant="ghost" size="sm" (pressed)="exit()"/>
       <div class="segs">
         @for (done of facade.progressSegments(); track $index) {
           <i [class.d]="done" [class.c]="!done && $index === facade.solved()"></i>
@@ -74,13 +65,13 @@
             <small>Без штрафа — вопрос вернётся в конце урока.</small>
           }
         </div>
-        <button type="button" class="next" (click)="facade.next()">Дальше</button>
+        <hg-button class="next" label="Дальше" (pressed)="facade.next()"/>
       </div>
     }
   } @else if (facade.saveError()) {
     <div class="panel loadpanel" role="alert" aria-live="polite">
       <p>Не получилось сохранить результат урока.</p>
-      <button type="button" class="cta" (click)="facade.retryFinish()">Повторить</button>
+      <hg-button label="Повторить" (pressed)="facade.retryFinish()"/>
     </div>
   } @else if (facade.finishing()) {
     <div class="panel loadpanel" aria-live="polite">Сохраняем результат…</div>

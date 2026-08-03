@@ -2,35 +2,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-// Старые переменные библиотечного шаблона, на которые завязаны shared-компоненты.
-// Ремап на тёмную палитру Hangeoreum вместо правки каждого компонента.
-:root {
-  --color-bg:           var(--hg-ink);
-  --color-surface:      var(--hg-card);
-  --color-surface-2:    var(--hg-card-2);
-  --color-border:       var(--hg-line);
-
-  --color-text-primary: var(--hg-txt);
-  --color-text-muted:   var(--hg-muted);
-  --color-text-faint:   var(--hg-muted);
-
-  --color-accent:       var(--hg-blue);
-  --color-accent-light: #5a83ff;
-  --color-accent-bg:    rgba(59, 107, 255, .14);
-
-  --color-warm:         var(--hg-yellow);
-  --color-warm-bg:      rgba(255, 194, 60, .14);
-
-  --color-danger:       var(--hg-red);
-  --color-danger-bg:    rgba(255, 77, 94, .12);
-  --color-warning:      var(--hg-yellow);
-  --color-warning-bg:   rgba(255, 194, 60, .14);
-
-  --radius-sm: var(--hg-radius-sm);
-  --radius-md: var(--hg-radius-md);
-  --radius-lg: var(--hg-radius-lg);
-}
-
 * {
   margin: 0;
   padding: 0;

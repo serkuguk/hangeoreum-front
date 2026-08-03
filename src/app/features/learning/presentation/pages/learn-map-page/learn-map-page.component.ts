@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, ElementRef, afterNextRender, inject} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {LearnMapFacade} from '../../../application/facades/learn-map.facade';
 import {LessonNode, UnitNode} from '../../../domain/entities/course-map.entity';
 
@@ -7,7 +8,7 @@ type UnitState = 'completed' | 'current' | 'locked';
 
 @Component({
   selector: 'hg-learn-map-page',
-  imports: [RouterLink],
+  imports: [RouterLink, HgButtonComponent],
   templateUrl: './learn-map-page.component.html',
   styleUrl: './learn-map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

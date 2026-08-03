@@ -15,7 +15,8 @@ interface MatchCell {
     <div class="q-kind">Сопоставь пары</div>
     <div class="match">
       @for (cell of cells(); track cell.side + cell.pairIndex) {
-        <button type="button" class="mcell"
+        <button type="button" data-domain-control class="mcell"
+                [attr.aria-pressed]="selected() === cell"
                 [class.kr]="cell.side === 'left'"
                 [class.hit]="isHit(cell)"
                 [class.sel]="selected() === cell"

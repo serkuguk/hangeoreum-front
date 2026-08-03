@@ -16,21 +16,26 @@
   @for (speaker of speakers(); track speaker.id) {
     <div class="sprow">
       @if (editingSpeaker() === speaker.id) {
-        <input class="grow" [(ngModel)]="speakerDraft" (keydown.enter)="saveSpeaker(speaker)">
-        <button type="button" class="rowbtn" (click)="saveSpeaker(speaker)">✓ Сохранить</button>
-        <button type="button" class="rowbtn" (click)="editingSpeaker.set(null)">Отмена</button>
+        <hg-input class="grow" ariaLabel="Имя спикера" [(ngModel)]="speakerDraft"
+                  (keydown.enter)="saveSpeaker(speaker)" />
+        <hg-button size="sm" variant="ghost" label="Сохранить" icon="✓"
+                   (pressed)="saveSpeaker(speaker)" />
+        <hg-button size="sm" variant="ghost" label="Отмена"
+                   (pressed)="editingSpeaker.set(null)" />
       } @else {
         <span class="grow">{{ speaker.name }}</span>
-        <button type="button" class="rowbtn" (click)="startEditSpeaker(speaker)">✎</button>
-        <button type="button" class="rowbtn danger" (click)="removeSpeaker(speaker)">Удалить</button>
+        <hg-button size="sm" variant="ghost" icon="✎" ariaLabel="Изменить спикера"
+                   (pressed)="startEditSpeaker(speaker)" />
+        <hg-button size="sm" variant="danger" label="Удалить" (pressed)="removeSpeaker(speaker)" />
       }
     </div>
   } @empty {
     <div class="empty">Спикеров нет.</div>
   }
   <div class="addrow">
-    <input placeholder="Имя носителя (지민…)" [(ngModel)]="newSpeakerName" (keydown.enter)="addSpeaker()">
-    <button type="button" class="rowbtn" (click)="addSpeaker()">+ Спикер</button>
+    <hg-input label="Имя носителя" placeholder="지민…" [(ngModel)]="newSpeakerName"
+              (keydown.enter)="addSpeaker()" />
+    <hg-button size="sm" variant="ghost" label="Спикер" icon="+" (pressed)="addSpeaker()" />
   </div>
 </section>
 
@@ -44,55 +49,54 @@
         {{ clip.videoUrl ? '🎬 видео' : 'без видео' }} ·
         {{ clip.audioUrl ? '🔊 аудио' : 'без аудио' }}
       </span>
-      <label class="rowbtn" [class.on]="clip.videoUrl">
-        🎬 <input type="file" accept="video/*" hidden (change)="upload(clip, $event, 'video')">
-      </label>
-      <label class="rowbtn" [class.on]="clip.audioUrl">
-        🔊 <input type="file" accept="audio/*" hidden (change)="upload(clip, $event, 'audio')">
-      </label>
-      <label class="rowbtn" [class.on]="clip.thumbnailUrl">
-        🖼 <input type="file" accept="image/*" hidden (change)="upload(clip, $event, 'thumbnail')">
-      </label>
-      <button type="button" class="rowbtn" [class.on]="editingClip() === clip.id" (click)="openEdit(clip)">✎</button>
-      <button type="button" class="rowbtn" (click)="openSubtitles(clip)">Сабы</button>
-      <button type="button" class="rowbtn" [class.on]="clip.published" (click)="togglePublish(clip)">
-        {{ clip.published ? '👁' : '🚫' }}
-      </button>
-      <button type="button" class="rowbtn danger" (click)="removeClip(clip)">✕</button>
+      <hg-file-picker class="media-picker" label="🎬" ariaLabel="Загрузить видео клипа"
+                      accept="video/*" (fileSelected)="upload(clip, $event, 'video')" />
+      <hg-file-picker class="media-picker" label="🔊" ariaLabel="Загрузить аудио клипа"
+                      accept="audio/*" (fileSelected)="upload(clip, $event, 'audio')" />
+      <hg-file-picker class="media-picker" label="🖼" ariaLabel="Загрузить обложку клипа"
+                      accept="image/*" (fileSelected)="upload(clip, $event, 'thumbnail')" />
+      <hg-button size="sm" [variant]="editingClip() === clip.id ? 'secondary' : 'ghost'"
+                 icon="✎" ariaLabel="Изменить клип" (pressed)="openEdit(clip)" />
+      <hg-button size="sm" variant="ghost" label="Сабы" (pressed)="openSubtitles(clip)" />
+      <hg-button size="sm" [variant]="clip.published ? 'secondary' : 'ghost'"
+                 [icon]="clip.published ? '👁' : '🚫'"
+                 [ariaLabel]="clip.published ? 'Снять клип с публикации' : 'Опубликовать клип'"
+                 (pressed)="togglePublish(clip)" />
+      <hg-button size="sm" variant="danger" icon="✕" ariaLabel="Удалить клип"
+                 (pressed)="removeClip(clip)" />
 
       @if (editingClip() === clip.id) {
         <div class="editbox">
-          <select [(ngModel)]="clipDraft.kind">
-            <option value="IMMERSE">IMMERSE</option>
-            <option value="STORY">STORY</option>
-            <option value="WORD">WORD</option>
-          </select>
-          <select [(ngModel)]="clipDraft.speakerId">
-            <option [ngValue]="null">без спикера</option>
-            @for (speaker of speakers(); track speaker.id) {
-              <option [ngValue]="speaker.id">{{ speaker.name }}</option>
-            }
-          </select>
-          <input type="number" placeholder="Длительность, мс" [(ngModel)]="clipDraft.durationMs">
+          <hg-select ariaLabel="Тип клипа" placeholder="" [options]="clipKindOptions"
+                     [(ngModel)]="clipDraft.kind" />
+          <hg-select ariaLabel="Спикер клипа" placeholder="" [options]="speakerOptions()"
+                     [(ngModel)]="clipDraft.speakerId" />
+          <hg-input type="number" label="Длительность, мс" [min]="0"
+                    [(ngModel)]="clipDraft.durationMs" />
           <div class="wordpick">
             @if (clipDraft.wordId) {
               <span class="pill p-b">{{ clipWordLabel }}</span>
-              <button type="button" class="rowbtn" (click)="clearWord()">✕ слово</button>
+              <hg-button size="sm" variant="ghost" label="Убрать слово" icon="✕"
+                         (pressed)="clearWord()" />
             } @else {
-              <input placeholder="Поиск слова…" [ngModel]="wordSearch" (ngModelChange)="searchWords($event)">
+              <hg-input type="search" ariaLabel="Поиск слова" placeholder="Поиск слова…"
+                        [ngModel]="wordSearch" (ngModelChange)="searchWords($event)" />
               @for (word of foundWords(); track word.id) {
-                <button type="button" class="rowbtn" (click)="pickWord(word)">{{ word.hangul }} — {{ word.translation }}</button>
+                <button type="button" data-domain-control class="rowbtn"
+                        [attr.aria-label]="'Привязать слово ' + word.hangul + ', ' + word.translation"
+                        (click)="pickWord(word)">{{ word.hangul }} — {{ word.translation }}</button>
               }
             }
           </div>
-          <button type="button" class="rowbtn" (click)="saveClip(clip)">Сохранить клип</button>
+          <hg-button size="sm" variant="ghost" label="Сохранить клип" (pressed)="saveClip(clip)" />
         </div>
       }
 
       @if (subtitlesFor() === clip.id) {
         <div class="subsbox">
-          <textarea [(ngModel)]="subsDraft" spellcheck="false"></textarea>
-          <button type="button" class="rowbtn" (click)="saveSubtitles(clip)">Сохранить субтитры</button>
+          <hg-textarea label="Субтитры в JSON" [rows]="7" [(ngModel)]="subsDraft" />
+          <hg-button size="sm" variant="ghost" label="Сохранить субтитры"
+                     (pressed)="saveSubtitles(clip)" />
         </div>
       }
     </div>
@@ -100,11 +104,8 @@
     <div class="empty">Клипов нет — создай первый.</div>
   }
   <div class="addrow">
-    <select [(ngModel)]="newClipKind">
-      <option value="IMMERSE">IMMERSE</option>
-      <option value="STORY">STORY</option>
-      <option value="WORD">WORD</option>
-    </select>
-    <button type="button" class="rowbtn" (click)="addClip()">+ Клип</button>
+    <hg-select label="Тип нового клипа" placeholder="" [options]="clipKindOptions"
+               [(ngModel)]="newClipKind" />
+    <hg-button size="sm" variant="ghost" label="Клип" icon="+" (pressed)="addClip()" />
   </div>
 </section>

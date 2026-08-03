@@ -1,5 +1,4 @@
-import {Injectable, computed, inject, signal} from '@angular/core';
-import {DestroyRef} from '@angular/core';
+import {DestroyRef, Injectable, computed, effect, inject, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
 import {UserWord} from '../../domain/entities/user-word.entity';
 import {GameEngine, syllables} from '../../domain/services/game-engine';
@@ -24,6 +23,8 @@ export class GamesFacade {
 
   private engine = new GameEngine();
   private timerId: ReturnType<typeof setInterval> | null = null;
+  private readonly timeoutIds = new Set<ReturnType<typeof setTimeout>>();
+  private readonly pendingMode = signal<GameMode | null>(null);
   private answerStart = 0;
   private pool: UserWord[] = [];
 
@@ -53,33 +54,53 @@ export class GamesFacade {
   readonly loading = this.review.loading;
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.stopTimer());
+    effect(() => {
+      const mode = this.pendingMode();
+      if (!mode || this.review.loading()) return;
+      if (this.review.error()) {
+        this.pendingMode.set(null);
+        this.mode.set(null);
+        return;
+      }
+
+      const cards = this.review.queue();
+      this.pendingMode.set(null);
+      if (cards.length === 0) {
+        this.mode.set(null);
+        return;
+      }
+      this.beginRound(mode, cards);
+    });
+    this.destroyRef.onDestroy(() => {
+      this.stopTimer();
+      this.clearScheduled();
+    });
   }
 
   start(mode: GameMode): void {
+    if (this.phase() !== 'pick' || this.pendingMode()) return;
     this.mode.set(mode);
+    this.pendingMode.set(mode);
     this.review.start(mode, {limit: 20});
-    // ждём загрузку очереди
-    const wait = setInterval(() => {
-      if (this.review.loading()) return;
-      clearInterval(wait);
-      const cards = this.review.queue();
-      if (cards.length === 0) return; // пусто — remain in pick, страница покажет сообщение
-      this.pool = cards;
-      this.engine = new GameEngine();
-      this.score.set(0);
-      this.combo.set(0);
-      this.phase.set('playing');
-      this.timeLeft.set(ROUND_SECONDS);
-      this.startTimer();
-      if (mode === 'MATCH') {
-        this.matchQueue = [...cards];
-        this.dealMatch();
-      } else {
-        this.wordQueue = shuffle(cards);
-        this.nextWord();
-      }
-    }, 100);
+  }
+
+  private beginRound(mode: GameMode, cards: UserWord[]): void {
+    this.clearScheduled();
+    this.pool = cards;
+    this.engine = new GameEngine();
+    this.score.set(0);
+    this.combo.set(0);
+    this.currentWord.set(null);
+    this.phase.set('playing');
+    this.timeLeft.set(ROUND_SECONDS);
+    this.startTimer();
+    if (mode === 'MATCH') {
+      this.matchQueue = [...cards];
+      this.dealMatch();
+    } else {
+      this.wordQueue = shuffle(cards);
+      this.nextWord();
+    }
   }
 
   // ---------- MATCH ----------
@@ -124,7 +145,7 @@ export class GamesFacade {
       }
     } else {
       this.matchMiss.set(cell);
-      setTimeout(() => this.matchMiss.set(null), 350);
+      this.schedule(() => this.matchMiss.set(null), 350);
     }
   }
 
@@ -157,7 +178,7 @@ export class GamesFacade {
     const correct = translation === word.word.translation;
     this.registerAnswer(word.word.id, correct);
     this.lastAnswer.set(correct ? 'ok' : 'bad');
-    setTimeout(() => this.nextWord(), correct ? 500 : 1100);
+    this.schedule(() => this.nextWord(), correct ? 500 : 1100);
   }
 
   pickSyllable(index: number): void {
@@ -173,7 +194,7 @@ export class GamesFacade {
       const correct = typed.join('') === target.join('');
       this.registerAnswer(word.word.id, correct);
       this.lastAnswer.set(correct ? 'ok' : 'bad');
-      setTimeout(() => this.nextWord(), correct ? 500 : 1100);
+      this.schedule(() => this.nextWord(), correct ? 500 : 1100);
     }
   }
 
@@ -206,15 +227,31 @@ export class GamesFacade {
     this.timerId = null;
   }
 
+  private schedule(callback: () => void, delay: number): void {
+    const id = setTimeout(() => {
+      this.timeoutIds.delete(id);
+      callback();
+    }, delay);
+    this.timeoutIds.add(id);
+  }
+
+  private clearScheduled(): void {
+    this.timeoutIds.forEach(id => clearTimeout(id));
+    this.timeoutIds.clear();
+  }
+
   private finish(): void {
     if (this.phase() !== 'playing') return;
     this.stopTimer();
+    this.clearScheduled();
     this.phase.set('done');
     this.review.finishWithAnswers(this.engine.answers);
   }
 
   backToPick(): void {
     this.stopTimer();
+    this.clearScheduled();
+    this.pendingMode.set(null);
     this.phase.set('pick');
     this.mode.set(null);
   }

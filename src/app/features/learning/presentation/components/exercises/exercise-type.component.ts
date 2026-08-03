@@ -1,42 +1,23 @@
 import {ChangeDetectionStrategy, Component, input, output, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
+import {HgInputComponent} from '@shared/components/controls/hg-input.component';
 import {TypeWordPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
 
 @Component({
   selector: 'hg-exercise-type',
-  imports: [FormsModule],
+  imports: [FormsModule, HgButtonComponent, HgInputComponent],
   template: `
     <div class="q-kind">Напечатай по-корейски</div>
     <div class="panel taskpanel">«{{ payload().translation }}»</div>
-    <input class="krinput kr" type="text" [(ngModel)]="value" [disabled]="answered()"
-           lang="ko" autocomplete="off" autocapitalize="off" spellcheck="false"
-           placeholder="한국어로…" (keydown.enter)="check()">
-    <button type="button" class="cta checkbtn" [disabled]="!value().trim() || answered()" (click)="check()">
-      Проверить
-    </button>
+    <hg-input class="krinput kr" type="text" label="Ответ по-корейски" [(ngModel)]="value"
+              [disabled]="answered()" lang="ko" autocomplete="off" autocapitalize="off"
+              [spellcheck]="false" placeholder="한국어로…" (keydown.enter)="check()"/>
+    <hg-button class="checkbtn" label="Проверить"
+               [disabled]="!value().trim() || answered()" (pressed)="check()"/>
   `,
   styleUrl: './exercise-shared.scss',
-  styles: `
-    .krinput {
-      width: 100%;
-      min-height: var(--hg-touch-min);
-      background: var(--hg-surface);
-      border: 2px solid var(--hg-border);
-      border-radius: var(--hg-radius-block);
-      padding: var(--hg-space-4) var(--hg-space-5);
-      color: var(--hg-text);
-      font-size: 26px;
-      text-align: center;
-      transition: border-color var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
-
-      &:focus-visible {
-        outline: none;
-        border-color: var(--hg-focus);
-        box-shadow: 0 0 0 3px var(--hg-route-soft);
-      }
-    }
-  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExerciseTypeComponent {

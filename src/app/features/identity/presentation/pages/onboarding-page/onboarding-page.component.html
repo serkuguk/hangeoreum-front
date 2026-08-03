@@ -9,35 +9,20 @@
     @case (1) {
       <h2 class="pagettl center">Какой у тебя уровень?</h2>
       <p class="pagesub center">Подберём стартовую точку курса.</p>
-      <div class="oblist">
-        @for (option of levels; track option.value) {
-          <button type="button" class="obcard" [class.is-picked]="level() === option.value"
-                  (click)="level.set(option.value)">
-            <span class="obic han" [class]="'obic han c-' + option.color">{{ option.han }}</span>
-            <span><b>{{ option.title }}</b><small>{{ option.hint }}</small></span>
-          </button>
-        }
-      </div>
+      <hg-segmented-control class="oblist" label="Начальный уровень" variant="cards"
+                            [options]="levelOptions" [(ngModel)]="level"/>
       <div class="obbtns">
-        <button class="cta" (click)="step.set(2)">Далее</button>
+        <hg-button label="Далее" (pressed)="step.set(2)"/>
       </div>
     }
     @case (2) {
       <h2 class="pagettl center">Сколько минут в день?</h2>
       <p class="pagesub center">Цель дня. Всегда можно изменить в настройках.</p>
-      <div class="oblist">
-        @for (option of goals; track option.xp) {
-          <button type="button" class="obcard" [class.is-picked]="goal() === option.xp"
-                  (click)="goal.set(option.xp)">
-            <span class="obic" [class]="'obic c-' + option.color">{{ option.icon }}</span>
-            <span><b>{{ option.title }}</b><small>{{ option.hint }}</small></span>
-            <span class="tail" [class]="'tail t-' + option.color">{{ option.xp }} XP</span>
-          </button>
-        }
-      </div>
+      <hg-segmented-control class="oblist" label="Ежедневная цель" variant="cards"
+                            [options]="goalOptions" [(ngModel)]="goal"/>
       <div class="obbtns">
-        <button class="ghostbtn" (click)="step.set(1)">Назад</button>
-        <button class="cta" (click)="step.set(3)">Далее</button>
+        <hg-button label="Назад" variant="ghost" (pressed)="step.set(1)"/>
+        <hg-button label="Далее" (pressed)="step.set(3)"/>
       </div>
     }
     @case (3) {
@@ -45,27 +30,17 @@
       <p class="pagesub center">Серия живёт, пока занимаешься каждый день.</p>
       <div class="panel">
         <div class="setrow">
-          Напоминания
-          <button type="button" class="toggle" [class.off]="!remindersEnabled()"
-                  role="switch" [attr.aria-checked]="remindersEnabled()"
-                  (click)="remindersEnabled.set(!remindersEnabled())"></button>
+          <hg-toggle label="Напоминания" [(ngModel)]="remindersEnabled"/>
         </div>
         @if (remindersEnabled()) {
           <div class="setrow noborder"><span>Удобное время</span></div>
-          <div class="obtime">
-            @for (option of times; track option) {
-              <button type="button" [class.is-picked]="time() === option" (click)="time.set(option)">
-                {{ option }}
-              </button>
-            }
-          </div>
+          <hg-segmented-control class="obtime" label="Удобное время"
+                                [options]="timeOptions" [(ngModel)]="time"/>
         }
       </div>
       <div class="obbtns">
-        <button class="ghostbtn" (click)="step.set(2)">Назад</button>
-        <button class="cta" [disabled]="saving()" (click)="finish()">
-          {{ saving() ? 'Сохраняем…' : 'Начать учиться →' }}
-        </button>
+        <hg-button label="Назад" variant="ghost" (pressed)="step.set(2)"/>
+        <hg-button label="Начать учиться →" [loading]="saving()" (pressed)="finish()"/>
       </div>
     }
   }

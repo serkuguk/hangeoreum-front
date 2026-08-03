@@ -8,19 +8,11 @@
     </div>
   } @else if (facade.result(); as result) {
     <!-- Сводка сессии -->
-    <div class="panel rewcard">
-      <div class="ghost kr">기억</div>
-      <div class="rew-han kr">수고했어요!</div>
-      <h2 class="pagettl">Сессия завершена</h2>
-      <p class="pagesub">SM-2 обновил интервалы для {{ result.total }} слов</p>
-      <div class="rewstats">
-        <div class="rewstat"><b class="bl">{{ result.total }}</b><span>повторено</span></div>
-        <div class="rewstat"><b class="j">{{ result.correct }}</b><span>крепко в памяти</span></div>
-        <div class="rewstat"><b class="r">{{ facade.hardWords().length }}</b><span>сложных</span></div>
-        <div class="rewstat"><b class="y">+{{ result.xp }}</b><span>XP</span></div>
-      </div>
+    <hg-session-result-card eyebrow="기억" koreanTitle="수고했어요!" title="Сессия завершена"
+                            [subtitle]="'SM-2 обновил интервалы для ' + result.total + ' слов'"
+                            [stats]="resultStats(result)">
       @if (facade.hardWords().length > 0) {
-        <div class="hardlist">
+        <div result-details class="hardlist">
           <div class="eyebrow">Стоит повторить ещё раз</div>
           @for (word of facade.hardWords(); track word.id) {
             <div class="hardrow">
@@ -31,17 +23,17 @@
           }
         </div>
       }
-      <div class="rewbtns">
-        <button class="cta grow" (click)="again()">К режимам повторения</button>
+      <div result-actions>
+        <hg-button class="grow" label="К режимам повторения" (pressed)="again()"/>
         <a class="ghostbtn" routerLink="/dashboard">На дашборд</a>
       </div>
-    </div>
+    </hg-session-result-card>
   } @else if (facade.saving()) {
     <div class="panel loadpanel" aria-live="polite">Сохраняем повторение…</div>
   } @else if (facade.saveError(); as saveError) {
     <div class="panel loadpanel" role="alert">
       <p>{{ saveError }}</p>
-      <button type="button" class="cta" (click)="facade.retryFinish()">Повторить</button>
+      <hg-button label="Повторить" (pressed)="facade.retryFinish()"/>
     </div>
   } @else if (facade.current(); as card) {
     <div class="fc-top">
@@ -52,7 +44,9 @@
 
     <div class="flip-scene">
       <div class="flip-card" [class.is-flipped]="isFlipped()" (click)="flip()"
-           tabindex="0" role="button" aria-label="Перевернуть карточку">
+           (keydown.enter)="flip()" (keydown.space)="$event.preventDefault(); flip()"
+           tabindex="0" role="button" aria-label="Перевернуть карточку"
+           [attr.aria-pressed]="isFlipped()">
         <div class="flip-face flip-face--front">
           <div class="ghost kr">{{ card.word.hangul.charAt(0) }}</div>
           @if (card.word.imageUrl) {
@@ -82,12 +76,13 @@
 
     @if (!isFlipped()) {
       <div class="hint">Клик, тап или пробел — переворот</div>
-      <button class="cta showbtn" (click)="flip()">Показать ответ</button>
+      <hg-button class="showbtn" label="Показать ответ" (pressed)="flip()"/>
     } @else {
       <div class="hint">Оцени, насколько легко вспомнилось · клавиши 1–4</div>
       <div class="srs">
         @for (rating of ratings; track rating.quality) {
-          <button type="button" [class]="rating.cls" (click)="rate(rating.quality)">
+          <button type="button" data-domain-control [class]="rating.cls" (click)="rate(rating.quality)"
+                  [attr.aria-label]="rating.label + ': ' + facade.intervalLabel(rating.quality)">
             {{ rating.label }}<small>{{ facade.intervalLabel(rating.quality) }}</small>
           </button>
         }

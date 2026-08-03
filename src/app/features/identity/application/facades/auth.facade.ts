@@ -1,34 +1,49 @@
-import {Injectable, inject} from '@angular/core';
-import {Store} from '@ngrx/store';
+import {HttpErrorResponse} from '@angular/common/http';
+import {Injectable, inject, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '@core/auth/auth.service';
 import {ME_REPOSITORY} from '../../domain/repositories/me.repository';
 import {OnboardingData, User} from '../../domain/user.entity';
-import {authActions, authFeature} from '../store/auth.store';
 
 /** Единая точка identity для presentation-слоя. */
 @Injectable({providedIn: 'root'})
 export class AuthFacade {
-  private store = inject(Store);
   private authService = inject(AuthService);
   private router = inject(Router);
   private meRepository = inject(ME_REPOSITORY);
 
-  readonly loading = this.store.selectSignal(authFeature.selectLoading);
-  readonly error = this.store.selectSignal(authFeature.selectError);
-  /** Пользователь: из стора после login, иначе восстановленная сессия из localStorage. */
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
   readonly user = this.authService.currentUser;
 
   login(email: string, password: string): void {
-    this.store.dispatch(authActions.login({email, password}));
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.error.set(null);
+    this.authService.login(email, password).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error: HttpErrorResponse) => this.failAuth(error),
+    });
   }
 
   register(name: string, email: string, password: string): void {
-    this.store.dispatch(authActions.register({name, email, password}));
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.error.set(null);
+    this.authService.register(name, email, password).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/onboarding']);
+      },
+      error: (error: HttpErrorResponse) => this.failAuth(error),
+    });
   }
 
   logout(): void {
-    this.store.dispatch(authActions.logout());
+    this.authService.logout().subscribe(() => this.router.navigate(['/']));
   }
 
   loginWithProvider(provider: 'google' | 'kakao'): void {
@@ -50,6 +65,19 @@ export class AuthFacade {
 
   syncUser(user: User): void {
     this.authService.updateStoredUser(user);
-    this.store.dispatch(authActions.userUpdated({user}));
   }
+
+  private failAuth(error: HttpErrorResponse): void {
+    this.loading.set(false);
+    this.error.set(humanizeError(error));
+  }
+}
+
+function humanizeError(error: HttpErrorResponse): string {
+  const body = error.error as {code?: string; message?: string} | null;
+  if (error.status === 401 || body?.code === 'INVALID_CREDENTIALS') return 'Неверный email или пароль';
+  if (body?.code === 'EMAIL_TAKEN' || error.status === 409) return 'Такой email уже зарегистрирован';
+  if (body?.code === 'VALIDATION') return 'Проверь правильность заполнения полей';
+  if (error.status === 0) return 'Сервер недоступен. Попробуй позже';
+  return body?.message || 'Что-то пошло не так. Попробуй ещё раз';
 }

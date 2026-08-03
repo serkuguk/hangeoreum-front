@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {BillingFacade} from '../../application/billing.facade';
 import {Plan} from '../../domain/billing.model';
 
@@ -10,6 +11,7 @@ const INTERVAL_LABEL: Record<Plan['interval'], string> = {
 
 @Component({
   selector: 'hg-pricing-page',
+  imports: [HgButtonComponent],
   templateUrl: './pricing-page.component.html',
   styleUrl: './pricing-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,10 +24,6 @@ export class PricingPageComponent {
 
   constructor() {
     this.facade.load();
-    // после success-редиректа обновляем состояние подписки
-    setTimeout(() => {
-      if (this.result() === 'success') this.facade.refreshSubscription();
-    });
   }
 
   price(plan: Plan): string {

@@ -1,10 +1,11 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AdminApi} from '../../infrastructure/admin.api';
+import {HgButtonComponent, HgInputComponent, HgTextareaComponent} from '@shared/components/controls';
 
 @Component({
   selector: 'hg-admin-notifications-page',
-  imports: [FormsModule],
+  imports: [FormsModule, HgButtonComponent, HgInputComponent, HgTextareaComponent],
   template: `
     <h2 class="pagettl">Уведомления</h2>
     <p class="pagesub">Системная рассылка — уходит всем пользователям (in-app).</p>
@@ -17,15 +18,9 @@ import {AdminApi} from '../../infrastructure/admin.api';
     }
 
     <div class="panel form">
-      <label>Заголовок *
-        <input [(ngModel)]="title" placeholder="Новые уроки уже в курсе!">
-      </label>
-      <label>Текст
-        <textarea [(ngModel)]="body" placeholder="Юнит 3 «В кафе» опубликован…"></textarea>
-      </label>
-      <button type="button" class="cta" [disabled]="!title.trim() || sending()" (click)="send()">
-        {{ sending() ? 'Отправляем…' : 'Отправить всем' }}
-      </button>
+      <hg-input label="Заголовок" required [(ngModel)]="title" placeholder="Новые уроки уже в курсе!"/>
+      <hg-textarea label="Текст" [(ngModel)]="body" placeholder="Юнит 3 «В кафе» опубликован…"/>
+      <hg-button label="Отправить всем" [loading]="sending()" [disabled]="!title.trim()" (pressed)="send()"/>
     </div>
   `,
   styleUrl: './_admin.scss',
@@ -36,20 +31,7 @@ import {AdminApi} from '../../infrastructure/admin.api';
       flex-direction: column;
       gap: 14px;
 
-      label { font-size: 12px; color: var(--hg-muted); display: flex; flex-direction: column; gap: 6px; }
-
-      input, textarea {
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 10px;
-        padding: 11px 13px;
-        color: var(--hg-txt);
-        font-size: 14px;
-        font-family: inherit;
-      }
-
-      textarea { min-height: 110px; }
-      .cta { align-self: flex-start; padding: 13px 26px; }
+      hg-button { align-self: flex-start; }
     }
 
     .okbar {

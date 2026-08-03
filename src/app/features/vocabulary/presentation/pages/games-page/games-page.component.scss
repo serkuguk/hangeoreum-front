@@ -44,7 +44,6 @@
   }
 
   .combo { color: var(--hg-reward); font-weight: 700; font-size: 15px; flex: 1; }
-  .exitbtn { padding: 9px var(--hg-space-4); font-size: 13px; }
 }
 
 .match, .opts {
@@ -130,46 +129,6 @@
   .syl { min-width: 64px; }
 }
 
-.rewcard {
-  padding: var(--hg-space-7) var(--hg-space-6);
-  text-align: center;
-
-  .ghost { font-size: 240px; right: -50px; bottom: -80px; }
-}
-
-.rew-han { font-family: var(--hg-font-display); font-size: 54px; color: var(--hg-reward); margin-bottom: 10px; }
-
-.rewstats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--hg-space-2);
-  margin: var(--hg-space-6) 0 var(--hg-space-5);
-}
-
-.rewstat {
-  background: var(--hg-surface-muted);
-  border-radius: var(--hg-radius-block);
-  padding: var(--hg-space-4) var(--hg-space-2);
-
-  b { font-size: 20px; font-weight: 700; display: block; }
-  span { font-size: 11.5px; color: var(--hg-text-muted); }
-}
-
-.y { color: var(--hg-reward); }
-.j { color: var(--hg-success); }
-.r { color: var(--hg-danger); }
-.bl { color: var(--hg-route); }
-
-.rewbtns {
-  display: flex;
-  gap: var(--hg-space-3);
-
-  .grow { flex: 1; }
-  .ghostbtn { text-decoration: none; color: var(--hg-text); display: inline-grid; place-items: center; }
-}
-
 @media (max-width: 880px) {
   .gpick { grid-template-columns: 1fr; }
-  .rewstats { grid-template-columns: repeat(2, 1fr); }
-  .rewbtns { flex-direction: column; }
 }

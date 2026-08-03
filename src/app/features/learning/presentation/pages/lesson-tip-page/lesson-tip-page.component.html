@@ -23,7 +23,7 @@
       }
       <div class="tipbtns">
         <a class="cta" [routerLink]="['/learn', id()]">Понятно, начать урок</a>
-        <button type="button" class="ghostbtn" (click)="back()">Позже</button>
+        <hg-button label="Позже" variant="ghost" (pressed)="back()"/>
       </div>
     </div>
   }

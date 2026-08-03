@@ -6,6 +6,8 @@ import {EnvironmentInterface} from '@core/interfaces/environment.interface';
 import {Word} from '@features/vocabulary/domain/entities/word.entity';
 import {LessonType} from '@features/learning/domain/entities/course-map.entity';
 import {ExerciseKind} from '@features/learning/domain/entities/exercise.entity';
+import {ClipSubtitle} from '@shared/models/clip-subtitle';
+import {Page} from '@shared/types/page';
 
 // ---- типы админки (сырые JPA-сущности бэка: Lombok isXxx → JSON "xxx") ----
 
@@ -15,12 +17,6 @@ export interface AdminMetrics {
   lessonsCompletedToday: number;
   activeSubscriptions: number;
   conversion: number;
-}
-
-export interface AdminPage<T> {
-  content: T[];
-  totalElements: number;
-  page: number;
 }
 
 export interface WordRequest {
@@ -140,10 +136,10 @@ export class AdminApi {
   }
 
   // ---- слова ----
-  words(search: string, page: number): Observable<AdminPage<Word>> {
+  words(search: string, page: number): Observable<Page<Word>> {
     let params = new HttpParams().set('page', page).set('size', 20);
     if (search) params = params.set('search', search);
-    return this.http.get<AdminPage<Word>>(`${this.base}/words`, {params});
+    return this.http.get<Page<Word>>(`${this.base}/words`, {params});
   }
 
   createWord(request: WordRequest): Observable<Word> {
@@ -201,10 +197,6 @@ export class AdminApi {
 
   createUnit(request: {courseId: string; position: number; title: string; description?: string; color?: string}): Observable<AdminUnit> {
     return this.http.post<AdminUnit>(`${this.base}/units`, request);
-  }
-
-  updateUnit(id: string, request: {courseId: string; position: number; title: string; description?: string; color?: string}): Observable<AdminUnit> {
-    return this.http.put<AdminUnit>(`${this.base}/units/${id}`, request);
   }
 
   deleteUnit(id: string): Observable<void> {
@@ -277,10 +269,6 @@ export class AdminApi {
     return this.http.get<AdminLetter[]>(`${this.base}/alphabet`);
   }
 
-  updateLetter(id: string, request: {position?: number; audioUrl?: string}): Observable<AdminLetter> {
-    return this.http.put<AdminLetter>(`${this.base}/alphabet/${id}`, request);
-  }
-
   uploadLetterAudio(id: string, file: File): Observable<AdminLetter> {
     const form = new FormData();
     form.append('file', file);
@@ -331,23 +319,19 @@ export class AdminApi {
     return this.http.patch<AdminClip>(`${this.base}/clips/${id}/publish`, {isPublished});
   }
 
-  getSubtitles(clipId: string): Observable<{lang: string; position: number; text: string; startMs: number; endMs: number}[]> {
-    return this.http.get<{lang: string; position: number; text: string; startMs: number; endMs: number}[]>(`${this.base}/clips/${clipId}/subtitles`);
+  getSubtitles(clipId: string): Observable<ClipSubtitle[]> {
+    return this.http.get<ClipSubtitle[]>(`${this.base}/clips/${clipId}/subtitles`);
   }
 
-  putSubtitles(clipId: string, subtitles: {lang: string; position: number; text: string; startMs: number; endMs: number}[]): Observable<void> {
+  putSubtitles(clipId: string, subtitles: ClipSubtitle[]): Observable<void> {
     return this.http.put<void>(`${this.base}/clips/${clipId}/subtitles`, subtitles);
   }
 
-  putStory(lessonId: string, request: {title: string; clipId?: string | null; lines: unknown[]}): Observable<void> {
-    return this.http.put<void>(`${this.base}/lessons/${lessonId}/story`, request);
-  }
-
   // ---- пользователи / уведомления ----
-  users(search: string, page: number): Observable<AdminPage<AdminUser>> {
+  users(search: string, page: number): Observable<Page<AdminUser>> {
     let params = new HttpParams().set('page', page).set('size', 20);
     if (search) params = params.set('search', search);
-    return this.http.get<AdminPage<AdminUser>>(`${this.base}/users`, {params});
+    return this.http.get<Page<AdminUser>>(`${this.base}/users`, {params});
   }
 
   patchUser(id: string, patch: {role?: string; isActive?: boolean}): Observable<AdminUser> {

@@ -18,7 +18,8 @@ import {Feedback} from '../../../application/facades/lesson.facade';
       }
       <div class="gapopts">
         @for (option of options(); track option.text) {
-          <button type="button" class="gapopt kr"
+          <button type="button" data-domain-control class="gapopt kr"
+                  [attr.aria-pressed]="picked() === option.text"
                   [class.is-ok]="answered() && option.text === payload().correct"
                   [class.is-bad]="answered() && picked() === option.text && option.text !== payload().correct"
                   [disabled]="answered()"

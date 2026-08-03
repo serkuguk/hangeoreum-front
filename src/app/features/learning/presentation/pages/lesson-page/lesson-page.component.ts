@@ -1,5 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {Router} from '@angular/router';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
+import {HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
 import {LessonFacade} from '../../../application/facades/lesson.facade';
 import {
   ChoicePayload,
@@ -15,6 +17,7 @@ import {ExerciseWordOrderComponent} from '../../components/exercises/exercise-wo
 import {ExerciseFillBlankComponent} from '../../components/exercises/exercise-fill-blank.component';
 import {ExerciseMatchComponent} from '../../components/exercises/exercise-match.component';
 import {ExerciseTypeComponent} from '../../components/exercises/exercise-type.component';
+import {CompleteResult} from '../../../domain/repositories/learning.repository';
 
 @Component({
   selector: 'hg-lesson-page',
@@ -25,6 +28,8 @@ import {ExerciseTypeComponent} from '../../components/exercises/exercise-type.co
     ExerciseFillBlankComponent,
     ExerciseMatchComponent,
     ExerciseTypeComponent,
+    HgButtonComponent,
+    HgSessionResultCardComponent,
   ],
   templateUrl: './lesson-page.component.html',
   styleUrl: './lesson-page.component.scss',
@@ -54,4 +59,13 @@ export class LessonPageComponent {
   asFillBlank = (p: unknown) => p as FillBlankPayload;
   asMatch = (p: unknown) => p as MatchPairsPayload;
   asType = (p: unknown) => p as TypeWordPayload;
+
+  resultStats(result: CompleteResult): readonly HgSessionStat[] {
+    return [
+      {label: 'XP', value: `+${result.xp}`, tone: 'reward'},
+      {label: 'новых слов', value: `+${result.newWords.length}`, tone: 'info'},
+      {label: 'дней серии', value: `🔥 ${result.streak}`, tone: 'danger'},
+      {label: 'цель дня', value: result.goalReached ? '✓' : '…', tone: 'success'},
+    ];
+  }
 }

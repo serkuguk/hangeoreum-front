@@ -2,7 +2,7 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "yarn",
+    "packageManager": "pnpm@10.12.3",
     "analytics": false
   },
   "newProjectRoot": "projects",
@@ -25,12 +25,10 @@
               "base": "dist/hangeoreum"
             },
             "index": "src/index.html",
-            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets",
               {
                 "glob": "**/*",
                 "input": "src/assets/",
@@ -38,8 +36,6 @@
               }
             ],
             "styles": [
-              "node_modules/tabulator-tables/dist/css/tabulator.min.css",
-              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "node_modules/primeicons/primeicons.css",
               "src/styles.scss"
             ],
@@ -60,12 +56,9 @@
                   "maximumError": "16kb"
                 }
               ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
+              "optimization": {
+                "fonts": false
+              },
               "outputHashing": "all"
             },
             "development": {

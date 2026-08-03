@@ -43,8 +43,18 @@
   }
 }
 
-.feed {
+.feednav {
   flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feed {
+  width: 75%;
+  height: 75%;
   min-height: 0;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
@@ -52,6 +62,25 @@
   scrollbar-width: none;
 
   &::-webkit-scrollbar { display: none; }
+}
+
+.navbtn {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: var(--hg-touch-min);
+  height: var(--hg-touch-min);
+  border: 0;
+  background: transparent;
+  color: var(--hg-danger);
+  font-size: 56px;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  &.prev { left: 0; }
+  &.next { right: 0; }
+  &:disabled { opacity: .25; cursor: default; }
 }
 
 .clip {

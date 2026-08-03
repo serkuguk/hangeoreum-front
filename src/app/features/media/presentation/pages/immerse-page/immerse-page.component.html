@@ -9,7 +9,7 @@
   } @else if (facade.error(); as error) {
     <div class="panel centerpanel">
       <p class="pagesub">{{ error }}</p>
-      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
     </div>
   } @else if (facade.clips().length === 0 && !facade.loading()) {
     <div class="panel centerpanel">
@@ -19,50 +19,60 @@
       <a class="ghostbtn" routerLink="/dashboard">На дашборд</a>
     </div>
   } @else {
-    <div class="subtoggle">
-      <button type="button" [class.is-active]="subMode() === 'ko'" (click)="subMode.set('ko')">한국어</button>
-      <button type="button" [class.is-active]="subMode() === 'ru'" (click)="subMode.set('ru')">Перевод</button>
-      <button type="button" [class.is-active]="subMode() === 'both'" (click)="subMode.set('both')">Оба</button>
-    </div>
+    <hg-segmented-control class="subtoggle" label="Язык субтитров"
+                          [options]="subModeOptions" [(ngModel)]="subMode"/>
 
-    <div class="feed">
-      @for (clip of facade.clips(); track clip.id) {
-        <section class="clip">
-          @if (clip.videoUrl) {
-            <video [attr.data-clip-id]="clip.id" [src]="clip.videoUrl"
-                   [poster]="clip.thumbnailUrl ?? ''" loop playsinline muted controls preload="none"
-                   [attr.aria-label]="'Видео: ' + (subtitle(clip, 'ru') ?? subtitle(clip, 'ko') ?? 'клип')"
-                   (click)="togglePlay($event)"></video>
-          } @else {
-            <div class="novid"><span class="ghost kr">말</span></div>
-          }
-
-          <div class="subs">
-            @if (subMode() !== 'ru' && subtitle(clip, 'ko'); as ko) {
-              <div class="kr kotext">{{ ko }}</div>
-            }
-            @if (subMode() !== 'ko' && subtitle(clip, 'ru'); as ru) {
-              <div class="rutext">{{ ru }}</div>
-            }
-          </div>
-
-          <div class="actions">
-            <button type="button" [class.liked]="clip.liked" (click)="facade.toggleLike(clip)"
-                    [attr.aria-label]="clip.liked ? 'Убрать лайк' : 'Нравится'">
-              {{ clip.liked ? '❤️' : '🤍' }}
-            </button>
-            @if (clip.wordId) {
-              <button type="button" (click)="addWord(clip)"
-                      [disabled]="vocabulary.addState(clip.wordId) !== 'idle'"
-                      aria-label="Слово в словарь">
-                {{ vocabulary.addState(clip.wordId) === 'saved' ? '✓' : '＋' }}
-              </button>
-            }
-          </div>
-        </section>
+    <div class="feednav">
+      @if (facade.clips().length > 1) {
+        <button type="button" data-domain-control class="navbtn prev" [disabled]="!canScrollClip('prev')"
+                aria-label="Предыдущее видео" (click)="scrollClip('prev')">‹</button>
       }
-      @if (facade.loading()) {
-        <div class="feedload">Загружаем…</div>
+
+      <div class="feed">
+        @for (clip of facade.clips(); track clip.id) {
+          <section class="clip">
+            @if (clip.videoUrl) {
+              <video [attr.data-clip-id]="clip.id" [src]="clip.videoUrl"
+                     [poster]="clip.thumbnailUrl ?? ''" loop playsinline muted controls preload="none"
+                     [attr.aria-label]="'Видео: ' + (subtitle(clip, 'ru') ?? subtitle(clip, 'ko') ?? 'клип')"
+                     (click)="togglePlay($event)"></video>
+            } @else {
+              <div class="novid"><span class="ghost kr">말</span></div>
+            }
+
+            <div class="subs">
+              @if (subMode() !== 'ru' && subtitle(clip, 'ko'); as ko) {
+                <div class="kr kotext">{{ ko }}</div>
+              }
+              @if (subMode() !== 'ko' && subtitle(clip, 'ru'); as ru) {
+                <div class="rutext">{{ ru }}</div>
+              }
+            </div>
+
+            <div class="actions">
+              <button type="button" data-domain-control [class.liked]="clip.liked" (click)="facade.toggleLike(clip)"
+                      [attr.aria-pressed]="clip.liked"
+                      [attr.aria-label]="clip.liked ? 'Убрать лайк' : 'Нравится'">
+                {{ clip.liked ? '❤️' : '🤍' }}
+              </button>
+              @if (clip.wordId) {
+                <button type="button" data-domain-control (click)="addWord(clip)"
+                        [disabled]="vocabulary.addState(clip.wordId) !== 'idle'"
+                        aria-label="Слово в словарь">
+                  {{ vocabulary.addState(clip.wordId) === 'saved' ? '✓' : '＋' }}
+                </button>
+              }
+            </div>
+          </section>
+        }
+        @if (facade.loading()) {
+          <div class="feedload">Загружаем…</div>
+        }
+      </div>
+
+      @if (facade.clips().length > 1) {
+        <button type="button" data-domain-control class="navbtn next" [disabled]="!canScrollClip('next')"
+                aria-label="Следующее видео" (click)="scrollClip('next')">›</button>
       }
     </div>
   }

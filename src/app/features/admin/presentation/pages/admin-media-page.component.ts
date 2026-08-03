@@ -1,11 +1,31 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
 import {Word} from '@features/vocabulary/domain/entities/word.entity';
+import {
+  HgButtonComponent,
+  HgFilePickerComponent,
+  HgInputComponent,
+  HgSelectComponent,
+  HgSelectOption,
+  HgTextareaComponent,
+} from '@shared/components/controls';
 import {AdminApi, AdminClip, Speaker} from '../../infrastructure/admin.api';
+
+const CLIP_KIND_OPTIONS: readonly HgSelectOption<string>[] = ['IMMERSE', 'STORY', 'WORD']
+  .map(value => ({label: value, value}));
 
 @Component({
   selector: 'hg-admin-media-page',
-  imports: [FormsModule],
+  imports: [
+    FormsModule,
+    HgButtonComponent,
+    HgFilePickerComponent,
+    HgInputComponent,
+    HgSelectComponent,
+    HgTextareaComponent,
+  ],
   templateUrl: './admin-media-page.component.html',
   styleUrl: './_admin.scss',
   styles: `
@@ -24,33 +44,6 @@ import {AdminApi, AdminClip, Speaker} from '../../infrastructure/admin.api';
 
       .grow { flex: 1; }
       .muted { color: var(--hg-muted); font-size: 12px; }
-    }
-
-    .addrow {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-
-      input, select {
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 10px;
-        padding: 9px 12px;
-        color: var(--hg-txt);
-        font-size: 13px;
-      }
-
-      input { flex: 1; min-width: 140px; }
-    }
-
-    .sprow input, .editbox input, .editbox select {
-      background: var(--hg-card-2);
-      border: 1px solid var(--hg-line);
-      border-radius: 10px;
-      padding: 9px 12px;
-      color: var(--hg-txt);
-      font-size: 13px;
     }
 
     .editbox {
@@ -73,18 +66,10 @@ import {AdminApi, AdminClip, Speaker} from '../../infrastructure/admin.api';
       flex-basis: 100%;
       margin-top: 8px;
 
-      textarea {
-        width: 100%;
-        min-height: 110px;
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 10px;
-        padding: 10px;
-        color: var(--hg-txt);
-        font-family: monospace;
-        font-size: 12px;
-      }
+      hg-textarea { width: 100%; }
     }
+
+    .media-picker { max-width: 5rem; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -99,6 +84,11 @@ export class AdminMediaPageComponent {
   readonly editingClip = signal<string | null>(null); // clipId с открытым редактором полей
   readonly editingSpeaker = signal<string | null>(null);
   readonly foundWords = signal<Word[]>([]);
+  readonly clipKindOptions = CLIP_KIND_OPTIONS;
+  readonly speakerOptions = computed<readonly HgSelectOption<string | null>[]>(() => [
+    {label: 'без спикера', value: null},
+    ...this.speakers().map(speaker => ({label: speaker.name, value: speaker.id})),
+  ]);
 
   // сигнал: наполняется асинхронно из getSubtitles, иначе zoneless CD не перерисует textarea
   readonly subsDraft = signal('');
@@ -110,9 +100,22 @@ export class AdminMediaPageComponent {
     {kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: null};
   clipWordLabel = '';
   wordSearch = '';
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly wordSearch$ = new Subject<string>();
 
   constructor() {
+    this.wordSearch$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(value => value.trim()
+        ? this.api.words(value, 0).pipe(
+          catchError(() => {
+            this.error.set('Не получилось найти слова.');
+            return of(null);
+          }),
+        )
+        : of(null)),
+      takeUntilDestroyed(),
+    ).subscribe(result => this.foundWords.set(result?.content ?? []));
     this.load();
   }
 
@@ -130,15 +133,21 @@ export class AdminMediaPageComponent {
   addSpeaker(): void {
     const name = this.newSpeakerName.trim();
     if (!name) return;
-    this.api.createSpeaker({name}).subscribe(() => {
-      this.newSpeakerName = '';
-      this.load();
+    this.api.createSpeaker({name}).subscribe({
+      next: () => {
+        this.newSpeakerName = '';
+        this.load();
+      },
+      error: err => this.fail('Не получилось добавить спикера', err),
     });
   }
 
   removeSpeaker(speaker: Speaker): void {
     if (!confirm(`Удалить спикера «${speaker.name}»?`)) return;
-    this.api.deleteSpeaker(speaker.id).subscribe(() => this.load());
+    this.api.deleteSpeaker(speaker.id).subscribe({
+      next: () => this.load(),
+      error: err => this.fail('Не получилось удалить спикера', err),
+    });
   }
 
   startEditSpeaker(speaker: Speaker): void {
@@ -165,12 +174,18 @@ export class AdminMediaPageComponent {
   }
 
   addClip(): void {
-    this.api.createClip({kind: this.newClipKind}).subscribe(() => this.load());
+    this.api.createClip({kind: this.newClipKind}).subscribe({
+      next: () => this.load(),
+      error: err => this.fail('Не получилось добавить клип', err),
+    });
   }
 
   removeClip(clip: AdminClip): void {
     if (!confirm('Удалить клип?')) return;
-    this.api.deleteClip(clip.id).subscribe(() => this.load());
+    this.api.deleteClip(clip.id).subscribe({
+      next: () => this.load(),
+      error: err => this.fail('Не получилось удалить клип', err),
+    });
   }
 
   togglePublish(clip: AdminClip): void {
@@ -195,14 +210,7 @@ export class AdminMediaPageComponent {
 
   searchWords(value: string): void {
     this.wordSearch = value;
-    if (this.searchTimer) clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => {
-      if (!value.trim()) {
-        this.foundWords.set([]);
-        return;
-      }
-      this.api.words(value, 0).subscribe(result => this.foundWords.set(result.content));
-    }, 300);
+    this.wordSearch$.next(value);
   }
 
   pickWord(word: Word): void {
@@ -228,9 +236,7 @@ export class AdminMediaPageComponent {
     });
   }
 
-  upload(clip: AdminClip, event: Event, kind: 'video' | 'audio' | 'thumbnail'): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+  upload(clip: AdminClip, file: File, kind: 'video' | 'audio' | 'thumbnail'): void {
     this.showFlash('Загружаем файл…');
     this.api.uploadClipMedia(clip.id, file, kind).subscribe({
       next: () => {

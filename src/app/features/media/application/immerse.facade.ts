@@ -41,7 +41,12 @@ export class ImmerseFacade {
   markViewed(clip: Clip): void {
     if (clip.watched) return;
     this.clips.update(list => list.map(c => c.id === clip.id ? {...c, watched: true} : c));
-    this.repository.markViewed(clip.id).subscribe();
+    this.repository.markViewed(clip.id).subscribe({
+      error: () => {
+        this.clips.update(list => list.map(c => c.id === clip.id ? {...c, watched: false} : c));
+        this.error.set('Не получилось сохранить просмотр.');
+      },
+    });
   }
 
   toggleLike(clip: Clip): void {
@@ -49,7 +54,10 @@ export class ImmerseFacade {
     this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: !c.liked} : c));
     this.repository.toggleLike(clip.id).subscribe({
       next: res => this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: res.liked} : c)),
-      error: () => this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: clip.liked} : c)),
+      error: () => {
+        this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: clip.liked} : c));
+        this.error.set('Не получилось сохранить лайк.');
+      },
     });
   }
 }

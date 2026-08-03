@@ -1,20 +1,23 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, afterNextRender, computed, inject, input, output, signal} from '@angular/core';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
+import {HgAudioButtonComponent} from '@shared/components/hg';
 import {shuffle} from '@shared/utils/shuffle';
 import {ChoiceOption, ListenChoicePayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
 
 @Component({
   selector: 'hg-exercise-listen',
+  imports: [HgAudioButtonComponent],
   template: `
     <div class="q-kind">Слушай и выбери</div>
     <div class="q-word">
-      <button type="button" class="bigsnd" (click)="play()" aria-label="Прослушать ещё раз">🔊</button>
+      <hg-audio-button [text]="payload().text ?? ''" [audioUrl]="payload().audioUrl" size="lg"/>
       <div class="r">Нажми, чтобы прослушать ещё раз</div>
     </div>
     <div class="opts">
       @for (option of options(); track option.text) {
-        <button type="button" class="opt"
+        <button type="button" data-domain-control class="opt"
+                [attr.aria-pressed]="picked() === option"
                 [class.pick]="answered() && option.correct"
                 [class.wrong]="answered() && picked() === option && !option.correct"
                 [disabled]="answered()"
@@ -41,12 +44,7 @@ export class ExerciseListenComponent {
   readonly answered = signal(false);
 
   constructor() {
-    // автопроигрывание при появлении упражнения
-    setTimeout(() => this.play());
-  }
-
-  play(): void {
-    this.tts.speak(this.payload().text ?? '', this.payload().audioUrl);
+    afterNextRender(() => this.tts.speak(this.payload().text ?? '', this.payload().audioUrl));
   }
 
   pick(option: ChoiceOption): void {

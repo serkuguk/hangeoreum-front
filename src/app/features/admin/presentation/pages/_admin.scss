@@ -22,6 +22,15 @@
   }
 }
 
+.addrow {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+
+  hg-input { flex: 1; min-width: 160px; }
+}
+
 .atable {
   width: 100%;
   border-collapse: collapse;

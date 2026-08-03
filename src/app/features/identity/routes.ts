@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {loggedGuard, redirectLoggedInGuard} from '@core/auth/auth.guard';
+import {authGuard, redirectLoggedInGuard} from '@core/auth/auth.guard';
 import {AuthLayoutComponent} from './presentation/layout/auth-layout.component';
 
 export const identityRoutes: Routes = [
@@ -21,7 +21,7 @@ export const identityRoutes: Routes = [
   },
   {
     path: 'onboarding',
-    canActivate: [loggedGuard],
+    canActivate: [authGuard],
     loadComponent: () => import('./presentation/pages/onboarding-page/onboarding-page.component').then(c => c.OnboardingPageComponent),
   },
 ];

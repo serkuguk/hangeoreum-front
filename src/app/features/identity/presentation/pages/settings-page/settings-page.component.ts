@@ -1,5 +1,18 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormsModule} from '@angular/forms';
+import {
+  ReplaySubject,
+  Subject,
+  catchError,
+  debounce,
+  finalize,
+  firstValueFrom,
+  map,
+  of,
+  switchMap,
+  timer,
+} from 'rxjs';
 import {
   ColorMode,
   DEFAULT_THEME,
@@ -10,15 +23,29 @@ import {
   ThemeService,
 } from '@core/services/theme.service';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
+import {
+  HgButtonComponent,
+  HgInputComponent,
+  HgSegmentedControlComponent,
+  HgSegmentedOption,
+  HgToggleComponent,
+} from '@shared/components/controls';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {ME_REPOSITORY} from '../../../domain/repositories/me.repository';
 import {UserSettings} from '../../../domain/user.entity';
 
+interface SettingsSaveRequest {
+  settings: UserSettings;
+  immediate: boolean;
+  completion?: ReplaySubject<boolean>;
+}
+
 @Component({
   selector: 'hg-settings-page',
-  imports: [FormsModule],
+  imports: [FormsModule, HgButtonComponent, HgInputComponent, HgToggleComponent, HgSegmentedControlComponent],
   templateUrl: './settings-page.component.html',
   styleUrl: './settings-page.component.scss',
+  host: {'(window:beforeunload)': 'warnBeforeUnload($event)'},
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPageComponent {
@@ -26,9 +53,12 @@ export class SettingsPageComponent {
   private meRepository = inject(ME_REPOSITORY);
   private themeService = inject(ThemeService);
   private tts = inject(KoreanTtsService);
+  private destroyRef = inject(DestroyRef);
 
   readonly settings = signal<UserSettings | null>(null);
   readonly saved = signal(false);
+  readonly saving = signal(false);
+  readonly dirty = signal(false);
   readonly error = signal<string | null>(null);
 
   // тема
@@ -48,10 +78,58 @@ export class SettingsPageComponent {
   readonly goals = [10, 20, 50];
   readonly speeds = [0.75, 1.0, 1.25];
   readonly times = ['09:00', '12:00', '19:00', '21:00'];
+  readonly goalOptions: readonly HgSegmentedOption<number>[] = this.goals.map(goal =>
+    ({value: goal, label: `${goal} XP`}));
+  readonly speedOptions: readonly HgSegmentedOption<number>[] = this.speeds.map(speed =>
+    ({value: speed, label: `${speed}×`}));
+  readonly timeOptions: readonly HgSegmentedOption<string>[] = this.times.map(time =>
+    ({value: time, label: time}));
+  readonly modeOptions: readonly HgSegmentedOption<ColorMode>[] = [
+    {value: 'light', label: 'Светлая'},
+    {value: 'dark', label: 'Тёмная'},
+    {value: 'system', label: 'Системная'},
+  ];
+  readonly accentOptions: readonly HgSegmentedOption<string>[] = this.accents.map(accent =>
+    ({value: accent.value, label: accent.name}));
+  readonly fontScaleOptions: readonly HgSegmentedOption<number>[] = this.fontScales.map(scale =>
+    ({value: scale.value, label: scale.name}));
+  readonly radiusOptions: readonly HgSegmentedOption<string>[] = this.radii.map(radius =>
+    ({value: radius.value, label: radius.name}));
 
-  private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly saveRequests$ = new Subject<SettingsSaveRequest>();
+  private readonly pendingCompletions = new Set<ReplaySubject<boolean>>();
+  private savedTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    this.saveRequests$.pipe(
+      debounce(request => request.immediate ? of(0) : timer(600)),
+      switchMap(request => {
+        this.saving.set(true);
+        return this.meRepository.updateSettings(request.settings).pipe(
+          map(() => ({request, success: true})),
+          catchError(() => of({request, success: false})),
+          finalize(() => {
+            if (request.completion && !request.completion.closed) {
+              this.resolveCompletion(request.completion, false);
+            }
+          }),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(({request, success}) => {
+      this.saving.set(false);
+      const savedLatestValue = success && sameSettings(this.settings(), request.settings);
+      if (savedLatestValue) this.dirty.set(false);
+      this.error.set(success ? null : 'Не удалось сохранить. Проверь соединение.');
+      if (success) this.showSaved();
+      if (request.completion) this.resolveCompletion(request.completion, savedLatestValue);
+    });
+
+    this.destroyRef.onDestroy(() => {
+      if (this.savedTimer) clearTimeout(this.savedTimer);
+      this.pendingCompletions.forEach(completion => this.resolveCompletion(completion, false));
+    });
+
     this.nameDraft.set(this.auth.user()?.name ?? '');
     this.meRepository.settings().subscribe({
       next: settings => {
@@ -68,6 +146,7 @@ export class SettingsPageComponent {
           }
         }
         this.tts.setRate(settings.playbackSpeed);
+        this.dirty.set(false);
       },
       error: () => this.error.set('Не получилось загрузить настройки.'),
     });
@@ -78,8 +157,10 @@ export class SettingsPageComponent {
     if (!current) return;
     const next = {...current, ...patch};
     this.settings.set(next);
+    this.dirty.set(true);
+    this.error.set(null);
     if (patch.playbackSpeed) this.tts.setRate(patch.playbackSpeed);
-    this.scheduleSave();
+    this.saveRequests$.next({settings: next, immediate: false});
   }
 
   setTheme(patch: Partial<ThemeChoice>): void {
@@ -95,27 +176,54 @@ export class SettingsPageComponent {
     this.patch({theme: {...this.theme(), mode}});
   }
 
-  /** Автосохранение с дебаунсом 600мс. */
-  private scheduleSave(): void {
-    if (this.saveTimer) clearTimeout(this.saveTimer);
-    this.saveTimer = setTimeout(() => {
-      const settings = this.settings();
-      if (!settings) return;
-      this.meRepository.updateSettings(settings).subscribe({
-        next: () => {
-          this.saved.set(true);
-          setTimeout(() => this.saved.set(false), 1600);
-        },
-        error: () => this.error.set('Не удалось сохранить. Проверь соединение.'),
-      });
-    }, 600);
+  updateGoal(goal: number | null): void {
+    if (goal !== null) this.patch({dailyGoalXp: goal});
+  }
+
+  updateReminderTime(time: string | null): void {
+    if (time !== null) this.patch({reminderTime: time});
+  }
+
+  updatePlaybackSpeed(speed: number | null): void {
+    if (speed !== null) this.patch({playbackSpeed: speed});
+  }
+
+  updateMode(mode: ColorMode | null): void {
+    if (mode !== null) this.setMode(mode);
+  }
+
+  updateAccent(accent: string | null): void {
+    if (accent !== null) this.setTheme({accent});
+  }
+
+  updateFontScale(fontScale: number | null): void {
+    if (fontScale !== null) this.setTheme({fontScale});
+  }
+
+  updateRadius(radius: string | null): void {
+    if (radius !== null) this.setTheme({radius});
+  }
+
+  canDeactivate(): boolean | Promise<boolean> {
+    if (!this.dirty()) return true;
+    if (!confirm('Настройки ещё не сохранены. Сохранить их перед выходом?')) return false;
+    return this.saveLatestSettings();
+  }
+
+  warnBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.dirty()) return;
+    event.preventDefault();
+    event.returnValue = '';
   }
 
   saveName(): void {
     const name = this.nameDraft().trim();
     const user = this.auth.user();
     if (!name || !user || name === user.name) return;
-    this.meRepository.update({name}).subscribe(updated => this.auth.syncUser(updated));
+    this.meRepository.update({name}).subscribe({
+      next: updated => this.auth.syncUser(updated),
+      error: () => this.error.set('Не получилось изменить имя.'),
+    });
   }
 
   changePassword(): void {
@@ -129,8 +237,7 @@ export class SettingsPageComponent {
         this.showPassword.set(false);
         this.passwordCurrent.set('');
         this.passwordNext.set('');
-        this.saved.set(true);
-        setTimeout(() => this.saved.set(false), 1600);
+        this.showSaved();
       },
       error: () => this.passwordError.set('Не получилось — проверь текущий пароль'),
     });
@@ -138,10 +245,41 @@ export class SettingsPageComponent {
 
   deleteAccount(): void {
     if (!confirm('Удалить аккаунт навсегда? Прогресс, слова и подписка будут стёрты.')) return;
-    this.meRepository.deleteAccount().subscribe(() => this.auth.logout());
+    this.meRepository.deleteAccount().subscribe({
+      next: () => this.auth.logout(),
+      error: () => this.error.set('Не получилось удалить аккаунт.'),
+    });
   }
 
   logout(): void {
     this.auth.logout();
   }
+
+  private saveLatestSettings(): Promise<boolean> {
+    const settings = this.settings();
+    if (!settings) return Promise.resolve(!this.dirty());
+
+    const completion = new ReplaySubject<boolean>(1);
+    this.pendingCompletions.add(completion);
+    const result = firstValueFrom(completion);
+    this.saveRequests$.next({settings, immediate: true, completion});
+    return result.finally(() => this.pendingCompletions.delete(completion));
+  }
+
+  private resolveCompletion(completion: ReplaySubject<boolean>, result: boolean): void {
+    if (completion.closed) return;
+    completion.next(result);
+    completion.complete();
+    this.pendingCompletions.delete(completion);
+  }
+
+  private showSaved(): void {
+    this.saved.set(true);
+    if (this.savedTimer) clearTimeout(this.savedTimer);
+    this.savedTimer = setTimeout(() => this.saved.set(false), 1600);
+  }
+}
+
+function sameSettings(current: UserSettings | null, saved: UserSettings): boolean {
+  return current !== null && JSON.stringify(current) === JSON.stringify(saved);
 }

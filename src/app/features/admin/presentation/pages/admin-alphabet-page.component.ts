@@ -1,8 +1,10 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {AdminApi, AdminLetter} from '../../infrastructure/admin.api';
+import {HgFilePickerComponent} from '@shared/components/controls';
 
 @Component({
   selector: 'hg-admin-alphabet-page',
+  imports: [HgFilePickerComponent],
   template: `
     <h2 class="pagettl">Алфавит</h2>
     <p class="pagesub">40 букв 자모: озвучка и порядок. Буквы создаются миграцией БД.</p>
@@ -22,10 +24,8 @@ import {AdminApi, AdminLetter} from '../../infrastructure/admin.api';
               <td>{{ letter.letterGroup }}</td>
               <td>{{ letter.position }}</td>
               <td>
-                <label class="rowbtn" [class.on]="letter.audioUrl">
-                  {{ letter.audioUrl ? '🔊 Заменить' : '⬆ Загрузить' }}
-                  <input type="file" accept="audio/*" hidden (change)="upload(letter, $event)">
-                </label>
+                <hg-file-picker [label]="letter.audioUrl ? '🔊 Заменить' : '⬆ Загрузить'"
+                                accept="audio/*" (fileSelected)="upload(letter, $event)"/>
               </td>
             </tr>
           } @empty {
@@ -55,9 +55,7 @@ export class AdminAlphabetPageComponent {
     });
   }
 
-  upload(letter: AdminLetter, event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+  upload(letter: AdminLetter, file: File): void {
     this.api.uploadLetterAudio(letter.id, file).subscribe({
       next: () => this.load(),
       error: () => this.error.set('Не получилось загрузить аудио.'),

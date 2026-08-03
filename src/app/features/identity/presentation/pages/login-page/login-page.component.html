@@ -4,37 +4,25 @@
   <p class="sub">Рад снова видеть тебя 👋</p>
 
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="field">
-      <label for="email">Email</label>
-      <input id="email" type="email" formControlName="email" placeholder="you@email.com"
-             autocomplete="email" [class.invalid]="invalid('email')">
-      @if (invalid('email')) {
-        <div class="fielderr">Введи корректный email</div>
-      }
-    </div>
+    <hg-input id="email" type="email" label="Email" formControlName="email"
+              placeholder="you@email.com" autocomplete="email"
+              [error]="invalid('email') ? 'Введи корректный email' : ''"/>
 
-    <div class="field">
-      <label for="password">Пароль</label>
-      <input id="password" type="password" formControlName="password" placeholder="••••••••"
-             autocomplete="current-password" [class.invalid]="invalid('password')">
-      @if (invalid('password')) {
-        <div class="fielderr">Введи пароль</div>
-      }
-    </div>
+    <hg-input id="password" type="password" label="Пароль" formControlName="password"
+              placeholder="••••••••" autocomplete="current-password"
+              [error]="invalid('password') ? 'Введи пароль' : ''"/>
 
     @if (facade.error(); as error) {
       <div class="apierr">{{ error }}</div>
     }
 
-    <button class="btn" type="submit" [disabled]="facade.loading()">
-      {{ facade.loading() ? 'Входим…' : 'Войти' }}
-    </button>
+    <hg-button class="btn" type="submit" label="Войти" [loading]="facade.loading()" block/>
   </form>
 
   <div class="sep">или через</div>
   <div class="social">
-    <button type="button" (click)="facade.loginWithProvider('google')">Google</button>
-    <button type="button" (click)="facade.loginWithProvider('kakao')">Kakao</button>
+    <hg-button label="Google" variant="secondary" block (pressed)="facade.loginWithProvider('google')"/>
+    <hg-button label="Kakao" variant="secondary" block (pressed)="facade.loginWithProvider('kakao')"/>
   </div>
 
   <div class="alt">Нет аккаунта? <a routerLink="/auth/register">Зарегистрироваться</a></div>

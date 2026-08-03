@@ -20,7 +20,8 @@ import {Feedback} from '../../../application/facades/lesson.facade';
     </div>
     <div class="opts">
       @for (option of options(); track option.text) {
-        <button type="button" class="opt"
+        <button type="button" data-domain-control class="opt"
+                [attr.aria-pressed]="picked() === option"
                 [class.pick]="answered() && option.correct"
                 [class.wrong]="answered() && picked() === option && !option.correct"
                 [disabled]="answered()"

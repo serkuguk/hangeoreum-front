@@ -5,7 +5,8 @@
     @if (isAdmin()) {
       <a class="pill p-r adminlink" routerLink="/admin">Админ</a>
     }
-    <button type="button" class="userbtn" (click)="menuOpen.set(!menuOpen())"
+    <button type="button" data-domain-control class="userbtn" (click)="menuOpen.set(!menuOpen())"
+            aria-label="Меню пользователя"
             aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
       @if (facade.user()?.avatarUrl; as avatar) {
         <img class="av" [src]="avatar" alt="">
@@ -22,7 +23,7 @@
         <a routerLink="/profile" role="menuitem" (click)="menuOpen.set(false)">Кабинет</a>
         <a routerLink="/settings" role="menuitem" (click)="menuOpen.set(false)">Настройки</a>
         <a routerLink="/billing" role="menuitem" (click)="menuOpen.set(false)">Подписка</a>
-        <button type="button" class="exit" role="menuitem" (click)="logout()">Выйти</button>
+        <hg-button class="exit" label="Выйти" variant="danger" size="sm" (pressed)="logout()"/>
       </div>
     }
   </div>

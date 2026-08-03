@@ -80,7 +80,4 @@ export class VocabularyHttpRepository implements VocabularyRepository {
     return this.http.post<void>(`${this.base}/decks/${deckId}/words/${wordId}`, null);
   }
 
-  removeDeckWord(deckId: string, wordId: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/decks/${deckId}/words/${wordId}`);
-  }
 }

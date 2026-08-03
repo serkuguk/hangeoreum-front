@@ -2,6 +2,13 @@ import {ChangeDetectionStrategy, Component, computed, effect, inject, signal} fr
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {HgAudioButtonComponent} from '@shared/components/hg';
+import {
+  HgButtonComponent,
+  HgDialogComponent,
+  HgInputComponent,
+  HgPaginationComponent,
+  HgSegmentedControlComponent,
+} from '@shared/components/controls';
 import {VocabularyFacade} from '../../../application/facades/vocabulary.facade';
 import {UserWord} from '../../../domain/entities/user-word.entity';
 import {Deck} from '../../../domain/repositories/vocabulary.repository';
@@ -10,7 +17,16 @@ const PAGE_SIZE = 20;
 
 @Component({
   selector: 'hg-vocabulary-page',
-  imports: [FormsModule, RouterLink, HgAudioButtonComponent],
+  imports: [
+    FormsModule,
+    RouterLink,
+    HgAudioButtonComponent,
+    HgButtonComponent,
+    HgDialogComponent,
+    HgInputComponent,
+    HgPaginationComponent,
+    HgSegmentedControlComponent,
+  ],
   templateUrl: './vocabulary-page.component.html',
   styleUrl: './vocabulary-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +46,11 @@ export class VocabularyPageComponent {
   readonly newDeckTitle = signal('');
 
   readonly totalPages = computed(() => Math.ceil(this.facade.totalElements() / PAGE_SIZE));
+
+  readonly tabs = [
+    {value: 'words' as const, label: 'Слова'},
+    {value: 'decks' as const, label: 'Мои колоды'},
+  ];
 
   readonly levels = [
     {value: null, label: 'Все'},
@@ -115,6 +136,10 @@ export class VocabularyPageComponent {
   addToDeck(deck: Deck): void {
     const word = this.deckPickWord();
     if (word) this.facade.addToDeck(deck.id, word.word.id);
+    this.deckPickWord.set(null);
+  }
+
+  closeDeckPicker(): void {
     this.deckPickWord.set(null);
   }
 }

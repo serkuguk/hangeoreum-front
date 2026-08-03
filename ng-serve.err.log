@@ -1,0 +1,4 @@
+$ ng serve "--" "--host" "127.0.0.1" "--port" "4200"
+[1m[33mOption '--' has been specified multiple times. The value '4200' will be used.[39m[22m
+[1m[31mError: Schema validation failed with the following errors:
+  Data path "" must NOT have additional properties().[39m[22m

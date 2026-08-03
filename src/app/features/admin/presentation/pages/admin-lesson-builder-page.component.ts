@@ -1,8 +1,17 @@
 import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {RouterLink} from '@angular/router';
+import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
 import {AdminApi, AdminExercise, AdminLessonFull} from '../../infrastructure/admin.api';
 import {Word} from '@features/vocabulary/domain/entities/word.entity';
+import {
+  HgButtonComponent,
+  HgInputComponent,
+  HgSelectComponent,
+  HgSelectOption,
+  HgTextareaComponent,
+} from '@shared/components/controls';
 
 /** Шаблоны payload по kind — подставляются в JSON-редактор при добавлении. */
 const PAYLOAD_TEMPLATES: Record<string, unknown> = {
@@ -20,10 +29,18 @@ const PAYLOAD_TEMPLATES: Record<string, unknown> = {
 };
 
 const KINDS = Object.keys(PAYLOAD_TEMPLATES);
+const KIND_OPTIONS: readonly HgSelectOption<string>[] = KINDS.map(value => ({label: value, value}));
 
 @Component({
   selector: 'hg-admin-lesson-builder-page',
-  imports: [FormsModule, RouterLink],
+  imports: [
+    FormsModule,
+    RouterLink,
+    HgButtonComponent,
+    HgInputComponent,
+    HgSelectComponent,
+    HgTextareaComponent,
+  ],
   templateUrl: './admin-lesson-builder-page.component.html',
   styleUrl: './_admin.scss',
   styles: `
@@ -38,19 +55,7 @@ const KINDS = Object.keys(PAYLOAD_TEMPLATES);
 
       .kind { font-weight: 700; font-size: 13px; min-width: 120px; padding-top: 4px; }
 
-      textarea {
-        flex: 1;
-        min-height: 84px;
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 10px;
-        padding: 10px;
-        color: var(--hg-txt);
-        font-family: monospace;
-        font-size: 12px;
-
-        &.badjson { border-color: var(--hg-red); }
-      }
+      hg-textarea { flex: 1; }
     }
 
     .addex {
@@ -58,13 +63,6 @@ const KINDS = Object.keys(PAYLOAD_TEMPLATES);
       gap: 8px;
       margin-top: 14px;
 
-      select {
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 10px;
-        padding: 9px 12px;
-        color: var(--hg-txt);
-      }
     }
 
     .tipform {
@@ -72,17 +70,6 @@ const KINDS = Object.keys(PAYLOAD_TEMPLATES);
       flex-direction: column;
       gap: 10px;
 
-      input, textarea {
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 10px;
-        padding: 10px 12px;
-        color: var(--hg-txt);
-        font-size: 13.5px;
-        font-family: inherit;
-      }
-
-      textarea { min-height: 90px; }
       .mono { font-family: monospace; font-size: 12px; }
     }
 
@@ -118,7 +105,7 @@ export class AdminLessonBuilderPageComponent {
   readonly error = signal<string | null>(null);
   readonly savedFlash = signal<string | null>(null);
 
-  readonly kinds = KINDS;
+  readonly kindOptions = KIND_OPTIONS;
   newKind = 'CHOICE';
 
   // черновики payload как JSON-строки по id упражнения
@@ -132,9 +119,20 @@ export class AdminLessonBuilderPageComponent {
   // поиск слов для привязки
   wordSearch = '';
   readonly foundWords = signal<Word[]>([]);
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly wordSearch$ = new Subject<string>();
 
   constructor() {
+    this.wordSearch$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(value => this.api.words(value, 0).pipe(
+        catchError(() => {
+          this.error.set('Не получилось найти слова.');
+          return of(null);
+        }),
+      )),
+      takeUntilDestroyed(),
+    ).subscribe(result => this.foundWords.set(result?.content ?? []));
     setTimeout(() => this.load());
   }
 
@@ -187,7 +185,10 @@ export class AdminLessonBuilderPageComponent {
 
   removeExercise(exercise: AdminExercise): void {
     if (!confirm('Удалить упражнение?')) return;
-    this.api.deleteExercise(this.id(), exercise.id).subscribe(() => this.load());
+    this.api.deleteExercise(this.id(), exercise.id).subscribe({
+      next: () => this.load(),
+      error: () => this.error.set('Не получилось удалить упражнение.'),
+    });
   }
 
   saveTip(): void {
@@ -209,10 +210,7 @@ export class AdminLessonBuilderPageComponent {
 
   searchWords(value: string): void {
     this.wordSearch = value;
-    if (this.searchTimer) clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => {
-      this.api.words(value, 0).subscribe(result => this.foundWords.set(result.content));
-    }, 300);
+    this.wordSearch$.next(value);
   }
 
   isLinked(word: Word): boolean {
@@ -225,9 +223,12 @@ export class AdminLessonBuilderPageComponent {
     const ids = this.isLinked(word)
       ? data.words.filter(w => w.id !== word.id).map(w => w.id)
       : [...data.words.map(w => w.id), word.id];
-    this.api.putLessonWords(this.id(), ids).subscribe(words => {
-      this.data.set({...data, words});
-      this.flash('Слова урока обновлены');
+    this.api.putLessonWords(this.id(), ids).subscribe({
+      next: words => {
+        this.data.set({...data, words});
+        this.flash('Слова урока обновлены');
+      },
+      error: () => this.error.set('Не получилось обновить слова урока.'),
     });
   }
 

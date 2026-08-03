@@ -1,7 +1,8 @@
 import {Routes} from '@angular/router';
-import {adminGuard, isAuthCanMatch, redirectLoggedInGuard} from '@core/auth/auth.guard';
+import {adminGuard, authGuard, redirectLoggedInGuard} from '@core/auth/auth.guard';
 import {MainLayoutComponent} from './layouts/main-layout/main-layout.component';
 import {identityRoutes} from '@features/identity/routes';
+import {settingsPendingChangesGuard} from '@features/identity/presentation/pages/settings-page/settings-pending-changes.guard';
 
 export const routes: Routes = [
   {
@@ -14,7 +15,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    canMatch: [isAuthCanMatch],
+    canMatch: [authGuard],
     children: [
       {
         path: 'dashboard',
@@ -44,6 +45,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
+        canDeactivate: [settingsPendingChangesGuard],
         loadComponent: () => import('@features/identity/presentation/pages/settings-page/settings-page.component')
           .then(c => c.SettingsPageComponent),
       },
@@ -56,7 +58,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canMatch: [isAuthCanMatch],
+    canMatch: [authGuard],
     canActivate: [adminGuard],
     loadChildren: () => import('@features/admin/routes').then(m => m.adminRoutes),
   },

@@ -1,13 +1,8 @@
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
+import {ClipSubtitle} from '@shared/models/clip-subtitle';
 
-export interface ClipSubtitle {
-  lang: string;
-  position: number;
-  text: string;
-  startMs: number;
-  endMs: number;
-}
+export type {ClipSubtitle} from '@shared/models/clip-subtitle';
 
 export interface Clip {
   id: string;

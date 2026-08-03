@@ -129,37 +129,6 @@
   }
 }
 
-// сводка
-.rewcard {
-  padding: var(--hg-space-7) var(--hg-space-6);
-  text-align: center;
-
-  .ghost { font-size: 240px; right: -50px; bottom: -80px; }
-}
-
-.rew-han { font-family: var(--hg-font-display); font-size: 54px; color: var(--hg-reward); margin-bottom: 10px; line-height: 1.1; }
-
-.rewstats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--hg-space-2);
-  margin: var(--hg-space-6) 0 var(--hg-space-5);
-}
-
-.rewstat {
-  background: var(--hg-surface-muted);
-  border-radius: var(--hg-radius-block);
-  padding: var(--hg-space-4) var(--hg-space-2);
-
-  b { font-size: 20px; font-weight: 700; display: block; }
-  span { font-size: 11.5px; color: var(--hg-text-muted); }
-}
-
-.y { color: var(--hg-reward); }
-.j { color: var(--hg-success); }
-.r { color: var(--hg-danger); }
-.bl { color: var(--hg-route); }
-
 .hardlist {
   display: flex;
   flex-direction: column;
@@ -180,15 +149,6 @@
   .tr { flex: 1; color: var(--hg-text-muted); font-size: 13.5px; }
 }
 
-.rewbtns {
-  display: flex;
-  gap: var(--hg-space-3);
-
-  .grow { flex: 1; }
-  .ghostbtn { text-decoration: none; color: var(--hg-text); }
-}
-
 @media (max-width: 880px) {
-  .srs, .rewstats { grid-template-columns: repeat(2, 1fr); }
-  .rewbtns { flex-direction: column; }
+  .srs { grid-template-columns: repeat(2, 1fr); }
 }

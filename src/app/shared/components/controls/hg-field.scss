@@ -1,0 +1,9 @@
+.field { display: grid; gap: .4rem; width: 100%; }
+label { color: var(--hg-text, #172033); font-size: .9rem; font-weight: 700; }
+input:not([type='checkbox']), textarea, select { box-sizing: border-box; width: 100%; min-height: 2.75rem; border: 1px solid var(--hg-border, #ccd4e2); border-radius: var(--hg-radius-control, .75rem); background: var(--hg-card, #fff); color: var(--hg-text, #172033); padding: .65rem .8rem; font: inherit; }
+textarea { min-height: 6rem; resize: vertical; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { border-color: var(--hg-blue, #4f67ff); outline: 3px solid color-mix(in srgb, var(--hg-blue, #4f67ff) 22%, transparent); }
+input:disabled, textarea:disabled, select:disabled { cursor: not-allowed; opacity: .62; }
+.hint, .error { font-size: .8rem; }
+.hint { color: var(--hg-text-muted, #647084); }
+.error { color: var(--hg-danger, #c43143); }

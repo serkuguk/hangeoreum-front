@@ -1,17 +1,21 @@
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, switchMap} from 'rxjs';
+import {HgButtonComponent, HgInputComponent, HgPaginationComponent} from '@shared/components/controls';
 import {AdminApi, AdminUser} from '../../infrastructure/admin.api';
 
 @Component({
   selector: 'hg-admin-users-page',
-  imports: [FormsModule],
+  imports: [FormsModule, HgButtonComponent, HgInputComponent, HgPaginationComponent],
   template: `
     <h2 class="pagettl">Пользователи</h2>
     <p class="pagesub">{{ total() }} зарегистрировано.</p>
 
     <div class="toolbar">
-      <input class="search" type="search" placeholder="Поиск: имя или email…"
-             [ngModel]="search()" (ngModelChange)="onSearch($event)">
+      <hg-input class="search" type="search" label="Поиск пользователей"
+                placeholder="Имя или email…" [ngModel]="search()"
+                (ngModelChange)="onSearch($event)" />
     </div>
 
     @if (error()) {
@@ -33,10 +37,11 @@ import {AdminApi, AdminUser} from '../../infrastructure/admin.api';
               </td>
               <td>{{ user.createdAt.slice(0, 10) }}</td>
               <td>
-                <button type="button" class="rowbtn" (click)="toggleRole(user)">
-                  {{ user.role === 'ADMIN' ? 'Сделать USER' : 'Сделать ADMIN' }}
-                </button>
-                <button type="button" class="rowbtn danger" (click)="block(user)">Заблокировать</button>
+                <hg-button size="sm" variant="ghost"
+                           [label]="user.role === 'ADMIN' ? 'Сделать USER' : 'Сделать ADMIN'"
+                           (pressed)="toggleRole(user)" />
+                <hg-button size="sm" variant="danger" label="Заблокировать"
+                           (pressed)="block(user)" />
               </td>
             </tr>
           } @empty {
@@ -45,11 +50,8 @@ import {AdminApi, AdminUser} from '../../infrastructure/admin.api';
         </tbody>
       </table>
       @if (totalPages() > 1) {
-        <div class="pager">
-          <button type="button" class="rowbtn" [disabled]="page() === 0" (click)="page.set(page() - 1); load()">←</button>
-          {{ page() + 1 }} / {{ totalPages() }}
-          <button type="button" class="rowbtn" [disabled]="page() + 1 >= totalPages()" (click)="page.set(page() + 1); load()">→</button>
-        </div>
+        <hg-pagination [page]="page()" [totalPages]="totalPages()"
+                       ariaLabel="Страницы пользователей" (pageChange)="goToPage($event)" />
       }
     </div>
   `,
@@ -67,9 +69,24 @@ export class AdminUsersPageComponent {
 
   readonly totalPages = computed(() => Math.ceil(this.total() / 20));
 
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly search$ = new Subject<string>();
 
   constructor() {
+    this.search$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(search => this.api.users(search, 0).pipe(
+        catchError(() => {
+          this.error.set('Не получилось загрузить пользователей.');
+          return EMPTY;
+        }),
+      )),
+      takeUntilDestroyed(),
+    ).subscribe(result => {
+      this.users.set(result.content);
+      this.total.set(result.totalElements);
+      this.error.set(null);
+    });
     this.load();
   }
 
@@ -86,14 +103,21 @@ export class AdminUsersPageComponent {
   onSearch(value: string): void {
     this.search.set(value);
     this.page.set(0);
-    if (this.searchTimer) clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this.load(), 300);
+    this.search$.next(value);
+  }
+
+  goToPage(page: number): void {
+    this.page.set(page);
+    this.load();
   }
 
   toggleRole(user: AdminUser): void {
     const role = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
     if (!confirm(`Сменить роль ${user.email} на ${role}?`)) return;
-    this.api.patchUser(user.id, {role}).subscribe(() => this.load());
+    this.api.patchUser(user.id, {role}).subscribe({
+      next: () => this.load(),
+      error: () => this.error.set('Не получилось сменить роль.'),
+    });
   }
 
   block(user: AdminUser): void {

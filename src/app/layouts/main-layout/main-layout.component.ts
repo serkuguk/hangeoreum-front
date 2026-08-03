@@ -2,10 +2,11 @@ import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@ang
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {PaywallDialogComponent} from '@features/billing/presentation/paywall-dialog/paywall-dialog.component';
+import {HgButtonComponent} from '@shared/components/controls';
 
 @Component({
   selector: 'hg-main-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, PaywallDialogComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PaywallDialogComponent, HgButtonComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

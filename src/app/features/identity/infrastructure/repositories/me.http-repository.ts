@@ -12,10 +12,6 @@ export class MeHttpRepository implements MeRepository {
   private http = inject(HttpClient);
   private base = `${inject<EnvironmentInterface>(ENV).server_url}/me`;
 
-  me(): Observable<User> {
-    return this.http.get<User>(this.base);
-  }
-
   update(patch: {name?: string; startLevel?: string}): Observable<User> {
     return this.http.patch<User>(this.base, patch);
   }
@@ -46,7 +42,4 @@ export class MeHttpRepository implements MeRepository {
     return this.http.delete<void>(this.base);
   }
 
-  unlinkOauth(provider: 'GOOGLE' | 'KAKAO'): Observable<void> {
-    return this.http.delete<void>(`${this.base}/oauth/${provider}`);
-  }
 }

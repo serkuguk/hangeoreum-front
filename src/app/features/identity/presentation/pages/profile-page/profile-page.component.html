@@ -4,20 +4,20 @@
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
     </div>
   } @else if (facade.profile(); as profile) {
     <div class="panel cab-head">
       <div class="ghost kr">복</div>
-      <label class="bigav" [title]="uploading() ? 'Загружаем…' : 'Сменить аватар'">
+      <div class="bigav" [title]="uploading() ? 'Загружаем…' : 'Аватар'">
         @if (profile.avatarUrl) {
           <img [src]="profile.avatarUrl" alt="Аватар">
         } @else {
           {{ profile.name.charAt(0).toUpperCase() }}
         }
-        <input type="file" accept="image/*" (change)="onAvatar($event)" hidden>
-        <span class="cam">📷</span>
-      </label>
+      </div>
+      <hg-file-picker label="Сменить аватар" ariaLabel="Выбрать новый аватар"
+                      accept="image/*" [disabled]="uploading()" (fileSelected)="onAvatar($event)"/>
       <div class="who">
         <h1>{{ profile.name }}</h1>
         <div class="pill p-y">⭐ {{ profile.levelTitle || ('Уровень ' + profile.level) }} · {{ profile.totalXp }} XP</div>

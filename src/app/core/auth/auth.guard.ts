@@ -1,8 +1,8 @@
 import {inject} from '@angular/core';
-import {CanActivateFn, CanMatchFn, Router} from '@angular/router';
+import {CanActivateFn, Router} from '@angular/router';
 import {AuthTokenStorageService} from '@core/services/auth-token-storage.service';
 
-export const loggedGuard: CanActivateFn = () => {
+export const authGuard = () => {
   const router = inject(Router);
   return inject(AuthTokenStorageService).isAuthenticate()
     ? true
@@ -14,13 +14,6 @@ export const redirectLoggedInGuard: CanActivateFn = () => {
   return inject(AuthTokenStorageService).isAuthenticate()
     ? router.createUrlTree(['/dashboard'])
     : true;
-};
-
-export const isAuthCanMatch: CanMatchFn = () => {
-  const router = inject(Router);
-  return inject(AuthTokenStorageService).isAuthenticate()
-    ? true
-    : router.createUrlTree(['/auth/login']);
 };
 
 export const adminGuard: CanActivateFn = () => {

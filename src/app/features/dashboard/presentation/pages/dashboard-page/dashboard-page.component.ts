@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/cor
 import {RouterLink} from '@angular/router';
 import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {HgAudioButtonComponent, HgProgressRingComponent} from '@shared/components/hg';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {DashboardFacade} from '../../../application/dashboard.facade';
 import {DASHBOARD_REPOSITORY} from '../../../domain/dashboard.model';
 import {DashboardHttpRepository} from '../../../infrastructure/dashboard.http-repository';
@@ -10,7 +11,7 @@ const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 @Component({
   selector: 'hg-dashboard-page',
-  imports: [RouterLink, HgAudioButtonComponent, HgProgressRingComponent],
+  imports: [RouterLink, HgAudioButtonComponent, HgProgressRingComponent, HgButtonComponent],
   providers: [
     {provide: DASHBOARD_REPOSITORY, useClass: DashboardHttpRepository},
     DashboardFacade,

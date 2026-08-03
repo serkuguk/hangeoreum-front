@@ -6,10 +6,11 @@ import {GAMIFICATION_REPOSITORY} from '@features/gamification/domain/gamificatio
 import {GamificationHttpRepository} from '@features/gamification/infrastructure/gamification.http-repository';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {ME_REPOSITORY} from '../../../domain/repositories/me.repository';
+import {HgButtonComponent, HgFilePickerComponent} from '@shared/components/controls';
 
 @Component({
   selector: 'hg-profile-page',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, HgButtonComponent, HgFilePickerComponent],
   providers: [
     {provide: GAMIFICATION_REPOSITORY, useClass: GamificationHttpRepository},
     GamificationFacade,
@@ -29,9 +30,7 @@ export class ProfilePageComponent {
     this.facade.load();
   }
 
-  onAvatar(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+  onAvatar(file: File): void {
     this.uploading.set(true);
     this.meRepository.uploadAvatar(file).subscribe({
       next: ({avatarUrl}) => {

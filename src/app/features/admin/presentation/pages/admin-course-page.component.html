@@ -7,27 +7,25 @@
 
 @if (!course()) {
   <div class="panel coursehead">
-    <input class="search" placeholder="Название курса (например «Корейский с нуля»)" [(ngModel)]="newCourseTitle">
-    <button type="button" class="cta" (click)="createCourse()">Создать курс</button>
+    <hg-input class="search" label="Название курса" placeholder="Например, Корейский с нуля" [(ngModel)]="newCourseTitle"/>
+    <hg-button label="Создать курс" (pressed)="createCourse()"/>
   </div>
 } @else {
   <div class="panel coursehead">
     <h3>{{ course()!.title }}</h3>
-    <button type="button" class="rowbtn" [class.on]="course()!.published" (click)="toggleCoursePublish()">
-      {{ course()!.published ? '👁 Опубликован' : '🚫 Черновик' }}
-    </button>
+    <hg-button [label]="course()!.published ? '👁 Опубликован' : '🚫 Черновик'"
+               variant="ghost" size="sm" (pressed)="toggleCoursePublish()"/>
   </div>
 
   @for (unit of units(); track unit.id) {
     <div class="panel unit">
       <div class="uhead">
         <b>{{ unit.position }} · {{ unit.title }}</b>
-        <button type="button" class="rowbtn" (click)="moveUnit(unit, -1)">↑</button>
-        <button type="button" class="rowbtn" (click)="moveUnit(unit, 1)">↓</button>
-        <button type="button" class="rowbtn" [class.on]="unit.published" (click)="toggleUnitPublish(unit)">
-          {{ unit.published ? '👁' : '🚫' }}
-        </button>
-        <button type="button" class="rowbtn danger" (click)="removeUnit(unit)">Удалить</button>
+        <hg-button icon="↑" ariaLabel="Переместить юнит выше" variant="ghost" size="sm" (pressed)="moveUnit(unit, -1)"/>
+        <hg-button icon="↓" ariaLabel="Переместить юнит ниже" variant="ghost" size="sm" (pressed)="moveUnit(unit, 1)"/>
+        <hg-button [icon]="unit.published ? '👁' : '🚫'" ariaLabel="Изменить публикацию юнита"
+                   variant="ghost" size="sm" (pressed)="toggleUnitPublish(unit)"/>
+        <hg-button label="Удалить" variant="danger" size="sm" (pressed)="removeUnit(unit)"/>
       </div>
 
       <div class="lessons">
@@ -36,14 +34,13 @@
             <span class="ttl">{{ lesson.position }} · {{ lesson.title }}</span>
             <span class="meta">{{ lesson.type }} · {{ lesson.xpReward }} XP</span>
             <a [routerLink]="['/admin/course/lessons', lesson.id]">Конструктор →</a>
-            <button type="button" class="rowbtn" (click)="moveLesson(unit, lesson, -1)">↑</button>
-            <button type="button" class="rowbtn" (click)="moveLesson(unit, lesson, 1)">↓</button>
-            <button type="button" class="rowbtn" [class.on]="lesson.free" (click)="toggleLessonFree(unit, lesson)"
-                    title="Бесплатный урок">{{ lesson.free ? 'Free' : 'Pro' }}</button>
-            <button type="button" class="rowbtn" [class.on]="lesson.published" (click)="toggleLessonPublish(unit, lesson)">
-              {{ lesson.published ? '👁' : '🚫' }}
-            </button>
-            <button type="button" class="rowbtn danger" (click)="removeLesson(unit, lesson)">✕</button>
+            <hg-button icon="↑" ariaLabel="Переместить урок выше" variant="ghost" size="sm" (pressed)="moveLesson(unit, lesson, -1)"/>
+            <hg-button icon="↓" ariaLabel="Переместить урок ниже" variant="ghost" size="sm" (pressed)="moveLesson(unit, lesson, 1)"/>
+            <hg-button [label]="lesson.free ? 'Free' : 'Pro'" ariaLabel="Изменить доступность урока"
+                       variant="ghost" size="sm" (pressed)="toggleLessonFree(unit, lesson)"/>
+            <hg-button [icon]="lesson.published ? '👁' : '🚫'" ariaLabel="Изменить публикацию урока"
+                       variant="ghost" size="sm" (pressed)="toggleLessonPublish(unit, lesson)"/>
+            <hg-button icon="✕" ariaLabel="Удалить урок" variant="danger" size="sm" (pressed)="removeLesson(unit, lesson)"/>
           </div>
         } @empty {
           <div class="empty">Уроков нет.</div>
@@ -51,23 +48,18 @@
       </div>
 
       <div class="addrow">
-        <input placeholder="Название нового урока…" [(ngModel)]="newLessonTitle[unit.id]"
-               (keydown.enter)="addLesson(unit)">
-        <select [(ngModel)]="newLessonType[unit.id]">
-          <option value="LESSON">LESSON</option>
-          <option value="GRAMMAR">GRAMMAR</option>
-          <option value="STORY">STORY</option>
-          <option value="ALPHABET">ALPHABET</option>
-        </select>
-        <button type="button" class="rowbtn" (click)="addLesson(unit)">+ Урок</button>
+        <hg-input label="Название нового урока" [(ngModel)]="newLessonTitle[unit.id]"
+                  (keydown.enter)="addLesson(unit)"/>
+        <hg-select label="Тип урока" [options]="lessonTypes" [(ngModel)]="newLessonType[unit.id]"/>
+        <hg-button label="+ Урок" variant="secondary" size="sm" (pressed)="addLesson(unit)"/>
       </div>
     </div>
   }
 
   <div class="panel unit">
     <div class="addrow">
-      <input placeholder="Название нового юнита…" [(ngModel)]="newUnitTitle" (keydown.enter)="addUnit()">
-      <button type="button" class="rowbtn" (click)="addUnit()">+ Юнит</button>
+      <hg-input label="Название нового юнита" [(ngModel)]="newUnitTitle" (keydown.enter)="addUnit()"/>
+      <hg-button label="+ Юнит" variant="secondary" size="sm" (pressed)="addUnit()"/>
     </div>
   </div>
 }

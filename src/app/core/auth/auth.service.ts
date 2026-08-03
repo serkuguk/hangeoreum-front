@@ -72,10 +72,6 @@ export class AuthService {
     );
   }
 
-  public get isAuth(): boolean {
-    return this.tokenStorage.isAuthenticate();
-  }
-
   public updateStoredUser(user: AuthUser): void {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     this.currentUser.set(user);

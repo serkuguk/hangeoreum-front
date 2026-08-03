@@ -8,7 +8,7 @@
   } @else if (facade.error(); as error) {
     <div class="panel errpanel">
       <p>{{ error }}</p>
-      <button class="ghostbtn" (click)="facade.load()">Повторить</button>
+      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
     </div>
   } @else if (facade.data(); as dash) {
     <div class="eyebrow">{{ today }}</div>

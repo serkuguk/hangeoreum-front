@@ -1,4 +1,4 @@
-import {SrsQuality, UserWord} from '../entities/user-word.entity';
+import {SrsQuality} from '../entities/user-word.entity';
 
 export type GameMode = 'MATCH' | 'LISTEN' | 'SPELL';
 
@@ -49,21 +49,6 @@ export class GameEngine {
       this.comboValue = 0;
     }
   }
-}
-
-/** Раунд Listen/Spell: слово + варианты. */
-export interface OptionRound {
-  word: UserWord;
-  options: string[]; // переводы (LISTEN) или слоги (SPELL не использует)
-  correct: string;
-}
-
-export function buildListenRound(word: UserWord, pool: UserWord[], optionCount = 4): OptionRound {
-  const distractors = pool
-    .filter(w => w.id !== word.id)
-    .map(w => w.word.translation);
-  const options = [word.word.translation, ...distractors.slice(0, optionCount - 1)];
-  return {word, options, correct: word.word.translation};
 }
 
 /** Слоги слова для Spell (собери из слогов). */

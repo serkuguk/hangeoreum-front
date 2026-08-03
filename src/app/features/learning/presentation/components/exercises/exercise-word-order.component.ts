@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {shuffle} from '@shared/utils/shuffle';
 import {WordOrderPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
@@ -10,6 +11,7 @@ interface BankToken {
 
 @Component({
   selector: 'hg-exercise-word-order',
+  imports: [HgButtonComponent],
   template: `
     <div class="q-kind">Собери предложение</div>
     <div class="panel taskpanel">{{ payload().translation }}</div>
@@ -19,21 +21,22 @@ interface BankToken {
         <span class="placeholder">Нажимай на слова внизу</span>
       }
       @for (token of chosen(); track token.id) {
-        <button type="button" class="wtok kr" [disabled]="answered()" (click)="remove(token)">{{ token.text }}</button>
+        <button type="button" data-domain-control class="wtok kr" [disabled]="answered()"
+                [attr.aria-label]="'Убрать слово ' + token.text" (click)="remove(token)">{{ token.text }}</button>
       }
     </div>
 
     <div class="wbank">
       @for (token of bank(); track token.id) {
         @if (!isChosen(token)) {
-          <button type="button" class="wtok kr" [disabled]="answered()" (click)="add(token)">{{ token.text }}</button>
+          <button type="button" data-domain-control class="wtok kr" [disabled]="answered()"
+                  [attr.aria-label]="'Добавить слово ' + token.text" (click)="add(token)">{{ token.text }}</button>
         }
       }
     </div>
 
-    <button type="button" class="cta checkbtn" [disabled]="chosen().length === 0 || answered()" (click)="check()">
-      Проверить
-    </button>
+    <hg-button class="checkbtn" label="Проверить"
+               [disabled]="chosen().length === 0 || answered()" (pressed)="check()"/>
   `,
   styleUrl: './exercise-shared.scss',
   styles: `

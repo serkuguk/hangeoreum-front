@@ -1,5 +1,6 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {concatMap} from 'rxjs';
 import {SrsQuality, UserWord} from '../../domain/entities/user-word.entity';
 import {previewLabel} from '../../domain/services/srs';
 import {
@@ -55,6 +56,7 @@ export class ReviewFacade {
     this.correctCount.set(0);
     this.hardWords.set([]);
     this.index.set(0);
+    this.queue.set([]);
     this.repository.startSession(mode, opts).subscribe({
       next: session => {
         this.sessionId = session.id;
@@ -117,16 +119,14 @@ export class ReviewFacade {
     if (!sessionId || this.saving()) return;
     this.saving.set(true);
     this.saveError.set(null);
-    this.repository.submitAnswers(sessionId, this.answers).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.repository.finishSession(sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-          next: result => {
-            this.result.set(result);
-            this.saving.set(false);
-            this.sessionId = null;
-          },
-          error: () => this.failFinish(),
-        });
+    this.repository.submitAnswers(sessionId, this.answers).pipe(
+      concatMap(() => this.repository.finishSession(sessionId)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: result => {
+        this.result.set(result);
+        this.saving.set(false);
+        this.sessionId = null;
       },
       error: () => this.failFinish(),
     });

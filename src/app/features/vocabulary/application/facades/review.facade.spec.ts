@@ -1,5 +1,5 @@
 import {TestBed} from '@angular/core/testing';
-import {of, throwError} from 'rxjs';
+import {Subject, of, throwError} from 'rxjs';
 import {UserWord} from '../../domain/entities/user-word.entity';
 import {VOCABULARY_REPOSITORY, VocabularyRepository} from '../../domain/repositories/vocabulary.repository';
 import {ReviewFacade} from './review.facade';
@@ -56,5 +56,21 @@ describe('ReviewFacade', () => {
     expect(repository.submitAnswers).toHaveBeenLastCalledWith('review-1', [{wordId: word.word.id, quality: 4}]);
     expect(facade.result()).toEqual({total: 1, correct: 1, xp: 5, streak: 2});
     expect(facade.saveError()).toBeNull();
+  });
+
+  it('finishes the session only after answers are submitted', () => {
+    const submit$ = new Subject<void>();
+    repository.submitAnswers.mockReturnValue(submit$);
+    repository.finishSession.mockReset().mockReturnValue(of({total: 1, correct: 1, xp: 5, streak: 2}));
+    facade.start('FLASHCARDS');
+
+    facade.finishWithAnswers([{wordId: word.word.id, quality: 4}]);
+    expect(repository.finishSession).not.toHaveBeenCalled();
+
+    submit$.next();
+    submit$.complete();
+
+    expect(repository.finishSession).toHaveBeenCalledWith('review-1');
+    expect(facade.result()).toEqual({total: 1, correct: 1, xp: 5, streak: 2});
   });
 });

@@ -24,9 +24,6 @@
       "dom"
     ],
     "paths": {
-      "@app/*": [
-        "./src/app/*"
-      ],
       "@core/*": [
         "./src/app/core/*"
       ],
@@ -35,12 +32,6 @@
       ],
       "@features/*": [
         "./src/app/features/*"
-      ],
-      "@pages/*": [
-        "./src/app/features/*"
-      ],
-      "@components/*": [
-        "./src/app/components/*"
       ],
       "@shared/*": [
         "./src/app/shared/*"

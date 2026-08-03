@@ -2,27 +2,17 @@
   <h2 class="pagettl">Мой словарь</h2>
   <p class="pagesub">{{ facade.totalElements() }} слов</p>
 
-  <div class="tabs">
-    <button type="button" [class.is-active]="tab() === 'words'" (click)="tab.set('words')">Слова</button>
-    <button type="button" [class.is-active]="tab() === 'decks'" (click)="tab.set('decks')">Мои колоды</button>
-  </div>
+  <hg-segmented-control class="tabs" label="Раздел словаря" [options]="tabs" [(ngModel)]="tab"/>
 
   @if (tab() === 'words') {
-    <input class="searchbox" type="search" placeholder="Поиск: хангыль или перевод…"
-           [ngModel]="search()" (ngModelChange)="search.set($event); page.set(0)">
+    <hg-input class="searchbox" type="search" label="Поиск слов"
+              placeholder="Хангыль или перевод…"
+              [ngModel]="search()" (ngModelChange)="search.set($event); page.set(0)"/>
 
     <div class="filters">
-      @for (option of levels; track option.label) {
-        <button type="button" [class.is-active]="level() === option.value" (click)="setLevel(option.value)">
-          {{ option.label }}
-        </button>
-      }
-      <span class="spacer"></span>
-      @for (option of sorts; track option.value) {
-        <button type="button" [class.is-active]="sort() === option.value" (click)="sort.set(option.value)">
-          {{ option.label }}
-        </button>
-      }
+      <hg-segmented-control label="Уровень слова" [options]="levels"
+                            [ngModel]="level()" (ngModelChange)="setLevel($event)"/>
+      <hg-segmented-control label="Сортировка" [options]="sorts" [(ngModel)]="sort"/>
     </div>
 
     @if (facade.loading()) {
@@ -38,7 +28,9 @@
       <div class="panel">
         @for (word of facade.words(); track word.id) {
           <div class="vrow" [class]="'state-' + wordState(word)" [class.open]="expandedId() === word.id">
-            <button type="button" class="rowmain" (click)="toggleExpand(word)">
+            <button type="button" data-domain-control class="rowmain" (click)="toggleExpand(word)"
+                    [attr.aria-expanded]="expandedId() === word.id"
+                    [attr.aria-label]="word.word.hangul + ', ' + word.word.translation">
               <span class="kr wh">{{ word.word.hangul }}</span>
               <span class="rom">{{ word.word.romanization }}</span>
               <span class="tr">{{ word.word.translation }}</span>
@@ -46,10 +38,12 @@
             <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl" size="sm"/>
             <span class="stars" [title]="'Уровень ' + word.level">{{ stars(word) }}</span>
             <span class="due">{{ dueLabel(word) }}</span>
-            <button type="button" class="diffbtn" [class.on]="word.isDifficult"
+            <button type="button" data-domain-control class="diffbtn" [class.on]="word.isDifficult"
                     (click)="facade.toggleDifficult(word)"
+                    [attr.aria-pressed]="word.isDifficult"
                     [title]="word.isDifficult ? 'Убрать метку «сложное»' : 'Отметить сложным'">🔥</button>
-            <button type="button" class="deckbtn" (click)="deckPickWord.set(word)" title="В колоду">＋</button>
+            <button type="button" data-domain-control class="deckbtn" (click)="deckPickWord.set(word)"
+                    [attr.aria-label]="'Добавить ' + word.word.hangul + ' в колоду'" title="В колоду">＋</button>
 
             @if (expandedId() === word.id && word.word.exampleKo) {
               <div class="example kr">
@@ -62,20 +56,16 @@
       </div>
 
       @if (totalPages() > 1) {
-        <div class="pager">
-          <button type="button" class="ghostbtn" [disabled]="page() === 0" (click)="page.set(page() - 1)">←</button>
-          <span>{{ page() + 1 }} / {{ totalPages() }}</span>
-          <button type="button" class="ghostbtn" [disabled]="page() + 1 >= totalPages()" (click)="page.set(page() + 1)">→</button>
-        </div>
+        <hg-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="page.set($event)"/>
       }
     }
   } @else {
     <!-- Колоды -->
     <div class="newdeck">
-      <input type="text" placeholder="Название новой колоды…"
-             [ngModel]="newDeckTitle()" (ngModelChange)="newDeckTitle.set($event)"
-             (keydown.enter)="createDeck()">
-      <button type="button" class="cta" (click)="createDeck()">Создать</button>
+      <hg-input label="Название новой колоды" placeholder="Например, Путешествие"
+                [ngModel]="newDeckTitle()" (ngModelChange)="newDeckTitle.set($event)"
+                (keydown.enter)="createDeck()"/>
+      <hg-button label="Создать" (pressed)="createDeck()"/>
     </div>
     @if (facade.decks().length === 0) {
       <div class="panel loadpanel">Колод пока нет — создай первую и собирай в неё слова.</div>
@@ -86,24 +76,23 @@
           <b>{{ deck.title }}</b>
           <small>{{ deck.wordCount }} слов</small>
         </div>
-        <button type="button" class="ghostbtn sm" (click)="renameDeck(deck)">Переименовать</button>
-        <button type="button" class="ghostbtn sm danger" (click)="deleteDeck(deck)">Удалить</button>
+        <hg-button label="Переименовать" variant="ghost" size="sm" (pressed)="renameDeck(deck)"/>
+        <hg-button label="Удалить" variant="danger" size="sm" (pressed)="deleteDeck(deck)"/>
       </div>
     }
   }
 
   <!-- выбор колоды для слова -->
   @if (deckPickWord(); as word) {
-    <div class="modal-backdrop" (click)="deckPickWord.set(null)"></div>
-    <div class="modal panel" role="dialog" aria-label="Добавить в колоду">
+    <hg-dialog [visible]="true" (visibleChange)="!$event && closeDeckPicker()" title="Добавить в колоду">
       <h3>«{{ word.word.hangul }}» — в какую колоду?</h3>
       @if (facade.decks().length === 0) {
         <p class="pagesub">Колод пока нет. Создай её на вкладке «Мои колоды».</p>
       }
       @for (deck of facade.decks(); track deck.id) {
-        <button type="button" class="ghostbtn deckopt" (click)="addToDeck(deck)">{{ deck.title }}</button>
+        <hg-button class="deckopt" [label]="deck.title" variant="ghost" block (pressed)="addToDeck(deck)"/>
       }
-      <button type="button" class="ghostbtn deckopt cancel" (click)="deckPickWord.set(null)">Отмена</button>
-    </div>
+      <hg-button dialog-actions label="Отмена" variant="ghost" (pressed)="closeDeckPicker()"/>
+    </hg-dialog>
   }
 </div>

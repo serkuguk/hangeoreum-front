@@ -1,6 +1,7 @@
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 import {UserWord} from '../entities/user-word.entity';
+import {Page} from '@shared/types/page';
 
 export type ReviewMode = 'FLASHCARDS' | 'MATCH' | 'LISTEN' | 'SPELL' | 'QUICK';
 
@@ -23,11 +24,7 @@ export interface FinishResult {
   streak: number;
 }
 
-export interface VocabularyPage {
-  content: UserWord[];
-  totalElements: number;
-  page: number;
-}
+export type VocabularyPage = Page<UserWord>;
 
 export interface VocabularyQuery {
   search?: string;
@@ -59,7 +56,6 @@ export interface VocabularyRepository {
   renameDeck(id: string, title: string): Observable<Deck>;
   deleteDeck(id: string): Observable<void>;
   addDeckWord(deckId: string, wordId: string): Observable<void>;
-  removeDeckWord(deckId: string, wordId: string): Observable<void>;
 }
 
 export const VOCABULARY_REPOSITORY = new InjectionToken<VocabularyRepository>('VocabularyRepository');

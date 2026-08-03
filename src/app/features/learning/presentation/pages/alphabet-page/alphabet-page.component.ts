@@ -1,10 +1,12 @@
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {AlphabetFacade} from '../../../application/facades/alphabet.facade';
 import {AlphabetLetter} from '../../../domain/entities/alphabet.entity';
 
 @Component({
   selector: 'hg-alphabet-page',
+  imports: [HgButtonComponent],
   templateUrl: './alphabet-page.component.html',
   styleUrl: './alphabet-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

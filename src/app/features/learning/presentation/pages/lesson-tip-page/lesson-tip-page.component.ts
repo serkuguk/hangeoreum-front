@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {Location} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {LessonFacade} from '../../../application/facades/lesson.facade';
 import {TipExample} from '../../../domain/entities/exercise.entity';
 
@@ -10,7 +11,7 @@ const escapeHtml = (s: string) =>
 
 @Component({
   selector: 'hg-lesson-tip-page',
-  imports: [RouterLink],
+  imports: [RouterLink, HgButtonComponent],
   templateUrl: './lesson-tip-page.component.html',
   styleUrl: './lesson-tip-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

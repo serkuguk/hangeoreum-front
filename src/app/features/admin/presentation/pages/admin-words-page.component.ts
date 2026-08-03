@@ -1,6 +1,17 @@
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, switchMap} from 'rxjs';
 import {Word} from '@features/vocabulary/domain/entities/word.entity';
+import {
+  HgButtonComponent,
+  HgDialogComponent,
+  HgFilePickerComponent,
+  HgInputComponent,
+  HgPaginationComponent,
+  HgSelectComponent,
+  HgSelectOption,
+} from '@shared/components/controls';
 import {AdminApi, Topic, WordRequest} from '../../infrastructure/admin.api';
 
 const EMPTY_DRAFT: WordRequest = {
@@ -10,15 +21,24 @@ const EMPTY_DRAFT: WordRequest = {
 
 @Component({
   selector: 'hg-admin-words-page',
-  imports: [FormsModule],
+  imports: [
+    FormsModule,
+    HgButtonComponent,
+    HgDialogComponent,
+    HgFilePickerComponent,
+    HgInputComponent,
+    HgPaginationComponent,
+    HgSelectComponent,
+  ],
   template: `
     <h2 class="pagettl">Слова</h2>
     <p class="pagesub">{{ total() }} слов в базе.</p>
 
     <div class="toolbar">
-      <input class="search" type="search" placeholder="Поиск: хангыль или перевод…"
-             [ngModel]="search()" (ngModelChange)="onSearch($event)">
-      <button type="button" class="cta addbtn" (click)="openCreate()">+ Новое слово</button>
+      <hg-input class="search" type="search" label="Поиск слов"
+                placeholder="Хангыль или перевод…" [ngModel]="search()"
+                (ngModelChange)="onSearch($event)" />
+      <hg-button label="Новое слово" icon="+" (pressed)="openCreate()" />
     </div>
 
     @if (error()) {
@@ -37,16 +57,14 @@ const EMPTY_DRAFT: WordRequest = {
               <td>{{ word.romanization }}</td>
               <td>{{ word.translation }}</td>
               <td>
-                <label class="rowbtn" [class.on]="word.audioUrl">
-                  🔊 <input type="file" accept="audio/*" hidden (change)="upload(word, $event, 'audio')">
-                </label>
-                <label class="rowbtn" [class.on]="word.imageUrl">
-                  🖼 <input type="file" accept="image/*" hidden (change)="upload(word, $event, 'image')">
-                </label>
+                <hg-file-picker label="🔊" ariaLabel="Загрузить аудио слова"
+                                accept="audio/*" (fileSelected)="upload(word, $event, 'audio')" />
+                <hg-file-picker label="🖼" ariaLabel="Загрузить изображение слова"
+                                accept="image/*" (fileSelected)="upload(word, $event, 'image')" />
               </td>
               <td>
-                <button type="button" class="rowbtn" (click)="openEdit(word)">Изменить</button>
-                <button type="button" class="rowbtn danger" (click)="remove(word)">Удалить</button>
+                <hg-button size="sm" variant="ghost" label="Изменить" (pressed)="openEdit(word)" />
+                <hg-button size="sm" variant="danger" label="Удалить" (pressed)="remove(word)" />
               </td>
             </tr>
           } @empty {
@@ -55,40 +73,27 @@ const EMPTY_DRAFT: WordRequest = {
         </tbody>
       </table>
       @if (totalPages() > 1) {
-        <div class="pager">
-          <button type="button" class="rowbtn" [disabled]="page() === 0" (click)="page.set(page() - 1); load()">←</button>
-          {{ page() + 1 }} / {{ totalPages() }}
-          <button type="button" class="rowbtn" [disabled]="page() + 1 >= totalPages()" (click)="page.set(page() + 1); load()">→</button>
-        </div>
+        <hg-pagination [page]="page()" [totalPages]="totalPages()"
+                       ariaLabel="Страницы слов" (pageChange)="goToPage($event)" />
       }
     </div>
 
-    @if (dialogOpen()) {
-      <div class="modal-backdrop" (click)="dialogOpen.set(false)"></div>
-      <div class="modal panel" role="dialog">
-        <h3>{{ editing() ? 'Изменить слово' : 'Новое слово' }}</h3>
-        <label>Хангыль *<input class="kr" [(ngModel)]="draft.hangul" lang="ko"></label>
-        <label>Романизация *<input [(ngModel)]="draft.romanization"></label>
-        <label>Перевод *<input [(ngModel)]="draft.translation"></label>
-        <label>Часть речи<input [(ngModel)]="draft.partOfSpeech" placeholder="существительное"></label>
-        <label>Тема
-          <select [(ngModel)]="draft.topicId">
-            <option [ngValue]="null">— без темы —</option>
-            @for (topic of topics(); track topic.id) {
-              <option [ngValue]="topic.id">{{ topic.title }}</option>
-            }
-          </select>
-        </label>
-        <label>Пример (ko)<input class="kr" [(ngModel)]="draft.exampleKo" lang="ko"></label>
-        <label>Перевод примера<input [(ngModel)]="draft.exampleTranslation"></label>
-        <label>Грамматическая пометка<input [(ngModel)]="draft.grammarNote"></label>
-        <div class="btns">
-          <button type="button" class="cta" [disabled]="!draft.hangul || !draft.romanization || !draft.translation"
-                  (click)="save()">Сохранить</button>
-          <button type="button" class="ghostbtn" (click)="dialogOpen.set(false)">Отмена</button>
-        </div>
+    <hg-dialog [visible]="dialogOpen()" (visibleChange)="dialogOpen.set($event)"
+               [title]="editing() ? 'Изменить слово' : 'Новое слово'">
+      <hg-input label="Хангыль" [(ngModel)]="draft.hangul" lang="ko" required />
+      <hg-input label="Романизация" [(ngModel)]="draft.romanization" required />
+      <hg-input label="Перевод" [(ngModel)]="draft.translation" required />
+      <hg-input label="Часть речи" [(ngModel)]="draft.partOfSpeech" placeholder="существительное" />
+      <hg-select label="Тема" placeholder="" [options]="topicOptions()" [(ngModel)]="draft.topicId" />
+      <hg-input label="Пример (ko)" [(ngModel)]="draft.exampleKo" lang="ko" />
+      <hg-input label="Перевод примера" [(ngModel)]="draft.exampleTranslation" />
+      <hg-input label="Грамматическая пометка" [(ngModel)]="draft.grammarNote" />
+      <div dialog-actions class="btns">
+        <hg-button label="Сохранить" [disabled]="!draft.hangul || !draft.romanization || !draft.translation"
+                   (pressed)="save()" />
+        <hg-button label="Отмена" variant="ghost" (pressed)="dialogOpen.set(false)" />
       </div>
-    }
+    </hg-dialog>
   `,
   styleUrl: './_admin.scss',
   styles: `.addbtn { padding: 11px 20px; font-size: 14px; }`,
@@ -103,6 +108,10 @@ export class AdminWordsPageComponent {
   readonly search = signal('');
   readonly error = signal<string | null>(null);
   readonly topics = signal<Topic[]>([]);
+  readonly topicOptions = computed<readonly HgSelectOption<string | null>[]>(() => [
+    {label: '— без темы —', value: null},
+    ...this.topics().map(topic => ({label: topic.title, value: topic.id})),
+  ]);
 
   readonly dialogOpen = signal(false);
   readonly editing = signal<Word | null>(null);
@@ -110,9 +119,24 @@ export class AdminWordsPageComponent {
 
   readonly totalPages = computed(() => Math.ceil(this.total() / 20));
 
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly search$ = new Subject<string>();
 
   constructor() {
+    this.search$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(search => this.api.words(search, 0).pipe(
+        catchError(() => {
+          this.error.set('Не получилось загрузить слова.');
+          return EMPTY;
+        }),
+      )),
+      takeUntilDestroyed(),
+    ).subscribe(result => {
+      this.words.set(result.content);
+      this.total.set(result.totalElements);
+      this.error.set(null);
+    });
     this.load();
     this.api.topics().subscribe(topics => this.topics.set(topics));
   }
@@ -130,8 +154,12 @@ export class AdminWordsPageComponent {
   onSearch(value: string): void {
     this.search.set(value);
     this.page.set(0);
-    if (this.searchTimer) clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this.load(), 300);
+    this.search$.next(value);
+  }
+
+  goToPage(page: number): void {
+    this.page.set(page);
+    this.load();
   }
 
   openCreate(): void {
@@ -173,9 +201,7 @@ export class AdminWordsPageComponent {
     });
   }
 
-  upload(word: Word, event: Event, kind: 'audio' | 'image'): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+  upload(word: Word, file: File, kind: 'audio' | 'image'): void {
     this.api.uploadWordMedia(word.id, file, kind).subscribe({
       next: () => this.load(),
       error: () => this.error.set('Не получилось загрузить файл.'),

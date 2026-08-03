@@ -21,9 +21,8 @@
             <small>Действует до {{ sub.currentPeriodEnd.slice(0, 10) }}</small>
           }
         </div>
-        <button type="button" class="ghostbtn" [disabled]="facade.redirecting()" (click)="facade.openPortal()">
-          Управлять подпиской
-        </button>
+        <hg-button label="Управлять подпиской" variant="ghost"
+                   [disabled]="facade.redirecting()" (pressed)="facade.openPortal()"/>
       </div>
     }
   }
@@ -62,9 +61,8 @@
           }
           <h3>{{ plan.name }}</h3>
           <div class="price">{{ price(plan) }}<small> {{ intervalLabel(plan) }}</small></div>
-          <button type="button" class="cta" [disabled]="facade.redirecting()" (click)="facade.checkout(plan.code)">
-            {{ facade.redirecting() ? 'Открываем оплату…' : 'Выбрать' }}
-          </button>
+          <hg-button [label]="facade.redirecting() ? 'Открываем оплату…' : 'Выбрать'"
+                     [loading]="facade.redirecting()" (pressed)="facade.checkout(plan.code)"/>
         </div>
       }
     </div>

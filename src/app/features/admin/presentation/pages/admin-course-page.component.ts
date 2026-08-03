@@ -2,10 +2,11 @@ import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core'
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '../../infrastructure/admin.api';
+import {HgButtonComponent, HgInputComponent, HgSelectComponent} from '@shared/components/controls';
 
 @Component({
   selector: 'hg-admin-course-page',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, HgButtonComponent, HgInputComponent, HgSelectComponent],
   templateUrl: './admin-course-page.component.html',
   styleUrl: './_admin.scss',
   styles: `
@@ -48,23 +49,6 @@ import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '../../infrastructur
       }
     }
 
-    .addrow {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-
-      input, select {
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 10px;
-        padding: 9px 12px;
-        color: var(--hg-txt);
-        font-size: 13px;
-      }
-
-      input { flex: 1; min-width: 160px; }
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -80,6 +64,7 @@ export class AdminCoursePageComponent {
   newUnitTitle = '';
   newLessonTitle: Record<string, string> = {};
   newLessonType: Record<string, string> = {};
+  readonly lessonTypes = ['LESSON', 'GRAMMAR', 'STORY', 'ALPHABET'].map(value => ({value, label: value}));
 
   constructor() {
     this.load();
@@ -140,13 +125,19 @@ export class AdminCoursePageComponent {
   }
 
   moveUnit(unit: AdminUnit, delta: -1 | 1): void {
-    const list = [...this.units()];
+    const previous = this.units();
+    const list = [...previous];
     const index = list.indexOf(unit);
     const target = index + delta;
     if (target < 0 || target >= list.length) return;
     [list[index], list[target]] = [list[target], list[index]];
     this.units.set(list);
-    this.api.reorderUnits(list.map((u, i) => ({id: u.id, position: i + 1}))).subscribe();
+    this.api.reorderUnits(list.map((u, i) => ({id: u.id, position: i + 1}))).subscribe({
+      error: () => {
+        this.units.set(previous);
+        this.error.set('Не получилось изменить порядок юнитов.');
+      },
+    });
   }
 
   addLesson(unit: AdminUnit): void {
@@ -188,13 +179,19 @@ export class AdminCoursePageComponent {
   }
 
   moveLesson(unit: AdminUnit, lesson: AdminLesson, delta: -1 | 1): void {
-    const list = [...(this.lessonsByUnit()[unit.id] ?? [])];
+    const previous = this.lessonsByUnit()[unit.id] ?? [];
+    const list = [...previous];
     const index = list.indexOf(lesson);
     const target = index + delta;
     if (target < 0 || target >= list.length) return;
     [list[index], list[target]] = [list[target], list[index]];
     this.lessonsByUnit.update(map => ({...map, [unit.id]: list}));
-    this.api.reorderLessons(list.map((l, i) => ({id: l.id, position: i + 1}))).subscribe();
+    this.api.reorderLessons(list.map((l, i) => ({id: l.id, position: i + 1}))).subscribe({
+      error: () => {
+        this.lessonsByUnit.update(map => ({...map, [unit.id]: previous}));
+        this.error.set('Не получилось изменить порядок уроков.');
+      },
+    });
   }
 
   private patchLesson(unitId: string, lesson: AdminLesson): void {

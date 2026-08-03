@@ -1,19 +1,20 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AdminApi, Topic} from '../../infrastructure/admin.api';
+import {HgButtonComponent, HgInputComponent} from '@shared/components/controls';
 
 @Component({
   selector: 'hg-admin-topics-page',
-  imports: [FormsModule],
+  imports: [FormsModule, HgButtonComponent, HgInputComponent],
   template: `
     <h2 class="pagettl">Темы словаря</h2>
     <p class="pagesub">Категории слов: еда, знакомство, погода…</p>
 
     <div class="toolbar">
-      <input class="search" placeholder="code (например food)" [(ngModel)]="draftCode">
-      <input class="search" placeholder="Название" [(ngModel)]="draftTitle">
-      <input class="search icon" placeholder="🍜" [(ngModel)]="draftIcon">
-      <button type="button" class="cta" [disabled]="!draftCode || !draftTitle" (click)="create()">Добавить</button>
+      <hg-input class="search" label="Code" placeholder="Например, food" [(ngModel)]="draftCode"/>
+      <hg-input class="search" label="Название" [(ngModel)]="draftTitle"/>
+      <hg-input class="search icon" label="Иконка" placeholder="🍜" [(ngModel)]="draftIcon"/>
+      <hg-button label="Добавить" [disabled]="!draftCode || !draftTitle" (pressed)="create()"/>
     </div>
 
     @if (error()) {
@@ -30,8 +31,8 @@ import {AdminApi, Topic} from '../../infrastructure/admin.api';
               <td>{{ topic.code }}</td>
               <td>{{ topic.title }}</td>
               <td>
-                <button type="button" class="rowbtn" (click)="rename(topic)">Переименовать</button>
-                <button type="button" class="rowbtn danger" (click)="remove(topic)">Удалить</button>
+                <hg-button label="Переименовать" variant="ghost" size="sm" (pressed)="rename(topic)"/>
+                <hg-button label="Удалить" variant="danger" size="sm" (pressed)="remove(topic)"/>
               </td>
             </tr>
           } @empty {
