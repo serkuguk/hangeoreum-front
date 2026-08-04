@@ -36,7 +36,7 @@ pipeline {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
-                    pnpm exec -- --runInBand
+                    pnpm test -- --runInBand
                 '''
             }
         }
