@@ -92,7 +92,7 @@ pipeline {
 
                     switch ($env:FRONTEND_MODE) {
                         "nginx" {
-                            nginx -s reload
+                           Restart-Service -Name 'nginx' -ErrorAction Stop
                         }
                         "iis" {
                             Import-Module WebAdministration
