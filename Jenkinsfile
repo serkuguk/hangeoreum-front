@@ -10,7 +10,7 @@ pipeline {
     environment {
         DEPLOY_DIR = 'C:\\apps\\coreano-frontend'
         DIST_DIR = 'dist\\hangeoreum'
-        HEALTH_URL = 'http://localhost:8081/'
+        HEALTH_URL = 'http://127.0.0.1/'
         FRONTEND_MODE = 'static'
     }
 
