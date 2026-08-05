@@ -11,7 +11,7 @@ pipeline {
         DEPLOY_DIR = 'C:\\apps\\coreano-frontend'
         DIST_DIR = 'dist\\hangeoreum'
         HEALTH_URL = 'http://localhost:8081/'
-        FRONTEND_MODE = 'nginx'
+        FRONTEND_MODE = 'static'
     }
 
     stages {
