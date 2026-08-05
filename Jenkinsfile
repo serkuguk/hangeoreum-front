@@ -72,6 +72,14 @@ pipeline {
                         throw "robocopy failed with exit code $LASTEXITCODE"
                     }
 
+                    robocopy $distDir $releaseDir /MIR /NFL /NDL /NJH /NJS /NP
+
+                    if ($LASTEXITCODE -gt 7) {
+                        throw "robocopy failed with exit code $LASTEXITCODE"
+                    }
+
+                    $global:LASTEXITCODE = 0
+
                     if (Test-Path $currentDir) {
                         Remove-Item $currentDir -Recurse -Force
                     }
