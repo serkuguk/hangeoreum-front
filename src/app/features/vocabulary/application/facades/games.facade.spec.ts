@@ -1,5 +1,6 @@
 import {signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
+import {jest} from '@jest/globals';
 import {UserWord} from '../../domain/entities/user-word.entity';
 import {GamesFacade} from './games.facade';
 import {ReviewFacade} from './review.facade';
@@ -36,13 +37,14 @@ describe('GamesFacade', () => {
       ],
     });
     const facade = TestBed.inject(GamesFacade);
+    const initialTimers = jest.getTimerCount();
 
     review.start.mockImplementation(() => review.loading.set(true));
     facade.start('LISTEN');
     facade.start('LISTEN');
 
     expect(review.start).toHaveBeenCalledTimes(1);
-    expect(jest.getTimerCount()).toBe(0);
+    expect(jest.getTimerCount()).toBe(initialTimers);
 
     review.queue.set([word]);
     review.loading.set(false);

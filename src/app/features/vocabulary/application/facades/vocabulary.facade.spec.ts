@@ -1,4 +1,5 @@
 import {TestBed} from '@angular/core/testing';
+import {jest} from '@jest/globals';
 import {Subject, of, throwError} from 'rxjs';
 import {UserWord} from '../../domain/entities/user-word.entity';
 import {VOCABULARY_REPOSITORY, VocabularyRepository} from '../../domain/repositories/vocabulary.repository';

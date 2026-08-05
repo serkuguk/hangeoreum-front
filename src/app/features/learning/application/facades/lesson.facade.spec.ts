@@ -1,4 +1,5 @@
 import {TestBed} from '@angular/core/testing';
+import {jest} from '@jest/globals';
 import {of, throwError} from 'rxjs';
 import {Lesson} from '../../domain/entities/exercise.entity';
 import {CompleteResult, LEARNING_REPOSITORY, LearningRepository} from '../../domain/repositories/learning.repository';
