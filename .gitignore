@@ -50,4 +50,7 @@ CLAUDE.md
 AGENTS.md
 .claude/*
 .codex/*
+.agents/*
+.vscode/*
+docs/*
 .playwright-mcp
