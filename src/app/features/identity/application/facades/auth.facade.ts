@@ -2,8 +2,9 @@ import {HttpErrorResponse} from '@angular/common/http';
 import {Injectable, inject, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '@core/auth/auth.service';
-import {ME_REPOSITORY} from '../../domain/repositories/me.repository';
+import {ME_REPOSITORY} from '../me-repository.token';
 import {OnboardingData, User} from '../../domain/user.entity';
+import {TranslateService} from '@ngx-translate/core';
 
 /** Единая точка identity для presentation-слоя. */
 @Injectable({providedIn: 'root'})
@@ -11,6 +12,7 @@ export class AuthFacade {
   private authService = inject(AuthService);
   private router = inject(Router);
   private meRepository = inject(ME_REPOSITORY);
+  private translate = inject(TranslateService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -69,15 +71,15 @@ export class AuthFacade {
 
   private failAuth(error: HttpErrorResponse): void {
     this.loading.set(false);
-    this.error.set(humanizeError(error));
+    this.error.set(humanizeError(error, this.translate));
   }
 }
 
-function humanizeError(error: HttpErrorResponse): string {
+function humanizeError(error: HttpErrorResponse, translate: TranslateService): string {
   const body = error.error as {code?: string; message?: string} | null;
-  if (error.status === 401 || body?.code === 'INVALID_CREDENTIALS') return 'Неверный email или пароль';
-  if (body?.code === 'EMAIL_TAKEN' || error.status === 409) return 'Такой email уже зарегистрирован';
-  if (body?.code === 'VALIDATION') return 'Проверь правильность заполнения полей';
-  if (error.status === 0) return 'Сервер недоступен. Попробуй позже';
-  return body?.message || 'Что-то пошло не так. Попробуй ещё раз';
+  if (error.status === 401 || body?.code === 'INVALID_CREDENTIALS') return translate.instant('identity.errors.invalidCredentials');
+  if (body?.code === 'EMAIL_TAKEN' || error.status === 409) return translate.instant('identity.errors.emailTaken');
+  if (body?.code === 'VALIDATION') return translate.instant('identity.errors.validation');
+  if (error.status === 0) return translate.instant('common.errors.serverUnavailable');
+  return body?.message || translate.instant('common.errors.generic');
 }

@@ -4,15 +4,16 @@ import {HgAudioButtonComponent} from '@shared/components/hg';
 import {shuffle} from '@shared/utils/shuffle';
 import {ChoiceOption, ListenChoicePayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-exercise-listen',
-  imports: [HgAudioButtonComponent],
+  imports: [HgAudioButtonComponent, TranslatePipe],
   template: `
-    <div class="q-kind">Слушай и выбери</div>
+    <div class="q-kind">{{ 'learning.exercise.listenChoose' | translate }}</div>
     <div class="q-word">
       <hg-audio-button [text]="payload().text ?? ''" [audioUrl]="payload().audioUrl" size="lg"/>
-      <div class="r">Нажми, чтобы прослушать ещё раз</div>
+      <div class="r">{{ 'learning.exercise.listenAgain' | translate }}</div>
     </div>
     <div class="opts">
       @for (option of options(); track option.text) {

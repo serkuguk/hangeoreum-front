@@ -31,7 +31,7 @@ import {
   HgToggleComponent,
 } from '@shared/components/controls';
 import {AuthFacade} from '../../../application/facades/auth.facade';
-import {ME_REPOSITORY} from '../../../domain/repositories/me.repository';
+import {ME_REPOSITORY} from '../../../application/me-repository.token';
 import {UserSettings} from '../../../domain/user.entity';
 
 interface SettingsSaveRequest {

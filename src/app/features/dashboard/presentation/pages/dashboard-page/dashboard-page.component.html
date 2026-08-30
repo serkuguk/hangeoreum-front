@@ -1,118 +1,161 @@
-<div class="wrap dashwrap">
-  @if (facade.loading()) {
-    <div class="skeleton-grid" aria-label="Загрузка">
-      @for (block of [1, 2, 3, 4]; track block) {
-        <div class="panel skeleton"></div>
-      }
-    </div>
-  } @else if (facade.error(); as error) {
-    <div class="panel errpanel">
-      <p>{{ error }}</p>
-      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
-    </div>
-  } @else if (facade.data(); as dash) {
-    <div class="eyebrow">{{ today }}</div>
-    <h1 class="greeting">С возвращением, {{ auth.user()?.name }}</h1>
-    <p class="goalline">
-      @if (dash.streak > 0) {
-        Серия <b class="y">{{ dash.streak }} дн.</b> ·
-      }
-      сегодня {{ dash.goal.earnedXp }} из {{ dash.goal.goalXp }} XP.
-      @if (dash.goal.reached) {
-        Цель дня закрыта — 잘했어요!
+@if (facade.loading()) {
+  <div class="hg-fullspan hg-card skeleton" [attr.aria-label]="'common.loading' | translate"></div>
+} @else if (facade.error(); as error) {
+  <div class="hg-fullspan hg-card errpanel">
+    <p>{{ error }}</p>
+    <hg-button [label]="'common.retry' | translate" variant="ghost" (pressed)="retry()"/>
+  </div>
+} @else if (facade.data(); as dash) {
+  <div class="hg-main">
+    <section class="hg-hero">
+      <span class="hg-hero__watermark" aria-hidden="true">한</span>
+      <span class="hg-hero__glyph" aria-hidden="true">歩</span>
+
+      <div class="hg-hero__inner">
+        <div class="hg-hero__copy">
+          <div class="hg-eyebrow">{{ today }}</div>
+          <h1>
+            {{ 'dashboard.welcomeBack' | translate:{name: facade.user()?.name} }}<br>
+            @if (dash.goal.reached) {
+              {{ 'dashboard.goalReached' | translate }} <span class="hg-hero__xp">{{ 'dashboard.koreanWellDone' | translate }}</span>
+            } @else {
+              {{ 'dashboard.goalRemaining' | translate }} <span class="hg-hero__xp">{{ xpLeft() }} XP</span>
+            }
+          </h1>
+          <p>
+            @if (dash.streak > 0) {
+              {{ 'dashboard.streakDays' | translate:{count: dash.streak} }}
+            }
+            {{ 'dashboard.oneMoreLesson' | translate }}
+          </p>
+
+          <div class="hg-hero__actions">
+            @if (currentNode(); as node) {
+              <button type="button" data-domain-control class="hg-btn hg-btn--light" (click)="openLesson(node)">
+                <span>{{ node.title }}</span>
+                <span aria-hidden="true">→</span>
+                <i class="hg-sheen"></i>
+              </button>
+            } @else {
+              <a class="hg-btn hg-btn--light" routerLink="/learn">
+                <span>{{ 'dashboard.openCourseMap' | translate }}</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            }
+            @if (dash.dueWords > 0) {
+              <a class="hg-btn hg-btn--ghost" routerLink="/review">{{ 'dashboard.wordsDue' | translate:{count: dash.dueWords} }}</a>
+            }
+          </div>
+        </div>
+
+        <hg-mascot [speech]="'dashboard.koreanCheer' | translate"/>
+      </div>
+    </section>
+
+    <section class="hg-card hg-course">
+      <header class="hg-course__head">
+        <div>
+          <div class="hg-eyebrow">{{ 'dashboard.coursePath' | translate }}</div>
+          <h2>{{ facade.courseMap()?.title || ('dashboard.firstSteps' | translate) }} · <span class="kr">{{ 'dashboard.koreanStepByStep' | translate }}</span></h2>
+        </div>
+        <div class="hg-course__badges">
+          <span class="hg-chip hg-chip--success">{{ 'dashboard.lessonsCompleted' | translate:{count: dash.lessonsCompleted} }}</span>
+          <a class="hg-chip hg-chip--muted" routerLink="/learn">{{ 'dashboard.fullMap' | translate }}</a>
+        </div>
+      </header>
+
+      @if (facade.courseLoading()) {
+        <div class="hg-course__stub">{{ 'dashboard.loadingCourseMap' | translate }}</div>
+      } @else if (facade.courseError(); as mapError) {
+        <div class="hg-course__stub">{{ mapError }}</div>
+      } @else if (path().nodes.length > 0) {
+        <hg-course-path
+          [nodes]="path().nodes"
+          [chapters]="path().chapters"
+          (nodeSelected)="openLesson($event)"/>
       } @else {
-        Ещё немного — и цель дня закрыта.
+        <div class="hg-course__stub">
+          {{ 'dashboard.emptyCourseMap' | translate }}
+          <a class="hg-chip hg-chip--success" routerLink="/learn/alphabet">{{ 'dashboard.toAlphabet' | translate }}</a>
+        </div>
       }
-    </p>
+    </section>
 
-    @if (dash.nextLessons.length > 0) {
-      <a class="panel primarycta" [routerLink]="['/learn', dash.nextLessons[0].id, 'tip']">
-        <div class="nic kr">{{ dash.nextLessons[0].title.charAt(0) }}</div>
-        <div class="ctabody">
-          <div class="eyebrow">{{ dash.nextLessons[0].type === 'STORY' ? 'Story · видео носителя' : 'Ближайший урок' }}</div>
-          <b>{{ dash.nextLessons[0].title }}</b>
-        </div>
-        <span class="cta ctabtn">Продолжить →</span>
-      </a>
-    } @else {
-      <a class="panel primarycta onboarding" routerLink="/learn">
-        <div class="ctabody">
-          <div class="eyebrow">Начни путь</div>
-          <b>Курс пройден или ещё не начат — открой карту уроков</b>
-        </div>
-        <span class="cta ctabtn">К карте →</span>
-      </a>
-    }
-
-    <div class="dash-secondary">
-      <div class="panel goalpanel">
-        <hg-progress-ring [percent]="goalPercent()" [size]="64">
-          <div><b>{{ goalPercent() }}%</b><span>цель дня</span></div>
-        </hg-progress-ring>
-        <div class="goalstats">
-          <div class="row"><span>XP сегодня</span><b>{{ dash.goal.earnedXp }} / {{ dash.goal.goalXp }}</b></div>
-          <div class="row"><span>Всего XP</span><b>{{ dash.totalXp }}</b></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="eyebrow">Повторение</div>
-        @if (dash.dueWords > 0) {
-          <p class="duecount"><b class="y">{{ dash.dueWords }}</b> слов ждут повторения</p>
-          <a class="ghostbtn fullw" routerLink="/review">Начать повторение</a>
-        } @else {
-          <p class="duecount">Пока нечего повторять.</p>
-        }
-      </div>
-    </div>
-
-    @if (dash.nextLessons.length > 1) {
-      <div class="panel">
-        <div class="eyebrow">Дальше по курсу</div>
-        <div class="lessonlist">
-          @for (lesson of dash.nextLessons.slice(1); track lesson.id) {
-            <a class="llrow" [routerLink]="['/learn', lesson.id, 'tip']">
-              <div class="nic kr sm">{{ lesson.title.charAt(0) }}</div>
-              <div><b>{{ lesson.title }}</b><small>{{ lesson.type === 'STORY' ? 'Story · видео носителя' : 'Урок' }}</small></div>
-              <span class="st">Начать →</span>
-            </a>
-          }
-        </div>
-      </div>
-    }
-
-    <div class="panel">
-      <div class="eyebrow">XP за неделю</div>
-      <div class="wchart">
+    <section class="hg-card hg-week">
+      <div class="hg-eyebrow">{{ 'dashboard.weekXp' | translate }}</div>
+      <div class="hg-week__chart">
         @for (bar of weekBars(); track bar.label) {
-          <div class="bar" [class.today]="bar.isToday" [title]="bar.xp + ' XP'">
+          <div class="hg-week__bar" [class.is-today]="bar.isToday" [title]="'dashboard.xpValue' | translate:{value: bar.xp}">
             <i [style.height.%]="bar.height"></i>
             <span>{{ bar.label }}</span>
           </div>
         }
       </div>
-      <div class="dash-stats">
-        <div class="dstat"><b class="j">{{ dash.wordsLearned }}</b><span>слов выучено</span></div>
-        <div class="dstat"><b class="y">{{ dash.streak }}</b><span>дней серии</span></div>
-        <div class="dstat"><b class="bl">{{ dash.lessonsCompleted }}</b><span>уроков пройдено</span></div>
-        <div class="dstat"><b class="r">{{ dash.totalXp }}</b><span>всего XP</span></div>
+      <div class="hg-week__stats">
+        <div><b class="is-success">{{ dash.wordsLearned }}</b><span>{{ 'dashboard.wordsLearned' | translate }}</span></div>
+        <div><b class="is-reward">{{ dash.streak }}</b><span>{{ 'dashboard.streakLabel' | translate }}</span></div>
+        <div><b class="is-route">{{ dash.lessonsCompleted }}</b><span>{{ 'dashboard.lessonsCompletedLabel' | translate }}</span></div>
+        <div><b class="is-danger">{{ dash.totalXp }}</b><span>{{ 'dashboard.totalXp' | translate }}</span></div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="hg-side">
+    <div class="hg-card hg-goal">
+      <hg-progress-ring [percent]="goalPercent()" [size]="104" [stroke]="12" color="var(--hg-success)">
+        <div class="hg-goal__value">
+          <b>{{ goalPercent() }}%</b>
+          <span>{{ 'dashboard.dailyGoal' | translate }}</span>
+        </div>
+      </hg-progress-ring>
+      <div class="hg-goal__rows">
+        <div><span>{{ 'dashboard.xpToday' | translate }}</span><b>{{ dash.goal.earnedXp }} / {{ dash.goal.goalXp }}</b></div>
+        <div><span>{{ 'dashboard.totalXp' | translate }}</span><b>{{ dash.totalXp }}</b></div>
       </div>
     </div>
 
-    @if (dash.wordOfDay; as word) {
-      <div class="panel wod">
-        <div class="ghost kr">{{ word.hangul.charAt(0) }}</div>
-        <hg-audio-button [text]="word.hangul" [audioUrl]="word.audioUrl"/>
-        <div>
-          <div class="eyebrow">Слово дня</div>
-          <div class="big kr">{{ word.hangul }}</div>
-          <div class="rom">{{ word.romanization }}</div>
-          <div class="mean">{{ word.translation }}</div>
-          @if (word.exampleKo) {
-            <div class="ex kr">{{ word.exampleKo }} <span class="extr">— {{ word.exampleTranslation }}</span></div>
+    @if (dash.streak > 0) {
+      <div class="hg-card hg-streak">
+        <div class="hg-eyebrow">{{ 'dashboard.streakDays' | translate:{count: dash.streak} }}</div>
+        <div class="hg-streak__week">
+          @for (bar of weekBars(); track bar.label) {
+            <div [class.is-open]="bar.xp === 0">{{ bar.label }}</div>
           }
         </div>
+        <p>
+          @if (dash.goal.reached) {
+            {{ 'dashboard.todayDone' | translate }} <b>{{ 'dashboard.streakHolds' | translate }}</b>
+          } @else {
+            {{ 'dashboard.completeTodayGoal' | translate }}
+          }
+        </p>
       </div>
     }
-  }
-</div>
+
+    @if (dash.wordOfDay; as word) {
+      <div class="hg-card hg-word">
+        <div class="hg-word__head">
+          <div class="hg-eyebrow">{{ 'dashboard.wordOfDay' | translate }}</div>
+          <hg-audio-button [text]="word.hangul" [audioUrl]="word.audioUrl"/>
+        </div>
+        <div class="hg-word__hangul">{{ word.hangul }}</div>
+        <div class="hg-word__roman">{{ word.romanization }}</div>
+        <div class="hg-word__ru">{{ word.translation }}</div>
+        @if (word.exampleKo) {
+          <div class="hg-word__example kr">{{ word.exampleKo }} <span>— {{ word.exampleTranslation }}</span></div>
+        }
+        <span class="hg-word__watermark" aria-hidden="true">{{ word.hangul.charAt(0) }}</span>
+      </div>
+    }
+
+    <div class="hg-card hg-review">
+      <div class="hg-eyebrow">{{ 'dashboard.review' | translate }}</div>
+      @if (dash.dueWords > 0) {
+        <p>{{ 'dashboard.reviewWaiting' | translate:{count: dash.dueWords} }}</p>
+        <a class="hg-review__cta" routerLink="/review">{{ 'dashboard.startReview' | translate }}</a>
+      } @else {
+        <p>{{ 'dashboard.noReviewNeeded' | translate }}</p>
+      }
+    </div>
+  </aside>
+}

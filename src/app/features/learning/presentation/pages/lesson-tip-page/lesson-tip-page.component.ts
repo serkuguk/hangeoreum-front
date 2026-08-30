@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit, inject, input} from '@angular/core';
 import {Location} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
@@ -16,7 +16,7 @@ const escapeHtml = (s: string) =>
   styleUrl: './lesson-tip-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LessonTipPageComponent {
+export class LessonTipPageComponent implements OnInit {
   readonly id = input.required<string>();
 
   readonly facade = inject(LessonFacade);
@@ -24,8 +24,8 @@ export class LessonTipPageComponent {
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
 
-  constructor() {
-    setTimeout(() => this.facade.loadTip(this.id()));
+  ngOnInit(): void {
+    this.facade.loadTip(this.id());
   }
 
   back(): void {

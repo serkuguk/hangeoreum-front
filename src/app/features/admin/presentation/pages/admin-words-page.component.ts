@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@ang
 import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, switchMap} from 'rxjs';
-import {Word} from '@features/vocabulary/domain/entities/word.entity';
 import {
   HgButtonComponent,
   HgDialogComponent,
@@ -12,7 +11,7 @@ import {
   HgSelectComponent,
   HgSelectOption,
 } from '@shared/components/controls';
-import {AdminApi, Topic, WordRequest} from '../../infrastructure/admin.api';
+import {AdminApi, AdminWord, Topic, WordRequest} from '../../infrastructure/admin.api';
 
 const EMPTY_DRAFT: WordRequest = {
   hangul: '', romanization: '', translation: '',
@@ -102,7 +101,7 @@ const EMPTY_DRAFT: WordRequest = {
 export class AdminWordsPageComponent {
   private api = inject(AdminApi);
 
-  readonly words = signal<Word[]>([]);
+  readonly words = signal<AdminWord[]>([]);
   readonly total = signal(0);
   readonly page = signal(0);
   readonly search = signal('');
@@ -114,7 +113,7 @@ export class AdminWordsPageComponent {
   ]);
 
   readonly dialogOpen = signal(false);
-  readonly editing = signal<Word | null>(null);
+  readonly editing = signal<AdminWord | null>(null);
   draft: WordRequest = {...EMPTY_DRAFT};
 
   readonly totalPages = computed(() => Math.ceil(this.total() / 20));
@@ -168,7 +167,7 @@ export class AdminWordsPageComponent {
     this.dialogOpen.set(true);
   }
 
-  openEdit(word: Word): void {
+  openEdit(word: AdminWord): void {
     this.editing.set(word);
     this.draft = {
       hangul: word.hangul, romanization: word.romanization, translation: word.translation,
@@ -193,7 +192,7 @@ export class AdminWordsPageComponent {
     });
   }
 
-  remove(word: Word): void {
+  remove(word: AdminWord): void {
     if (!confirm(`Удалить «${word.hangul}»?`)) return;
     this.api.deleteWord(word.id).subscribe({
       next: () => this.load(),
@@ -201,7 +200,7 @@ export class AdminWordsPageComponent {
     });
   }
 
-  upload(word: Word, file: File, kind: 'audio' | 'image'): void {
+  upload(word: AdminWord, file: File, kind: 'audio' | 'image'): void {
     this.api.uploadWordMedia(word.id, file, kind).subscribe({
       next: () => this.load(),
       error: () => this.error.set('Не получилось загрузить файл.'),

@@ -1,11 +1,11 @@
 <div class="wrap billbox">
-  <h2 class="pagettl center">Hangeoreum Pro</h2>
-  <p class="pagesub center">Весь курс, Story, Immerse и повторение без лимитов.</p>
+  <h2 class="pagettl center">{{ 'billing.title' | translate }}</h2>
+  <p class="pagesub center">{{ 'billing.subtitle' | translate }}</p>
 
   @if (result() === 'success') {
-    <div class="banner ok">🎉 Оплата прошла! Pro активируется в течение минуты.</div>
+    <div class="banner ok">{{ 'billing.paymentSuccess' | translate }}</div>
   } @else if (result() === 'cancel') {
-    <div class="banner">Оплата отменена — ничего не списано.</div>
+    <div class="banner">{{ 'billing.paymentCancelled' | translate }}</div>
   }
 
   @if (facade.error(); as error) {
@@ -16,12 +16,12 @@
     @if (sub.isActive) {
       <div class="panel subpanel">
         <div>
-          <b>Подписка активна · {{ sub.planCode }}</b>
+          <b>{{ 'billing.subscriptionActive' | translate: {planCode: sub.planCode} }}</b>
           @if (sub.currentPeriodEnd) {
-            <small>Действует до {{ sub.currentPeriodEnd.slice(0, 10) }}</small>
+            <small>{{ 'billing.activeUntil' | translate: {date: sub.currentPeriodEnd.slice(0, 10)} }}</small>
           }
         </div>
-        <hg-button label="Управлять подпиской" variant="ghost"
+        <hg-button [label]="'billing.manage' | translate" variant="ghost"
                    [disabled]="facade.redirecting()" (pressed)="facade.openPortal()"/>
       </div>
     }
@@ -29,43 +29,43 @@
 
   <div class="freevspro panel">
     <div class="col">
-      <h3>Free</h3>
+      <h3>{{ 'billing.free' | translate }}</h3>
       <ul>
-        <li>Алфавит хангыль полностью</li>
-        <li>Первые юниты курса</li>
-        <li>Карточки-повторение</li>
-        <li>1 урок и 3 игры в день</li>
+        <li>{{ 'billing.freeAlphabet' | translate }}</li>
+        <li>{{ 'billing.freeUnits' | translate }}</li>
+        <li>{{ 'billing.freeFlashcards' | translate }}</li>
+        <li>{{ 'billing.freeLimit' | translate }}</li>
       </ul>
     </div>
     <div class="col pro">
-      <h3>Pro ⭐</h3>
+      <h3>{{ 'billing.pro' | translate }}</h3>
       <ul>
-        <li>Все уроки и Story носителей</li>
-        <li>Лента Immerse</li>
-        <li>Повторение без лимитов</li>
-        <li>Полная статистика</li>
+        <li>{{ 'billing.proLessons' | translate }}</li>
+        <li>{{ 'billing.proImmerse' | translate }}</li>
+        <li>{{ 'billing.proReview' | translate }}</li>
+        <li>{{ 'billing.proStatistics' | translate }}</li>
       </ul>
     </div>
   </div>
 
   @if (facade.loading()) {
-    <div class="panel loadpanel">Загружаем тарифы…</div>
+    <div class="panel loadpanel">{{ 'billing.loadingPlans' | translate }}</div>
   } @else if (facade.plans().length === 0) {
-    <div class="panel loadpanel">Тарифы скоро появятся.</div>
+    <div class="panel loadpanel">{{ 'billing.noPlans' | translate }}</div>
   } @else {
     <div class="plans">
       @for (plan of facade.plans(); track plan.id) {
         <div class="panel plancard" [class.best]="plan.interval === 'YEAR'">
           @if (plan.interval === 'YEAR') {
-            <span class="pill p-y best-pill">−50% · Популярный</span>
+            <span class="pill p-y best-pill">{{ 'billing.popular' | translate }}</span>
           }
           <h3>{{ plan.name }}</h3>
-          <div class="price">{{ price(plan) }}<small> {{ intervalLabel(plan) }}</small></div>
-          <hg-button [label]="facade.redirecting() ? 'Открываем оплату…' : 'Выбрать'"
+          <div class="price">{{ price(plan) }}<small> {{ intervalLabel(plan) | translate }}</small></div>
+          <hg-button [label]="facade.redirecting() ? ('billing.openingCheckout' | translate) : ('billing.select' | translate)"
                      [loading]="facade.redirecting()" (pressed)="facade.checkout(plan.code)"/>
         </div>
       }
     </div>
-    <p class="secure">🔒 Оплата через Stripe · карты не хранятся у нас · отмена в один клик</p>
+    <p class="secure">{{ 'billing.secure' | translate }}</p>
   }
 </div>

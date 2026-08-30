@@ -3,7 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Injector,
   OnDestroy,
+  afterNextRender,
   effect,
   inject,
   signal,
@@ -12,20 +14,15 @@ import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {ImmerseFacade} from '../../../application/immerse.facade';
 import {Clip} from '../../../domain/clip.entity';
-import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
-import {VOCABULARY_REPOSITORY} from '@features/vocabulary/domain/repositories/vocabulary.repository';
-import {VocabularyHttpRepository} from '@features/vocabulary/infrastructure/vocabulary.http-repository';
 import {HgButtonComponent, HgSegmentedControlComponent} from '@shared/components/controls';
+import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 type SubMode = 'ko' | 'ru' | 'both';
 
 @Component({
   selector: 'hg-immerse-page',
-  imports: [FormsModule, RouterLink, HgButtonComponent, HgSegmentedControlComponent],
-  providers: [
-    {provide: VOCABULARY_REPOSITORY, useClass: VocabularyHttpRepository},
-    VocabularyFacade,
-  ],
+  imports: [FormsModule, RouterLink, HgButtonComponent, HgSegmentedControlComponent, TranslatePipe],
   templateUrl: './immerse-page.component.html',
   styleUrl: './immerse-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,12 +31,14 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   readonly facade = inject(ImmerseFacade);
   readonly vocabulary = inject(VocabularyFacade);
   private host = inject(ElementRef<HTMLElement>);
+  private injector = inject(Injector);
+  private translate = inject(TranslateService);
 
   readonly subMode = signal<SubMode>('both');
   readonly subModeOptions = [
-    {value: 'ko' as const, label: '한국어'},
-    {value: 'ru' as const, label: 'Перевод'},
-    {value: 'both' as const, label: 'Оба'},
+    {value: 'ko' as const, label: this.translate.instant('media.subtitles.korean')},
+    {value: 'ru' as const, label: this.translate.instant('media.subtitles.translation')},
+    {value: 'both' as const, label: this.translate.instant('media.subtitles.both')},
   ];
   readonly currentClipIndex = signal(0);
 
@@ -50,7 +49,7 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
     // после каждого дозаполнения ленты навешиваем observer на новые видео
     effect(() => {
       this.facade.clips();
-      setTimeout(() => this.observeVideos());
+      afterNextRender(() => this.observeVideos(), {injector: this.injector});
     });
   }
 
@@ -92,8 +91,7 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
 
   addWord(clip: Clip): void {
     if (!clip.wordId) return;
-    const wordId = clip.wordId;
-    this.vocabulary.addWordToVocabulary(wordId);
+    this.vocabulary.addWordToVocabulary(clip.wordId);
   }
 
   canScrollClip(direction: 'prev' | 'next'): boolean {

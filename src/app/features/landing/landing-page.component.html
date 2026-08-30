@@ -1,62 +1,53 @@
 <div class="land-hero">
-  <div class="ghost kr">한걸음</div>
-  <div class="eyebrow">한걸음 · Hangeoreum</div>
-  <h1>Корейский, который<br>ты <span class="kr">понимаешь</span>,<br>а не зазубриваешь.</h1>
-  <p>Грамматика с объяснениями до практики, визуальные карточки с умным повторением и живая речь носителей — три сильных подхода в одном приложении.</p>
+  <div class="ghost kr">{{ 'landing.brand' | translate }}</div>
+  <div class="eyebrow">{{ 'landing.brandName' | translate }}</div>
+  <h1>{{ 'landing.hero.title' | translate }}</h1>
+  <p>{{ 'landing.hero.subtitle' | translate }}</p>
   <div class="btns">
-    <a class="cta" routerLink="/auth/register">Начать бесплатно</a>
-    <a class="ghostbtn" routerLink="/auth/login">У меня есть аккаунт</a>
+    <a class="cta" routerLink="/auth/register">{{ 'landing.hero.startFree' | translate }}</a>
+    <a class="ghostbtn" routerLink="/auth/login">{{ 'landing.hero.hasAccount' | translate }}</a>
   </div>
-  <div class="proverb kr">천 리 길도 한 걸음부터<small>Дорога в тысячу ли начинается с одного шага</small></div>
+  <div class="proverb kr">{{ 'landing.proverb.korean' | translate }}<small>{{ 'landing.proverb.translation' | translate }}</small></div>
 </div>
 
 <div class="wrap">
-  <h2 class="secttl">Почему это работает</h2>
-  <p class="secsub">Не механический повтор — понимание, визуальная память и живая речь.</p>
+  <h2 class="secttl">{{ 'landing.featuresHeading' | translate }}</h2>
+  <p class="secsub">{{ 'landing.featuresSubheading' | translate }}</p>
   <div class="feat3">
     @for (feature of features; track feature.title) {
       <div class="panel feat">
         <div class="ghost kr">{{ feature.ghost }}</div>
         <div class="ic" [class]="'ic c-' + feature.color">{{ feature.icon }}</div>
-        <h3>{{ feature.title }}</h3>
-        <p>{{ feature.text }}</p>
-        <div class="src">{{ feature.src }}</div>
+        <h3>{{ feature.title | translate }}</h3>
+        <p>{{ feature.text | translate }}</p>
+        <div class="src">{{ feature.src | translate }}</div>
       </div>
     }
   </div>
 
-  <h2 class="secttl">Тарифы</h2>
-  <p class="secsub">Начни бесплатно. Открой всё, когда втянешься.</p>
+  <h2 class="secttl">{{ 'landing.pricing.heading' | translate }}</h2>
+  <p class="secsub">{{ 'landing.pricing.subheading' | translate }}</p>
   <div class="plans">
     <div class="panel plan">
-      <h3>Free</h3>
-      <p class="plansub">Для знакомства</p>
-      <div class="price">0 €<small> / навсегда</small></div>
+      <h3>{{ 'landing.pricing.free.title' | translate }}</h3>
+      <p class="plansub">{{ 'landing.pricing.free.subtitle' | translate }}</p>
+      <div class="price">0 €<small>{{ 'landing.pricing.free.priceSuffix' | translate }}</small></div>
       <ul>
-        <li>Алфавит хангыль полностью</li>
-        <li>Первые 2 юнита курса</li>
-        <li>Базовые карточки</li>
-        <li>1 урок или 5 минут игр в день</li>
+        <li>{{ 'landing.pricing.free.benefit1' | translate }}</li><li>{{ 'landing.pricing.free.benefit2' | translate }}</li><li>{{ 'landing.pricing.free.benefit3' | translate }}</li><li>{{ 'landing.pricing.free.benefit4' | translate }}</li>
       </ul>
-      <a class="ghostbtn" routerLink="/auth/register">Начать</a>
+      <a class="ghostbtn" routerLink="/auth/register">{{ 'common.start' | translate }}</a>
     </div>
     <div class="panel plan pro">
-      <span class="pill p-y poppill">⭐ Популярный</span>
-      <h3>Pro</h3>
-      <p class="plansub">Весь курс без лимитов</p>
-      <div class="price">9 €<small> / месяц · год и lifetime дешевле</small></div>
+      <span class="pill p-y poppill">{{ 'landing.pricing.pro.popular' | translate }}</span>
+      <h3>{{ 'landing.pricing.pro.title' | translate }}</h3><p class="plansub">{{ 'landing.pricing.pro.subtitle' | translate }}</p><div class="price">9 €<small>{{ 'landing.pricing.pro.priceSuffix' | translate }}</small></div>
       <ul>
-        <li>Все уроки и Story</li>
-        <li>Лента Immerse с носителями</li>
-        <li>ИИ-диалог для практики</li>
-        <li>Офлайн-режим и полная статистика</li>
+        <li>{{ 'landing.pricing.pro.benefit1' | translate }}</li><li>{{ 'landing.pricing.pro.benefit2' | translate }}</li><li>{{ 'landing.pricing.pro.benefit3' | translate }}</li><li>{{ 'landing.pricing.pro.benefit4' | translate }}</li>
       </ul>
-      <a class="cta" routerLink="/auth/register">Попробовать Pro</a>
+      <a class="cta" routerLink="/auth/register">{{ 'landing.pricing.pro.cta' | translate }}</a>
     </div>
   </div>
 
   <div class="land-foot">
-    <span>© {{ year }} 한걸음 · Hangeoreum</span>
-    <span>Условия · Приватность · Контакты</span>
+    <span>© {{ year }} {{ 'landing.brandName' | translate }}</span><span>{{ 'landing.footerLinks' | translate }}</span>
   </div>
 </div>

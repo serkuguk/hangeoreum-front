@@ -57,7 +57,7 @@ export class AdminCoursePageComponent {
 
   readonly course = signal<AdminCourse | null>(null);
   readonly units = signal<AdminUnit[]>([]);
-  readonly lessonsByUnit = signal<Record<string, AdminLesson[]>>({});
+  readonly lessonsByUnit = signal<Partial<Record<string, AdminLesson[]>>>({});
   readonly error = signal<string | null>(null);
 
   newCourseTitle = '';

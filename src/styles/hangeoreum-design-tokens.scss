@@ -149,14 +149,21 @@ $hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
   --hg-route:         oklch(45% 0.190 257);
   --hg-on-route:      oklch(99% 0.005 90);
   --hg-route-soft:    oklch(92% 0.040 257);
+  --hg-route-deep:    oklch(32% 0.150 257);
+  --hg-violet:        oklch(42% 0.200 295);
 
   --hg-success:       oklch(47% 0.135 165);
   --hg-on-success:    oklch(99% 0.005 90);
   --hg-success-soft:  oklch(92% 0.040 165);
+  --hg-success-deep:  oklch(34% 0.100 165);
 
   --hg-reward:        oklch(76% 0.145 82);
   --hg-on-reward:     oklch(25% 0.035 70);
   --hg-reward-soft:   oklch(94% 0.040 82);
+  --hg-reward-deep:   oklch(50% 0.120 72);
+
+  // Глубина «3D»-плит: кнопки узлов курса и CTA отбрасывают тень этой силы.
+  --hg-slab-shadow:   0.14;
 
   --hg-danger:        oklch(50% 0.200 25);
   --hg-on-danger:     oklch(99% 0.005 90);
@@ -170,6 +177,8 @@ $hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
   --hg-radius-control: 8px; --hg-radius-block: 12px; --hg-radius-scene: 20px; --hg-radius-pill-new: 999px;
   --hg-content-lesson: 720px; --hg-content-main: 1120px;
   --hg-touch-min: 44px;
+  // Высота липкого топбара (12px паддинга + 44px контрол + 1px граница) — под неё липнут шапки страниц.
+  --hg-topbar-h: 69px;
   --hg-motion-feedback: 120ms; --hg-motion-nav: 180ms; --hg-motion-route: 280ms;
 
   // ---------- Легаси-ремап (транзитный слой) ----------
@@ -199,6 +208,12 @@ $hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
   --hg-text:          oklch(94% 0.012 88);
   --hg-text-muted:    oklch(74% 0.020 88);
   --hg-border:        oklch(34% 0.025 260);
+  --hg-slab-shadow:   0.4;
+
+  // «Глубина» 3D-плит на тёмном фоне светлее заливки, иначе тень сливается с фоном.
+  --hg-route-deep:    oklch(44% 0.150 257);
+  --hg-success-deep:  oklch(48% 0.115 165);
+  --hg-reward-deep:   oklch(88% 0.110 88);
 }
 
 // =============================================================

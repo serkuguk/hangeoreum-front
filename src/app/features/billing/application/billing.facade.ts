@@ -1,9 +1,12 @@
 import {Injectable, inject, signal} from '@angular/core';
-import {BILLING_REPOSITORY, Plan, Subscription} from '../domain/billing.model';
+import {Plan, Subscription} from '../domain/billing.model';
+import {BILLING_REPOSITORY} from './billing-repository.token';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable({providedIn: 'root'})
 export class BillingFacade {
   private repository = inject(BILLING_REPOSITORY);
+  private translate = inject(TranslateService);
 
   readonly plans = signal<Plan[]>([]);
   readonly subscription = signal<Subscription | null>(null);
@@ -20,7 +23,7 @@ export class BillingFacade {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Не получилось загрузить тарифы.');
+        this.error.set(this.translate.instant('billing.loadError'));
         this.loading.set(false);
       },
     });
@@ -36,7 +39,7 @@ export class BillingFacade {
     this.repository.checkout(planCode).subscribe({
       next: ({checkoutUrl}) => window.location.href = checkoutUrl,
       error: () => {
-        this.error.set('Оплата временно недоступна. Попробуй позже.');
+        this.error.set(this.translate.instant('billing.checkoutError'));
         this.redirecting.set(false);
       },
     });
@@ -47,7 +50,7 @@ export class BillingFacade {
     this.repository.portal().subscribe({
       next: ({portalUrl}) => window.location.href = portalUrl,
       error: () => {
-        this.error.set('Портал управления временно недоступен.');
+        this.error.set(this.translate.instant('billing.portalError'));
         this.redirecting.set(false);
       },
     });

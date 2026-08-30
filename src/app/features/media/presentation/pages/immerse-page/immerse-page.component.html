@@ -2,30 +2,30 @@
   @if (facade.proRequired()) {
     <div class="panel centerpanel">
       <div class="ghost kr">몰입</div>
-      <h2 class="pagettl">Immerse — Pro-фича</h2>
-      <p class="pagesub">Лента коротких видео носителей: субтитры, слова в один тап.</p>
-      <a class="cta" routerLink="/billing">Открыть с Pro</a>
+      <h2 class="pagettl">{{ 'media.pro.title' | translate }}</h2>
+      <p class="pagesub">{{ 'media.pro.description' | translate }}</p>
+      <a class="cta" routerLink="/billing">{{ 'media.pro.open' | translate }}</a>
     </div>
   } @else if (facade.error(); as error) {
     <div class="panel centerpanel">
       <p class="pagesub">{{ error }}</p>
-      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
+      <hg-button [label]="'common.retry' | translate" variant="ghost" (pressed)="facade.load()"/>
     </div>
   } @else if (facade.clips().length === 0 && !facade.loading()) {
     <div class="panel centerpanel">
       <div class="ghost kr">서울</div>
-      <h2 class="pagettl">Клипы уже в пути</h2>
-      <p class="pagesub">Носители записывают видео — лента скоро наполнится.</p>
-      <a class="ghostbtn" routerLink="/dashboard">На дашборд</a>
+      <h2 class="pagettl">{{ 'media.empty.title' | translate }}</h2>
+      <p class="pagesub">{{ 'media.empty.description' | translate }}</p>
+      <a class="ghostbtn" routerLink="/dashboard">{{ 'common.toDashboard' | translate }}</a>
     </div>
   } @else {
-    <hg-segmented-control class="subtoggle" label="Язык субтитров"
+    <hg-segmented-control class="subtoggle" [label]="'media.subtitles.label' | translate"
                           [options]="subModeOptions" [(ngModel)]="subMode"/>
 
     <div class="feednav">
       @if (facade.clips().length > 1) {
         <button type="button" data-domain-control class="navbtn prev" [disabled]="!canScrollClip('prev')"
-                aria-label="Предыдущее видео" (click)="scrollClip('prev')">‹</button>
+                [attr.aria-label]="'media.previousVideo' | translate" (click)="scrollClip('prev')">‹</button>
       }
 
       <div class="feed">
@@ -34,7 +34,7 @@
             @if (clip.videoUrl) {
               <video [attr.data-clip-id]="clip.id" [src]="clip.videoUrl"
                      [poster]="clip.thumbnailUrl ?? ''" loop playsinline muted controls preload="none"
-                     [attr.aria-label]="'Видео: ' + (subtitle(clip, 'ru') ?? subtitle(clip, 'ko') ?? 'клип')"
+                     [attr.aria-label]="'media.videoAria' | translate:{title: subtitle(clip, 'ru') ?? subtitle(clip, 'ko') ?? ('media.clipFallback' | translate)}"
                      (click)="togglePlay($event)"></video>
             } @else {
               <div class="novid"><span class="ghost kr">말</span></div>
@@ -52,13 +52,13 @@
             <div class="actions">
               <button type="button" data-domain-control [class.liked]="clip.liked" (click)="facade.toggleLike(clip)"
                       [attr.aria-pressed]="clip.liked"
-                      [attr.aria-label]="clip.liked ? 'Убрать лайк' : 'Нравится'">
+                      [attr.aria-label]="(clip.liked ? 'media.unlike' : 'media.like') | translate">
                 {{ clip.liked ? '❤️' : '🤍' }}
               </button>
               @if (clip.wordId) {
                 <button type="button" data-domain-control (click)="addWord(clip)"
-                        [disabled]="vocabulary.addState(clip.wordId) !== 'idle'"
-                        aria-label="Слово в словарь">
+                        [disabled]="vocabulary.addState(clip.wordId) === 'saving' || vocabulary.addState(clip.wordId) === 'saved'"
+                        [attr.aria-label]="'media.addWordAria' | translate">
                   {{ vocabulary.addState(clip.wordId) === 'saved' ? '✓' : '＋' }}
                 </button>
               }
@@ -66,13 +66,13 @@
           </section>
         }
         @if (facade.loading()) {
-          <div class="feedload">Загружаем…</div>
+          <div class="feedload">{{ 'common.loading' | translate }}</div>
         }
       </div>
 
       @if (facade.clips().length > 1) {
         <button type="button" data-domain-control class="navbtn next" [disabled]="!canScrollClip('next')"
-                aria-label="Следующее видео" (click)="scrollClip('next')">›</button>
+                [attr.aria-label]="'media.nextVideo' | translate" (click)="scrollClip('next')">›</button>
       }
     </div>
   }

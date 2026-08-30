@@ -19,10 +19,12 @@ import {ENV} from "@core/tokens/environment.token";
 import {providePrimeNG} from "primeng/config";
 import {definePreset} from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
-import {ME_REPOSITORY} from "@features/identity/domain/repositories/me.repository";
+import {ME_REPOSITORY} from "@features/identity/application/me-repository.token";
 import {MeHttpRepository} from "@features/identity/infrastructure/repositories/me.http-repository";
-import {BILLING_REPOSITORY} from "@features/billing/domain/billing.model";
+import {BILLING_REPOSITORY} from "@features/billing/application/billing-repository.token";
 import {BillingHttpRepository} from "@features/billing/infrastructure/billing.http-repository";
+import {provideTranslateService} from '@ngx-translate/core';
+import {provideTranslateHttpLoader} from '@ngx-translate/http-loader';
 
 // ---------- PrimeNG: тема Hangeoreum (오방색) поверх Aura ----------
 const HangeoreumPreset = definePreset(Aura, {
@@ -67,6 +69,11 @@ const ANGULAR_PROVIDERS = [
     provideHttpClient(
         withInterceptors([authInterceptor]),
     ),
+    provideTranslateService({
+        loader: provideTranslateHttpLoader({prefix: '/assets/i18n/', suffix: '.json'}),
+        lang: 'ru',
+        fallbackLang: 'ru',
+    }),
     provideZonelessChangeDetection()
 ];
 

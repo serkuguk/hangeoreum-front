@@ -3,6 +3,7 @@ import {HgButtonComponent} from '@shared/components/controls/hg-button.component
 import {shuffle} from '@shared/utils/shuffle';
 import {WordOrderPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
+import {TranslatePipe} from '@ngx-translate/core';
 
 interface BankToken {
   id: number;
@@ -11,18 +12,18 @@ interface BankToken {
 
 @Component({
   selector: 'hg-exercise-word-order',
-  imports: [HgButtonComponent],
+  imports: [HgButtonComponent, TranslatePipe],
   template: `
-    <div class="q-kind">Собери предложение</div>
+    <div class="q-kind">{{ 'learning.exercise.buildSentence' | translate }}</div>
     <div class="panel taskpanel">{{ payload().translation }}</div>
 
-    <div class="assembled" [class.empty]="chosen().length === 0" aria-label="Собранное предложение">
+    <div class="assembled" [class.empty]="chosen().length === 0" [attr.aria-label]="'learning.exercise.assembledSentence' | translate">
       @if (chosen().length === 0) {
-        <span class="placeholder">Нажимай на слова внизу</span>
+        <span class="placeholder">{{ 'learning.exercise.chooseWords' | translate }}</span>
       }
       @for (token of chosen(); track token.id) {
         <button type="button" data-domain-control class="wtok kr" [disabled]="answered()"
-                [attr.aria-label]="'Убрать слово ' + token.text" (click)="remove(token)">{{ token.text }}</button>
+                [attr.aria-label]="'learning.exercise.removeWord' | translate:{word: token.text}" (click)="remove(token)">{{ token.text }}</button>
       }
     </div>
 
@@ -30,12 +31,12 @@ interface BankToken {
       @for (token of bank(); track token.id) {
         @if (!isChosen(token)) {
           <button type="button" data-domain-control class="wtok kr" [disabled]="answered()"
-                  [attr.aria-label]="'Добавить слово ' + token.text" (click)="add(token)">{{ token.text }}</button>
+                  [attr.aria-label]="'learning.exercise.addWord' | translate:{word: token.text}" (click)="add(token)">{{ token.text }}</button>
         }
       }
     </div>
 
-    <hg-button class="checkbtn" label="Проверить"
+    <hg-button class="checkbtn" [label]="'common.check' | translate"
                [disabled]="chosen().length === 0 || answered()" (pressed)="check()"/>
   `,
   styleUrl: './exercise-shared.scss',

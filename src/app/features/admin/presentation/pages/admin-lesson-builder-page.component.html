@@ -40,15 +40,15 @@
   </section>
 
   <section class="panel">
-    <div class="eyebrow">Learning Tip (грамматика перед уроком)</div>
+    <div class="eyebrow">{{ 'admin.tipHeading' | translate }}</div>
     <div class="tipform">
-      <hg-input label="Заголовок" placeholder="Частицы 은/는" [(ngModel)]="tipTitle" />
-      <hg-textarea label="Правило" placeholder="Текст с переносами…" [rows]="5"
+      <hg-input [label]="'admin.tipTitle' | translate" [placeholder]="'learning.particlesPlaceholder' | translate" [(ngModel)]="tipTitle" />
+      <hg-textarea [label]="'admin.tipRule' | translate" [placeholder]="'learning.tipTextPlaceholder' | translate" [rows]="5"
                    [(ngModel)]="tipBody" />
-      <hg-textarea class="mono" label="Примеры в JSON" [rows]="5"
-                   placeholder='[{"ko":"…","translation":"…","highlight":["는"]}]'
+      <hg-textarea class="mono" [label]="'admin.tipExamples' | translate" [rows]="5"
+                   [placeholder]="'admin.tipExamplesPlaceholder' | translate"
                    [(ngModel)]="tipExamples" />
-      <hg-button size="sm" variant="ghost" label="Сохранить tip" (pressed)="saveTip()" />
+      <hg-button size="sm" variant="ghost" [label]="'learning.saveTip' | translate" (pressed)="saveTip()" />
     </div>
   </section>
 

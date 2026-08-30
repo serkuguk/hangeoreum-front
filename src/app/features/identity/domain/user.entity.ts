@@ -1,6 +1,12 @@
-// ponytail: единый тип пользователя живёт в core (нужен interceptor'у/AuthService),
-// identity реэкспортирует его как доменную сущность.
-export type {AuthUser as User} from '@core/auth/auth.service';
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  role: 'USER' | 'ADMIN';
+  startLevel: string;
+  createdAt: string;
+}
 
 export type StartLevel = 'BEGINNER' | 'KNOWS_HANGUL' | 'INTERMEDIATE';
 

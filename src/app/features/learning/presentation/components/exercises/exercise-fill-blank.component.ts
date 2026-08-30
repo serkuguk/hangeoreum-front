@@ -2,11 +2,13 @@ import {ChangeDetectionStrategy, Component, computed, input, output, signal} fro
 import {shuffle} from '@shared/utils/shuffle';
 import {FillBlankPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-exercise-fill-blank',
+  imports: [TranslatePipe],
   template: `
-    <div class="q-kind">Заполни пропуск</div>
+    <div class="q-kind">{{ 'learning.exercise.fillBlank' | translate }}</div>
     <div class="panel gapcard">
       <div class="gapline kr">
         {{ parts().before }}<span class="gap"
@@ -14,7 +16,7 @@ import {Feedback} from '../../../application/facades/lesson.facade';
           [class.is-bad]="answered() && !pickedCorrect()">{{ picked() || ' ' }}</span>{{ parts().after }}
       </div>
       @if (payload().translation) {
-        <div class="gaptr">«{{ payload().translation }}»@if (payload().hint) { · Подсказка: {{ payload().hint }}}</div>
+        <div class="gaptr">«{{ payload().translation }}»@if (payload().hint) { · {{ 'learning.exercise.hint' | translate }}: {{ payload().hint }}}</div>
       }
       <div class="gapopts">
         @for (option of options(); track option.text) {

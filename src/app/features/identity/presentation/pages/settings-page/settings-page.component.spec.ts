@@ -5,7 +5,7 @@ import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {ThemeService} from '@core/services/theme.service';
 import {Subject, of} from 'rxjs';
 import {AuthFacade} from '../../../application/facades/auth.facade';
-import {ME_REPOSITORY} from '../../../domain/repositories/me.repository';
+import {ME_REPOSITORY} from '../../../application/me-repository.token';
 import {UserSettings} from '../../../domain/user.entity';
 import {SettingsPageComponent} from './settings-page.component';
 

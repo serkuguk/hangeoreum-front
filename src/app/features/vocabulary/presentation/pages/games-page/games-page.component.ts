@@ -5,10 +5,11 @@ import {HgButtonComponent} from '@shared/components/controls';
 import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
 import {FinishResult} from '../../../domain/repositories/vocabulary.repository';
 import {GameMode, GamesFacade} from '../../../application/facades/games.facade';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-games-page',
-  imports: [RouterLink, HgAudioButtonComponent, HgButtonComponent, HgSessionResultCardComponent],
+  imports: [RouterLink, HgAudioButtonComponent, HgButtonComponent, HgSessionResultCardComponent, TranslatePipe],
   templateUrl: './games-page.component.html',
   styleUrl: './games-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,12 +17,13 @@ import {GameMode, GamesFacade} from '../../../application/facades/games.facade';
 export class GamesPageComponent {
   readonly facade = inject(GamesFacade);
   private tts = inject(KoreanTtsService);
+  private translate = inject(TranslateService);
   private lastAutoplayWordId: string | null = null;
 
   readonly games: {mode: GameMode; icon: string; title: string; hint: string}[] = [
-    {mode: 'MATCH', icon: '🧩', title: 'Match', hint: 'Соедини слово и перевод'},
-    {mode: 'LISTEN', icon: '🎧', title: 'Listen', hint: 'Услышь и выбери'},
-    {mode: 'SPELL', icon: '⌨️', title: 'Spell', hint: 'Собери слово из слогов'},
+    {mode: 'MATCH', icon: '🧩', title: this.translate.instant('vocabulary.games.match.title'), hint: this.translate.instant('vocabulary.games.match.hint')},
+    {mode: 'LISTEN', icon: '🎧', title: this.translate.instant('vocabulary.games.listen.title'), hint: this.translate.instant('vocabulary.games.listen.hint')},
+    {mode: 'SPELL', icon: '⌨️', title: this.translate.instant('vocabulary.games.spell.title'), hint: this.translate.instant('vocabulary.games.spell.hint')},
   ];
 
   readonly clock = computed(() => {
@@ -48,9 +50,9 @@ export class GamesPageComponent {
 
   resultStats(result: FinishResult | null): readonly HgSessionStat[] {
     return [
-      {label: 'очков', value: this.facade.score(), tone: 'reward'},
-      {label: 'слов', value: result?.total ?? '—', tone: 'info'},
-      {label: 'верно', value: result?.correct ?? '—', tone: 'success'},
+      {label: this.translate.instant('vocabulary.games.stats.score'), value: this.facade.score(), tone: 'reward'},
+      {label: this.translate.instant('vocabulary.games.stats.words'), value: result?.total ?? '—', tone: 'info'},
+      {label: this.translate.instant('vocabulary.games.stats.correct'), value: result?.correct ?? '—', tone: 'success'},
       {label: 'XP', value: result ? `+${result.xp}` : '—', tone: 'danger'},
     ];
   }

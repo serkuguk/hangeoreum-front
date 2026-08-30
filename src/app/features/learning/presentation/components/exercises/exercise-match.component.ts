@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, input, output, signal} fro
 import {shuffle} from '@shared/utils/shuffle';
 import {MatchPairsPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
+import {TranslatePipe} from '@ngx-translate/core';
 
 interface MatchCell {
   pairIndex: number;
@@ -11,8 +12,9 @@ interface MatchCell {
 
 @Component({
   selector: 'hg-exercise-match',
+  imports: [TranslatePipe],
   template: `
-    <div class="q-kind">Сопоставь пары</div>
+    <div class="q-kind">{{ 'learning.exercise.matchPairs' | translate }}</div>
     <div class="match">
       @for (cell of cells(); track cell.side + cell.pairIndex) {
         <button type="button" data-domain-control class="mcell"

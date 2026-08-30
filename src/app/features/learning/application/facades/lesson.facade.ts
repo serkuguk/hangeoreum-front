@@ -1,12 +1,13 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {Subscription, filter, map, switchMap, take, timer} from 'rxjs';
 import {Exercise, Lesson, Tip} from '../../domain/entities/exercise.entity';
 import {LessonSession} from '../../domain/services/lesson-session';
 import {
   CompleteRequest,
   CompleteResult,
-  LEARNING_REPOSITORY,
 } from '../../domain/repositories/learning.repository';
+import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 
 export interface Feedback {
@@ -31,6 +32,7 @@ export class LessonFacade {
   private session: LessonSession | null = null;
   private pendingCompletion: PendingCompletion | null = null;
   private nextTimer: ReturnType<typeof setTimeout> | null = null;
+  private completionPolling: Subscription | null = null;
 
   readonly lesson = signal<Lesson | null>(null);
   readonly tip = signal<Tip | null>(null);
@@ -52,6 +54,7 @@ export class LessonFacade {
   constructor() {
     this.destroyRef.onDestroy(() => {
       if (this.nextTimer) clearTimeout(this.nextTimer);
+      this.cancelCompletionPolling();
     });
   }
 
@@ -152,6 +155,7 @@ export class LessonFacade {
     const lesson = this.lesson();
     const session = this.session;
     if (!lesson || !session) return;
+    this.current.set(null);
     this.pendingCompletion = {
       lessonId: lesson.id,
       attemptId: crypto.randomUUID(),
@@ -162,18 +166,14 @@ export class LessonFacade {
   }
 
   private complete(pending: PendingCompletion): void {
+    this.cancelCompletionPolling();
     this.finishing.set(true);
     this.saveError.set(false);
     this.phase.set('saving');
     this.repository.complete(pending.lessonId, pending).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: result => {
-        this.result.set(result);
-        this.finishing.set(false);
-        this.session = null;
-        this.pendingCompletion = null;
-        this.clearPendingCompletion();
-        this.map.invalidate();
-        this.phase.set('completed');
+      next: accepted => {
+        this.persistPendingCompletion(pending);
+        this.pollCompletion(accepted.attemptId);
       },
       error: () => {
         this.finishing.set(false);
@@ -186,6 +186,7 @@ export class LessonFacade {
 
   private resetForStart(): void {
     if (this.nextTimer) clearTimeout(this.nextTimer);
+    this.cancelCompletionPolling();
     this.session = null;
     this.pendingCompletion = null;
     this.lesson.set(null);
@@ -197,6 +198,37 @@ export class LessonFacade {
     this.error.set(null);
     this.saveError.set(false);
     this.finishing.set(false);
+  }
+
+  private pollCompletion(attemptId: string): void {
+    this.completionPolling = timer(0, 500).pipe(
+      switchMap(() => this.repository.getCompletionStatus(attemptId)),
+      filter(response => response.status === 'COMPLETED'),
+      take(1),
+      map(response => response.result!),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: result => {
+        this.result.set(result);
+        this.finishing.set(false);
+        this.session = null;
+        this.pendingCompletion = null;
+        this.clearPendingCompletion();
+        this.map.invalidate();
+        this.phase.set('completed');
+      },
+      error: () => {
+        this.finishing.set(false);
+        this.saveError.set(true);
+        if (this.pendingCompletion) this.persistPendingCompletion(this.pendingCompletion);
+        this.phase.set('save-error');
+      },
+    });
+  }
+
+  private cancelCompletionPolling(): void {
+    this.completionPolling?.unsubscribe();
+    this.completionPolling = null;
   }
 
   private readPendingCompletion(lessonId: string): PendingCompletion | null {

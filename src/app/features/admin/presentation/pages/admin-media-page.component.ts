@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@ang
 import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
-import {Word} from '@features/vocabulary/domain/entities/word.entity';
 import {
   HgButtonComponent,
   HgFilePickerComponent,
@@ -11,7 +10,7 @@ import {
   HgSelectOption,
   HgTextareaComponent,
 } from '@shared/components/controls';
-import {AdminApi, AdminClip, Speaker} from '../../infrastructure/admin.api';
+import {AdminApi, AdminClip, AdminWord, Speaker} from '../../infrastructure/admin.api';
 
 const CLIP_KIND_OPTIONS: readonly HgSelectOption<string>[] = ['IMMERSE', 'STORY', 'WORD']
   .map(value => ({label: value, value}));
@@ -83,7 +82,7 @@ export class AdminMediaPageComponent {
   readonly subtitlesFor = signal<string | null>(null); // clipId с открытым редактором сабов
   readonly editingClip = signal<string | null>(null); // clipId с открытым редактором полей
   readonly editingSpeaker = signal<string | null>(null);
-  readonly foundWords = signal<Word[]>([]);
+  readonly foundWords = signal<AdminWord[]>([]);
   readonly clipKindOptions = CLIP_KIND_OPTIONS;
   readonly speakerOptions = computed<readonly HgSelectOption<string | null>[]>(() => [
     {label: 'без спикера', value: null},
@@ -213,7 +212,7 @@ export class AdminMediaPageComponent {
     this.wordSearch$.next(value);
   }
 
-  pickWord(word: Word): void {
+  pickWord(word: AdminWord): void {
     this.clipDraft.wordId = word.id;
     this.clipWordLabel = `${word.hangul} — ${word.translation}`;
     this.wordSearch = '';

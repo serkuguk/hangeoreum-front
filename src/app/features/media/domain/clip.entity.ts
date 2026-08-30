@@ -1,4 +1,3 @@
-import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ClipSubtitle} from '@shared/models/clip-subtitle';
 
@@ -28,5 +27,3 @@ export interface ClipRepository {
   markViewed(clipId: string): Observable<void>;
   toggleLike(clipId: string): Observable<{liked: boolean}>;
 }
-
-export const CLIP_REPOSITORY = new InjectionToken<ClipRepository>('ClipRepository');

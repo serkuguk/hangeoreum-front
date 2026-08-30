@@ -1,36 +1,34 @@
 <div class="formbox">
-  <div class="eyebrow">회원가입 · Регистрация</div>
-  <h1>Создать аккаунт</h1>
-  <p class="sub">Займёт меньше минуты.</p>
+  <div class="eyebrow">{{ 'identity.register.eyebrow' | translate }}</div><h1>{{ 'identity.register.title' | translate }}</h1><p class="sub">{{ 'identity.register.subtitle' | translate }}</p>
 
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <hg-input id="name" type="text" label="Имя" formControlName="name" placeholder="Сергей"
-              autocomplete="name" [error]="invalid('name') ? 'Как тебя зовут?' : ''"/>
+    <hg-input id="name" type="text" [label]="'common.name' | translate" formControlName="name" [placeholder]="'identity.register.namePlaceholder' | translate"
+              autocomplete="name" [error]="invalid('name') ? ('identity.validation.name' | translate) : ''"/>
 
-    <hg-input id="email" type="email" label="Email" formControlName="email" placeholder="you@email.com"
-              autocomplete="email" [error]="invalid('email') ? 'Введи корректный email' : ''"/>
+    <hg-input id="email" type="email" [label]="'common.email' | translate" formControlName="email" placeholder="you@email.com"
+              autocomplete="email" [error]="invalid('email') ? ('identity.validation.email' | translate) : ''"/>
 
-    <hg-input id="password" type="password" label="Пароль" formControlName="password"
-              placeholder="Минимум 8 символов" autocomplete="new-password"
-              [error]="invalid('password') ? 'Пароль — минимум 8 символов' : ''"/>
+    <hg-input id="password" type="password" [label]="'common.password' | translate" formControlName="password"
+              [placeholder]="'identity.validation.passwordMin' | translate" autocomplete="new-password"
+              [error]="invalid('password') ? ('identity.validation.passwordMin' | translate) : ''"/>
 
-    <hg-checkbox label="Принимаю условия и политику" formControlName="consent"/>
+    <hg-checkbox [label]="'identity.register.consent' | translate" formControlName="consent"/>
     @if (invalid('consent')) {
-      <div class="apierr">Нужно принять условия, чтобы продолжить</div>
+      <div class="apierr">{{ 'identity.validation.consent' | translate }}</div>
     }
 
     @if (facade.error(); as error) {
       <div class="apierr">{{ error }}</div>
     }
 
-    <hg-button class="btn" type="submit" label="Создать аккаунт" [loading]="facade.loading()" block/>
+    <hg-button class="btn" type="submit" [label]="'identity.register.submit' | translate" [loading]="facade.loading()" block/>
   </form>
 
-  <div class="sep">или через</div>
+  <div class="sep">{{ 'identity.socialDivider' | translate }}</div>
   <div class="social">
     <hg-button label="Google" variant="secondary" block (pressed)="facade.loginWithProvider('google')"/>
     <hg-button label="Kakao" variant="secondary" block (pressed)="facade.loginWithProvider('kakao')"/>
   </div>
 
-  <div class="alt">Уже есть аккаунт? <a routerLink="/auth/login">Войти</a></div>
+  <div class="alt">{{ 'identity.register.hasAccount' | translate }} <a routerLink="/auth/login">{{ 'identity.login.submit' | translate }}</a></div>
 </div>

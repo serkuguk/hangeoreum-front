@@ -2,7 +2,8 @@ import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {of, throwError} from 'rxjs';
 import {Story} from '../../domain/entities/story.entity';
-import {CompleteResult, LEARNING_REPOSITORY, LearningRepository} from '../../domain/repositories/learning.repository';
+import {CompletionAccepted, CompleteResult, LearningRepository} from '../../domain/repositories/learning.repository';
+import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 import {StoryFacade} from './story.facade';
 
@@ -16,15 +17,23 @@ const result: CompleteResult = {
   goalReached: false,
 };
 
+const accepted: CompletionAccepted = {
+  attemptId: 'server-attempt',
+  acceptedAt: '2026-07-16T12:00:00Z',
+  status: 'PENDING',
+};
+
 describe('StoryFacade', () => {
   let facade: StoryFacade;
-  let repository: jest.Mocked<Pick<LearningRepository, 'story' | 'complete'>>;
+  let repository: jest.Mocked<Pick<LearningRepository, 'story' | 'complete' | 'getCompletionStatus'>>;
   let map: {invalidate: jest.Mock};
 
   beforeEach(() => {
+    jest.useFakeTimers();
     repository = {
       story: jest.fn().mockReturnValue(of(story)),
       complete: jest.fn(),
+      getCompletionStatus: jest.fn().mockReturnValue(of({status: 'COMPLETED', result})),
     };
     map = {invalidate: jest.fn()};
     TestBed.configureTestingModule({
@@ -38,7 +47,10 @@ describe('StoryFacade', () => {
     facade.load(story.id);
   });
 
-  afterEach(() => TestBed.resetTestingModule());
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    jest.useRealTimers();
+  });
 
   it('не показывает Story завершённой, если сервер не сохранил прогресс', () => {
     repository.complete.mockReturnValue(throwError(() => new Error('network')));
@@ -54,7 +66,7 @@ describe('StoryFacade', () => {
   it('повторяет завершение Story с тем же attemptId', () => {
     repository.complete
       .mockReturnValueOnce(throwError(() => new Error('network')))
-      .mockReturnValueOnce(of(result));
+      .mockReturnValueOnce(of(accepted));
 
     facade.complete(story.id);
     const initialAttemptId = repository.complete.mock.calls[0][1].attemptId;
@@ -62,6 +74,7 @@ describe('StoryFacade', () => {
     facade.complete(story.id);
 
     expect(repository.complete.mock.calls[1][1].attemptId).toBe(initialAttemptId);
+    jest.advanceTimersByTime(0);
     expect(facade.completed()).toBe(true);
     expect(facade.completionError()).toBeNull();
     expect(map.invalidate).toHaveBeenCalledTimes(1);

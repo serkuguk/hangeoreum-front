@@ -1,10 +1,10 @@
 <div class="wrap gamebox">
   @switch (facade.phase()) {
     @case ('pick') {
-      <h2 class="pagettl">Мини-игры</h2>
-      <p class="pagesub">Пять минут в день. Выбери игру — таймер пойдёт сразу.</p>
+      <h2 class="pagettl">{{ 'vocabulary.games.title' | translate }}</h2>
+      <p class="pagesub">{{ 'vocabulary.games.subtitle' | translate }}</p>
       @if (facade.loadError(); as error) {
-        <div class="panel errpanel">{{ error }} <a routerLink="/billing">Открыть Pro →</a></div>
+        <div class="panel errpanel">{{ error }} <a routerLink="/billing">{{ 'common.openPro' | translate }}</a></div>
       }
       <div class="gpick">
         @for (game of games; track game.mode) {
@@ -17,14 +17,14 @@
         }
       </div>
       @if (facade.loading()) {
-        <p class="pagesub loadhint">Готовим слова…</p>
+        <p class="pagesub loadhint">{{ 'vocabulary.games.loading' | translate }}</p>
       }
     }
     @case ('playing') {
       <div class="g-top">
         <div class="timer" [class.low]="facade.timeLeft() < 15">{{ clock() }}</div>
-        <div class="combo">🔥 Комбо ×{{ facade.combo() }} · {{ facade.score() }} очков</div>
-        <hg-button class="exitbtn" label="Выйти" variant="ghost" size="sm" (pressed)="facade.backToPick()"/>
+        <div class="combo">{{ 'vocabulary.games.combo' | translate:{combo: facade.combo(), score: facade.score()} }}</div>
+        <hg-button class="exitbtn" [label]="'common.exit' | translate" variant="ghost" size="sm" (pressed)="facade.backToPick()"/>
       </div>
 
       @switch (facade.mode()) {
@@ -66,28 +66,28 @@
               <div class="task">«{{ word.word.translation }}»</div>
               <div class="typed kr" [class.ok]="facade.lastAnswer() === 'ok'" [class.bad]="facade.lastAnswer() === 'bad'">
                 @if (facade.typed().length === 0) {
-                  <span class="ph">Собери слово из слогов</span>
+                  <span class="ph">{{ 'vocabulary.games.spell.hint' | translate }}</span>
                 }
                 {{ facade.typed().join('') }}
               </div>
               <div class="bank">
                 @for (syllable of facade.bank(); track $index) {
                   <button type="button" data-domain-control class="mcell kr syl"
-                          [attr.aria-label]="'Добавить слог ' + syllable"
+                          [attr.aria-label]="'vocabulary.games.addSyllable' | translate:{syllable}"
                           (click)="facade.pickSyllable($index)">{{ syllable }}</button>
                 }
               </div>
-              <hg-button label="Сбросить" variant="ghost" (pressed)="facade.resetTyped()"/>
+              <hg-button [label]="'common.reset' | translate" variant="ghost" (pressed)="facade.resetTyped()"/>
             </div>
           }
         }
       }
     }
     @case ('done') {
-      <hg-session-result-card eyebrow="놀이" koreanTitle="잘 놀았어요!" title="Раунд завершён"
+      <hg-session-result-card [eyebrow]="'vocabulary.games.koreanEyebrow' | translate" [koreanTitle]="'vocabulary.games.koreanTitle' | translate" [title]="'vocabulary.games.roundComplete' | translate"
                               [stats]="resultStats(facade.result())">
-        <hg-button result-actions label="Ещё раунд" (pressed)="facade.backToPick()"/>
-        <a result-actions class="ghostbtn" routerLink="/review">К режимам</a>
+        <hg-button result-actions [label]="'vocabulary.games.anotherRound' | translate" (pressed)="facade.backToPick()"/>
+        <a result-actions class="ghostbtn" routerLink="/review">{{ 'vocabulary.toModes' | translate }}</a>
       </hg-session-result-card>
     }
   }

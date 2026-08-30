@@ -1,0 +1,81 @@
+<div class="hg-path" [class.is-compact]="compact()" [style.width.px]="width()" [style.height.px]="canvasHeight()">
+  <span class="hg-path__watermark hg-path__watermark--start" aria-hidden="true">韓</span>
+  <span class="hg-path__watermark hg-path__watermark--end" aria-hidden="true">歩</span>
+
+  <svg class="hg-path__track" [attr.width]="width()" [attr.height]="canvasHeight()"
+       [attr.viewBox]="'0 0 ' + width() + ' ' + canvasHeight()" aria-hidden="true">
+    @if (startStub()) {
+      <path class="hg-path__track-done" [attr.d]="stubPath()"></path>
+    }
+    <path class="hg-path__track-done" [attr.d]="donePath()"></path>
+    <path class="hg-path__track-rest" [attr.d]="restPath()"></path>
+  </svg>
+
+  @for (divider of dividers(); track divider.chapter.id) {
+    <div class="hg-path__divider" [style.top.px]="divider.y" [attr.data-chapter]="divider.chapter.id">
+      @if (divider.chapter.icon; as icon) {
+        <img [src]="icon" alt="" width="40" height="40"
+             [class.is-locked]="divider.chapter.state === 'locked'">
+      } @else {
+        <span class="hg-path__glyph" aria-hidden="true">章</span>
+      }
+      <i></i>
+      <span class="hg-path__chapter">
+        <span [class]="'hg-path__chip is-' + divider.chapter.state">
+          {{ divider.chapter.title }}
+          @if (divider.chapter.counter; as counter) { <b>{{ counter }}</b> }
+        </span>
+        @if (divider.chapter.hint; as hint) { <small>{{ hint }}</small> }
+      </span>
+      <i></i>
+    </div>
+  }
+
+  @for (node of placed(); track node.id) {
+    <div class="hg-path__node"
+         [style.left.px]="node.x - node.size / 2"
+         [style.top.px]="node.y"
+         [style.width.px]="node.size"
+         [style.height.px]="node.size">
+      @if (isNow(node)) { <span class="hg-path__pulse" aria-hidden="true"></span> }
+      @if (node.state !== 'final') { <span class="hg-path__shadow" aria-hidden="true"></span> }
+      <button type="button" data-domain-control
+              [class]="'hg-path__btn is-' + node.state"
+              [disabled]="isDead(node)"
+              [attr.data-node]="node.id"
+              [attr.aria-label]="node.title + ' — ' + node.subtitle"
+              (click)="select(node)">{{ node.glyph }}</button>
+      @if (node.state === 'pro') { <span class="hg-path__badge">PRO</span> }
+    </div>
+
+    <div class="hg-path__label"
+         [class.is-left]="node.side === 'left'"
+         [class.is-now]="isNow(node)"
+         [style.top.px]="isNow(node) ? node.y - 10 : node.y + 18"
+         [style.left.px]="labelLeft(node)"
+         [style.right.px]="labelRight(node)">
+      @if (isNow(node) && node.icon) {
+        <img [src]="node.icon" alt="" width="56" height="56">
+      }
+      <div class="hg-path__labeltext">
+        @if (isNow(node)) { <span class="hg-path__eyebrow">Сейчас проходишь</span> }
+        <b [class.is-muted]="isMuted(node)">{{ node.title }}</b>
+        <small [class]="'is-' + node.state">{{ node.subtitle }}</small>
+        @if (node.progress != null) {
+          <div class="hg-path__progress"><i [style.width.%]="node.progress"></i></div>
+        }
+      </div>
+    </div>
+  }
+
+  @for (test of testOuts(); track test.chapter.id) {
+    <button type="button" data-domain-control class="hg-path__testout"
+            [style.top.px]="test.y"
+            [style.left.px]="testOutLeft()"
+            [style.width.px]="testOutWidth()"
+            (click)="testOutSelected.emit(test.chapter)">
+      <b>ПРОВЕРКА ГЛАВЫ · TEST OUT</b>
+      <i class="hg-path__sheen" aria-hidden="true"></i>
+    </button>
+  }
+</div>

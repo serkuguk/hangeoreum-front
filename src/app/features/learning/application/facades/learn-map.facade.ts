@@ -1,6 +1,6 @@
 import {Injectable, inject, signal} from '@angular/core';
 import {CourseMap} from '../../domain/entities/course-map.entity';
-import {LEARNING_REPOSITORY} from '../../domain/repositories/learning.repository';
+import {LEARNING_REPOSITORY} from '../learning-repository.token';
 
 @Injectable()
 export class LearnMapFacade {

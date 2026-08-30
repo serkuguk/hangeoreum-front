@@ -3,12 +3,13 @@ import {HgAudioButtonComponent} from '@shared/components/hg';
 import {shuffle} from '@shared/utils/shuffle';
 import {ChoiceOption, ChoicePayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-exercise-choice',
-  imports: [HgAudioButtonComponent],
+  imports: [HgAudioButtonComponent, TranslatePipe],
   template: `
-    <div class="q-kind">Выбери перевод</div>
+    <div class="q-kind">{{ 'learning.exercise.chooseTranslation' | translate }}</div>
     <div class="q-word">
       <hg-audio-button [text]="payload().question" [audioUrl]="payload().audioUrl ?? null"/>
       <div>

@@ -1,30 +1,30 @@
 <div class="wrap lessonbox">
   @if (facade.loading()) {
-    <div class="panel loadpanel">Загружаем урок…</div>
+    <div class="panel loadpanel">{{ 'learning.lesson.loading' | translate }}</div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <hg-button label="К дереву уроков" variant="ghost" (pressed)="exit()"/>
+      <hg-button [label]="'learning.lesson.backToMap' | translate" variant="ghost" (pressed)="exit()"/>
     </div>
   } @else if (facade.result(); as result) {
     <!-- Экран награды -->
-    <hg-session-result-card eyebrow="축하" koreanTitle="참 잘했어요!" title="Урок пройден"
+    <hg-session-result-card [eyebrow]="'learning.lesson.congratulations' | translate" [koreanTitle]="'learning.lesson.koreanCongratulations' | translate" [title]="'learning.lesson.completed' | translate"
                             [subtitle]="'«' + facade.lesson()?.title + '»'" [stats]="resultStats(result)">
       @if (result.newWords.length > 0) {
         <div result-details class="rewwords">
           @for (word of result.newWords; track word.id) {
             <span class="pill p-b kr">{{ word.hangul }}</span>
           }
-          <p class="pagesub">Новые слова уже в словаре — SRS напомнит о них завтра.</p>
+          <p class="pagesub">{{ 'learning.lesson.newWordsSaved' | translate }}</p>
         </div>
       }
       <div result-actions>
-        <hg-button class="grow" label="К дереву уроков" (pressed)="exit()"/>
+        <hg-button class="grow" [label]="'learning.lesson.backToMap' | translate" (pressed)="exit()"/>
       </div>
     </hg-session-result-card>
   } @else if (facade.current(); as exercise) {
     <div class="l-top">
-      <hg-button class="x" icon="✕" ariaLabel="Выйти из урока" variant="ghost" size="sm" (pressed)="exit()"/>
+      <hg-button class="x" icon="✕" [ariaLabel]="'learning.lesson.exit' | translate" variant="ghost" size="sm" (pressed)="exit()"/>
       <div class="segs">
         @for (done of facade.progressSegments(); track $index) {
           <i [class.d]="done" [class.c]="!done && $index === facade.solved()"></i>
@@ -58,22 +58,22 @@
       <div class="fb" [class.ok]="feedback.correct" [class.bad]="!feedback.correct" role="status">
         <div>{{ feedback.correct ? '✅' : '❌' }}</div>
         <div>
-          <b>{{ feedback.correct ? 'Верно!' : 'Не совсем.' }}</b>
+          <b>{{ (feedback.correct ? 'learning.lesson.correct' : 'learning.lesson.incorrect') | translate }}</b>
           @if (!feedback.correct && feedback.expected) {
-            <small>Правильно: <span class="kr">{{ feedback.expected }}</span>. Без штрафа — вопрос вернётся в конце урока.</small>
+            <small>{{ 'learning.lesson.correctAnswer' | translate }}: <span class="kr">{{ feedback.expected }}</span>. {{ 'learning.lesson.retryAtEnd' | translate }}</small>
           } @else if (!feedback.correct) {
-            <small>Без штрафа — вопрос вернётся в конце урока.</small>
+            <small>{{ 'learning.lesson.retryAtEnd' | translate }}</small>
           }
         </div>
-        <hg-button class="next" label="Дальше" (pressed)="facade.next()"/>
+        <hg-button class="next" [label]="'common.next' | translate" [variant]="feedback.correct ? 'primary' : 'danger'" (pressed)="facade.next()"/>
       </div>
     }
   } @else if (facade.saveError()) {
     <div class="panel loadpanel" role="alert" aria-live="polite">
-      <p>Не получилось сохранить результат урока.</p>
-      <hg-button label="Повторить" (pressed)="facade.retryFinish()"/>
+      <p>{{ 'learning.lesson.saveError' | translate }}</p>
+      <hg-button [label]="'common.retry' | translate" (pressed)="facade.retryFinish()"/>
     </div>
   } @else if (facade.finishing()) {
-    <div class="panel loadpanel" aria-live="polite">Сохраняем результат…</div>
+    <div class="panel loadpanel" aria-live="polite">{{ 'learning.lesson.saving' | translate }}</div>
   }
 </div>

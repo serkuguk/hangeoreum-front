@@ -39,13 +39,14 @@ import {filter, map, startWith} from 'rxjs/operators';
     .brand {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(150deg, var(--hg-blue), #5a2bcf);
+      background: linear-gradient(150deg, var(--hg-route), var(--hg-violet));
+      color: var(--hg-on-route);
       display: flex;
       flex-direction: column;
       justify-content: center;
       padding: 60px;
 
-      .ghost { right: -40px; bottom: -80px; font-size: 340px; color: rgba(255, 255, 255, .07); }
+      .ghost { right: -40px; bottom: -80px; font-size: 340px; color: currentColor; opacity: .07; }
 
       .mark {
         width: 54px;

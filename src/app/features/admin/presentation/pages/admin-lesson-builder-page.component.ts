@@ -3,8 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {RouterLink} from '@angular/router';
 import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
-import {AdminApi, AdminExercise, AdminLessonFull} from '../../infrastructure/admin.api';
-import {Word} from '@features/vocabulary/domain/entities/word.entity';
+import {AdminApi, AdminExercise, AdminLessonFull, AdminWord} from '../../infrastructure/admin.api';
 import {
   HgButtonComponent,
   HgInputComponent,
@@ -12,6 +11,7 @@ import {
   HgSelectOption,
   HgTextareaComponent,
 } from '@shared/components/controls';
+import {TranslatePipe} from '@ngx-translate/core';
 
 /** Шаблоны payload по kind — подставляются в JSON-редактор при добавлении. */
 const PAYLOAD_TEMPLATES: Record<string, unknown> = {
@@ -40,6 +40,7 @@ const KIND_OPTIONS: readonly HgSelectOption<string>[] = KINDS.map(value => ({lab
     HgInputComponent,
     HgSelectComponent,
     HgTextareaComponent,
+    TranslatePipe,
   ],
   templateUrl: './admin-lesson-builder-page.component.html',
   styleUrl: './_admin.scss',
@@ -118,7 +119,7 @@ export class AdminLessonBuilderPageComponent {
 
   // поиск слов для привязки
   wordSearch = '';
-  readonly foundWords = signal<Word[]>([]);
+  readonly foundWords = signal<AdminWord[]>([]);
   private readonly wordSearch$ = new Subject<string>();
 
   constructor() {
@@ -213,11 +214,11 @@ export class AdminLessonBuilderPageComponent {
     this.wordSearch$.next(value);
   }
 
-  isLinked(word: Word): boolean {
+  isLinked(word: AdminWord): boolean {
     return !!this.data()?.words.some(w => w.id === word.id);
   }
 
-  toggleWord(word: Word): void {
+  toggleWord(word: AdminWord): void {
     const data = this.data();
     if (!data) return;
     const ids = this.isLinked(word)

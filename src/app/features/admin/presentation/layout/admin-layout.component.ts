@@ -1,20 +1,21 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   template: `
     <div class="admin">
       <aside class="sidebar">
-        <a class="logo han" routerLink="/dashboard">한걸음 <span>admin</span></a>
+        <a class="logo han" routerLink="/dashboard">한걸음 <span>{{ 'admin.brand' | translate }}</span></a>
         <nav>
           @for (item of nav; track item.link) {
             <a [routerLink]="item.link" [routerLinkActiveOptions]="{exact: item.exact}"
                routerLinkActive="is-active">{{ item.icon }} {{ item.label }}</a>
           }
         </nav>
-        <a class="back" routerLink="/dashboard">← Вернуться в приложение</a>
+        <a class="back" routerLink="/dashboard">{{ 'admin.backToApp' | translate }}</a>
       </aside>
       <main class="content">
         <router-outlet/>
@@ -82,15 +83,16 @@ import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLayoutComponent {
+  private readonly translate = inject(TranslateService);
   readonly nav = [
-    {link: '/admin', label: 'Дашборд', icon: '📊', exact: true},
-    {link: '/admin/words', label: 'Слова', icon: '📚', exact: false},
-    {link: '/admin/topics', label: 'Темы', icon: '🏷️', exact: false},
-    {link: '/admin/course', label: 'Курс и уроки', icon: '🗺️', exact: false},
-    {link: '/admin/alphabet', label: 'Алфавит', icon: '가', exact: false},
-    {link: '/admin/grammar', label: 'Грамматика', icon: '💡', exact: false},
-    {link: '/admin/media', label: 'Медиа / Story', icon: '🎬', exact: false},
-    {link: '/admin/users', label: 'Пользователи', icon: '👥', exact: false},
-    {link: '/admin/notifications', label: 'Уведомления', icon: '📣', exact: false},
+    {link: '/admin', label: this.translate.instant('admin.navigation.dashboard'), icon: '📊', exact: true},
+    {link: '/admin/words', label: this.translate.instant('admin.navigation.words'), icon: '📚', exact: false},
+    {link: '/admin/topics', label: this.translate.instant('admin.navigation.topics'), icon: '🏷️', exact: false},
+    {link: '/admin/course', label: this.translate.instant('admin.navigation.course'), icon: '🗺️', exact: false},
+    {link: '/admin/alphabet', label: this.translate.instant('admin.navigation.alphabet'), icon: '가', exact: false},
+    {link: '/admin/grammar', label: this.translate.instant('admin.navigation.grammar'), icon: '💡', exact: false},
+    {link: '/admin/media', label: this.translate.instant('admin.navigation.media'), icon: '🎬', exact: false},
+    {link: '/admin/users', label: this.translate.instant('admin.navigation.users'), icon: '👥', exact: false},
+    {link: '/admin/notifications', label: this.translate.instant('admin.navigation.notifications'), icon: '📣', exact: false},
   ];
 }

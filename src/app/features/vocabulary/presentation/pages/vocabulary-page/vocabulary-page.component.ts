@@ -12,6 +12,7 @@ import {
 import {VocabularyFacade} from '../../../application/facades/vocabulary.facade';
 import {UserWord} from '../../../domain/entities/user-word.entity';
 import {Deck} from '../../../domain/repositories/vocabulary.repository';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 const PAGE_SIZE = 20;
 
@@ -26,6 +27,7 @@ const PAGE_SIZE = 20;
     HgInputComponent,
     HgPaginationComponent,
     HgSegmentedControlComponent,
+    TranslatePipe,
   ],
   templateUrl: './vocabulary-page.component.html',
   styleUrl: './vocabulary-page.component.scss',
@@ -35,6 +37,7 @@ export class VocabularyPageComponent {
   readonly facade = inject(VocabularyFacade);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private translate = inject(TranslateService);
 
   readonly tab = signal<'words' | 'decks'>('words');
   readonly search = signal(this.route.snapshot.queryParamMap.get('search') ?? '');
@@ -48,24 +51,24 @@ export class VocabularyPageComponent {
   readonly totalPages = computed(() => Math.ceil(this.facade.totalElements() / PAGE_SIZE));
 
   readonly tabs = [
-    {value: 'words' as const, label: 'Слова'},
-    {value: 'decks' as const, label: 'Мои колоды'},
+    {value: 'words' as const, label: this.translate.instant('vocabulary.tabs.words')},
+    {value: 'decks' as const, label: this.translate.instant('vocabulary.tabs.decks')},
   ];
 
   readonly levels = [
-    {value: null, label: 'Все'},
-    {value: 0, label: '☆ Новые'},
+    {value: null, label: this.translate.instant('common.all')},
+    {value: 0, label: this.translate.instant('vocabulary.levels.new')},
     {value: 1, label: '★ 1'},
     {value: 2, label: '★ 2'},
     {value: 3, label: '★ 3'},
     {value: 4, label: '★ 4'},
-    {value: 5, label: '★★★ Выучено'},
+    {value: 5, label: this.translate.instant('vocabulary.levels.learned')},
   ];
 
   readonly sorts = [
-    {value: 'due', label: 'По сроку'},
-    {value: 'created', label: 'По дате'},
-    {value: 'alpha', label: 'По алфавиту'},
+    {value: 'due', label: this.translate.instant('vocabulary.sort.due')},
+    {value: 'created', label: this.translate.instant('vocabulary.sort.created')},
+    {value: 'alpha', label: this.translate.instant('vocabulary.sort.alpha')},
   ];
 
   constructor() {
@@ -108,9 +111,9 @@ export class VocabularyPageComponent {
 
   dueLabel(word: UserWord): string {
     const days = Math.ceil((new Date(word.dueDate).getTime() - Date.now()) / 86_400_000);
-    if (days <= 0) return 'сегодня';
-    if (days === 1) return 'завтра';
-    return `через ${days} д`;
+    if (days <= 0) return this.translate.instant('vocabulary.due.today');
+    if (days === 1) return this.translate.instant('vocabulary.due.tomorrow');
+    return this.translate.instant('vocabulary.due.inDays', {days});
   }
 
   toggleExpand(word: UserWord): void {
@@ -125,12 +128,12 @@ export class VocabularyPageComponent {
   }
 
   renameDeck(deck: Deck): void {
-    const title = prompt('Новое название колоды:', deck.title)?.trim();
+    const title = prompt(this.translate.instant('vocabulary.deck.renamePrompt'), deck.title)?.trim();
     if (title) this.facade.renameDeck(deck, title);
   }
 
   deleteDeck(deck: Deck): void {
-    if (confirm(`Удалить колоду «${deck.title}»?`)) this.facade.deleteDeck(deck);
+    if (confirm(this.translate.instant('vocabulary.deck.deleteConfirm', {title: deck.title}))) this.facade.deleteDeck(deck);
   }
 
   addToDeck(deck: Deck): void {

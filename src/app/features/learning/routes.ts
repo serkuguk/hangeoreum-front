@@ -1,13 +1,13 @@
 import {Routes} from '@angular/router';
-import {LEARNING_REPOSITORY} from './domain/repositories/learning.repository';
+import {LEARNING_REPOSITORY} from './application/learning-repository.token';
 import {LearningHttpRepository} from './infrastructure/learning.http-repository';
 import {LearnMapFacade} from './application/facades/learn-map.facade';
 import {AlphabetFacade} from './application/facades/alphabet.facade';
 import {LessonFacade} from './application/facades/lesson.facade';
 import {StoryFacade} from './application/facades/story.facade';
-import {VOCABULARY_REPOSITORY} from '@features/vocabulary/domain/repositories/vocabulary.repository';
-import {VocabularyHttpRepository} from '@features/vocabulary/infrastructure/vocabulary.http-repository';
-import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
+import {VOCABULARY_REPOSITORY} from '../vocabulary/application/vocabulary-repository.token';
+import {VocabularyFacade} from '../vocabulary/application/facades/vocabulary.facade';
+import {VocabularyHttpRepository} from '../vocabulary/infrastructure/vocabulary.http-repository';
 
 export const learningRoutes: Routes = [
   {

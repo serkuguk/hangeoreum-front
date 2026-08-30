@@ -23,4 +23,5 @@ export class ClipHttpRepository implements ClipRepository {
   toggleLike(clipId: string): Observable<{liked: boolean}> {
     return this.http.post<{liked: boolean}>(`${this.base}/${clipId}/like`, null);
   }
+
 }

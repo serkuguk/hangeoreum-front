@@ -1,12 +1,12 @@
 <header class="topbar">
-  <a class="logo han" routerLink="/dashboard">한걸음</a>
+  <a class="logo han" routerLink="/dashboard">{{ 'navigation.brand' | translate }}</a>
 
   <div class="userbox">
     @if (isAdmin()) {
-      <a class="pill p-r adminlink" routerLink="/admin">Админ</a>
+      <a class="pill p-r adminlink" routerLink="/admin">{{ 'navigation.admin' | translate }}</a>
     }
     <button type="button" data-domain-control class="userbtn" (click)="menuOpen.set(!menuOpen())"
-            aria-label="Меню пользователя"
+            [attr.aria-label]="'navigation.userMenu' | translate"
             aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
       @if (facade.user()?.avatarUrl; as avatar) {
         <img class="av" [src]="avatar" alt="">
@@ -20,20 +20,20 @@
     @if (menuOpen()) {
       <div class="backdrop" (click)="menuOpen.set(false)"></div>
       <div class="usermenu" role="menu">
-        <a routerLink="/profile" role="menuitem" (click)="menuOpen.set(false)">Кабинет</a>
-        <a routerLink="/settings" role="menuitem" (click)="menuOpen.set(false)">Настройки</a>
-        <a routerLink="/billing" role="menuitem" (click)="menuOpen.set(false)">Подписка</a>
-        <hg-button class="exit" label="Выйти" variant="danger" size="sm" (pressed)="logout()"/>
+        <a routerLink="/profile" role="menuitem" (click)="menuOpen.set(false)">{{ 'navigation.profile' | translate }}</a>
+        <a routerLink="/settings" role="menuitem" (click)="menuOpen.set(false)">{{ 'navigation.settings' | translate }}</a>
+        <a routerLink="/billing" role="menuitem" (click)="menuOpen.set(false)">{{ 'navigation.billing' | translate }}</a>
+        <hg-button class="exit" [label]="'navigation.logout' | translate" variant="danger" size="sm" (pressed)="logout()"/>
       </div>
     }
   </div>
 </header>
 
-<nav class="mainnav" aria-label="Основная навигация">
+<nav class="mainnav" [attr.aria-label]="'navigation.main' | translate">
   @for (item of nav; track item.link) {
-    <a [routerLink]="item.link" routerLinkActive="is-active" [title]="item.label">
+    <a [routerLink]="item.link" routerLinkActive="is-active" [title]="item.label | translate">
       <i class="pi {{ item.icon }}" aria-hidden="true"></i>
-      <span class="navlabel">{{ item.label }}</span>
+      <span class="navlabel">{{ item.label | translate }}</span>
     </a>
   }
 </nav>

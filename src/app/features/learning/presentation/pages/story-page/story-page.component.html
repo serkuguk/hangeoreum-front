@@ -1,28 +1,28 @@
 <div class="wrap storybox">
   @if (facade.loading()) {
-    <div class="panel loadpanel">Загружаем story…</div>
+    <div class="panel loadpanel">{{ 'learning.story.loading' | translate }}</div>
   } @else if (facade.error(); as err) {
     <div class="panel loadpanel">
       <p>{{ err }}</p>
-      <a class="cta" routerLink="/billing">Тарифы</a>
-      <hg-button label="К урокам" variant="ghost" (pressed)="back()"/>
+      <a class="cta" routerLink="/billing">{{ 'billing.title' | translate }}</a>
+      <hg-button [label]="'learning.story.backToLessons' | translate" variant="ghost" (pressed)="back()"/>
     </div>
   } @else if (facade.story(); as st) {
-    <h2 class="pagettl">Story · {{ st.title }}</h2>
-    <p class="pagesub">Тапни строку — увидишь перевод и разбор.</p>
+    <h2 class="pagettl">{{ 'learning.story.title' | translate }} · {{ st.title }}</h2>
+    <p class="pagesub">{{ 'learning.story.instructions' | translate }}</p>
 
-    <hg-segmented-control class="modes" label="Режим Story" [options]="modeOptions()"
+    <hg-segmented-control class="modes" [label]="'learning.story.mode' | translate" [options]="modeOptions()"
                           [(ngModel)]="facade.mode"/>
 
     @if (facade.mode() === 'watch' && st.clip?.videoUrl) {
       <video class="player" controls muted [src]="st.clip!.videoUrl!" [poster]="st.clip!.thumbnailUrl ?? ''"
-             [attr.aria-label]="'Видео: ' + st.title"
+             [attr.aria-label]="'learning.story.video' | translate:{title: st.title}"
              preload="metadata" (timeupdate)="onTime($event)"></video>
     } @else if (facade.mode() === 'listen') {
       <div class="panel listenpanel">
         <div class="ghost kr">듣기</div>
         <audio controls [src]="st.clip?.audioUrl || st.clip?.videoUrl || ''" (timeupdate)="onTime($event)"></audio>
-        <p class="hint">Строки подсвечиваются по мере воспроизведения</p>
+        <p class="hint">{{ 'learning.story.highlightedLines' | translate }}</p>
       </div>
     }
 
@@ -45,11 +45,11 @@
                 <div class="bd">
                   <b class="kr">{{ item.token }}</b> — {{ item.note }}
                   @if (item.wordId && vocabulary.addState(item.wordId) === 'saved') {
-                    <span class="pill p-j addw">✓ в словаре</span>
+                    <span class="pill p-j addw">{{ 'learning.story.inVocabulary' | translate }}</span>
                   } @else if (item.wordId) {
                     <hg-button class="addw" size="sm" variant="secondary"
                                [loading]="vocabulary.addState(item.wordId) === 'saving'"
-                               [label]="vocabulary.addState(item.wordId) === 'error' ? 'Повторить' : '+ в словарь'"
+                               [label]="vocabulary.addState(item.wordId) === 'error' ? ('common.retry' | translate) : ('learning.story.addToVocabulary' | translate)"
                                (pressed)="addWord(item.wordId)"/>
                   }
                 </div>
@@ -65,12 +65,12 @@
         <p class="saveerror" role="alert">{{ completionError }}</p>
       }
       <hg-button class="finishbtn" [loading]="facade.completing()"
-                 [label]="facade.completionError() ? 'Повторить сохранение' : 'Story пройдена ✓'"
+                 [label]="facade.completionError() ? ('learning.story.retrySaving' | translate) : ('learning.story.complete' | translate)"
                  (pressed)="complete()"/>
     } @else {
       <div class="panel donebar">
-        <span>🎉 Story пройдена — прогресс сохранён.</span>
-        <hg-button label="К дереву уроков" variant="ghost" (pressed)="back()"/>
+        <span>{{ 'learning.story.completed' | translate }}</span>
+        <hg-button [label]="'learning.lesson.backToMap' | translate" variant="ghost" (pressed)="back()"/>
       </div>
     }
   }

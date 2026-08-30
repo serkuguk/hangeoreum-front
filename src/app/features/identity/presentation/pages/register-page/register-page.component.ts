@@ -3,10 +3,11 @@ import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {HgButtonComponent, HgCheckboxComponent, HgInputComponent} from '@shared/components/controls';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-register-page',
-  imports: [ReactiveFormsModule, RouterLink, HgButtonComponent, HgCheckboxComponent, HgInputComponent],
+  imports: [ReactiveFormsModule, RouterLink, HgButtonComponent, HgCheckboxComponent, HgInputComponent, TranslatePipe],
   templateUrl: './register-page.component.html',
   styleUrl: '../_auth-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

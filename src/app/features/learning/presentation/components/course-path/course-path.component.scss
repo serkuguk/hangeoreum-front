@@ -1,0 +1,359 @@
+:host { display: block; }
+
+.hg-path {
+  position: relative;
+  margin: 8px auto 0;
+
+  &__watermark {
+    position: absolute;
+    font-family: var(--hg-font-kr);
+    font-size: 200px;
+    line-height: 1;
+    color: var(--hg-text);
+    opacity: .035;
+    pointer-events: none;
+    user-select: none;
+
+    &--start { left: 6px; top: 280px; }
+    &--end { right: 8px; top: 1180px; font-size: 190px; }
+  }
+
+  &__track {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+
+    &-done {
+      fill: none;
+      stroke: var(--hg-success);
+      stroke-width: 7;
+      stroke-linecap: round;
+      opacity: .55;
+    }
+
+    &-rest {
+      fill: none;
+      stroke: var(--hg-border);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 3 22;
+      animation: hg-dash 2.4s linear infinite;
+    }
+  }
+
+  // ---------- Разделитель главы ----------
+  &__divider {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    img {
+      border-radius: 11px;
+      flex-shrink: 0;
+
+      &.is-locked { opacity: .55; }
+    }
+
+    i {
+      flex: 1;
+      height: 0;
+      border-top: 1px dashed var(--hg-border);
+    }
+  }
+
+  &__glyph {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: var(--hg-surface-muted);
+    color: var(--hg-text-muted);
+    display: grid;
+    place-items: center;
+    font-family: var(--hg-font-kr);
+    font-size: 19px;
+    flex-shrink: 0;
+  }
+
+  &__chapter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    text-align: center;
+
+    small {
+      font-size: var(--hg-fs-xs);
+      color: var(--hg-text-muted);
+    }
+  }
+
+  &__chip {
+    padding: 6px 14px;
+    border-radius: var(--hg-radius-pill-new);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    white-space: nowrap;
+
+    b { margin-left: 8px; opacity: .75; font-weight: 700; }
+
+    &.is-done { background: var(--hg-success-soft); color: var(--hg-success-deep); }
+    &.is-current { background: var(--hg-route-soft); color: var(--hg-route); }
+    &.is-locked { background: var(--hg-surface-muted); color: var(--hg-text-muted); }
+  }
+
+  // ---------- Узел ----------
+  &__node { position: absolute; }
+
+  &__pulse {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 3px solid var(--hg-route);
+    animation: hg-ring 2.1s ease-out infinite;
+  }
+
+  &__shadow {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: -8px;
+    height: 18px;
+    border-radius: 50%;
+    background: #000;
+    opacity: var(--hg-slab-shadow, .14);
+    filter: blur(6px);
+  }
+
+  &__badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    padding: 4px 9px;
+    border-radius: var(--hg-radius-pill-new);
+    background: var(--hg-reward);
+    color: var(--hg-on-reward);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .6px;
+  }
+
+  &__btn {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-family: var(--hg-font-kr);
+    font-size: 30px;
+    color: #fff;
+    transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+
+    &.is-done {
+      background: var(--hg-success);
+      box-shadow: 0 8px 0 var(--hg-success-deep);
+    }
+
+    &.is-current {
+      background: var(--hg-route);
+      border: 4px solid var(--hg-surface);
+      font-size: 32px;
+      box-shadow: 0 9px 0 var(--hg-route-deep);
+    }
+
+    &.is-open {
+      background: var(--hg-surface);
+      border: 2px solid var(--hg-route);
+      color: var(--hg-route);
+      box-shadow: 0 8px 0 var(--hg-route-soft);
+    }
+
+    &.is-locked {
+      background: var(--hg-surface-muted);
+      color: var(--hg-text-muted);
+      font-size: 28px;
+      box-shadow: 0 8px 0 var(--hg-border);
+      opacity: .85;
+      cursor: not-allowed;
+    }
+
+    &.is-pro {
+      background: var(--hg-reward-soft);
+      border: 2px solid var(--hg-reward);
+      color: var(--hg-reward-deep);
+      font-size: 28px;
+      box-shadow: 0 8px 0 var(--hg-reward);
+    }
+
+    &.is-bonus {
+      background: var(--hg-reward);
+      color: var(--hg-on-reward);
+      font-size: 28px;
+      box-shadow: 0 8px 0 var(--hg-reward-deep);
+    }
+
+    &.is-final {
+      background: transparent;
+      border: 2px dashed var(--hg-border);
+      color: var(--hg-text-muted);
+      font-size: 26px;
+      cursor: default;
+    }
+
+    &:not(:disabled):hover { transform: translateY(4px); }
+    &.is-done:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-success-deep); }
+    &.is-current:not(:disabled):hover { box-shadow: 0 5px 0 var(--hg-route-deep); }
+    &.is-open:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-route-soft); }
+    &.is-pro:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-reward); }
+    &.is-bonus:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-reward-deep); }
+
+    &:focus-visible {
+      outline: 3px solid var(--hg-focus);
+      outline-offset: 4px;
+    }
+  }
+
+  // ---------- Подпись узла ----------
+  &__label {
+    position: absolute;
+    width: 240px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    &.is-left {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+
+    &.is-now {
+      width: 300px;
+      padding: 14px 18px;
+      border-radius: var(--hg-radius-scene);
+      background: var(--hg-route-soft);
+      border: 1px solid color-mix(in oklab, var(--hg-route) 35%, transparent);
+      text-align: left;
+    }
+
+    img { border-radius: 14px; flex-shrink: 0; }
+
+    b {
+      display: block;
+      font-size: var(--hg-fs-base);
+
+      &.is-muted { color: var(--hg-text-muted); }
+    }
+
+    small {
+      font-size: 12.5px;
+      color: var(--hg-text-muted);
+
+      &.is-done { color: var(--hg-success); }
+      &.is-open { color: var(--hg-route); }
+      &.is-bonus, &.is-pro { color: var(--hg-reward-deep); }
+    }
+  }
+
+  &__labeltext { min-width: 0; }
+
+  &__eyebrow {
+    display: block;
+    font-size: 10.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--hg-route);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  &__progress {
+    margin-top: 10px;
+    height: 8px;
+    width: 150px;
+    border-radius: var(--hg-radius-pill-new);
+    background: color-mix(in oklab, var(--hg-route) 18%, transparent);
+    overflow: hidden;
+
+    i {
+      display: block;
+      height: 100%;
+      border-radius: var(--hg-radius-pill-new);
+      background: var(--hg-route);
+      transition: width 400ms ease;
+    }
+  }
+
+  // ---------- TEST OUT ----------
+  &__testout {
+    position: absolute;
+    height: 60px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(100deg, var(--hg-reward), oklch(84% 0.150 92));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 7px 0 var(--hg-reward-deep);
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+
+    b {
+      font-size: var(--hg-fs-base);
+      letter-spacing: 2px;
+      color: var(--hg-on-reward);
+    }
+
+    &:hover {
+      transform: translateY(3px);
+      box-shadow: 0 4px 0 var(--hg-reward-deep);
+    }
+  }
+
+  &__sheen {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 26%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .5), transparent);
+    animation: hg-sheen 4.6s ease-in-out infinite;
+  }
+
+  // ---------- Компактный режим (телефон): узлы и подписи меньше ----------
+  &.is-compact {
+    .hg-path__watermark { display: none; }
+    .hg-path__btn { font-size: 22px; &.is-current { font-size: 24px; border-width: 3px; } }
+    .hg-path__label { width: 148px; gap: 9px; &.is-now { width: 176px; padding: 10px 12px; } }
+    .hg-path__label img { display: none; }
+    .hg-path__label b { font-size: 13.5px; }
+    .hg-path__label small { font-size: 11.5px; }
+    .hg-path__progress { width: 110px; }
+    .hg-path__chip { font-size: 10.5px; padding: 5px 10px; }
+    .hg-path__divider img, .hg-path__glyph { width: 32px; height: 32px; }
+  }
+}
+
+@keyframes hg-ring {
+  0% { transform: scale(1); opacity: .55; }
+  70%, 100% { transform: scale(1.55); opacity: 0; }
+}
+
+@keyframes hg-dash {
+  to { stroke-dashoffset: -28; }
+}
+
+@keyframes hg-sheen {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  55%, 100% { transform: translateX(320%) skewX(-18deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hg-path * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

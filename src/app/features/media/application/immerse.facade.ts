@@ -1,9 +1,12 @@
 import {Injectable, inject, signal} from '@angular/core';
-import {CLIP_REPOSITORY, Clip} from '../domain/clip.entity';
+import {Clip} from '../domain/clip.entity';
+import {CLIP_REPOSITORY} from './clip-repository.token';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable()
 export class ImmerseFacade {
   private repository = inject(CLIP_REPOSITORY);
+  private translate = inject(TranslateService);
 
   readonly clips = signal<Clip[]>([]);
   readonly loading = signal(false);
@@ -32,7 +35,7 @@ export class ImmerseFacade {
       },
       error: err => {
         if (err?.status === 403) this.proRequired.set(true);
-        else this.error.set('Не получилось загрузить ленту.');
+        else this.error.set(this.translate.instant('media.errors.load'));
         this.loading.set(false);
       },
     });
@@ -44,7 +47,7 @@ export class ImmerseFacade {
     this.repository.markViewed(clip.id).subscribe({
       error: () => {
         this.clips.update(list => list.map(c => c.id === clip.id ? {...c, watched: false} : c));
-        this.error.set('Не получилось сохранить просмотр.');
+        this.error.set(this.translate.instant('media.errors.view'));
       },
     });
   }
@@ -56,8 +59,9 @@ export class ImmerseFacade {
       next: res => this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: res.liked} : c)),
       error: () => {
         this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: clip.liked} : c));
-        this.error.set('Не получилось сохранить лайк.');
+        this.error.set(this.translate.instant('media.errors.like'));
       },
     });
   }
+
 }

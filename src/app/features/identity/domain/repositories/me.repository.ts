@@ -1,4 +1,3 @@
-import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 import {OnboardingData, User, UserSettings} from '../user.entity';
 
@@ -11,5 +10,3 @@ export interface MeRepository {
   uploadAvatar(file: File): Observable<{avatarUrl: string}>;
   deleteAccount(): Observable<void>;
 }
-
-export const ME_REPOSITORY = new InjectionToken<MeRepository>('MeRepository');

@@ -1,19 +1,47 @@
-<div class="wrap mapbox">
-  <h2 class="pagettl">Курс</h2>
-  <p class="pagesub">Живой маршрут по ситуациям: знакомство, кафе, метро — каждая глава заканчивается Story носителя.</p>
+<div class="mapbox">
+  <header class="maphead">
+    <div class="maphead-row">
+      <div class="maphead-title">
+        <div class="eyebrow">Карта курса</div>
+        <h2 class="pagettl">{{ facade.map()?.title || 'Курс' }}</h2>
+      </div>
 
-  <!-- Алфавит — фундамент, компактная строка в начале пути -->
-  <a class="unit-row foundation" routerLink="/learn/alphabet">
-    <div class="n han c-jade">가</div>
-    <div class="unit-row-body">
-      <b>Алфавит хангыль</b>
-      <small>Фундамент · 자모 · 40 букв</small>
+      <div class="maphead-chips">
+        <span class="pill p-n">{{ progress().done }} / {{ progress().total }} уроков</span>
+        @if (hasPaywall()) {
+          <a class="pill p-y" routerLink="/billing">Часть уроков — Pro</a>
+        }
+      </div>
+
+      <div class="seg" role="group" aria-label="Показ карты">
+        <button type="button" data-domain-control [class.is-on]="!showAll()" (click)="focusCurrent()">Текущая глава</button>
+        <button type="button" data-domain-control [class.is-on]="showAll()" (click)="showAll.set(true)">Весь путь</button>
+      </div>
     </div>
+
+    <div class="mapbar" [attr.aria-label]="'Пройдено ' + progress().percent + '%'">
+      <i [style.width.%]="progress().percent"></i>
+    </div>
+  </header>
+
+  <!-- Алфавит — фундамент, из него выходит трасса пути -->
+  <a class="foundation" routerLink="/learn/alphabet">
+    <span class="fglyph">가</span>
+    <span class="fbody">
+      <b>Алфавит хангыль</b>
+      <small>Фундамент пути · <span class="han">자모</span> · 40 букв</small>
+    </span>
     <span class="pill p-j">Открыть →</span>
   </a>
 
   @if (facade.loading()) {
-    <div class="panel loadpanel">Загружаем карту курса…</div>
+    <div class="skeleton" aria-busy="true">
+      <span class="sk-track"></span>
+      <span class="sk-node"></span>
+      <span class="sk-node"></span>
+      <span class="sk-node"></span>
+      <p>Загружаем карту курса…</p>
+    </div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
@@ -21,88 +49,43 @@
     </div>
   } @else if (facade.map(); as map) {
     @if (map.units.length === 0) {
-      <div class="panel loadpanel">
-        <p>Курс ещё наполняется контентом. Начни с алфавита — он уже доступен!</p>
-        <a class="cta" routerLink="/learn/alphabet">К алфавиту</a>
+      <div class="panel emptypanel">
+        <hg-mascot speech="Начнём с алфавита — я подожду здесь!" [size]="150"/>
+        <div>
+          <h3>Курс ещё наполняется</h3>
+          <p>Главы появятся здесь в виде пути. Алфавит уже доступен — с него начинается любой маршрут.</p>
+          <a class="cta" routerLink="/learn/alphabet">К алфавиту</a>
+        </div>
       </div>
-    }
-    @for (unit of map.units; track unit.id; let i = $index) {
-      @let state = unitState(unit);
-
-      @if (state === 'completed') {
-        <!-- Завершённая глава — компактная строка с результатом, не раскрытая сцена. -->
-        <div class="unit-row done">
-          <div class="n han ic-done">{{ unit.title.charAt(0) }}</div>
-          <div class="unit-row-body">
+    } @else {
+      @for (unit of collapsedUnits(); track unit.id; let i = $index) {
+        <!-- Пройденная глава — компактная строка с результатом; клик разворачивает её в путь. -->
+        <button type="button" class="unit-row done" data-domain-control (click)="expand(unit.id)">
+          @if (sceneUrl(i); as scene) {
+            <img [src]="scene" alt="" width="44" height="44">
+          } @else {
+            <span class="n han">{{ unit.title.charAt(0) }}</span>
+          }
+          <span class="unit-row-body">
             <b>{{ unit.title }}</b>
-            <small>Пройдено · {{ unitProgress(unit.lessons) }}</small>
-          </div>
-          <span class="pill p-j">✓ Готово</span>
-        </div>
-      } @else if (state === 'locked') {
-        <!-- Locked-глава — видна как обещание, условие открытия объяснено текстом. -->
-        <div class="unit-row locked" [attr.aria-label]="lockedReason(unit, map.units[i - 1])">
-          <div class="n han">{{ unit.title.charAt(0) }}</div>
-          <div class="unit-row-body">
-            <b>{{ unit.title }}</b>
-            <small>{{ lockedReason(unit, map.units[i - 1]) }}</small>
-          </div>
-          <span class="pill lockpill">🔒</span>
-        </div>
-      } @else {
-        <!-- Текущая глава — единственная раскрытая сцена на экране. -->
-        <section class="unit-scene" [attr.aria-label]="unit.title">
-          <div class="scene-head">
-            <div class="scene-illustration" [style.color]="unit.color || 'var(--hg-route)'" aria-hidden="true">
-              @if (sceneUrl(i); as scene) {
-                <img [src]="scene" alt="" width="64" height="64">
-              } @else {
-                <span class="han">{{ unit.title.charAt(0) }}</span>
-              }
-            </div>
-            <div>
-              <div class="eyebrow">Сейчас проходишь</div>
-              <h3>{{ unit.title }}</h3>
-              @if (unit.description) {
-                <p class="scene-desc">{{ unit.description }}</p>
-              }
-            </div>
-            <span class="pill p-b headpill">{{ unitProgress(unit.lessons) }}</span>
-          </div>
-
-          <div class="steps">
-            @for (lesson of unit.lessons; track lesson.id) {
-              <div class="node"
-                   [class.done]="lesson.status === 'COMPLETED'"
-                   [class.now]="lesson.status === 'AVAILABLE' && lesson.hasAccess"
-                   [class.locked]="lesson.status === 'LOCKED'"
-                   [class.story]="lesson.type === 'STORY'">
-                <button type="button" data-domain-control class="nc" [disabled]="lesson.status === 'LOCKED'"
-                        [attr.aria-label]="lesson.title + ': ' + statusLabel(lesson)" (click)="open(lesson)">
-                  <div class="nic han"
-                       [class.ic-done]="lesson.status === 'COMPLETED'"
-                       [class.ic-now]="lesson.status !== 'COMPLETED'">
-                    {{ lesson.type === 'STORY' ? '🎬' : lesson.title.charAt(0) }}
-                  </div>
-                  <div class="txt">
-                    <b>{{ lesson.title }}</b>
-                    <small>
-                      @if (lesson.type === 'STORY') {
-                        Видео носителя · финал главы
-                      } @else {
-                        +{{ lesson.xpReward }} XP
-                      }
-                    </small>
-                  </div>
-                  <span class="st"
-                        [class.st-done]="lesson.status === 'COMPLETED'"
-                        [class.st-now]="lesson.status === 'AVAILABLE'">{{ statusLabel(lesson) }}</span>
-                </button>
-              </div>
-            }
-          </div>
-        </section>
+            <small>
+              {{ unitProgress(unit.lessons) }} уроков
+              @if (unitScore(unit.lessons); as score) { · средний балл {{ score }}% }
+            </small>
+          </span>
+          <span class="unit-row-tail">
+            <span class="pill p-j">✓ Пройдено</span>
+            <span class="expand">развернуть ▾</span>
+          </span>
+        </button>
       }
+
+      <hg-course-path
+        [nodes]="nodes()"
+        [chapters]="chapters()"
+        [width]="pathWidth()"
+        [startStub]="true"
+        (nodeSelected)="onNode($event)"/>
     }
   }
 </div>

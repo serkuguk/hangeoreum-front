@@ -2,16 +2,17 @@ import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {BillingFacade} from '../../application/billing.facade';
 import {Plan} from '../../domain/billing.model';
+import {TranslatePipe} from '@ngx-translate/core';
 
 const INTERVAL_LABEL: Record<Plan['interval'], string> = {
-  MONTH: '/ месяц',
-  YEAR: '/ год',
-  LIFETIME: '/ навсегда',
+  MONTH: 'billing.month',
+  YEAR: 'billing.year',
+  LIFETIME: 'billing.lifetime',
 };
 
 @Component({
   selector: 'hg-pricing-page',
-  imports: [HgButtonComponent],
+  imports: [HgButtonComponent, TranslatePipe],
   templateUrl: './pricing-page.component.html',
   styleUrl: './pricing-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,7 +20,6 @@ const INTERVAL_LABEL: Record<Plan['interval'], string> = {
 export class PricingPageComponent {
   /** /billing?result=success|cancel — возврат из Stripe Checkout. */
   readonly result = input<string | undefined>();
-
   readonly facade = inject(BillingFacade);
 
   constructor() {

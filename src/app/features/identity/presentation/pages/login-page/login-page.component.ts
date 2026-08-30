@@ -3,10 +3,11 @@ import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {HgButtonComponent, HgInputComponent} from '@shared/components/controls';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-login-page',
-  imports: [ReactiveFormsModule, RouterLink, HgButtonComponent, HgInputComponent],
+  imports: [ReactiveFormsModule, RouterLink, HgButtonComponent, HgInputComponent, TranslatePipe],
   templateUrl: './login-page.component.html',
   styleUrl: '../_auth-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

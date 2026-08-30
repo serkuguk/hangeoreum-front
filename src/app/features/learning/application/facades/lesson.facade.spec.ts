@@ -1,8 +1,9 @@
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
-import {of, throwError} from 'rxjs';
+import {Subject, of, throwError} from 'rxjs';
 import {Lesson} from '../../domain/entities/exercise.entity';
-import {CompleteResult, LEARNING_REPOSITORY, LearningRepository} from '../../domain/repositories/learning.repository';
+import {CompletionAccepted, CompletionStatus, CompleteResult, LearningRepository} from '../../domain/repositories/learning.repository';
+import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 import {LessonFacade} from './lesson.facade';
 
@@ -28,16 +29,24 @@ const result: CompleteResult = {
   goalReached: false,
 };
 
+const accepted: CompletionAccepted = {
+  attemptId: 'server-attempt',
+  acceptedAt: '2026-07-16T12:00:00Z',
+  status: 'PENDING',
+};
+
 describe('LessonFacade', () => {
   let facade: LessonFacade;
-  let repository: jest.Mocked<Pick<LearningRepository, 'lesson' | 'complete'>>;
+  let repository: jest.Mocked<Pick<LearningRepository, 'lesson' | 'complete' | 'getCompletionStatus'>>;
   let map: {invalidate: jest.Mock};
 
   beforeEach(() => {
     sessionStorage.clear();
+    jest.useFakeTimers();
     repository = {
       lesson: jest.fn().mockReturnValue(of(lesson)),
-      complete: jest.fn().mockReturnValue(of(result)),
+      complete: jest.fn().mockReturnValue(of(accepted)),
+      getCompletionStatus: jest.fn().mockReturnValue(of({status: 'COMPLETED', result})),
     };
     map = {invalidate: jest.fn()};
 
@@ -51,10 +60,17 @@ describe('LessonFacade', () => {
     facade = TestBed.inject(LessonFacade);
   });
 
-  afterEach(() => TestBed.resetTestingModule());
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    jest.useRealTimers();
+  });
 
   it('сохраняет результат только после успешного ответа сервера', () => {
     finishLesson();
+
+    expect(facade.current()).toBeNull();
+    expect(facade.finishing()).toBe(true);
+    jest.advanceTimersByTime(0);
 
     expect(repository.complete).toHaveBeenCalledWith(
       lesson.id,
@@ -69,7 +85,7 @@ describe('LessonFacade', () => {
   it('повторяет неудачное сохранение с тем же attemptId', () => {
     repository.complete
       .mockReturnValueOnce(throwError(() => new Error('network')))
-      .mockReturnValueOnce(of(result));
+      .mockReturnValueOnce(of(accepted));
 
     finishLesson();
 
@@ -79,10 +95,42 @@ describe('LessonFacade', () => {
     expect(facade.saveError()).toBe(true);
 
     facade.retryFinish();
+    jest.advanceTimersByTime(0);
 
     expect(repository.complete.mock.calls[1][1].attemptId).toBe(initialAttemptId);
     expect(facade.result()).toEqual(result);
     expect(facade.phase()).toBe('completed');
+  });
+
+  it('не публикует pending receipt и завершает polling при первом completed', () => {
+    const status = new Subject<CompletionStatus>();
+    repository.getCompletionStatus.mockReturnValue(status);
+
+    finishLesson();
+    jest.advanceTimersByTime(0);
+    status.next({status: 'PENDING', result: null});
+
+    expect(facade.result()).toBeNull();
+    expect(facade.finishing()).toBe(true);
+
+    jest.advanceTimersByTime(500);
+    status.next({status: 'COMPLETED', result});
+
+    expect(facade.result()).toEqual(result);
+    expect(repository.getCompletionStatus).toHaveBeenCalledTimes(2);
+  });
+
+  it('отменяет polling при уничтожении facade', () => {
+    repository.getCompletionStatus.mockReturnValue(new Subject<CompletionStatus>());
+
+    finishLesson();
+    jest.advanceTimersByTime(0);
+    expect(repository.getCompletionStatus).toHaveBeenCalledTimes(1);
+
+    TestBed.resetTestingModule();
+    jest.advanceTimersByTime(500);
+
+    expect(repository.getCompletionStatus).toHaveBeenCalledTimes(1);
   });
 
   it('не начинает пустой урок', () => {

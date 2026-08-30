@@ -1,4 +1,3 @@
-import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 
 export interface Profile {
@@ -31,5 +30,3 @@ export interface GamificationRepository {
   profile(): Observable<Profile>;
   achievements(): Observable<Achievement[]>;
 }
-
-export const GAMIFICATION_REPOSITORY = new InjectionToken<GamificationRepository>('GamificationRepository');

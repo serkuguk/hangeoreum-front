@@ -1,39 +1,39 @@
 <div class="wrap fcbox">
   @if (facade.loading()) {
-    <div class="panel loadpanel">Готовим карточки…</div>
+    <div class="panel loadpanel">{{ 'vocabulary.flashcards.loading' | translate }}</div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <a class="ghostbtn" routerLink="/review">К режимам</a>
+      <a class="ghostbtn" routerLink="/review">{{ 'vocabulary.toModes' | translate }}</a>
     </div>
   } @else if (facade.result(); as result) {
     <!-- Сводка сессии -->
-    <hg-session-result-card eyebrow="기억" koreanTitle="수고했어요!" title="Сессия завершена"
-                            [subtitle]="'SM-2 обновил интервалы для ' + result.total + ' слов'"
+    <hg-session-result-card [eyebrow]="'vocabulary.flashcards.koreanEyebrow' | translate" [koreanTitle]="'vocabulary.flashcards.koreanTitle' | translate" [title]="'vocabulary.flashcards.complete' | translate"
+                            [subtitle]="'vocabulary.flashcards.updatedIntervals' | translate:{count: result.total}"
                             [stats]="resultStats(result)">
       @if (facade.hardWords().length > 0) {
         <div result-details class="hardlist">
-          <div class="eyebrow">Стоит повторить ещё раз</div>
+          <div class="eyebrow">{{ 'vocabulary.flashcards.reviewAgain' | translate }}</div>
           @for (word of facade.hardWords(); track word.id) {
             <div class="hardrow">
               <span class="kr hw">{{ word.word.hangul }}</span>
               <span class="tr">{{ word.word.translation }}</span>
-              <span class="pill p-r">снова завтра</span>
+              <span class="pill p-r">{{ 'vocabulary.flashcards.againTomorrow' | translate }}</span>
             </div>
           }
         </div>
       }
       <div result-actions>
-        <hg-button class="grow" label="К режимам повторения" (pressed)="again()"/>
-        <a class="ghostbtn" routerLink="/dashboard">На дашборд</a>
+        <hg-button class="grow" [label]="'vocabulary.flashcards.toReviewModes' | translate" (pressed)="again()"/>
+        <a class="ghostbtn" routerLink="/dashboard">{{ 'common.toDashboard' | translate }}</a>
       </div>
     </hg-session-result-card>
   } @else if (facade.saving()) {
-    <div class="panel loadpanel" aria-live="polite">Сохраняем повторение…</div>
+    <div class="panel loadpanel" aria-live="polite">{{ 'vocabulary.flashcards.saving' | translate }}</div>
   } @else if (facade.saveError(); as saveError) {
     <div class="panel loadpanel" role="alert">
       <p>{{ saveError }}</p>
-      <hg-button label="Повторить" (pressed)="facade.retryFinish()"/>
+      <hg-button [label]="'common.retry' | translate" (pressed)="facade.retryFinish()"/>
     </div>
   } @else if (facade.current(); as card) {
     <div class="fc-top">
@@ -45,7 +45,7 @@
     <div class="flip-scene">
       <div class="flip-card" [class.is-flipped]="isFlipped()" (click)="flip()"
            (keydown.enter)="flip()" (keydown.space)="$event.preventDefault(); flip()"
-           tabindex="0" role="button" aria-label="Перевернуть карточку"
+           tabindex="0" role="button" [attr.aria-label]="'vocabulary.flashcards.flipAria' | translate"
            [attr.aria-pressed]="isFlipped()">
         <div class="flip-face flip-face--front">
           <div class="ghost kr">{{ card.word.hangul.charAt(0) }}</div>
@@ -75,10 +75,10 @@
     </div>
 
     @if (!isFlipped()) {
-      <div class="hint">Клик, тап или пробел — переворот</div>
-      <hg-button class="showbtn" label="Показать ответ" (pressed)="flip()"/>
+      <div class="hint">{{ 'vocabulary.flashcards.flipHint' | translate }}</div>
+      <hg-button class="showbtn" [label]="'vocabulary.flashcards.showAnswer' | translate" (pressed)="flip()"/>
     } @else {
-      <div class="hint">Оцени, насколько легко вспомнилось · клавиши 1–4</div>
+      <div class="hint">{{ 'vocabulary.flashcards.rateHint' | translate }}</div>
       <div class="srs">
         @for (rating of ratings; track rating.quality) {
           <button type="button" data-domain-control [class]="rating.cls" (click)="rate(rating.quality)"
@@ -90,8 +90,8 @@
     }
   } @else {
     <div class="panel loadpanel">
-      <p>Пока нечего повторять — пройди урок, и слова появятся здесь.</p>
-      <a class="cta" routerLink="/learn">К урокам</a>
+      <p>{{ 'vocabulary.emptyReview' | translate }}</p>
+      <a class="cta" routerLink="/learn">{{ 'common.toLessons' | translate }}</a>
     </div>
   }
 </div>

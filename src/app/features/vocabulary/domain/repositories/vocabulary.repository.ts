@@ -1,4 +1,3 @@
-import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 import {UserWord} from '../entities/user-word.entity';
 import {Page} from '@shared/types/page';
@@ -57,5 +56,3 @@ export interface VocabularyRepository {
   deleteDeck(id: string): Observable<void>;
   addDeckWord(deckId: string, wordId: string): Observable<void>;
 }
-
-export const VOCABULARY_REPOSITORY = new InjectionToken<VocabularyRepository>('VocabularyRepository');

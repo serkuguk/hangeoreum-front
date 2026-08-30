@@ -68,19 +68,12 @@
     border: 1px solid var(--hg-danger);
 
     b { color: var(--hg-danger); }
-    .next { background: var(--hg-danger); color: var(--hg-on-danger); }
   }
 
+  // Раскраска — через variant у hg-button: эти правила попадают на host-элемент,
+  // а не на <button> внутри, иначе получается цветная рамка вокруг кнопки.
   .next {
     margin-left: auto;
-    background: var(--hg-success);
-    color: var(--hg-on-success);
-    border: none;
-    font-weight: 700;
-    min-height: var(--hg-touch-min);
-    padding: 11px var(--hg-space-5);
-    border-radius: var(--hg-radius-control);
-    cursor: pointer;
     flex-shrink: 0;
   }
 }

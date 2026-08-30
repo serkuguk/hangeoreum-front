@@ -7,40 +7,34 @@
 
   @switch (step()) {
     @case (1) {
-      <h2 class="pagettl center">Какой у тебя уровень?</h2>
-      <p class="pagesub center">Подберём стартовую точку курса.</p>
-      <hg-segmented-control class="oblist" label="Начальный уровень" variant="cards"
+      <h2 class="pagettl center">{{ 'identity.onboarding.level.title' | translate }}</h2><p class="pagesub center">{{ 'identity.onboarding.level.subtitle' | translate }}</p>
+      <hg-segmented-control class="oblist" [label]="'identity.onboarding.level.label' | translate" variant="cards"
                             [options]="levelOptions" [(ngModel)]="level"/>
       <div class="obbtns">
-        <hg-button label="Далее" (pressed)="step.set(2)"/>
+        <hg-button [label]="'common.next' | translate" (pressed)="step.set(2)"/>
       </div>
     }
     @case (2) {
-      <h2 class="pagettl center">Сколько минут в день?</h2>
-      <p class="pagesub center">Цель дня. Всегда можно изменить в настройках.</p>
-      <hg-segmented-control class="oblist" label="Ежедневная цель" variant="cards"
+      <h2 class="pagettl center">{{ 'identity.onboarding.goal.title' | translate }}</h2><p class="pagesub center">{{ 'identity.onboarding.goal.subtitle' | translate }}</p>
+      <hg-segmented-control class="oblist" [label]="'identity.onboarding.goal.label' | translate" variant="cards"
                             [options]="goalOptions" [(ngModel)]="goal"/>
       <div class="obbtns">
-        <hg-button label="Назад" variant="ghost" (pressed)="step.set(1)"/>
-        <hg-button label="Далее" (pressed)="step.set(3)"/>
+        <hg-button [label]="'common.back' | translate" variant="ghost" (pressed)="step.set(1)"/><hg-button [label]="'common.next' | translate" (pressed)="step.set(3)"/>
       </div>
     }
     @case (3) {
-      <h2 class="pagettl center">Напомнить о занятии?</h2>
-      <p class="pagesub center">Серия живёт, пока занимаешься каждый день.</p>
+      <h2 class="pagettl center">{{ 'identity.onboarding.reminder.title' | translate }}</h2><p class="pagesub center">{{ 'identity.onboarding.reminder.subtitle' | translate }}</p>
       <div class="panel">
         <div class="setrow">
-          <hg-toggle label="Напоминания" [(ngModel)]="remindersEnabled"/>
+          <hg-toggle [label]="'identity.settings.reminders' | translate" [(ngModel)]="remindersEnabled"/>
         </div>
         @if (remindersEnabled()) {
-          <div class="setrow noborder"><span>Удобное время</span></div>
-          <hg-segmented-control class="obtime" label="Удобное время"
+          <div class="setrow noborder"><span>{{ 'identity.onboarding.reminder.time' | translate }}</span></div><hg-segmented-control class="obtime" [label]="'identity.onboarding.reminder.time' | translate"
                                 [options]="timeOptions" [(ngModel)]="time"/>
         }
       </div>
       <div class="obbtns">
-        <hg-button label="Назад" variant="ghost" (pressed)="step.set(2)"/>
-        <hg-button label="Начать учиться →" [loading]="saving()" (pressed)="finish()"/>
+        <hg-button [label]="'common.back' | translate" variant="ghost" (pressed)="step.set(2)"/><hg-button [label]="'identity.onboarding.finish' | translate" [loading]="saving()" (pressed)="finish()"/>
       </div>
     }
   }

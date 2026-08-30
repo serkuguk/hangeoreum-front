@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {VOCABULARY_REPOSITORY} from './domain/repositories/vocabulary.repository';
+import {VOCABULARY_REPOSITORY} from './application/vocabulary-repository.token';
 import {VocabularyHttpRepository} from './infrastructure/vocabulary.http-repository';
 import {ReviewFacade} from './application/facades/review.facade';
 import {GamesFacade} from './application/facades/games.facade';

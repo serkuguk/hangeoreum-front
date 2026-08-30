@@ -1,6 +1,7 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {LEARNING_REPOSITORY} from '../../domain/repositories/learning.repository';
+import {Subscription, filter, switchMap, take, timer} from 'rxjs';
+import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {Story, StoryLine} from '../../domain/entities/story.entity';
 import {LearnMapFacade} from './learn-map.facade';
 
@@ -13,6 +14,7 @@ export class StoryFacade {
   private readonly map = inject(LearnMapFacade);
   private readonly destroyRef = inject(DestroyRef);
   private attemptId: string | null = null;
+  private completionPolling: Subscription | null = null;
 
   readonly story = signal<Story | null>(null);
   readonly loading = signal(true);
@@ -26,7 +28,12 @@ export class StoryFacade {
 
   readonly hasVideo = computed(() => !!this.story()?.clip?.videoUrl);
 
+  constructor() {
+    this.destroyRef.onDestroy(() => this.cancelCompletionPolling());
+  }
+
   load(lessonId: string): void {
+    this.cancelCompletionPolling();
     this.loading.set(true);
     this.error.set(null);
     this.completed.set(false);
@@ -70,6 +77,21 @@ export class StoryFacade {
       score: 100,
       accuracy: 100,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: accepted => this.pollCompletion(accepted.attemptId),
+      error: () => {
+        this.completing.set(false);
+        this.completionError.set('Не получилось сохранить прогресс Story. Повторите попытку.');
+      },
+    });
+  }
+
+  private pollCompletion(attemptId: string): void {
+    this.completionPolling = timer(0, 500).pipe(
+      switchMap(() => this.repository.getCompletionStatus(attemptId)),
+      filter(response => response.status === 'COMPLETED'),
+      take(1),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: () => {
         this.completed.set(true);
         this.completing.set(false);
@@ -80,5 +102,10 @@ export class StoryFacade {
         this.completionError.set('Не получилось сохранить прогресс Story. Повторите попытку.');
       },
     });
+  }
+
+  private cancelCompletionPolling(): void {
+    this.completionPolling?.unsubscribe();
+    this.completionPolling = null;
   }
 }

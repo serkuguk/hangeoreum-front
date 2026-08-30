@@ -7,13 +7,15 @@ import {
   FinishResult,
   ReviewMode,
   ReviewSummary,
-  VOCABULARY_REPOSITORY,
 } from '../../domain/repositories/vocabulary.repository';
+import {VOCABULARY_REPOSITORY} from '../vocabulary-repository.token';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable()
 export class ReviewFacade {
   private repository = inject(VOCABULARY_REPOSITORY);
   private destroyRef = inject(DestroyRef);
+  private translate = inject(TranslateService);
 
   readonly summary = signal<ReviewSummary | null>(null);
   readonly loading = signal(false);
@@ -40,7 +42,7 @@ export class ReviewFacade {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Не получилось загрузить сводку повторения.');
+        this.error.set(this.translate.instant('vocabulary.errors.loadSummary'));
         this.loading.set(false);
       },
     });
@@ -65,8 +67,8 @@ export class ReviewFacade {
       },
       error: err => {
         this.error.set(err?.error?.code === 'LIMIT_REACHED'
-          ? 'Дневной лимит бесплатных игр исчерпан.'
-          : 'Не получилось начать сессию.');
+          ? this.translate.instant('vocabulary.errors.dailyLimit')
+          : this.translate.instant('vocabulary.errors.startSession'));
         this.loading.set(false);
       },
     });
@@ -134,6 +136,6 @@ export class ReviewFacade {
 
   private failFinish(): void {
     this.saving.set(false);
-    this.saveError.set('Не получилось сохранить повторение. Повторите попытку.');
+    this.saveError.set(this.translate.instant('vocabulary.errors.saveReview'));
   }
 }

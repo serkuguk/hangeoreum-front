@@ -1,6 +1,13 @@
-import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Word} from '@features/vocabulary/domain/entities/word.entity';
+
+export interface DashboardWord {
+  hangul: string;
+  romanization: string;
+  translation: string;
+  audioUrl: string | null;
+  exampleKo: string | null;
+  exampleTranslation: string | null;
+}
 
 export interface DashboardGoal {
   goalXp: number;
@@ -14,9 +21,25 @@ export interface NextLesson {
   type: string;
 }
 
+export interface DashboardLesson {
+  id: string;
+  title: string;
+  type: 'ALPHABET' | 'GRAMMAR' | 'LESSON' | 'STORY';
+  position: number;
+  xpReward: number;
+  hasAccess: boolean;
+  status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
+  score: number | null;
+}
+
+export interface DashboardCourseMap {
+  title: string | null;
+  units: Array<{id: string; title: string; lessons: DashboardLesson[]}>;
+}
+
 export interface Dashboard {
   goal: DashboardGoal;
-  wordOfDay: Word | null;
+  wordOfDay: DashboardWord | null;
   dueWords: number;
   nextLessons: NextLesson[];
   weekXp: number[];
@@ -28,6 +51,5 @@ export interface Dashboard {
 
 export interface DashboardRepository {
   load(): Observable<Dashboard>;
+  courseMap(): Observable<DashboardCourseMap>;
 }
-
-export const DASHBOARD_REPOSITORY = new InjectionToken<DashboardRepository>('DashboardRepository');

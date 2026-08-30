@@ -4,17 +4,18 @@ import {HgButtonComponent} from '@shared/components/controls/hg-button.component
 import {HgInputComponent} from '@shared/components/controls/hg-input.component';
 import {TypeWordPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback} from '../../../application/facades/lesson.facade';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-exercise-type',
-  imports: [FormsModule, HgButtonComponent, HgInputComponent],
+  imports: [FormsModule, HgButtonComponent, HgInputComponent, TranslatePipe],
   template: `
-    <div class="q-kind">Напечатай по-корейски</div>
+    <div class="q-kind">{{ 'learning.exercise.typeKorean' | translate }}</div>
     <div class="panel taskpanel">«{{ payload().translation }}»</div>
-    <hg-input class="krinput kr" type="text" label="Ответ по-корейски" [(ngModel)]="value"
+    <hg-input class="krinput kr" type="text" [label]="'learning.exercise.answerKorean' | translate" [(ngModel)]="value"
               [disabled]="answered()" lang="ko" autocomplete="off" autocapitalize="off"
-              [spellcheck]="false" placeholder="한국어로…" (keydown.enter)="check()"/>
-    <hg-button class="checkbtn" label="Проверить"
+              [spellcheck]="false" [placeholder]="'learning.exercise.koreanPlaceholder' | translate" (keydown.enter)="check()"/>
+    <hg-button class="checkbtn" [label]="'common.check' | translate"
                [disabled]="!value().trim() || answered()" (pressed)="check()"/>
   `,
   styleUrl: './exercise-shared.scss',

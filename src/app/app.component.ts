@@ -1,6 +1,9 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {Meta, Title} from '@angular/platform-browser';
 import {RouterOutlet} from '@angular/router';
 import {ThemeService} from '@core/services/theme.service';
+import {TranslateService} from '@ngx-translate/core';
+import {take} from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -39,5 +42,20 @@ import {ThemeService} from '@core/services/theme.service';
 export class AppComponent {
   constructor() {
     inject(ThemeService).init();
+    const translate = inject(TranslateService);
+    const title = inject(Title);
+    const meta = inject(Meta);
+
+    translate.get([
+      'metadata.title',
+      'metadata.description',
+      'metadata.ogTitle',
+      'metadata.ogDescription',
+    ]).pipe(take(1)).subscribe(copy => {
+      title.setTitle(copy['metadata.title']);
+      meta.updateTag({name: 'description', content: copy['metadata.description']});
+      meta.updateTag({property: 'og:title', content: copy['metadata.ogTitle']});
+      meta.updateTag({property: 'og:description', content: copy['metadata.ogDescription']});
+    });
   }
 }

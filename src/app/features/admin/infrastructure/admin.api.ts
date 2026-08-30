@@ -3,9 +3,6 @@ import {Injectable, inject} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ENV} from '@core/tokens/environment.token';
 import {EnvironmentInterface} from '@core/interfaces/environment.interface';
-import {Word} from '@features/vocabulary/domain/entities/word.entity';
-import {LessonType} from '@features/learning/domain/entities/course-map.entity';
-import {ExerciseKind} from '@features/learning/domain/entities/exercise.entity';
 import {ClipSubtitle} from '@shared/models/clip-subtitle';
 import {Page} from '@shared/types/page';
 
@@ -28,6 +25,20 @@ export interface WordRequest {
   exampleKo?: string | null;
   exampleTranslation?: string | null;
   grammarNote?: string | null;
+}
+
+export interface AdminWord {
+  id: string;
+  hangul: string;
+  romanization: string;
+  translation: string;
+  audioUrl: string | null;
+  imageUrl: string | null;
+  exampleKo: string | null;
+  exampleTranslation: string | null;
+  partOfSpeech: string | null;
+  topicId: string | null;
+  grammarNote: string | null;
 }
 
 export interface Topic {
@@ -84,7 +95,7 @@ export interface AdminLessonFull {
   lesson: AdminLesson;
   tip: AdminTip | null;
   exercises: AdminExercise[];
-  words: Word[];
+  words: AdminWord[];
 }
 
 export interface AdminLetter {
@@ -136,29 +147,29 @@ export class AdminApi {
   }
 
   // ---- слова ----
-  words(search: string, page: number): Observable<Page<Word>> {
+  words(search: string, page: number): Observable<Page<AdminWord>> {
     let params = new HttpParams().set('page', page).set('size', 20);
     if (search) params = params.set('search', search);
-    return this.http.get<Page<Word>>(`${this.base}/words`, {params});
+    return this.http.get<Page<AdminWord>>(`${this.base}/words`, {params});
   }
 
-  createWord(request: WordRequest): Observable<Word> {
-    return this.http.post<Word>(`${this.base}/words`, request);
+  createWord(request: WordRequest): Observable<AdminWord> {
+    return this.http.post<AdminWord>(`${this.base}/words`, request);
   }
 
-  updateWord(id: string, request: WordRequest): Observable<Word> {
-    return this.http.put<Word>(`${this.base}/words/${id}`, request);
+  updateWord(id: string, request: WordRequest): Observable<AdminWord> {
+    return this.http.put<AdminWord>(`${this.base}/words/${id}`, request);
   }
 
   deleteWord(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/words/${id}`);
   }
 
-  uploadWordMedia(id: string, file: File, kind: 'audio' | 'image'): Observable<Word> {
+  uploadWordMedia(id: string, file: File, kind: 'audio' | 'image'): Observable<AdminWord> {
     const form = new FormData();
     form.append('file', file);
     form.append('kind', kind);
-    return this.http.post<Word>(`${this.base}/words/${id}/media`, form);
+    return this.http.post<AdminWord>(`${this.base}/words/${id}/media`, form);
   }
 
   // ---- темы ----
@@ -215,11 +226,11 @@ export class AdminApi {
     return this.http.get<AdminLesson[]>(`${this.base}/units/${unitId}/lessons`);
   }
 
-  createLesson(request: {unitId: string; position: number; type: LessonType | string; title: string; xpReward: number; isFree: boolean}): Observable<AdminLesson> {
+  createLesson(request: {unitId: string; position: number; type: string; title: string; xpReward: number; isFree: boolean}): Observable<AdminLesson> {
     return this.http.post<AdminLesson>(`${this.base}/lessons`, request);
   }
 
-  updateLesson(id: string, request: {unitId: string; position: number; type: LessonType | string; title: string; xpReward: number; isFree: boolean}): Observable<AdminLesson> {
+  updateLesson(id: string, request: {unitId: string; position: number; type: string; title: string; xpReward: number; isFree: boolean}): Observable<AdminLesson> {
     return this.http.put<AdminLesson>(`${this.base}/lessons/${id}`, request);
   }
 
@@ -240,11 +251,11 @@ export class AdminApi {
     return this.http.get<AdminLessonFull>(`${this.base}/lessons/${id}/full`);
   }
 
-  createExercise(lessonId: string, request: {position: number; kind: ExerciseKind | string; payload: unknown}): Observable<AdminExercise> {
+  createExercise(lessonId: string, request: {position: number; kind: string; payload: unknown}): Observable<AdminExercise> {
     return this.http.post<AdminExercise>(`${this.base}/lessons/${lessonId}/exercises`, request);
   }
 
-  updateExercise(lessonId: string, exerciseId: string, request: {position: number; kind: ExerciseKind | string; payload: unknown}): Observable<AdminExercise> {
+  updateExercise(lessonId: string, exerciseId: string, request: {position: number; kind: string; payload: unknown}): Observable<AdminExercise> {
     return this.http.put<AdminExercise>(`${this.base}/lessons/${lessonId}/exercises/${exerciseId}`, request);
   }
 
@@ -260,8 +271,8 @@ export class AdminApi {
     return this.http.get<AdminTip[]>(`${this.base}/tips`);
   }
 
-  putLessonWords(lessonId: string, wordIds: string[]): Observable<Word[]> {
-    return this.http.put<Word[]>(`${this.base}/lessons/${lessonId}/words`, wordIds);
+  putLessonWords(lessonId: string, wordIds: string[]): Observable<AdminWord[]> {
+    return this.http.put<AdminWord[]>(`${this.base}/lessons/${lessonId}/words`, wordIds);
   }
 
   // ---- алфавит ----

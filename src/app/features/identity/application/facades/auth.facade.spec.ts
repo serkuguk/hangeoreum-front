@@ -5,7 +5,7 @@ import {Router} from '@angular/router';
 import {jest} from '@jest/globals';
 import {AuthResponse, AuthService, AuthUser} from '@core/auth/auth.service';
 import {Subject, of} from 'rxjs';
-import {ME_REPOSITORY} from '../../domain/repositories/me.repository';
+import {ME_REPOSITORY} from '../me-repository.token';
 import {AuthFacade} from './auth.facade';
 
 describe('AuthFacade', () => {

@@ -2,10 +2,10 @@ import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core'
 import {DatePipe} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {GamificationFacade} from '@features/gamification/application/gamification.facade';
-import {GAMIFICATION_REPOSITORY} from '@features/gamification/domain/gamification.model';
+import {GAMIFICATION_REPOSITORY} from '@features/gamification/application/gamification-repository.token';
 import {GamificationHttpRepository} from '@features/gamification/infrastructure/gamification.http-repository';
 import {AuthFacade} from '../../../application/facades/auth.facade';
-import {ME_REPOSITORY} from '../../../domain/repositories/me.repository';
+import {ME_REPOSITORY} from '../../../application/me-repository.token';
 import {HgButtonComponent, HgFilePickerComponent} from '@shared/components/controls';
 
 @Component({

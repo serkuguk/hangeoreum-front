@@ -3,6 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {StartLevel} from '../../../domain/user.entity';
 import {HgButtonComponent, HgSegmentedControlComponent, HgToggleComponent} from '@shared/components/controls';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 interface LevelOption {
   value: StartLevel;
@@ -22,24 +23,25 @@ interface GoalOption {
 
 @Component({
   selector: 'hg-onboarding-page',
-  imports: [FormsModule, HgButtonComponent, HgSegmentedControlComponent, HgToggleComponent],
+  imports: [FormsModule, HgButtonComponent, HgSegmentedControlComponent, HgToggleComponent, TranslatePipe],
   templateUrl: './onboarding-page.component.html',
   styleUrl: './onboarding-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OnboardingPageComponent {
   private facade = inject(AuthFacade);
+  private translate = inject(TranslateService);
 
   readonly levels: LevelOption[] = [
-    {value: 'BEGINNER', han: '가', color: 'jade', title: 'Полный новичок', hint: 'Начнём с алфавита хангыль — 40 букв за пару дней'},
-    {value: 'KNOWS_HANGUL', han: '한', color: 'blue', title: 'Уже знаю хангыль', hint: 'Читаю по слогам — сразу к Юниту 1 «Знакомство»'},
-    {value: 'INTERMEDIATE', han: '말', color: 'yellow', title: 'Средний уровень', hint: 'Начнём дальше по курсу — темп подстроится'},
+    {value: 'BEGINNER', han: '가', color: 'jade', title: this.translate.instant('identity.onboarding.levels.beginner.title'), hint: this.translate.instant('identity.onboarding.levels.beginner.hint')},
+    {value: 'KNOWS_HANGUL', han: '한', color: 'blue', title: this.translate.instant('identity.onboarding.levels.hangul.title'), hint: this.translate.instant('identity.onboarding.levels.hangul.hint')},
+    {value: 'INTERMEDIATE', han: '말', color: 'yellow', title: this.translate.instant('identity.onboarding.levels.intermediate.title'), hint: this.translate.instant('identity.onboarding.levels.intermediate.hint')},
   ];
 
   readonly goals: GoalOption[] = [
-    {xp: 10, icon: '🌱', color: 'jade', title: 'Спокойно', hint: '≈ 5 минут в день'},
-    {xp: 20, icon: '🎯', color: 'blue', title: 'Уверенно', hint: '≈ 10 минут в день'},
-    {xp: 50, icon: '🔥', color: 'yellow', title: 'Серьёзно', hint: '≈ 20 минут в день'},
+    {xp: 10, icon: '🌱', color: 'jade', title: this.translate.instant('identity.onboarding.goals.calm.title'), hint: this.translate.instant('identity.onboarding.goals.calm.hint')},
+    {xp: 20, icon: '🎯', color: 'blue', title: this.translate.instant('identity.onboarding.goals.confident.title'), hint: this.translate.instant('identity.onboarding.goals.confident.hint')},
+    {xp: 50, icon: '🔥', color: 'yellow', title: this.translate.instant('identity.onboarding.goals.serious.title'), hint: this.translate.instant('identity.onboarding.goals.serious.hint')},
   ];
 
   readonly times = ['09:00', '12:00', '19:00', '21:00'];

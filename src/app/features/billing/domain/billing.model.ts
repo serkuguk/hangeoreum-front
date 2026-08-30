@@ -1,4 +1,3 @@
-import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 
 export type Feature = 'LESSON_PRO' | 'STORY' | 'IMMERSE' | 'UNLIMITED_REVIEW' | 'AI_DIALOG';
@@ -26,5 +25,3 @@ export interface BillingRepository {
   checkout(planCode: string): Observable<{checkoutUrl: string}>;
   portal(): Observable<{portalUrl: string}>;
 }
-
-export const BILLING_REPOSITORY = new InjectionToken<BillingRepository>('BillingRepository');

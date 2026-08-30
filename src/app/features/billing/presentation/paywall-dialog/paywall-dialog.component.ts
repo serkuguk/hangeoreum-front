@@ -2,33 +2,34 @@ import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {Router} from '@angular/router';
 import {PaywallService} from '@core/services/paywall.service';
 import {HgButtonComponent, HgDialogComponent} from '@shared/components/controls';
+import {TranslatePipe} from '@ngx-translate/core';
 
 /** Один на приложение (рендерится в main-layout), открывается interceptor'ом на 403. */
 @Component({
   selector: 'hg-paywall-dialog',
-  imports: [HgButtonComponent, HgDialogComponent],
+  imports: [HgButtonComponent, HgDialogComponent, TranslatePipe],
   template: `
     @if (paywall.reason(); as reason) {
       <hg-dialog [visible]="true" (visibleChange)="!$event && paywall.close()"
-                 title="Hangeoreum Pro" dismissableMask>
-        <div class="ghost kr">프로</div>
+                 [title]="'billing.title' | translate" dismissableMask>
+        <div class="ghost kr">{{ 'billing.ghost' | translate }}</div>
         <h3>
           @if (reason === 'LIMIT_REACHED') {
-            Дневной лимит Free исчерпан
+            {{ 'billing.limitReachedTitle' | translate }}
           } @else {
-            Это Pro-фича
+            {{ 'billing.proFeatureTitle' | translate }}
           }
         </h3>
         <p>
           @if (reason === 'LIMIT_REACHED') {
-            Бесплатный план — 1 урок и 3 игры в день. С Pro лимитов нет: занимайся сколько хочешь.
+            {{ 'billing.limitReachedText' | translate }}
           } @else {
-            Story носителей, лента Immerse и повторение без ограничений — всё открывается с Pro.
+            {{ 'billing.proFeatureText' | translate }}
           }
         </p>
         <div dialog-actions class="btns">
-          <hg-button label="Смотреть тарифы" (pressed)="toPricing()"/>
-          <hg-button label="Позже" variant="ghost" (pressed)="paywall.close()"/>
+          <hg-button [label]="'billing.viewPlans' | translate" (pressed)="toPricing()"/>
+          <hg-button [label]="'billing.later' | translate" variant="ghost" (pressed)="paywall.close()"/>
         </div>
       </hg-dialog>
     }

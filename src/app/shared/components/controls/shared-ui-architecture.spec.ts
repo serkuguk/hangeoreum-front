@@ -1,5 +1,5 @@
 import {Dirent, readFileSync, readdirSync} from 'node:fs';
-import {join, relative} from 'node:path';
+import {join, relative, sep} from 'node:path';
 
 interface TemplateSource {
   content: string;
@@ -127,6 +127,25 @@ describe('shared UI architecture', () => {
             message: 'raw <button> requires type="button" and data-domain-control',
           });
         }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it('keeps feature domain code independent from Angular and other features', () => {
+    const violations: Violation[] = [];
+
+    for (const file of files.filter(file => file.includes(`${sep}features${sep}`) && file.includes(`${sep}domain${sep}`) && file.endsWith('.ts'))) {
+      const source = readFileSync(file, 'utf8');
+      for (const match of source.matchAll(/from\s*['"]([^'"]+)['"]/g)) {
+        const target = match[1];
+        if (!target.startsWith('@angular/') && !target.startsWith('@core/') && !target.startsWith('@features/')) continue;
+        violations.push({
+          file: displayPath(file),
+          line: lineAt(source, match.index ?? 0),
+          message: `domain must not import ${target}`,
+        });
       }
     }
 

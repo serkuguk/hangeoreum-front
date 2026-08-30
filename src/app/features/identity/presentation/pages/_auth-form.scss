@@ -1,117 +1,55 @@
-// Общие стили форм входа/регистрации (по hangeoreum-auth.html)
+// Общие стили форм входа/регистрации.
+// Внутренности полей и кнопок живут в hg-input / hg-button — здесь только ритм страницы.
+:host { display: block; width: 100%; }
+
 .formbox {
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
+  margin: 0 auto;
 
-  h1 { font-size: var(--hg-fs-2xl); font-weight: 600; margin-bottom: 6px; }
-  .sub { color: var(--hg-muted); font-size: 14px; margin-bottom: 28px; }
+  h1 { font-size: var(--hg-fs-2xl); font-weight: 600; line-height: 1.15; margin-bottom: var(--hg-space-2); }
+  .sub { color: var(--hg-text-muted); font-size: var(--hg-fs-sm); margin-bottom: var(--hg-space-6); }
 }
 
-.field {
-  margin-bottom: 16px;
-
-  label { display: block; font-size: 13px; color: var(--hg-muted); margin-bottom: 7px; }
-
-  input {
-    width: 100%;
-    background: var(--hg-card);
-    border: 1px solid var(--hg-line);
-    border-radius: 14px;
-    padding: 14px 16px;
-    color: var(--hg-txt);
-    font-family: inherit;
-    font-size: 15px;
-    transition: .2s;
-
-    &:focus {
-      outline: none;
-      border-color: var(--hg-blue);
-      box-shadow: 0 0 0 3px rgba(59, 107, 255, .18);
-    }
-
-    &.invalid { border-color: var(--hg-red); }
-  }
-
-  .fielderr { color: var(--hg-red); font-size: 12px; margin-top: 6px; }
+form {
+  display: grid;
+  gap: var(--hg-space-4);
 }
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  margin-bottom: 22px;
-
-  label { color: var(--hg-muted); display: flex; align-items: center; gap: 7px; cursor: pointer; }
-}
+// Сабмит отделяем от последнего поля сильнее, чем поля друг от друга.
+.btn { margin-top: var(--hg-space-2); }
 
 .apierr {
-  background: rgba(255, 77, 94, .12);
-  border: 1px solid rgba(255, 77, 94, .35);
-  color: var(--hg-red);
-  border-radius: 14px;
-  padding: 12px 16px;
-  font-size: 13.5px;
-  margin-bottom: 16px;
-}
-
-.btn {
-  width: 100%;
-  background: linear-gradient(135deg, var(--hg-blue), #5a2bcf);
-  color: #fff;
-  border: none;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 15px;
-  padding: 15px;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: .2s;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: var(--hg-shadow-cta);
-  }
-
-  &:disabled { opacity: .55; cursor: default; }
+  background: var(--hg-danger-soft);
+  border: 1px solid color-mix(in srgb, var(--hg-danger) 35%, transparent);
+  color: var(--hg-danger);
+  border-radius: var(--hg-radius-block);
+  padding: var(--hg-space-3) var(--hg-space-4);
+  font-size: var(--hg-fs-sm);
 }
 
 .sep {
   display: flex;
   align-items: center;
-  gap: 14px;
-  color: var(--hg-muted);
-  font-size: 12px;
-  margin: 22px 0;
+  gap: var(--hg-space-3);
+  color: var(--hg-text-muted);
+  font-size: var(--hg-fs-xs);
+  margin: var(--hg-space-6) 0 var(--hg-space-4);
 
-  &::before, &::after { content: ""; flex: 1; height: 1px; background: var(--hg-line); }
+  &::before, &::after { content: ""; flex: 1; height: 1px; background: var(--hg-border); }
 }
 
 .social {
   display: flex;
-  gap: 10px;
+  gap: var(--hg-space-3);
 
-  button {
-    flex: 1;
-    background: var(--hg-card);
-    border: 1px solid var(--hg-line);
-    color: var(--hg-txt);
-    font-family: inherit;
-    font-size: 14px;
-    padding: 12px;
-    border-radius: 14px;
-    cursor: pointer;
-    transition: .2s;
-
-    &:hover { border-color: rgba(255, 255, 255, .2); }
-  }
+  hg-button { flex: 1; }
 }
 
 .alt {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 14px;
-  color: var(--hg-muted);
+  margin-top: var(--hg-space-6);
+  font-size: var(--hg-fs-sm);
+  color: var(--hg-text-muted);
 
-  a { color: var(--hg-yellow); font-weight: 600; cursor: pointer; }
+  a { color: var(--hg-route); font-weight: 600; }
 }

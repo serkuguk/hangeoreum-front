@@ -4,14 +4,16 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UserWord} from '../../domain/entities/user-word.entity';
 import {
   Deck,
-  VOCABULARY_REPOSITORY,
   VocabularyQuery,
 } from '../../domain/repositories/vocabulary.repository';
+import {VOCABULARY_REPOSITORY} from '../vocabulary-repository.token';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable()
 export class VocabularyFacade {
   private repository = inject(VOCABULARY_REPOSITORY);
   private destroyRef = inject(DestroyRef);
+  private translate = inject(TranslateService);
 
   readonly words = signal<UserWord[]>([]);
   readonly totalElements = signal(0);
@@ -32,7 +34,7 @@ export class VocabularyFacade {
         this.error.set(null);
         return this.repository.vocabulary(query).pipe(
           catchError(() => {
-            this.error.set('Не получилось загрузить словарь.');
+            this.error.set(this.translate.instant('vocabulary.errors.load'));
             this.loading.set(false);
             return EMPTY;
           }),
@@ -79,35 +81,35 @@ export class VocabularyFacade {
   loadDecks(): void {
     this.repository.decks().subscribe({
       next: decks => this.decks.set(decks),
-      error: () => this.error.set('Не получилось загрузить колоды.'),
+      error: () => this.error.set(this.translate.instant('vocabulary.errors.loadDecks')),
     });
   }
 
   createDeck(title: string): void {
     this.repository.createDeck(title).subscribe({
       next: deck => this.decks.update(list => [...list, deck]),
-      error: () => this.error.set('Не получилось создать колоду.'),
+      error: () => this.error.set(this.translate.instant('vocabulary.errors.createDeck')),
     });
   }
 
   renameDeck(deck: Deck, title: string): void {
     this.repository.renameDeck(deck.id, title).subscribe({
       next: updated => this.decks.update(list => list.map(d => d.id === deck.id ? updated : d)),
-      error: () => this.error.set('Не получилось переименовать колоду.'),
+      error: () => this.error.set(this.translate.instant('vocabulary.errors.renameDeck')),
     });
   }
 
   deleteDeck(deck: Deck): void {
     this.repository.deleteDeck(deck.id).subscribe({
       next: () => this.decks.update(list => list.filter(d => d.id !== deck.id)),
-      error: () => this.error.set('Не получилось удалить колоду.'),
+      error: () => this.error.set(this.translate.instant('vocabulary.errors.deleteDeck')),
     });
   }
 
   addToDeck(deckId: string, wordId: string): void {
     this.repository.addDeckWord(deckId, wordId).subscribe({
       next: () => this.loadDecks(),
-      error: () => this.error.set('Не получилось добавить слово в колоду.'),
+      error: () => this.error.set(this.translate.instant('vocabulary.errors.addToDeck')),
     });
   }
 }

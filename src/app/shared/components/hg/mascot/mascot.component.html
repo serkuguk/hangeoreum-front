@@ -1,0 +1,41 @@
+@if (pedestal()) {
+  <svg class="hg-mascot__pedestal" viewBox="0 0 260 130" width="270" height="135" aria-hidden="true">
+    <ellipse cx="130" cy="112" rx="104" ry="18" fill="rgba(0,0,0,.22)"/>
+    <path d="M130 96 L246 40 L246 60 L130 116 L14 60 L14 40 Z" fill="oklch(72% 0.080 78)"/>
+    <path d="M130 20 L246 40 L130 96 L14 40 Z" fill="oklch(93% 0.060 88)"/>
+    <path d="M130 30 L214 44 L130 84 L46 44 Z" fill="oklch(88% 0.070 84)" opacity=".55"/>
+  </svg>
+}
+
+<svg class="hg-mascot__body" viewBox="0 0 220 220" [attr.width]="size()" [attr.height]="size()" role="img" aria-label="Маскот 걸음이">
+  <ellipse cx="88" cy="190" rx="22" ry="12" fill="#FFF0D2"/>
+  <ellipse cx="134" cy="190" rx="22" ry="12" fill="#FFF0D2"/>
+  <ellipse cx="110" cy="152" rx="54" ry="43" fill="#F0A93C"/>
+  <ellipse cx="58" cy="150" rx="16" ry="23" fill="#E0951F" transform="rotate(-12 58 150)"/>
+  <ellipse cx="164" cy="150" rx="16" ry="23" fill="#E0951F" transform="rotate(12 164 150)"/>
+  <ellipse cx="110" cy="164" rx="34" ry="28" fill="#FFF0D2"/>
+  <path d="M72 130 q38 16 78 0 l4 12 q-42 18 -86 0 z" fill="#3B6BFF"/>
+  <path d="M150 138 l16 -6 -4 18 -14 -6 z" fill="#2F55D6"/>
+  <circle cx="66" cy="46" r="19" fill="#F0A93C"/>
+  <circle cx="66" cy="46" r="9" fill="#FF9AA6"/>
+  <circle cx="154" cy="46" r="19" fill="#F0A93C"/>
+  <circle cx="154" cy="46" r="9" fill="#FF9AA6"/>
+  <circle cx="110" cy="90" r="58" fill="#F0A93C"/>
+  <rect x="86" y="34" width="9" height="21" rx="4.5" fill="#2C2136" transform="rotate(-12 90 44)"/>
+  <rect x="105" y="30" width="9" height="23" rx="4.5" fill="#2C2136"/>
+  <rect x="124" y="34" width="9" height="21" rx="4.5" fill="#2C2136" transform="rotate(12 128 44)"/>
+  <circle cx="62" cy="102" r="10" fill="#FF8A98" opacity=".45"/>
+  <circle cx="158" cy="102" r="10" fill="#FF8A98" opacity=".45"/>
+  <ellipse cx="110" cy="108" rx="31" ry="23" fill="#FFF6E4"/>
+  <circle cx="88" cy="80" r="9" fill="#2C2136"/>
+  <circle cx="85" cy="77" r="3.4" fill="#fff"/>
+  <circle cx="132" cy="80" r="9" fill="#2C2136"/>
+  <circle cx="129" cy="77" r="3.4" fill="#fff"/>
+  <path d="M110 98c5.5 0 8.5 3.6 8.5 6.6 0 3.4-4.4 6.4-8.5 6.4s-8.5-3-8.5-6.4c0-3 3-6.6 8.5-6.6z" fill="#2C2136"/>
+  <path d="M110 112q-7 7.5 -14 2" stroke="#2C2136" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M110 112q7 7.5 14 2" stroke="#2C2136" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>
+
+@if (speech()) {
+  <div class="hg-mascot__speech">{{ speech() }}</div>
+}

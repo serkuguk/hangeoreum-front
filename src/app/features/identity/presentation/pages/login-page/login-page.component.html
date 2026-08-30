@@ -1,29 +1,27 @@
 <div class="formbox">
-  <div class="eyebrow">로그인 · Вход</div>
-  <h1>Войти в аккаунт</h1>
-  <p class="sub">Рад снова видеть тебя 👋</p>
+  <div class="eyebrow">{{ 'identity.login.eyebrow' | translate }}</div><h1>{{ 'identity.login.title' | translate }}</h1><p class="sub">{{ 'identity.login.subtitle' | translate }}</p>
 
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <hg-input id="email" type="email" label="Email" formControlName="email"
+    <hg-input id="email" type="email" [label]="'common.email' | translate" formControlName="email"
               placeholder="you@email.com" autocomplete="email"
-              [error]="invalid('email') ? 'Введи корректный email' : ''"/>
+              [error]="invalid('email') ? ('identity.validation.email' | translate) : ''"/>
 
-    <hg-input id="password" type="password" label="Пароль" formControlName="password"
+    <hg-input id="password" type="password" [label]="'common.password' | translate" formControlName="password"
               placeholder="••••••••" autocomplete="current-password"
-              [error]="invalid('password') ? 'Введи пароль' : ''"/>
+              [error]="invalid('password') ? ('identity.validation.passwordRequired' | translate) : ''"/>
 
     @if (facade.error(); as error) {
       <div class="apierr">{{ error }}</div>
     }
 
-    <hg-button class="btn" type="submit" label="Войти" [loading]="facade.loading()" block/>
+    <hg-button class="btn" type="submit" [label]="'identity.login.submit' | translate" [loading]="facade.loading()" block/>
   </form>
 
-  <div class="sep">или через</div>
+  <div class="sep">{{ 'identity.socialDivider' | translate }}</div>
   <div class="social">
     <hg-button label="Google" variant="secondary" block (pressed)="facade.loginWithProvider('google')"/>
     <hg-button label="Kakao" variant="secondary" block (pressed)="facade.loginWithProvider('kakao')"/>
   </div>
 
-  <div class="alt">Нет аккаунта? <a routerLink="/auth/register">Зарегистрироваться</a></div>
+  <div class="alt">{{ 'identity.login.noAccount' | translate }} <a routerLink="/auth/register">{{ 'identity.register.link' | translate }}</a></div>
 </div>

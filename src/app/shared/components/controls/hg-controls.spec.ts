@@ -4,6 +4,7 @@ import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HgButtonComponent} from './hg-button.component';
 import {HgInputComponent} from './hg-input.component';
 import {HgSegmentedControlComponent, HgSegmentedOption} from './hg-segmented-control.component';
+import {HgSelectComponent, HgSelectOption} from './hg-select.component';
 import {HgTextareaComponent} from './hg-textarea.component';
 
 @Component({imports: [ReactiveFormsModule, HgInputComponent], template: `<hg-input label="Email" error="Обязательное поле" [formControl]="control" />`})
@@ -11,6 +12,15 @@ class ReactiveInputHost { readonly control = new FormControl('first@example.com'
 
 @Component({imports: [FormsModule, HgTextareaComponent], template: `<hg-textarea label="Описание" [(ngModel)]="description" />`})
 class NgModelHost { description = 'Начальный текст'; }
+
+@Component({imports: [ReactiveFormsModule, HgSelectComponent], template: `<hg-select label="Уровень" [options]="options" [formControl]="control" />`})
+class SelectHost {
+  readonly options: readonly HgSelectOption<string>[] = [
+    {label: 'Первый', value: 'first'},
+    {label: 'Второй', value: 'second'},
+  ];
+  readonly control = new FormControl<string | null>('first');
+}
 
 @Component({imports: [ReactiveFormsModule, HgSegmentedControlComponent], template: `<hg-segmented-control label="Режим" [options]="options" [formControl]="control" />`})
 class SegmentedHost {
@@ -45,6 +55,17 @@ describe('shared controls', () => {
     expect(textarea.value).toBe('Начальный текст');
     textarea.value = 'Новый текст'; textarea.dispatchEvent(new Event('input')); fixture.detectChanges();
     expect(fixture.componentInstance.description).toBe('Новый текст');
+  });
+
+  it('connects hg-select to Reactive Forms in both directions', async () => {
+    const fixture = await createFixture(SelectHost);
+    await fixture.whenStable(); fixture.detectChanges();
+    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+    expect(select.value).toBe('0');
+    select.value = '1'; select.dispatchEvent(new Event('change')); fixture.detectChanges();
+    expect(fixture.componentInstance.control.value).toBe('second');
+    fixture.componentInstance.control.setValue('first'); fixture.detectChanges();
+    expect(select.value).toBe('0');
   });
 
   it('supports arrow-key radio navigation and skips disabled segments', async () => {

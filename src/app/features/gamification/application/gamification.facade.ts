@@ -1,5 +1,6 @@
 import {Injectable, computed, inject, signal} from '@angular/core';
-import {Achievement, GAMIFICATION_REPOSITORY, Profile} from '../domain/gamification.model';
+import {Achievement, Profile} from '../domain/gamification.model';
+import {GAMIFICATION_REPOSITORY} from './gamification-repository.token';
 
 @Injectable()
 export class GamificationFacade {
