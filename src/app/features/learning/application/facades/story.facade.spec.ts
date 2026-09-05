@@ -31,9 +31,9 @@ describe('StoryFacade', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     repository = {
-      story: jest.fn().mockReturnValue(of(story)),
+      story: jest.fn<LearningRepository['story']>().mockReturnValue(of(story)),
       complete: jest.fn(),
-      getCompletionStatus: jest.fn().mockReturnValue(of({status: 'COMPLETED', result})),
+      getCompletionStatus: jest.fn<LearningRepository['getCompletionStatus']>().mockReturnValue(of({status: 'COMPLETED', result})),
     };
     map = {invalidate: jest.fn()};
     TestBed.configureTestingModule({

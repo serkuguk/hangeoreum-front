@@ -3,7 +3,7 @@ import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {HgAudioButtonComponent} from '@shared/components/hg';
 import {shuffle} from '@shared/utils/shuffle';
 import {ChoiceOption, ListenChoicePayload} from '../../../domain/entities/exercise.entity';
-import {Feedback} from '../../../application/facades/lesson.facade';
+import {Feedback, gradeChoice} from '../../../domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
@@ -52,8 +52,6 @@ export class ExerciseListenComponent {
     if (this.answered()) return;
     this.picked.set(option);
     this.answered.set(true);
-    const correct = !!option.correct;
-    const expected = this.payload().options.find(o => o.correct)?.text;
-    this.result.emit({correct, expected: correct ? undefined : expected});
+    this.result.emit(gradeChoice(option, this.payload().options));
   }
 }

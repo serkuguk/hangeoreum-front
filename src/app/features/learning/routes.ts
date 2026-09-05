@@ -1,3 +1,4 @@
+import {provideWordAddition} from '../vocabulary/public-api';
 import {Routes} from '@angular/router';
 import {LEARNING_REPOSITORY} from './application/learning-repository.token';
 import {LearningHttpRepository} from './infrastructure/learning.http-repository';
@@ -5,9 +6,6 @@ import {LearnMapFacade} from './application/facades/learn-map.facade';
 import {AlphabetFacade} from './application/facades/alphabet.facade';
 import {LessonFacade} from './application/facades/lesson.facade';
 import {StoryFacade} from './application/facades/story.facade';
-import {VOCABULARY_REPOSITORY} from '../vocabulary/application/vocabulary-repository.token';
-import {VocabularyFacade} from '../vocabulary/application/facades/vocabulary.facade';
-import {VocabularyHttpRepository} from '../vocabulary/infrastructure/vocabulary.http-repository';
 
 export const learningRoutes: Routes = [
   {
@@ -38,8 +36,7 @@ export const learningRoutes: Routes = [
         path: ':id/story',
         providers: [
           StoryFacade,
-          {provide: VOCABULARY_REPOSITORY, useClass: VocabularyHttpRepository},
-          VocabularyFacade,
+          ...provideWordAddition(),
         ],
         loadComponent: () => import('./presentation/pages/story-page/story-page.component')
           .then(c => c.StoryPageComponent),

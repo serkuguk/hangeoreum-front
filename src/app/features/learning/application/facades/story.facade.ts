@@ -7,7 +7,7 @@ import {LearnMapFacade} from './learn-map.facade';
 
 export type StoryMode = 'watch' | 'read' | 'listen';
 
-/** Владеет load/playback/completion Story. Добавление слов остаётся во VocabularyFacade. */
+/** Владеет load/playback/completion Story. Добавление слов остаётся во WordAdditionFacade. */
 @Injectable()
 export class StoryFacade {
   private readonly repository = inject(LEARNING_REPOSITORY);

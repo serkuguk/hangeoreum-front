@@ -15,7 +15,7 @@ import {RouterLink} from '@angular/router';
 import {ImmerseFacade} from '../../../application/immerse.facade';
 import {Clip} from '../../../domain/clip.entity';
 import {HgButtonComponent, HgSegmentedControlComponent} from '@shared/components/controls';
-import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
+import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 type SubMode = 'ko' | 'ru' | 'both';
@@ -29,7 +29,7 @@ type SubMode = 'ko' | 'ru' | 'both';
 })
 export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   readonly facade = inject(ImmerseFacade);
-  readonly vocabulary = inject(VocabularyFacade);
+  readonly vocabulary = inject(WordAdditionFacade);
   private host = inject(ElementRef<HTMLElement>);
   private injector = inject(Injector);
   private translate = inject(TranslateService);

@@ -47,7 +47,6 @@ Thumbs.db
 #AI
 REFACTORING_PLAN.md
 CLAUDE.md
-AGENTS.md
 .claude/*
 .codex/*
 .agents/*

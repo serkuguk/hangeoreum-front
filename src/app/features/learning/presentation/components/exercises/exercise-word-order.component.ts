@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, input, output, signal} fro
 import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {shuffle} from '@shared/utils/shuffle';
 import {WordOrderPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback} from '../../../application/facades/lesson.facade';
+import {Feedback, gradeWordOrder} from '../../../domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 interface BankToken {
@@ -85,9 +85,6 @@ export class ExerciseWordOrderComponent {
   check(): void {
     if (this.answered()) return;
     this.answered.set(true);
-    const expected = this.payload().tokens.join(' ');
-    const actual = this.chosen().map(t => t.text).join(' ');
-    const correct = actual === expected;
-    this.result.emit({correct, expected: correct ? undefined : expected});
+    this.result.emit(gradeWordOrder(this.chosen().map(t => t.text), this.payload().tokens));
   }
 }

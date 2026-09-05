@@ -5,7 +5,7 @@ import {StoryFacade, StoryMode} from '../../../application/facades/story.facade'
 import {StoryLine} from '../../../domain/entities/story.entity';
 import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {HgSegmentedControlComponent, HgSegmentedOption} from '@shared/components/controls/hg-segmented-control.component';
-import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
+import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
@@ -19,7 +19,7 @@ export class StoryPageComponent implements OnInit {
   readonly id = input.required<string>();
 
   readonly facade = inject(StoryFacade);
-  readonly vocabulary = inject(VocabularyFacade);
+  readonly vocabulary = inject(WordAdditionFacade);
   private readonly translate = inject(TranslateService);
   private router = inject(Router);
 

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
 import {FillBlankPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback} from '../../../application/facades/lesson.facade';
+import {Feedback, gradeExactAnswer} from '../../../domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
@@ -121,13 +121,12 @@ export class ExerciseFillBlankComponent {
 
   readonly picked = signal<string | null>(null);
   readonly answered = signal(false);
-  readonly pickedCorrect = computed(() => this.picked() === this.payload().correct);
+  readonly pickedCorrect = computed(() => gradeExactAnswer(this.picked() ?? '', this.payload().correct).correct);
 
   pick(text: string): void {
     if (this.answered()) return;
     this.picked.set(text);
     this.answered.set(true);
-    const correct = text === this.payload().correct;
-    this.result.emit({correct, expected: correct ? undefined : this.payload().correct});
+    this.result.emit(gradeExactAnswer(text, this.payload().correct));
   }
 }

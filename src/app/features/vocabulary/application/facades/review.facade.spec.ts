@@ -26,9 +26,9 @@ describe('ReviewFacade', () => {
 
   beforeEach(() => {
     repository = {
-      startSession: jest.fn().mockReturnValue(of({id: 'review-1', mode: 'FLASHCARDS', cards: [word]})),
-      submitAnswers: jest.fn().mockReturnValue(of(undefined)),
-      finishSession: jest.fn()
+      startSession: jest.fn<VocabularyRepository['startSession']>().mockReturnValue(of({id: 'review-1', mode: 'FLASHCARDS', cards: [word]})),
+      submitAnswers: jest.fn<VocabularyRepository['submitAnswers']>().mockReturnValue(of(undefined)),
+      finishSession: jest.fn<VocabularyRepository['finishSession']>()
         .mockReturnValueOnce(throwError(() => new Error('network')))
         .mockReturnValueOnce(of({total: 1, correct: 1, xp: 5, streak: 2})),
     };

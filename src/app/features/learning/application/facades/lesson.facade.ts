@@ -10,11 +10,7 @@ import {
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 
-export interface Feedback {
-  correct: boolean;
-  expected?: string;
-  note?: string;
-}
+import {Feedback} from '../../domain/services/exercise-grading';
 
 export type LessonPhase = 'idle' | 'loading' | 'active' | 'saving' | 'save-error' | 'completed' | 'load-error';
 

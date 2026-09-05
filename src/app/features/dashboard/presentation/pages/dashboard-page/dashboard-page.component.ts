@@ -2,8 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/cor
 import {Router, RouterLink} from '@angular/router';
 import {HgAudioButtonComponent, HgProgressRingComponent, MascotComponent} from '@shared/components/hg';
 import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
-import {CoursePathComponent} from '@features/learning/presentation/components/course-path/course-path.component';
-import {toCoursePath} from '@features/learning/presentation/components/course-path/course-path.mapper';
+import {CoursePathComponent, toCoursePath} from '@features/learning/course-path';
 import {DashboardFacade} from '../../../application/dashboard.facade';
 import {DASHBOARD_REPOSITORY} from '../../../application/dashboard-repository.token';
 import {DashboardHttpRepository} from '../../../infrastructure/dashboard.http-repository';
@@ -53,7 +52,7 @@ export class DashboardPageComponent {
   });
 
   readonly path = computed(() => toCoursePath(
-    this.facade.courseMap() as Parameters<typeof toCoursePath>[0], PATH_WINDOW));
+    this.facade.courseMap(), PATH_WINDOW));
 
   /** Узел, на который ведёт главный CTA героя. */
   readonly currentNode = computed(() => this.path().nodes.find(node => node.state === 'current'));

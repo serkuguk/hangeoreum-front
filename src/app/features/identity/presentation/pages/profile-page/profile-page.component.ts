@@ -1,9 +1,7 @@
+import {GamificationFacade, provideGamification} from '@features/gamification/public-api';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {RouterLink} from '@angular/router';
-import {GamificationFacade} from '@features/gamification/application/gamification.facade';
-import {GAMIFICATION_REPOSITORY} from '@features/gamification/application/gamification-repository.token';
-import {GamificationHttpRepository} from '@features/gamification/infrastructure/gamification.http-repository';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {ME_REPOSITORY} from '../../../application/me-repository.token';
 import {HgButtonComponent, HgFilePickerComponent} from '@shared/components/controls';
@@ -11,10 +9,7 @@ import {HgButtonComponent, HgFilePickerComponent} from '@shared/components/contr
 @Component({
   selector: 'hg-profile-page',
   imports: [RouterLink, DatePipe, HgButtonComponent, HgFilePickerComponent],
-  providers: [
-    {provide: GAMIFICATION_REPOSITORY, useClass: GamificationHttpRepository},
-    GamificationFacade,
-  ],
+  providers: provideGamification(),
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,8 +31,7 @@ export class ProfilePageComponent {
       next: ({avatarUrl}) => {
         const user = this.auth.user();
         if (user) this.auth.syncUser({...user, avatarUrl});
-        const profile = this.facade.profile();
-        if (profile) this.facade.profile.set({...profile, avatarUrl});
+        this.facade.updateAvatar(avatarUrl);
         this.uploading.set(false);
       },
       error: () => this.uploading.set(false),

@@ -1,4 +1,4 @@
-import {DestroyRef, Injectable, inject, signal} from '@angular/core';
+import {Injectable, inject, signal} from '@angular/core';
 import {EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, switchMap} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UserWord} from '../../domain/entities/user-word.entity';
@@ -12,7 +12,6 @@ import {TranslateService} from '@ngx-translate/core';
 @Injectable()
 export class VocabularyFacade {
   private repository = inject(VOCABULARY_REPOSITORY);
-  private destroyRef = inject(DestroyRef);
   private translate = inject(TranslateService);
 
   readonly words = signal<UserWord[]>([]);
@@ -21,7 +20,6 @@ export class VocabularyFacade {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly decks = signal<Deck[]>([]);
-  readonly wordAddStates = signal<Record<string, 'idle' | 'saving' | 'saved' | 'error'>>({});
 
   private query$ = new Subject<VocabularyQuery>();
 
@@ -61,20 +59,6 @@ export class VocabularyFacade {
     this.words.update(list => list.map(w => w.id === word.id ? {...w, isDifficult: flag} : w));
     this.repository.setDifficult(word.id, flag).subscribe({
       error: () => this.words.update(list => list.map(w => w.id === word.id ? {...w, isDifficult: !flag} : w)),
-    });
-  }
-
-  addState(wordId: string): 'idle' | 'saving' | 'saved' | 'error' {
-    return this.wordAddStates()[wordId] ?? 'idle';
-  }
-
-  /** Состояние принадлежит фасаду: успех показывается только после ответа API. */
-  addWordToVocabulary(wordId: string): void {
-    if (this.addState(wordId) === 'saving' || this.addState(wordId) === 'saved') return;
-    this.wordAddStates.update(states => ({...states, [wordId]: 'saving'}));
-    this.repository.addWord(wordId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => this.wordAddStates.update(states => ({...states, [wordId]: 'saved'})),
-      error: () => this.wordAddStates.update(states => ({...states, [wordId]: 'error'})),
     });
   }
 

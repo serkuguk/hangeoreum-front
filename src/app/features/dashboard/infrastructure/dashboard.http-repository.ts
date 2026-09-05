@@ -7,8 +7,8 @@ import {Dashboard, DashboardCourseMap, DashboardRepository} from '../domain/dash
 
 @Injectable()
 export class DashboardHttpRepository implements DashboardRepository {
-  private http = inject(HttpClient);
-  private env = inject<EnvironmentInterface>(ENV);
+  private readonly http = inject(HttpClient);
+  private readonly env = inject<EnvironmentInterface>(ENV);
 
   load(): Observable<Dashboard> {
     return this.http.get<Dashboard>(`${this.env.server_url}/me/dashboard`);

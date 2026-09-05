@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
 import {MatchPairsPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback} from '../../../application/facades/lesson.facade';
+import {Feedback, isMatchingPair, gradeMatch} from '../../../domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 interface MatchCell {
@@ -88,11 +88,11 @@ export class ExerciseMatchComponent {
       this.selected.set(null);
       return;
     }
-    if (selected.pairIndex === cell.pairIndex && selected.side !== cell.side) {
+    if (isMatchingPair(selected, cell)) {
       this.hits.update(set => new Set(set).add(cell.pairIndex));
       this.selected.set(null);
       if (this.hits().size === this.payload().pairs.length) {
-        this.result.emit({correct: this.mistakes === 0});
+        this.result.emit(gradeMatch(this.mistakes));
       }
     } else {
       this.mistakes++;

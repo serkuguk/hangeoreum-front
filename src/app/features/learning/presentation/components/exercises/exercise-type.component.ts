@@ -3,7 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {HgInputComponent} from '@shared/components/controls/hg-input.component';
 import {TypeWordPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback} from '../../../application/facades/lesson.facade';
+import {Feedback, gradeTypedAnswer} from '../../../domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
@@ -31,9 +31,6 @@ export class ExerciseTypeComponent {
   check(): void {
     if (this.answered() || !this.value().trim()) return;
     this.answered.set(true);
-    // NFC-нормализация: составные хангыль-слоги из IME могут приходить в NFD
-    const normalize = (s: string) => s.normalize('NFC').replace(/\s+/g, ' ').trim();
-    const correct = normalize(this.value()) === normalize(this.payload().answer);
-    this.result.emit({correct, expected: correct ? undefined : this.payload().answer});
+    this.result.emit(gradeTypedAnswer(this.value(), this.payload().answer));
   }
 }

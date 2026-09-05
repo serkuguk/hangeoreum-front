@@ -44,9 +44,9 @@ describe('LessonFacade', () => {
     sessionStorage.clear();
     jest.useFakeTimers();
     repository = {
-      lesson: jest.fn().mockReturnValue(of(lesson)),
-      complete: jest.fn().mockReturnValue(of(accepted)),
-      getCompletionStatus: jest.fn().mockReturnValue(of({status: 'COMPLETED', result})),
+      lesson: jest.fn<LearningRepository['lesson']>().mockReturnValue(of(lesson)),
+      complete: jest.fn<LearningRepository['complete']>().mockReturnValue(of(accepted)),
+      getCompletionStatus: jest.fn<LearningRepository['getCompletionStatus']>().mockReturnValue(of({status: 'COMPLETED', result})),
     };
     map = {invalidate: jest.fn()};
 

@@ -6,7 +6,8 @@ import {GAMIFICATION_REPOSITORY} from './gamification-repository.token';
 export class GamificationFacade {
   private repository = inject(GAMIFICATION_REPOSITORY);
 
-  readonly profile = signal<Profile | null>(null);
+  private readonly profileState = signal<Profile | null>(null);
+  readonly profile = this.profileState.asReadonly();
   readonly achievements = signal<Achievement[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -19,12 +20,16 @@ export class GamificationFacade {
     return span === 0 ? 0 : Math.round(profile.totalXp / span * 100);
   });
 
+  updateAvatar(avatarUrl: string): void {
+    this.profileState.update(profile => profile ? {...profile, avatarUrl} : null);
+  }
+
   load(): void {
     this.loading.set(true);
     this.error.set(null);
     this.repository.profile().subscribe({
       next: profile => {
-        this.profile.set(profile);
+        this.profileState.set(profile);
         this.loading.set(false);
       },
       error: () => {

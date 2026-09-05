@@ -1,7 +1,7 @@
 import {TestBed} from '@angular/core/testing';
 import {provideRouter} from '@angular/router';
 import {jest} from '@jest/globals';
-import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
+import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {LessonFacade} from '../../application/facades/lesson.facade';
 import {StoryFacade} from '../../application/facades/story.facade';
 import {LessonPageComponent} from './lesson-page/lesson-page.component';
@@ -48,7 +48,7 @@ describe('learning route input lifecycle', () => {
       providers: [
         provideRouter([]),
         {provide: StoryFacade, useValue: facade},
-        {provide: VocabularyFacade, useValue: {}},
+        {provide: WordAdditionFacade, useValue: {}},
       ],
     });
     const fixture = TestBed.createComponent(StoryPageComponent);

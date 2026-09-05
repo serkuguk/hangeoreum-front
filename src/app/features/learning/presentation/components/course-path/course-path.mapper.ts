@@ -1,4 +1,6 @@
-import {CourseMap, LessonNode, UnitNode} from '../../../domain/entities/course-map.entity';
+import {CoursePathInput} from './course-path-input';
+type UnitNode = CoursePathInput['units'][number];
+type LessonNode = UnitNode['lessons'][number];
 import {CourseChapter, CourseNode} from './course-path.model';
 
 // ponytail: статический маппинг сцен первого курса по позиции юнита;
@@ -23,7 +25,7 @@ type RawNode = Omit<CourseNode, 'state'> & {state: CourseNode['state'] | 'availa
  * `limit` обрезает список до окна вокруг текущего урока — дашборд показывает фрагмент,
  * карта курса передаёт весь путь.
  */
-export function toCoursePath(map: CourseMap | null, limit?: number): CoursePathView {
+export function toCoursePath(map: CoursePathInput | null, limit?: number): CoursePathView {
   if (!map) return {chapters: [], nodes: []};
 
   const chapters = map.units.map((unit, index) => chapterOf(unit, index));
