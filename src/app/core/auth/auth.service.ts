@@ -48,6 +48,14 @@ export class AuthService {
       .pipe(tap(res => this.saveSession(res)));
   }
 
+  public requestPasswordReset(email: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/password-reset/request`, {email});
+  }
+
+  public confirmPasswordReset(token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/password-reset/confirm`, {token, newPassword});
+  }
+
   /** Единственный in-flight refresh на всё приложение (interceptor + guards). */
   public refreshAccessToken(): Observable<AuthResponse> {
     if (!this.refreshInFlight$) {

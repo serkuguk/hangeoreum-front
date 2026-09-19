@@ -52,6 +52,24 @@ describe('AuthService', () => {
     expect(localStorage.getItem('access_token')).toBe('new-token');
   });
 
+  it('запрашивает восстановление пароля с правильным телом', () => {
+    service.requestPasswordReset('t@t.t').subscribe();
+
+    const req = http.expectOne('/api/v1/auth/password-reset/request');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({email: 't@t.t'});
+    req.flush(null, {status: 202, statusText: 'Accepted'});
+  });
+
+  it('подтверждает новый пароль с токеном', () => {
+    service.confirmPasswordReset('reset-token', 'new-password').subscribe();
+
+    const req = http.expectOne('/api/v1/auth/password-reset/confirm');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({token: 'reset-token', newPassword: 'new-password'});
+    req.flush(null, {status: 204, statusText: 'No Content'});
+  });
+
   it('провал refresh чистит сессию', () => {
     localStorage.setItem('access_token', 'old');
     service.refreshAccessToken().subscribe({error: () => {}});

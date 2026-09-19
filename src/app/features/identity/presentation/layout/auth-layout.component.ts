@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, inject} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {filter, map, startWith} from 'rxjs/operators';
@@ -25,7 +25,7 @@ import {filter, map, startWith} from 'rxjs/operators';
         }
       </div>
       <div class="formside">
-        <router-outlet/>
+        <router-outlet (activate)="focusHeading()"/>
       </div>
     </div>
   `,
@@ -39,7 +39,7 @@ import {filter, map, startWith} from 'rxjs/operators';
     .brand {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(150deg, var(--hg-route), var(--hg-violet));
+      background: url('/assets/img/fondo.png') center / cover no-repeat;
       color: var(--hg-on-route);
       display: flex;
       flex-direction: column;
@@ -87,6 +87,7 @@ import {filter, map, startWith} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthLayoutComponent {
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -98,4 +99,13 @@ export class AuthLayoutComponent {
     ),
     {initialValue: 'login'},
   );
+
+  focusHeading(): void {
+    queueMicrotask(() => {
+      const heading = this.element.nativeElement.querySelector<HTMLElement>('.formside h1');
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus();
+    });
+  }
 }

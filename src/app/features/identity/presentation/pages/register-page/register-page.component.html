@@ -24,11 +24,5 @@
     <hg-button class="btn" type="submit" [label]="'identity.register.submit' | translate" [loading]="facade.loading()" block/>
   </form>
 
-  <div class="sep">{{ 'identity.socialDivider' | translate }}</div>
-  <div class="social">
-    <hg-button label="Google" variant="secondary" block (pressed)="facade.loginWithProvider('google')"/>
-    <hg-button label="Kakao" variant="secondary" block (pressed)="facade.loginWithProvider('kakao')"/>
-  </div>
-
   <div class="alt">{{ 'identity.register.hasAccount' | translate }} <a routerLink="/auth/login">{{ 'identity.login.submit' | translate }}</a></div>
 </div>

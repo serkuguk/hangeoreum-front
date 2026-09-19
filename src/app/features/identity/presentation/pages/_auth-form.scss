@@ -28,22 +28,21 @@ form {
   font-size: var(--hg-fs-sm);
 }
 
-.sep {
-  display: flex;
-  align-items: center;
-  gap: var(--hg-space-3);
-  color: var(--hg-text-muted);
-  font-size: var(--hg-fs-xs);
-  margin: var(--hg-space-6) 0 var(--hg-space-4);
-
-  &::before, &::after { content: ""; flex: 1; height: 1px; background: var(--hg-border); }
+.success {
+  background: color-mix(in srgb, var(--hg-success) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hg-success) 35%, transparent);
+  color: var(--hg-success);
+  border-radius: var(--hg-radius-block);
+  padding: var(--hg-space-3) var(--hg-space-4);
+  margin-bottom: var(--hg-space-4);
+  font-size: var(--hg-fs-sm);
 }
 
-.social {
-  display: flex;
-  gap: var(--hg-space-3);
+.recovery {
+  color: var(--hg-text-muted);
+  font-size: var(--hg-fs-sm);
 
-  hg-button { flex: 1; }
+  a { color: var(--hg-route); font-weight: 600; }
 }
 
 .alt {

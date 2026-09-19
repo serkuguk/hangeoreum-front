@@ -1,5 +1,11 @@
 <div class="formbox">
-  <div class="eyebrow">{{ 'identity.login.eyebrow' | translate }}</div><h1>{{ 'identity.login.title' | translate }}</h1><p class="sub">{{ 'identity.login.subtitle' | translate }}</p>
+  <div class="eyebrow">{{ 'identity.login.eyebrow' | translate }}</div>
+  <h1>{{ 'identity.login.title' | translate }}</h1>
+  <p class="sub">{{ 'identity.login.subtitle' | translate }}</p>
+
+  @if (passwordChanged) {
+    <div class="success" role="status">{{ 'identity.login.passwordChanged' | translate }}</div>
+  }
 
   <form [formGroup]="form" (ngSubmit)="submit()">
     <hg-input id="email" type="email" [label]="'common.email' | translate" formControlName="email"
@@ -11,17 +17,18 @@
               [error]="invalid('password') ? ('identity.validation.passwordRequired' | translate) : ''"/>
 
     @if (facade.error(); as error) {
-      <div class="apierr">{{ error }}</div>
+      <div class="apierr" role="alert">{{ error }}</div>
+    }
+
+    @if (facade.showPasswordRecovery()) {
+      <div class="recovery" role="status">
+        {{ 'identity.login.forgotPrompt' | translate }}
+        <a routerLink="/auth/forgot-password">{{ 'identity.login.recover' | translate }}</a>
+      </div>
     }
 
     <hg-button class="btn" type="submit" [label]="'identity.login.submit' | translate" [loading]="facade.loading()" block/>
   </form>
-
-  <div class="sep">{{ 'identity.socialDivider' | translate }}</div>
-  <div class="social">
-    <hg-button label="Google" variant="secondary" block (pressed)="facade.loginWithProvider('google')"/>
-    <hg-button label="Kakao" variant="secondary" block (pressed)="facade.loginWithProvider('kakao')"/>
-  </div>
 
   <div class="alt">{{ 'identity.login.noAccount' | translate }} <a routerLink="/auth/register">{{ 'identity.register.link' | translate }}</a></div>
 </div>

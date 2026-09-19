@@ -17,6 +17,14 @@ export const identityRoutes: Routes = [
         path: 'register',
         loadComponent: () => import('./presentation/pages/register-page/register-page.component').then(c => c.RegisterPageComponent),
       },
+      {
+        path: 'forgot-password',
+        loadComponent: () => import('./presentation/pages/forgot-password-page/forgot-password-page.component').then(c => c.ForgotPasswordPageComponent),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () => import('./presentation/pages/reset-password-page/reset-password-page.component').then(c => c.ResetPasswordPageComponent),
+      },
     ],
   },
   {
