@@ -1,4 +1,5 @@
 import {Routes} from '@angular/router';
+import {adminOnlyGuard} from '@core/auth/auth.guard';
 import {AdminApi} from './infrastructure/admin.api';
 import {AdminLayoutComponent} from './presentation/layout/admin-layout.component';
 
@@ -10,6 +11,8 @@ export const adminRoutes: Routes = [
     children: [
       {
         path: '',
+        pathMatch: 'full',
+        canActivate: [adminOnlyGuard],
         loadComponent: () => import('./presentation/pages/admin-metrics-page.component')
           .then(c => c.AdminMetricsPageComponent),
       },
@@ -50,6 +53,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'users',
+        canActivate: [adminOnlyGuard],
         loadComponent: () => import('./presentation/pages/admin-users-page.component')
           .then(c => c.AdminUsersPageComponent),
       },

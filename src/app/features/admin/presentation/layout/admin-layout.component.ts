@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {AuthService} from '@core/auth/auth.service';
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
-import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-admin-layout',
@@ -11,8 +12,10 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
         <a class="logo han" routerLink="/dashboard">한걸음 <span>{{ 'admin.brand' | translate }}</span></a>
         <nav>
           @for (item of nav; track item.link) {
+            @if (!item.adminOnly || auth.currentUser()?.role === 'ADMIN') {
             <a [routerLink]="item.link" [routerLinkActiveOptions]="{exact: item.exact}"
-               routerLinkActive="is-active">{{ item.icon }} {{ item.label }}</a>
+               routerLinkActive="is-active">{{ item.icon }} {{ item.label | translate }}</a>
+            }
           }
         </nav>
         <a class="back" routerLink="/dashboard">{{ 'admin.backToApp' | translate }}</a>
@@ -83,16 +86,16 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLayoutComponent {
-  private readonly translate = inject(TranslateService);
+  readonly auth = inject(AuthService);
   readonly nav = [
-    {link: '/admin', label: this.translate.instant('admin.navigation.dashboard'), icon: '📊', exact: true},
-    {link: '/admin/words', label: this.translate.instant('admin.navigation.words'), icon: '📚', exact: false},
-    {link: '/admin/topics', label: this.translate.instant('admin.navigation.topics'), icon: '🏷️', exact: false},
-    {link: '/admin/course', label: this.translate.instant('admin.navigation.course'), icon: '🗺️', exact: false},
-    {link: '/admin/alphabet', label: this.translate.instant('admin.navigation.alphabet'), icon: '가', exact: false},
-    {link: '/admin/grammar', label: this.translate.instant('admin.navigation.grammar'), icon: '💡', exact: false},
-    {link: '/admin/media', label: this.translate.instant('admin.navigation.media'), icon: '🎬', exact: false},
-    {link: '/admin/users', label: this.translate.instant('admin.navigation.users'), icon: '👥', exact: false},
-    {link: '/admin/notifications', label: this.translate.instant('admin.navigation.notifications'), icon: '📣', exact: false},
+    {link: '/admin', label: 'admin.navigation.dashboard', icon: '📊', exact: true, adminOnly: true},
+    {link: '/admin/words', label: 'admin.navigation.words', icon: '📚', exact: false},
+    {link: '/admin/topics', label: 'admin.navigation.topics', icon: '🏷️', exact: false},
+    {link: '/admin/course', label: 'admin.navigation.course', icon: '🗺️', exact: false},
+    {link: '/admin/alphabet', label: 'admin.navigation.alphabet', icon: '가', exact: false},
+    {link: '/admin/grammar', label: 'admin.navigation.grammar', icon: '💡', exact: false},
+    {link: '/admin/media', label: 'admin.navigation.media', icon: '🎬', exact: false},
+    {link: '/admin/users', label: 'admin.navigation.users', icon: '👥', exact: false, adminOnly: true},
+    {link: '/admin/notifications', label: 'admin.navigation.notifications', icon: '📣', exact: false},
   ];
 }

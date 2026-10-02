@@ -55,7 +55,7 @@
 
   tr:last-child td { border: none; }
 
-  .kr { font-family: var(--hg-font-display); font-size: 18px; }
+  .kr { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 400; font-size: 18px; letter-spacing: .04em; }
 }
 
 .rowbtn {

@@ -19,5 +19,11 @@ export const redirectLoggedInGuard: CanActivateFn = () => {
 export const adminGuard: CanActivateFn = () => {
   const router = inject(Router);
   const role = inject(AuthTokenStorageService).decodeToken()?.role;
-  return role === 'ADMIN' ? true : router.createUrlTree(['/dashboard']);
+  return role === 'ADMIN' || role === 'EDITOR' ? true : router.createUrlTree(['/dashboard']);
+};
+
+export const adminOnlyGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  return inject(AuthTokenStorageService).decodeToken()?.role === 'ADMIN'
+    ? true : router.createUrlTree(['/admin/words']);
 };

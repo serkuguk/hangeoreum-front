@@ -1,6 +1,6 @@
 @use 'styles/hangeoreum-design-tokens';
 
-@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -76,7 +76,7 @@ h2.pagettl {
   margin-bottom: 14px;
 }
 
-.ghost {
+.ghost.kr {
   position: absolute;
   font-family: var(--hg-font-display);
   color: var(--hg-text);

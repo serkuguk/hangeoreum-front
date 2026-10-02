@@ -2,7 +2,7 @@
   <a class="logo han" routerLink="/dashboard">{{ 'navigation.brand' | translate }}</a>
 
   <div class="userbox">
-    @if (isAdmin()) {
+    @if (canAccessAdmin()) {
       <a class="pill p-r adminlink" routerLink="/admin">{{ 'navigation.admin' | translate }}</a>
     }
     <button type="button" data-domain-control class="userbtn" (click)="menuOpen.set(!menuOpen())"

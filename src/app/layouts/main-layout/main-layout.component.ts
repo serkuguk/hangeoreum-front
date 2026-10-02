@@ -16,7 +16,7 @@ export class MainLayoutComponent {
   readonly facade = inject(AuthFacade);
 
   readonly menuOpen = signal(false);
-  readonly isAdmin = computed(() => this.facade.user()?.role === 'ADMIN');
+  readonly canAccessAdmin = computed(() => ['ADMIN', 'EDITOR'].includes(this.facade.user()?.role ?? ''));
   readonly initial = computed(() => this.facade.user()?.name?.charAt(0)?.toUpperCase() ?? '?');
 
   readonly nav = [

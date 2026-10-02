@@ -2,7 +2,7 @@
   <h2 class="pagettl">{{ 'vocabulary.title' | translate }}</h2>
   <p class="pagesub">{{ 'vocabulary.wordCount' | translate:{count: facade.totalElements()} }}</p>
 
-  <hg-segmented-control class="tabs" [label]="'vocabulary.sectionLabel' | translate" [options]="tabs" [(ngModel)]="tab"/>
+  <hg-segmented-control class="tabs" [label]="'vocabulary.sectionLabel' | translate" [options]="tabs()" [(ngModel)]="tab"/>
 
   @if (tab() === 'words') {
     <hg-input class="searchbox" type="search" [label]="'vocabulary.search.label' | translate"
@@ -10,9 +10,9 @@
               [ngModel]="search()" (ngModelChange)="search.set($event); page.set(0)"/>
 
     <div class="filters">
-      <hg-segmented-control [label]="'vocabulary.levelLabel' | translate" [options]="levels"
+      <hg-segmented-control [label]="'vocabulary.levelLabel' | translate" [options]="levels()"
                             [ngModel]="level()" (ngModelChange)="setLevel($event)"/>
-      <hg-segmented-control [label]="'vocabulary.sortLabel' | translate" [options]="sorts" [(ngModel)]="sort"/>
+      <hg-segmented-control [label]="'vocabulary.sortLabel' | translate" [options]="sorts()" [(ngModel)]="sort"/>
     </div>
 
     @if (facade.loading()) {
@@ -25,29 +25,39 @@
         <a class="cta" routerLink="/learn">{{ 'common.toLessons' | translate }}</a>
       </div>
     } @else {
-      <div class="panel">
+      <div class="word-list" role="list">
         @for (word of facade.words(); track word.id) {
-          <div class="vrow" [class]="'state-' + wordState(word)" [class.open]="expandedId() === word.id">
-            <button type="button" data-domain-control class="rowmain" (click)="toggleExpand(word)"
+          <div class="vrow" role="listitem" [class]="'state-' + wordState(word)" [class.open]="expandedId() === word.id">
+            <div class="card-main">
+              <button type="button" data-domain-control class="rowmain" (click)="toggleExpand(word)"
                     [attr.aria-expanded]="expandedId() === word.id"
+                    [attr.aria-controls]="word.word.exampleKo ? 'word-example-' + word.id : null"
                     [attr.aria-label]="word.word.hangul + ', ' + word.word.translation">
-              <span class="kr wh">{{ word.word.hangul }}</span>
-              <span class="rom">{{ word.word.romanization }}</span>
-              <span class="tr">{{ word.word.translation }}</span>
-            </button>
-            <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl" size="sm"/>
-            <span class="stars" [title]="'vocabulary.level' | translate:{level: word.level}">{{ stars(word) }}</span>
-            <span class="due">{{ dueLabel(word) }}</span>
-            <button type="button" data-domain-control class="diffbtn" [class.on]="word.isDifficult"
+                <img class="word-image" [src]="imageUrl(word.word.imageUrl)" (error)="onImageError(word.word.imageUrl)"
+                     alt="" width="80" height="80" loading="lazy" decoding="async"/>
+                <span class="word-copy">
+                  <span class="kr wh" lang="ko">{{ word.word.hangul }}</span>
+                  <span class="rom">{{ word.word.romanization }}</span>
+                  <span class="tr">{{ word.word.translation }}</span>
+                </span>
+              </button>
+              <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl"/>
+            </div>
+            <div class="card-footer">
+              <span class="stars" [title]="'vocabulary.level' | translate:{level: word.level}">{{ stars(word) }}</span>
+              <span class="due">{{ dueLabel(word) }}</span>
+              <button type="button" data-domain-control class="diffbtn" [class.on]="word.isDifficult"
                     (click)="facade.toggleDifficult(word)"
                     [attr.aria-pressed]="word.isDifficult"
-                    [title]="(word.isDifficult ? 'vocabulary.removeDifficult' : 'vocabulary.markDifficult') | translate">🔥</button>
-            <button type="button" data-domain-control class="deckbtn" (click)="deckPickWord.set(word)"
-                    [attr.aria-label]="'vocabulary.addToDeckAria' | translate:{word: word.word.hangul}" [title]="'vocabulary.toDeck' | translate">＋</button>
+                    [attr.aria-label]="(word.isDifficult ? 'vocabulary.removeDifficult' : 'vocabulary.markDifficult') | translate"
+                    [title]="(word.isDifficult ? 'vocabulary.removeDifficult' : 'vocabulary.markDifficult') | translate"><span aria-hidden="true">🔥</span></button>
+              <button type="button" data-domain-control class="deckbtn" (click)="deckPickWord.set(word)"
+                    [attr.aria-label]="'vocabulary.addToDeckAria' | translate:{word: word.word.hangul}" [title]="'vocabulary.toDeck' | translate"><span aria-hidden="true">＋</span></button>
+            </div>
 
             @if (expandedId() === word.id && word.word.exampleKo) {
-              <div class="example kr">
-                {{ word.word.exampleKo }}
+              <div class="example" [id]="'word-example-' + word.id">
+                <span class="kr" lang="ko">{{ word.word.exampleKo }}</span>
                 <small>{{ word.word.exampleTranslation }}</small>
               </div>
             }

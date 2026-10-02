@@ -1,6 +1,8 @@
 import {ChangeDetectionStrategy, Component, computed, effect, inject, signal} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {catchError, of} from 'rxjs';
 import {HgAudioButtonComponent} from '@shared/components/hg';
 import {
   HgButtonComponent,
@@ -9,9 +11,9 @@ import {
   HgPaginationComponent,
   HgSegmentedControlComponent,
 } from '@shared/components/controls';
-import {VocabularyFacade} from '../../../application/facades/vocabulary.facade';
-import {UserWord} from '../../../domain/entities/user-word.entity';
-import {Deck} from '../../../domain/repositories/vocabulary.repository';
+import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
+import {Deck} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 const PAGE_SIZE = 20;
@@ -38,6 +40,11 @@ export class VocabularyPageComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private translate = inject(TranslateService);
+  private readonly optionLabels = toSignal<Record<string, string>, Record<string, string>>(this.translate.stream([
+    'vocabulary.tabs.words', 'vocabulary.tabs.decks', 'common.all',
+    'vocabulary.levels.new', 'vocabulary.levels.learned',
+    'vocabulary.sort.due', 'vocabulary.sort.created', 'vocabulary.sort.alpha',
+  ]).pipe(catchError(() => of({}))), {initialValue: {}});
 
   readonly tab = signal<'words' | 'decks'>('words');
   readonly search = signal(this.route.snapshot.queryParamMap.get('search') ?? '');
@@ -47,29 +54,31 @@ export class VocabularyPageComponent {
   readonly expandedId = signal<string | null>(null);
   readonly deckPickWord = signal<UserWord | null>(null);
   readonly newDeckTitle = signal('');
+  readonly defaultWordImage = '/assets/illustrations/word-default.svg';
+  private readonly failedImageUrls = signal(new Set<string>());
 
   readonly totalPages = computed(() => Math.ceil(this.facade.totalElements() / PAGE_SIZE));
 
-  readonly tabs = [
-    {value: 'words' as const, label: this.translate.instant('vocabulary.tabs.words')},
-    {value: 'decks' as const, label: this.translate.instant('vocabulary.tabs.decks')},
-  ];
+  readonly tabs = computed(() => [
+    {value: 'words' as const, label: this.optionLabels()['vocabulary.tabs.words'] ?? ''},
+    {value: 'decks' as const, label: this.optionLabels()['vocabulary.tabs.decks'] ?? ''},
+  ]);
 
-  readonly levels = [
-    {value: null, label: this.translate.instant('common.all')},
-    {value: 0, label: this.translate.instant('vocabulary.levels.new')},
+  readonly levels = computed(() => [
+    {value: null, label: this.optionLabels()['common.all'] ?? ''},
+    {value: 0, label: this.optionLabels()['vocabulary.levels.new'] ?? ''},
     {value: 1, label: '★ 1'},
     {value: 2, label: '★ 2'},
     {value: 3, label: '★ 3'},
     {value: 4, label: '★ 4'},
-    {value: 5, label: this.translate.instant('vocabulary.levels.learned')},
-  ];
+    {value: 5, label: this.optionLabels()['vocabulary.levels.learned'] ?? ''},
+  ]);
 
-  readonly sorts = [
-    {value: 'due', label: this.translate.instant('vocabulary.sort.due')},
-    {value: 'created', label: this.translate.instant('vocabulary.sort.created')},
-    {value: 'alpha', label: this.translate.instant('vocabulary.sort.alpha')},
-  ];
+  readonly sorts = computed(() => [
+    {value: 'due', label: this.optionLabels()['vocabulary.sort.due'] ?? ''},
+    {value: 'created', label: this.optionLabels()['vocabulary.sort.created'] ?? ''},
+    {value: 'alpha', label: this.optionLabels()['vocabulary.sort.alpha'] ?? ''},
+  ]);
 
   constructor() {
     // фильтры → запрос (дебаунс в фасаде) + шеримая ссылка в query params
@@ -118,6 +127,17 @@ export class VocabularyPageComponent {
 
   toggleExpand(word: UserWord): void {
     this.expandedId.update(id => id === word.id ? null : word.id);
+  }
+
+  imageUrl(url: string | null): string {
+    const imageUrl = url?.trim();
+    return imageUrl && !this.failedImageUrls().has(imageUrl) ? imageUrl : this.defaultWordImage;
+  }
+
+  onImageError(url: string | null): void {
+    const imageUrl = url?.trim();
+    if (!imageUrl || imageUrl === this.defaultWordImage || this.failedImageUrls().has(imageUrl)) return;
+    this.failedImageUrls.update(urls => new Set(urls).add(imageUrl));
   }
 
   createDeck(): void {

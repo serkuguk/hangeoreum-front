@@ -11,7 +11,7 @@ export interface AuthUser {
   name: string;
   email: string;
   avatarUrl: string | null;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'EDITOR' | 'ADMIN';
   startLevel: string;
   createdAt: string;
 }

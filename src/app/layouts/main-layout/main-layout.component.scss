@@ -135,7 +135,7 @@
   .exit { color: var(--hg-danger); }
 }
 
-.content { grid-area: content; padding: var(--hg-space-6) var(--hg-space-5) 0; }
+.content { grid-area: content; min-width: 0; padding: var(--hg-space-6) var(--hg-space-5) 0; }
 
 // ---------- Rail: 768–1119px — иконка + tooltip, подпись скрыта ----------
 @media (max-width: 1119px) {
