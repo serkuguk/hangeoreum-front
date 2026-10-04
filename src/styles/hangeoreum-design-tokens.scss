@@ -150,7 +150,10 @@ $hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
   --hg-on-route:      oklch(99% 0.005 90);
   --hg-route-soft:    oklch(92% 0.040 257);
   --hg-route-deep:    oklch(32% 0.150 257);
-  --hg-violet:        oklch(42% 0.200 295);
+  // Синий как цвет текста на bg/surface/route-soft. В light совпадает с route, в dark — светлее.
+  --hg-route-text:    var(--hg-route);
+  // Пара градиента героя: тот же оттенок, глубже. Прежний фиолетовый (295°) спорил с синим.
+  --hg-violet:        oklch(32% 0.160 265);
 
   --hg-success:       oklch(47% 0.135 165);
   --hg-on-success:    oklch(99% 0.005 90);
@@ -199,8 +202,10 @@ $hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
 }
 
 // ---------- Тёмная тема ----------
-// route/success/reward/danger (+on-/soft-) переиспользуют light-значения как
-// временный placeholder: полная калибровка dark-семантики — задача P2 ("вечерний тест").
+// Палитра-ориентир: color.romanuke.com №4691 (ночной синий + фонарное золото) —
+// https://color.romanuke.com/czvetovaya-palitra-%e2%84%964691/
+// Акценты — те же оттенки, что в light, но с поднятой светлотой (текст на surface ≥ 4.5),
+// soft-подложки — тёмные тинты вместо светлых пятен, deep — светлый текст на soft.
 [data-theme='dark'] {
   --hg-bg:            oklch(18% 0.025 260);
   --hg-surface:       oklch(23% 0.025 260);
@@ -212,8 +217,26 @@ $hg-shadow-card: 0 8px 22px rgba(59,107,255,.4);
 
   // «Глубина» 3D-плит на тёмном фоне светлее заливки, иначе тень сливается с фоном.
   --hg-route-deep:    oklch(44% 0.150 257);
-  --hg-success-deep:  oklch(48% 0.115 165);
+  --hg-success-deep:  oklch(84% 0.110 165);
   --hg-reward-deep:   oklch(88% 0.110 88);
+
+  // route — заливка под белый текст (4.8); для текста на тёмном — route-text (6.8 на surface).
+  --hg-route:         oklch(55% 0.180 257);
+  --hg-route-text:    oklch(72% 0.130 257);
+  --hg-route-soft:    oklch(27% 0.060 257);
+
+  --hg-success:       oklch(72% 0.140 165);
+  --hg-on-success:    oklch(18% 0.025 260);
+  --hg-success-soft:  oklch(30% 0.050 165);
+
+  --hg-reward:        oklch(80% 0.140 82);
+  --hg-reward-soft:   oklch(32% 0.050 82);
+
+  --hg-danger:        oklch(70% 0.160 22);
+  --hg-on-danger:     oklch(18% 0.025 260);
+  --hg-danger-soft:   oklch(30% 0.070 22);
+
+  --hg-focus:         oklch(72% 0.130 257);
 }
 
 // =============================================================

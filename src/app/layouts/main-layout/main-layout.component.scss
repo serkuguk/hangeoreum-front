@@ -55,7 +55,7 @@
     .navlabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     &:hover { background: var(--hg-surface-muted); color: var(--hg-text); }
-    &.is-active { background: var(--hg-route-soft); color: var(--hg-route); }
+    &.is-active { background: var(--hg-route-soft); color: var(--hg-route-text); }
   }
 }
 

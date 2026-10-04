@@ -102,7 +102,7 @@
     b { margin-left: 8px; opacity: .75; font-weight: 700; }
 
     &.is-done { background: var(--hg-success-soft); color: var(--hg-success-deep); }
-    &.is-current { background: var(--hg-route-soft); color: var(--hg-route); }
+    &.is-current { background: var(--hg-route-soft); color: var(--hg-route-text); }
     &.is-locked { background: var(--hg-surface-muted); color: var(--hg-text-muted); }
   }
 
@@ -156,6 +156,7 @@
 
     &.is-done {
       background: var(--hg-success);
+      color: var(--hg-on-success);
       box-shadow: 0 8px 0 var(--hg-success-deep);
     }
 
@@ -169,7 +170,7 @@
     &.is-open {
       background: var(--hg-surface);
       border: 2px solid var(--hg-route);
-      color: var(--hg-route);
+      color: var(--hg-route-text);
       box-shadow: 0 8px 0 var(--hg-route-soft);
     }
 
@@ -254,7 +255,7 @@
       color: var(--hg-text-muted);
 
       &.is-done { color: var(--hg-success); }
-      &.is-open { color: var(--hg-route); }
+      &.is-open { color: var(--hg-route-text); }
       &.is-bonus, &.is-pro { color: var(--hg-reward-deep); }
     }
   }
@@ -266,7 +267,7 @@
     font-size: 10.5px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--hg-route);
+    color: var(--hg-route-text);
     font-weight: 700;
     margin-bottom: 4px;
   }

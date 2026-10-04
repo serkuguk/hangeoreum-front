@@ -122,7 +122,7 @@
     small { display: block; font-weight: 400; font-size: 11px; opacity: .8; margin-top: 3px; }
 
     &:hover { transform: translateY(-2px); }
-    &.again { background: var(--hg-danger); }
+    &.again { background: var(--hg-danger); color: var(--hg-on-danger); }
     &.hard { background: var(--hg-reward); color: var(--hg-on-reward); }
     &.good { background: var(--hg-route); }
     &.easy { background: var(--hg-success); color: var(--hg-on-success); }

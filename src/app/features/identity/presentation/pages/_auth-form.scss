@@ -42,7 +42,7 @@ form {
   color: var(--hg-text-muted);
   font-size: var(--hg-fs-sm);
 
-  a { color: var(--hg-route); font-weight: 600; }
+  a { color: var(--hg-route-text); font-weight: 600; }
 }
 
 .alt {
@@ -50,5 +50,5 @@ form {
   font-size: var(--hg-fs-sm);
   color: var(--hg-text-muted);
 
-  a { color: var(--hg-route); font-weight: 600; }
+  a { color: var(--hg-route-text); font-weight: 600; }
 }
