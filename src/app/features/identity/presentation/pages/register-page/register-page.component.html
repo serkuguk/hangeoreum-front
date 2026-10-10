@@ -1,28 +1,100 @@
 <div class="formbox">
-  <div class="eyebrow">{{ 'identity.register.eyebrow' | translate }}</div><h1>{{ 'identity.register.title' | translate }}</h1><p class="sub">{{ 'identity.register.subtitle' | translate }}</p>
+  <div class="eyebrow">{{ "identity.register.eyebrow" | translate }}</div>
+  <h1>{{ "identity.register.title" | translate }}</h1>
+  <p class="sub">{{ "identity.register.subtitle" | translate }}</p>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <hg-input id="name" type="text" [label]="'common.name' | translate" formControlName="name" [placeholder]="'identity.register.namePlaceholder' | translate"
-              autocomplete="name" [error]="invalid('name') ? ('identity.validation.name' | translate) : ''"/>
+  <form novalidate (submit)="$event.preventDefault(); submit()">
+    <app-form-field
+      class="hg-auth-field"
+      [field]="form.name"
+      [isInline]="false"
+      [submitted]="submitted()"
+      [label]="'common.name' | translate"
+      [showLabel]="true"
+      [errorMessages]="{
+        required: ('identity.validation.name' | translate),
+        maxLength: ('identity.validation.name' | translate),
+      }"
+    >
+      <app-basic-input
+        type="text"
+        [formField]="form.name"
+        [placeholder]="'identity.register.namePlaceholder' | translate"
+        autocomplete="name"
+      />
+    </app-form-field>
 
-    <hg-input id="email" type="email" [label]="'common.email' | translate" formControlName="email" placeholder="you@email.com"
-              autocomplete="email" [error]="invalid('email') ? ('identity.validation.email' | translate) : ''"/>
+    <app-form-field
+      class="hg-auth-field"
+      [field]="form.email"
+      [isInline]="false"
+      [submitted]="submitted()"
+      [label]="'common.email' | translate"
+      [showLabel]="true"
+      [errorMessages]="{
+        required: ('identity.validation.email' | translate),
+        email: ('identity.validation.email' | translate),
+      }"
+    >
+      <app-basic-input
+        type="email"
+        [formField]="form.email"
+        placeholder="you@email.com"
+        autocomplete="email"
+        autocapitalize="off"
+      />
+    </app-form-field>
 
-    <hg-input id="password" type="password" [label]="'common.password' | translate" formControlName="password"
-              [placeholder]="'identity.validation.passwordMin' | translate" autocomplete="new-password"
-              [error]="invalid('password') ? ('identity.validation.passwordMin' | translate) : ''"/>
+    <app-form-field
+      class="hg-auth-field"
+      [field]="form.password"
+      [isInline]="false"
+      [submitted]="submitted()"
+      [label]="'common.password' | translate"
+      [showLabel]="true"
+      [errorMessages]="{
+        required: ('identity.validation.passwordMin' | translate),
+        minLength: ('identity.validation.passwordMin' | translate),
+      }"
+    >
+      <app-password-input
+        [toggleMask]="false"
+        [formField]="form.password"
+        [placeholder]="'identity.validation.passwordMin' | translate"
+        autocomplete="new-password"
+      />
+    </app-form-field>
 
-    <hg-checkbox [label]="'identity.register.consent' | translate" formControlName="consent"/>
-    @if (invalid('consent')) {
-      <div class="apierr">{{ 'identity.validation.consent' | translate }}</div>
-    }
+    <app-form-field
+      class="hg-auth-field"
+      [field]="form.consent"
+      [isInline]="false"
+      [submitted]="submitted()"
+      [errorMessages]="{
+        required: ('identity.validation.consent' | translate),
+      }"
+    >
+      <app-checkbox
+        [label]="'identity.register.consent' | translate"
+        [formField]="form.consent"
+      />
+    </app-form-field>
 
     @if (facade.error(); as error) {
       <div class="apierr">{{ error }}</div>
     }
 
-    <hg-button class="btn" type="submit" [label]="'identity.register.submit' | translate" [loading]="facade.loading()" block/>
+    <app-button
+      class="btn"
+      type="submit"
+      [label]="'identity.register.submit' | translate"
+      [loading]="facade.loading()"
+      styleClass="hg-button hg-button--block"
+    />
   </form>
 
-  <div class="alt">{{ 'identity.register.hasAccount' | translate }} <a routerLink="/auth/login">{{ 'identity.login.submit' | translate }}</a></div>
+  <div class="alt">
+    {{ "identity.register.hasAccount" | translate }}
+    <a routerLink="/auth/login">{{ "identity.login.submit" | translate }}</a>
+  </div>
 </div>

@@ -1,15 +1,15 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, effect, inject} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {HgButtonComponent} from '@shared/components/controls';
 import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
 import {FinishResult} from '../../../domain/repositories/vocabulary.repository';
-import {GameMode, GamesFacade} from '../../../application/facades/games.facade';
+import {AnswerResult, GameMode, GamesFacade, MatchCell, MatchSide} from '../../../application/facades/games.facade';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-games-page',
-  imports: [RouterLink, HgAudioButtonComponent, HgButtonComponent, HgSessionResultCardComponent, TranslatePipe],
+  imports: [RouterLink, HgAudioButtonComponent, ButtonComponent, HgSessionResultCardComponent, TranslatePipe],
   templateUrl: './games-page.component.html',
   styleUrl: './games-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +19,10 @@ export class GamesPageComponent {
   private tts = inject(KoreanTtsService);
   private translate = inject(TranslateService);
   private lastAutoplayWordId: string | null = null;
+
+  gameAria(game: {title: string; hint: string}): Record<string, string> {
+    return {'aria-label': `${game.title}: ${game.hint}`};
+  }
 
   readonly games: {mode: GameMode; icon: string; title: string; hint: string}[] = [
     {mode: 'MATCH', icon: '🧩', title: this.translate.instant('vocabulary.games.match.title'), hint: this.translate.instant('vocabulary.games.match.hint')},
@@ -30,6 +34,30 @@ export class GamesPageComponent {
     const t = Math.max(0, this.facade.timeLeft());
     return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
   });
+
+  readonly isTimeLow = computed(() => this.facade.timeLeft() < 15);
+  readonly isAnswerOk = computed(() => this.facade.lastAnswer() === AnswerResult.OK);
+  readonly isAnswerBad = computed(() => this.facade.lastAnswer() === AnswerResult.BAD);
+
+  cellClass(cell: MatchCell): string {
+    const f = this.facade;
+    return [
+      'hg-native-button mcell',
+      cell.side === MatchSide.KO && 'kr',
+      f.matchHits().has(cell.wordId + cell.side) && 'hit',
+      f.matchSelected() === cell && 'sel',
+      f.matchMiss() === cell && 'miss',
+    ].filter(Boolean).join(' ');
+  }
+
+  optionClass(option: string, correctAnswer: string): string {
+    const isCorrect = option === correctAnswer;
+    return [
+      'hg-native-button mcell',
+      isCorrect && this.isAnswerOk() && 'hit',
+      isCorrect && this.isAnswerBad() && 'miss',
+    ].filter(Boolean).join(' ');
+  }
 
   constructor() {
     effect(() => {

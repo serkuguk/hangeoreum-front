@@ -3,7 +3,8 @@
 @if (data(); as d) {
   <h2 class="pagettl">Конструктор · {{ d.lesson.title }}</h2>
   <p class="pagesub">
-    {{ d.lesson.type }} · {{ d.lesson.xpReward }} XP · {{ d.exercises.length }} упражнений
+    {{ d.lesson.type }} · {{ d.lesson.xpReward }} XP ·
+    {{ d.exercises.length }} упражнений
     @if (savedFlash(); as flash) {
       <span class="savedmark">✓ {{ flash }}</span>
     }
@@ -18,61 +19,121 @@
     @for (exercise of d.exercises; track exercise.id) {
       <div class="exrow">
         <span class="kind">{{ exercise.position }} · {{ exercise.kind }}</span>
-        <hg-textarea [ariaLabel]="'Payload упражнения ' + exercise.position"
-                     [error]="badJson[exercise.id] ? 'Некорректный JSON' : ''" [rows]="5"
-                     [(ngModel)]="payloadDrafts[exercise.id]" />
+        <app-textarea
+          [ariaLabel]="payloadAria(exercise)"
+          [ariaInvalid]="badJson[exercise.id] || false"
+          [rows]="5"
+          [formField]="payloadFields[exercise.id]"
+        />
         <div>
-          <hg-button size="sm" variant="ghost" label="Сохранить"
-                     (pressed)="saveExercise(exercise)" />
-          <hg-button size="sm" variant="danger" icon="✕" ariaLabel="Удалить упражнение"
-                     (pressed)="removeExercise(exercise)" />
+          @if (badJson[exercise.id]) {
+            <p class="errbar" role="alert">Некорректный JSON</p>
+          }
+          <app-button
+            label="Сохранить"
+            (click)="saveExercise(exercise)"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
+          <app-button
+            (click)="removeExercise(exercise)"
+            [aria]="{ 'aria-label': 'Удалить упражнение' }"
+            styleClass="hg-button hg-button--danger hg-button--sm"
+            ><span aria-hidden="true">✕</span></app-button
+          >
         </div>
       </div>
     } @empty {
       <div class="empty">Упражнений нет — добавь первое.</div>
     }
     <div class="addex">
-      <hg-select label="Тип упражнения" placeholder="" [options]="kindOptions"
-                 [(ngModel)]="newKind" />
-      <hg-button size="sm" variant="ghost" label="Упражнение с шаблоном" icon="+"
-                 (pressed)="addExercise()" />
+      <app-basic-select
+        ariaLabel="Тип упражнения"
+        placeholder="Тип упражнения"
+        [items]="kindOptions"
+        [formField]="newKindField"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <app-button
+        label="Упражнение с шаблоном"
+        (click)="addExercise()"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        ><span aria-hidden="true">+</span></app-button
+      >
     </div>
   </section>
 
   <section class="panel">
-    <div class="eyebrow">{{ 'admin.tipHeading' | translate }}</div>
+    <div class="eyebrow">{{ "admin.tipHeading" | translate }}</div>
     <div class="tipform">
-      <hg-input [label]="'admin.tipTitle' | translate" [placeholder]="'learning.particlesPlaceholder' | translate" [(ngModel)]="tipTitle" />
-      <hg-textarea [label]="'admin.tipRule' | translate" [placeholder]="'learning.tipTextPlaceholder' | translate" [rows]="5"
-                   [(ngModel)]="tipBody" />
-      <hg-textarea class="mono" [label]="'admin.tipExamples' | translate" [rows]="5"
-                   [placeholder]="'admin.tipExamplesPlaceholder' | translate"
-                   [(ngModel)]="tipExamples" />
-      <hg-button size="sm" variant="ghost" [label]="'learning.saveTip' | translate" (pressed)="saveTip()" />
+      <app-basic-input
+        [label]="'admin.tipTitle' | translate"
+        [placeholder]="'learning.particlesPlaceholder' | translate"
+        [formField]="tipTitleField"
+      />
+      <app-textarea
+        [label]="'admin.tipRule' | translate"
+        [placeholder]="'learning.tipTextPlaceholder' | translate"
+        [rows]="5"
+        [formField]="tipBodyField"
+      />
+      <app-textarea
+        class="mono"
+        [label]="'admin.tipExamples' | translate"
+        [rows]="5"
+        [placeholder]="'admin.tipExamplesPlaceholder' | translate"
+        [formField]="tipExamplesField"
+      />
+      <app-button
+        [label]="'learning.saveTip' | translate"
+        (click)="saveTip()"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+      ></app-button>
     </div>
   </section>
 
   <section class="panel">
-    <div class="eyebrow">Слова урока ({{ d.words.length }}) — попадают в SRS после прохождения</div>
+    <div class="eyebrow">
+      Слова урока ({{ d.words.length }}) — попадают в SRS после прохождения
+    </div>
     <div class="wordpick">
       @for (word of d.words; track word.id) {
-        <button type="button" data-domain-control class="wchip on" aria-pressed="true"
-                [attr.aria-label]="'Убрать слово ' + word.hangul + ', ' + word.translation"
-                (click)="toggleWord(word)" title="Убрать">
+        <app-button
+          type="button"
+          styleClass="wchip on"
+          [aria]="{
+            'aria-pressed': true,
+            'aria-label': removeWordAria(word),
+          }"
+          (click)="toggleWord(word)"
+          title="Убрать"
+        >
           {{ word.hangul }} · {{ word.translation }} ✕
-        </button>
+        </app-button>
       }
     </div>
     <div class="toolbar" style="margin-top: 12px">
-      <hg-input class="search" type="search" label="Найти слово для привязки"
-                [ngModel]="wordSearch" (ngModelChange)="searchWords($event)" />
+      <app-basic-input
+        class="search"
+        type="search"
+        label="Найти слово для привязки"
+        [value]="wordSearch"
+        (valueChange)="searchWords($event)"
+      />
     </div>
     <div class="wordpick">
       @for (word of foundWords(); track word.id) {
         @if (!isLinked(word)) {
-          <button type="button" data-domain-control class="wchip" aria-pressed="false"
-                  [attr.aria-label]="'Привязать слово ' + word.hangul + ', ' + word.translation"
-                  (click)="toggleWord(word)">+ {{ word.hangul }} · {{ word.translation }}</button>
+          <app-button
+            type="button"
+            styleClass="wchip"
+            [aria]="{
+              'aria-pressed': false,
+              'aria-label': bindWordAria(word),
+            }"
+            (click)="toggleWord(word)"
+            >+ {{ word.hangul }} · {{ word.translation }}</app-button
+          >
         }
       }
     </div>

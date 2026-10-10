@@ -1,5 +1,6 @@
 :host { display: block; }
 
+:host ::ng-deep {
 .fcbox { max-width: 520px; text-align: center; }
 
 .loadpanel {
@@ -108,7 +109,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: var(--hg-space-3);
 
-  button {
+  button.hg-native-button.hg-native-button.hg-native-button {
     border: none;
     border-radius: var(--hg-radius-block);
     padding: 14px 8px;
@@ -151,4 +152,6 @@
 
 @media (max-width: 880px) {
   .srs { grid-template-columns: repeat(2, 1fr); }
+}
+
 }

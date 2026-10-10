@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {HgAudioButtonComponent, HgProgressRingComponent, MascotComponent} from '@shared/components/hg';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
+import {ButtonComponent} from 'springest';
 import {CoursePathComponent, toCoursePath} from '@features/learning/course-path';
 import {DashboardFacade} from '../../../application/dashboard.facade';
 import {DASHBOARD_REPOSITORY} from '../../../application/dashboard-repository.token';
@@ -19,7 +19,7 @@ const PATH_WINDOW = 6;
     RouterLink,
     HgAudioButtonComponent,
     HgProgressRingComponent,
-    HgButtonComponent,
+    ButtonComponent,
     MascotComponent,
     CoursePathComponent,
     TranslatePipe,
@@ -51,6 +51,10 @@ export class DashboardPageComponent {
     return goal ? Math.max(goal.goalXp - goal.earnedXp, 0) : 0;
   });
 
+  readonly hasStreak = computed(() => (this.facade.data()?.streak ?? 0) > 0);
+  readonly hasDueWords = computed(() => (this.facade.data()?.dueWords ?? 0) > 0);
+  readonly courseTitle = computed(() => this.facade.courseMap()?.title || null);
+
   readonly path = computed(() => toCoursePath(
     this.facade.courseMap(), PATH_WINDOW));
 
@@ -67,6 +71,7 @@ export class DashboardPageComponent {
     const todayIdx = (new Date().getDay() + 6) % 7; // 0 = Пн
     return week.map((xp, i) => ({
       xp,
+      isEmpty: xp === 0,
       height: Math.max(4, Math.round(xp / max * 100)),
       label: this.translate.instant(WEEKDAY_KEYS[(todayIdx - (week.length - 1 - i) + 14) % 7]),
       isToday: i === week.length - 1,

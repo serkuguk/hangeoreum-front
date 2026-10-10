@@ -3,23 +3,40 @@
     <div class="maphead-row">
       <div class="maphead-title">
         <div class="eyebrow">Карта курса</div>
-        <h2 class="pagettl">{{ facade.map()?.title || 'Курс' }}</h2>
+        <h2 class="pagettl">{{ mapTitle() }}</h2>
       </div>
 
       <div class="maphead-chips">
-        <span class="pill p-n">{{ progress().done }} / {{ progress().total }} уроков</span>
+        <span class="pill p-n"
+          >{{ progress().done }} / {{ progress().total }} уроков</span
+        >
         @if (hasPaywall()) {
           <a class="pill p-y" routerLink="/billing">Часть уроков — Pro</a>
         }
       </div>
 
       <div class="seg" role="group" aria-label="Показ карты">
-        <button type="button" data-domain-control [class.is-on]="!showAll()" (click)="focusCurrent()">Текущая глава</button>
-        <button type="button" data-domain-control [class.is-on]="showAll()" (click)="showAll.set(true)">Весь путь</button>
+        <app-button
+          class="hg-native-host"
+          [styleClass]="currentChapterClass()"
+          type="button"
+          (click)="focusCurrent()"
+          >Текущая глава</app-button
+        >
+        <app-button
+          class="hg-native-host"
+          [styleClass]="allChaptersClass()"
+          type="button"
+          (click)="showAll.set(true)"
+          >Весь путь</app-button
+        >
       </div>
     </div>
 
-    <div class="mapbar" [attr.aria-label]="'Пройдено ' + progress().percent + '%'">
+    <div
+      class="mapbar"
+      [attr.aria-label]="progressAria()"
+    >
       <i [style.width.%]="progress().percent"></i>
     </div>
   </header>
@@ -45,24 +62,36 @@
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <hg-button label="Повторить" variant="ghost" (pressed)="facade.invalidate()"/>
+      <app-button
+        styleClass="hg-button hg-button--ghost"
+        label="Повторить"
+        (click)="facade.invalidate()"
+      />
     </div>
   } @else if (facade.map(); as map) {
     @if (map.units.length === 0) {
       <div class="panel emptypanel">
-        <hg-mascot speech="Начнём с алфавита — я подожду здесь!" [size]="150"/>
+        <hg-mascot speech="Начнём с алфавита — я подожду здесь!" [size]="150" />
         <div>
           <h3>Курс ещё наполняется</h3>
-          <p>Главы появятся здесь в виде пути. Алфавит уже доступен — с него начинается любой маршрут.</p>
+          <p>
+            Главы появятся здесь в виде пути. Алфавит уже доступен — с него
+            начинается любой маршрут.
+          </p>
           <a class="cta" routerLink="/learn/alphabet">К алфавиту</a>
         </div>
       </div>
     } @else {
       @for (unit of collapsedUnits(); track unit.id; let i = $index) {
         <!-- Пройденная глава — компактная строка с результатом; клик разворачивает её в путь. -->
-        <button type="button" class="unit-row done" data-domain-control (click)="expand(unit.id)">
+        <app-button
+          class="hg-native-host"
+          styleClass="hg-native-button unit-row done"
+          type="button"
+          (click)="expand(unit.id)"
+        >
           @if (sceneUrl(i); as scene) {
-            <img [src]="scene" alt="" width="44" height="44">
+            <img [src]="scene" alt="" width="44" height="44" />
           } @else {
             <span class="n han">{{ unit.title.charAt(0) }}</span>
           }
@@ -70,14 +99,16 @@
             <b>{{ unit.title }}</b>
             <small>
               {{ unitProgress(unit.lessons) }} уроков
-              @if (unitScore(unit.lessons); as score) { · средний балл {{ score }}% }
+              @if (unitScore(unit.lessons); as score) {
+                · средний балл {{ score }}%
+              }
             </small>
           </span>
           <span class="unit-row-tail">
             <span class="pill p-j">✓ Пройдено</span>
             <span class="expand">развернуть ▾</span>
           </span>
-        </button>
+        </app-button>
       }
 
       <hg-course-path
@@ -85,7 +116,8 @@
         [chapters]="chapters()"
         [width]="pathWidth()"
         [startStub]="true"
-        (nodeSelected)="onNode($event)"/>
+        (nodeSelected)="onNode($event)"
+      />
     }
   }
 </div>

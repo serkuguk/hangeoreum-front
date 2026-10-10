@@ -1,29 +1,28 @@
+import {FormField, form, min} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
 import {
-  HgButtonComponent,
-  HgFilePickerComponent,
-  HgInputComponent,
-  HgSelectComponent,
-  HgSelectOption,
-  HgTextareaComponent,
-} from '@shared/components/controls';
-import {AdminApi, AdminClip, AdminWord, Speaker} from '../../infrastructure/admin.api';
+  ButtonComponent,
+  FilePickerComponent,
+  BasicInputComponent,
+  BasicSelectComponent,
+  TextareaComponent,
+} from 'springest';
+import {AdminApi, AdminClip, AdminWord, MediaUploadKind, Speaker} from '../../infrastructure/admin.api';
 
-const CLIP_KIND_OPTIONS: readonly HgSelectOption<string>[] = ['IMMERSE', 'STORY', 'WORD']
+const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY', 'WORD']
   .map(value => ({label: value, value}));
 
 @Component({
   selector: 'hg-admin-media-page',
   imports: [
-    FormsModule,
-    HgButtonComponent,
-    HgFilePickerComponent,
-    HgInputComponent,
-    HgSelectComponent,
-    HgTextareaComponent,
+    FormField,
+    ButtonComponent,
+    FilePickerComponent,
+    BasicInputComponent,
+    BasicSelectComponent,
+    TextareaComponent,
   ],
   templateUrl: './admin-media-page.component.html',
   styleUrl: './_admin.scss',
@@ -65,7 +64,7 @@ const CLIP_KIND_OPTIONS: readonly HgSelectOption<string>[] = ['IMMERSE', 'STORY'
       flex-basis: 100%;
       margin-top: 8px;
 
-      hg-textarea { width: 100%; }
+      app-textarea { width: 100%; }
     }
 
     .media-picker { max-width: 5rem; }
@@ -84,19 +83,24 @@ export class AdminMediaPageComponent {
   readonly editingSpeaker = signal<string | null>(null);
   readonly foundWords = signal<AdminWord[]>([]);
   readonly clipKindOptions = CLIP_KIND_OPTIONS;
-  readonly speakerOptions = computed<readonly HgSelectOption<string | null>[]>(() => [
+  readonly speakerOptions = computed<{label: string; value: string | null}[]>(() => [
     {label: 'без спикера', value: null},
     ...this.speakers().map(speaker => ({label: speaker.name, value: speaker.id})),
   ]);
 
   // сигнал: наполняется асинхронно из getSubtitles, иначе zoneless CD не перерисует textarea
   readonly subsDraft = signal('');
+  readonly subsField = form(this.subsDraft);
 
-  newSpeakerName = '';
-  newClipKind = 'IMMERSE';
-  speakerDraft = '';
-  clipDraft: {kind: string; speakerId: string | null; wordId: string | null; durationMs: number | null} =
-    {kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: null};
+  readonly newSpeakerName = signal('');
+  readonly newSpeakerNameField = form(this.newSpeakerName);
+  readonly newClipKind = signal('IMMERSE');
+  readonly newClipKindField = form(this.newClipKind);
+  readonly speakerDraft = signal('');
+  readonly speakerDraftField = form(this.speakerDraft);
+  readonly clipDraft = signal<{kind: string; speakerId: string | null; wordId: string | null; durationMs: number | null}>(
+    {kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: null});
+  readonly clipFields = form(this.clipDraft, path => min(path.durationMs, 0));
   clipWordLabel = '';
   wordSearch = '';
   private readonly wordSearch$ = new Subject<string>();
@@ -130,11 +134,11 @@ export class AdminMediaPageComponent {
   }
 
   addSpeaker(): void {
-    const name = this.newSpeakerName.trim();
+    const name = this.newSpeakerName().trim();
     if (!name) return;
     this.api.createSpeaker({name}).subscribe({
       next: () => {
-        this.newSpeakerName = '';
+        this.newSpeakerName.set('');
         this.load();
       },
       error: err => this.fail('Не получилось добавить спикера', err),
@@ -151,11 +155,11 @@ export class AdminMediaPageComponent {
 
   startEditSpeaker(speaker: Speaker): void {
     this.editingSpeaker.set(speaker.id);
-    this.speakerDraft = speaker.name;
+    this.speakerDraft.set(speaker.name);
   }
 
   saveSpeaker(speaker: Speaker): void {
-    const name = this.speakerDraft.trim();
+    const name = this.speakerDraft().trim();
     if (!name) return;
     // avatarUrl/bio отправляем как есть — PUT перезаписывает все поля
     this.api.updateSpeaker(speaker.id, {name, avatarUrl: speaker.avatarUrl, bio: speaker.bio}).subscribe({
@@ -173,7 +177,7 @@ export class AdminMediaPageComponent {
   }
 
   addClip(): void {
-    this.api.createClip({kind: this.newClipKind}).subscribe({
+    this.api.createClip({kind: this.newClipKind()}).subscribe({
       next: () => this.load(),
       error: err => this.fail('Не получилось добавить клип', err),
     });
@@ -201,7 +205,7 @@ export class AdminMediaPageComponent {
       return;
     }
     this.editingClip.set(clip.id);
-    this.clipDraft = {kind: clip.kind, speakerId: clip.speakerId, wordId: clip.wordId, durationMs: clip.durationMs};
+    this.clipFields().reset({kind: clip.kind, speakerId: clip.speakerId, wordId: clip.wordId, durationMs: clip.durationMs});
     this.clipWordLabel = clip.wordId ? `ID ${clip.wordId.slice(0, 8)}…` : '';
     this.wordSearch = '';
     this.foundWords.set([]);
@@ -213,19 +217,24 @@ export class AdminMediaPageComponent {
   }
 
   pickWord(word: AdminWord): void {
-    this.clipDraft.wordId = word.id;
+    this.clipDraft.update(draft => ({...draft, wordId: word.id}));
     this.clipWordLabel = `${word.hangul} — ${word.translation}`;
     this.wordSearch = '';
     this.foundWords.set([]);
   }
 
   clearWord(): void {
-    this.clipDraft.wordId = null;
+    this.clipDraft.update(draft => ({...draft, wordId: null}));
     this.clipWordLabel = '';
   }
 
   saveClip(clip: AdminClip): void {
-    this.api.updateClip(clip.id, this.clipDraft).subscribe({
+    if (this.clipFields().invalid()) {
+      this.error.set('Длительность должна быть не меньше 0 мс.');
+      return;
+    }
+    this.error.set(null);
+    this.api.updateClip(clip.id, this.clipDraft()).subscribe({
       next: () => {
         this.editingClip.set(null);
         this.showFlash('Клип обновлён');
@@ -235,7 +244,39 @@ export class AdminMediaPageComponent {
     });
   }
 
-  upload(clip: AdminClip, file: File, kind: 'video' | 'audio' | 'thumbnail'): void {
+  readonly uploadKind = MediaUploadKind;
+
+  isEditing(clip: AdminClip): boolean {
+    return this.editingClip() === clip.id;
+  }
+
+  editButtonClass(clip: AdminClip): string {
+    return `hg-button hg-button--sm hg-button--${this.isEditing(clip) ? 'secondary' : 'ghost'}`;
+  }
+
+  publishButtonClass(clip: AdminClip): string {
+    return `hg-button hg-button--sm hg-button--${clip.published ? 'secondary' : 'ghost'}`;
+  }
+
+  publishIcon(clip: AdminClip): string {
+    return clip.published ? '👁' : '🚫';
+  }
+
+  publishAria(clip: AdminClip): string {
+    return clip.published ? 'Снять клип с публикации' : 'Опубликовать клип';
+  }
+
+  mediaSummary(clip: AdminClip): string {
+    const video = clip.videoUrl ? '🎬 видео' : 'без видео';
+    const audio = clip.audioUrl ? '🔊 аудио' : 'без аудио';
+    return `${this.speakerName(clip.speakerId)} · ${video} · ${audio}`;
+  }
+
+  wordAria(word: AdminWord): string {
+    return `Привязать слово ${word.hangul}, ${word.translation}`;
+  }
+
+  upload(clip: AdminClip, file: File, kind: MediaUploadKind): void {
     this.showFlash('Загружаем файл…');
     this.api.uploadClipMedia(clip.id, file, kind).subscribe({
       next: () => {

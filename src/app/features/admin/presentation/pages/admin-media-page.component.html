@@ -16,26 +16,54 @@
   @for (speaker of speakers(); track speaker.id) {
     <div class="sprow">
       @if (editingSpeaker() === speaker.id) {
-        <hg-input class="grow" ariaLabel="Имя спикера" [(ngModel)]="speakerDraft"
-                  (keydown.enter)="saveSpeaker(speaker)" />
-        <hg-button size="sm" variant="ghost" label="Сохранить" icon="✓"
-                   (pressed)="saveSpeaker(speaker)" />
-        <hg-button size="sm" variant="ghost" label="Отмена"
-                   (pressed)="editingSpeaker.set(null)" />
+        <app-basic-input
+          class="grow"
+          ariaLabel="Имя спикера"
+          [formField]="speakerDraftField"
+          (keydown.enter)="saveSpeaker(speaker)"
+        />
+        <app-button
+          label="Сохранить"
+          (click)="saveSpeaker(speaker)"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">✓</span></app-button
+        >
+        <app-button
+          label="Отмена"
+          (click)="editingSpeaker.set(null)"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+        ></app-button>
       } @else {
         <span class="grow">{{ speaker.name }}</span>
-        <hg-button size="sm" variant="ghost" icon="✎" ariaLabel="Изменить спикера"
-                   (pressed)="startEditSpeaker(speaker)" />
-        <hg-button size="sm" variant="danger" label="Удалить" (pressed)="removeSpeaker(speaker)" />
+        <app-button
+          (click)="startEditSpeaker(speaker)"
+          [aria]="{ 'aria-label': 'Изменить спикера' }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">✎</span></app-button
+        >
+        <app-button
+          label="Удалить"
+          (click)="removeSpeaker(speaker)"
+          styleClass="hg-button hg-button--danger hg-button--sm"
+        ></app-button>
       }
     </div>
   } @empty {
     <div class="empty">Спикеров нет.</div>
   }
   <div class="addrow">
-    <hg-input label="Имя носителя" placeholder="지민…" [(ngModel)]="newSpeakerName"
-              (keydown.enter)="addSpeaker()" />
-    <hg-button size="sm" variant="ghost" label="Спикер" icon="+" (pressed)="addSpeaker()" />
+    <app-basic-input
+      label="Имя носителя"
+      placeholder="지민…"
+      [formField]="newSpeakerNameField"
+      (keydown.enter)="addSpeaker()"
+    />
+    <app-button
+      label="Спикер"
+      (click)="addSpeaker()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+      ><span aria-hidden="true">+</span></app-button
+    >
   </div>
 </section>
 
@@ -44,59 +72,139 @@
   @for (clip of clips(); track clip.id) {
     <div class="cliprow">
       <span class="pill p-b">{{ clip.kind }}</span>
-      <span class="grow muted">
-        {{ speakerName(clip.speakerId) }} ·
-        {{ clip.videoUrl ? '🎬 видео' : 'без видео' }} ·
-        {{ clip.audioUrl ? '🔊 аудио' : 'без аудио' }}
-      </span>
-      <hg-file-picker class="media-picker" label="🎬" ariaLabel="Загрузить видео клипа"
-                      accept="video/*" (fileSelected)="upload(clip, $event, 'video')" />
-      <hg-file-picker class="media-picker" label="🔊" ariaLabel="Загрузить аудио клипа"
-                      accept="audio/*" (fileSelected)="upload(clip, $event, 'audio')" />
-      <hg-file-picker class="media-picker" label="🖼" ariaLabel="Загрузить обложку клипа"
-                      accept="image/*" (fileSelected)="upload(clip, $event, 'thumbnail')" />
-      <hg-button size="sm" [variant]="editingClip() === clip.id ? 'secondary' : 'ghost'"
-                 icon="✎" ariaLabel="Изменить клип" (pressed)="openEdit(clip)" />
-      <hg-button size="sm" variant="ghost" label="Сабы" (pressed)="openSubtitles(clip)" />
-      <hg-button size="sm" [variant]="clip.published ? 'secondary' : 'ghost'"
-                 [icon]="clip.published ? '👁' : '🚫'"
-                 [ariaLabel]="clip.published ? 'Снять клип с публикации' : 'Опубликовать клип'"
-                 (pressed)="togglePublish(clip)" />
-      <hg-button size="sm" variant="danger" icon="✕" ariaLabel="Удалить клип"
-                 (pressed)="removeClip(clip)" />
+      <span class="grow muted">{{ mediaSummary(clip) }}</span>
+      <app-file-picker
+        #picker1
+        class="media-picker"
+        label="🎬"
+        ariaLabel="Загрузить видео клипа"
+        accept="video/*"
+        (changed)="
+          $event[0] && upload(clip, $event[0], uploadKind.VIDEO); picker1.value.set([])
+        "
+      />
+      <app-file-picker
+        #picker2
+        class="media-picker"
+        label="🔊"
+        ariaLabel="Загрузить аудио клипа"
+        accept="audio/*"
+        (changed)="
+          $event[0] && upload(clip, $event[0], uploadKind.AUDIO); picker2.value.set([])
+        "
+      />
+      <app-file-picker
+        #picker3
+        class="media-picker"
+        label="🖼"
+        ariaLabel="Загрузить обложку клипа"
+        accept="image/*"
+        (changed)="
+          $event[0] && upload(clip, $event[0], uploadKind.THUMBNAIL);
+          picker3.value.set([])
+        "
+      />
+      <app-button
+        (click)="openEdit(clip)"
+        [aria]="{ 'aria-label': 'Изменить клип' }"
+        [styleClass]="editButtonClass(clip)"
+        ><span aria-hidden="true">✎</span></app-button
+      >
+      <app-button
+        label="Сабы"
+        (click)="openSubtitles(clip)"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+      ></app-button>
+      <app-button
+        (click)="togglePublish(clip)"
+        [aria]="{
+          'aria-label': publishAria(clip),
+        }"
+        [styleClass]="publishButtonClass(clip)"
+        ><span aria-hidden="true">{{
+          publishIcon(clip)
+        }}</span></app-button
+      >
+      <app-button
+        (click)="removeClip(clip)"
+        [aria]="{ 'aria-label': 'Удалить клип' }"
+        styleClass="hg-button hg-button--danger hg-button--sm"
+        ><span aria-hidden="true">✕</span></app-button
+      >
 
-      @if (editingClip() === clip.id) {
+      @if (isEditing(clip)) {
         <div class="editbox">
-          <hg-select ariaLabel="Тип клипа" placeholder="" [options]="clipKindOptions"
-                     [(ngModel)]="clipDraft.kind" />
-          <hg-select ariaLabel="Спикер клипа" placeholder="" [options]="speakerOptions()"
-                     [(ngModel)]="clipDraft.speakerId" />
-          <hg-input type="number" label="Длительность, мс" [min]="0"
-                    [(ngModel)]="clipDraft.durationMs" />
+          <app-basic-select
+            ariaLabel="Тип клипа"
+            placeholder=""
+            [items]="clipKindOptions"
+            [formField]="clipFields.kind"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <app-basic-select
+            ariaLabel="Спикер клипа"
+            placeholder=""
+            [items]="speakerOptions()"
+            [formField]="clipFields.speakerId"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <app-basic-input
+            type="number"
+            label="Длительность, мс"
+            [formField]="clipFields.durationMs"
+          />
           <div class="wordpick">
-            @if (clipDraft.wordId) {
+            @if (clipDraft().wordId) {
               <span class="pill p-b">{{ clipWordLabel }}</span>
-              <hg-button size="sm" variant="ghost" label="Убрать слово" icon="✕"
-                         (pressed)="clearWord()" />
+              <app-button
+                label="Убрать слово"
+                (click)="clearWord()"
+                styleClass="hg-button hg-button--ghost hg-button--sm"
+                ><span aria-hidden="true">✕</span></app-button
+              >
             } @else {
-              <hg-input type="search" ariaLabel="Поиск слова" placeholder="Поиск слова…"
-                        [ngModel]="wordSearch" (ngModelChange)="searchWords($event)" />
+              <app-basic-input
+                type="search"
+                ariaLabel="Поиск слова"
+                placeholder="Поиск слова…"
+                [value]="wordSearch"
+                (valueChange)="searchWords($event)"
+              />
               @for (word of foundWords(); track word.id) {
-                <button type="button" data-domain-control class="rowbtn"
-                        [attr.aria-label]="'Привязать слово ' + word.hangul + ', ' + word.translation"
-                        (click)="pickWord(word)">{{ word.hangul }} — {{ word.translation }}</button>
+                <app-button
+                  type="button"
+                  styleClass="rowbtn"
+                  [aria]="{
+                    'aria-label': wordAria(word),
+                  }"
+                  (click)="pickWord(word)"
+                  >{{ word.hangul }} — {{ word.translation }}</app-button
+                >
               }
             }
           </div>
-          <hg-button size="sm" variant="ghost" label="Сохранить клип" (pressed)="saveClip(clip)" />
+          <app-button
+            label="Сохранить клип"
+            (click)="saveClip(clip)"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
         </div>
       }
 
       @if (subtitlesFor() === clip.id) {
         <div class="subsbox">
-          <hg-textarea label="Субтитры в JSON" [rows]="7" [(ngModel)]="subsDraft" />
-          <hg-button size="sm" variant="ghost" label="Сохранить субтитры"
-                     (pressed)="saveSubtitles(clip)" />
+          <app-textarea
+            label="Субтитры в JSON"
+            [rows]="7"
+            [formField]="subsField"
+          />
+          <app-button
+            label="Сохранить субтитры"
+            (click)="saveSubtitles(clip)"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
         </div>
       }
     </div>
@@ -104,8 +212,19 @@
     <div class="empty">Клипов нет — создай первый.</div>
   }
   <div class="addrow">
-    <hg-select label="Тип нового клипа" placeholder="" [options]="clipKindOptions"
-               [(ngModel)]="newClipKind" />
-    <hg-button size="sm" variant="ghost" label="Клип" icon="+" (pressed)="addClip()" />
+    <app-basic-select
+      ariaLabel="Тип нового клипа"
+      placeholder="Тип нового клипа"
+      [items]="clipKindOptions"
+      [formField]="newClipKindField"
+      optionLabel="label"
+      optionValue="value"
+    />
+    <app-button
+      label="Клип"
+      (click)="addClip()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+      ><span aria-hidden="true">+</span></app-button
+    >
   </div>
 </section>

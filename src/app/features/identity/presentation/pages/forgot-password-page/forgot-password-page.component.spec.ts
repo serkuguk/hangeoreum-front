@@ -35,13 +35,13 @@ describe('ForgotPasswordPageComponent', () => {
 
   it('requires a valid email and sends only valid input', () => {
     component.submit();
-    expect(component.form.controls.email.touched).toBe(true);
+    expect(component.form.email().touched()).toBe(true);
     expect(facade.requestPasswordReset).not.toHaveBeenCalled();
 
-    component.form.controls.email.setValue('not-an-email');
-    expect(component.form.invalid).toBe(true);
+    component.form.email().value.set('not-an-email');
+    expect(component.form().invalid()).toBe(true);
 
-    component.form.controls.email.setValue('mina@example.com');
+    component.form.email().value.set('mina@example.com');
     component.submit();
     expect(facade.requestPasswordReset).toHaveBeenCalledWith('mina@example.com');
   });

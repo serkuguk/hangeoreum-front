@@ -10,9 +10,15 @@ export type GameMode = Extract<ReviewMode, 'MATCH' | 'LISTEN' | 'SPELL'>;
 const ROUND_SECONDS = 90;
 const MATCH_BATCH = 6;
 
+export const MatchSide = {KO: 'ko', RU: 'ru'} as const;
+export type MatchSide = typeof MatchSide[keyof typeof MatchSide];
+
+export const AnswerResult = {OK: 'ok', BAD: 'bad'} as const;
+export type AnswerResult = typeof AnswerResult[keyof typeof AnswerResult];
+
 export interface MatchCell {
   wordId: string;
-  side: 'ko' | 'ru';
+  side: MatchSide;
   text: string;
 }
 
@@ -46,7 +52,7 @@ export class GamesFacade {
   readonly options = signal<string[]>([]);       // LISTEN: переводы
   readonly bank = signal<string[]>([]);          // SPELL: слоги
   readonly typed = signal<string[]>([]);         // SPELL: собранное
-  readonly lastAnswer = signal<'ok' | 'bad' | null>(null);
+  readonly lastAnswer = signal<AnswerResult | null>(null);
   private wordQueue: UserWord[] = [];
 
   readonly result = this.review.result;
@@ -113,8 +119,8 @@ export class GamesFacade {
     this.matchHits.set(new Set());
     this.matchSelected.set(null);
     this.matchCells.set(shuffle(batch.flatMap((uw): MatchCell[] => [
-      {wordId: uw.word.id, side: 'ko', text: uw.word.hangul},
-      {wordId: uw.word.id, side: 'ru', text: uw.word.translation},
+      {wordId: uw.word.id, side: MatchSide.KO, text: uw.word.hangul},
+      {wordId: uw.word.id, side: MatchSide.RU, text: uw.word.translation},
     ])));
     this.answerStart = Date.now();
   }
@@ -136,7 +142,7 @@ export class GamesFacade {
     if (hit) {
       this.matchHits.update(set => {
         const next = new Set(set);
-        next.add(cell.wordId + 'ko').add(cell.wordId + 'ru');
+        next.add(cell.wordId + MatchSide.KO).add(cell.wordId + MatchSide.RU);
         return next;
       });
       this.answerStart = Date.now();
@@ -177,7 +183,7 @@ export class GamesFacade {
     if (!word || this.lastAnswer()) return;
     const correct = translation === word.word.translation;
     this.registerAnswer(word.word.id, correct);
-    this.lastAnswer.set(correct ? 'ok' : 'bad');
+    this.lastAnswer.set(correct ? AnswerResult.OK : AnswerResult.BAD);
     this.schedule(() => this.nextWord(), correct ? 500 : 1100);
   }
 
@@ -193,7 +199,7 @@ export class GamesFacade {
     if (typed.length === target.length) {
       const correct = typed.join('') === target.join('');
       this.registerAnswer(word.word.id, correct);
-      this.lastAnswer.set(correct ? 'ok' : 'bad');
+      this.lastAnswer.set(correct ? AnswerResult.OK : AnswerResult.BAD);
       this.schedule(() => this.nextWord(), correct ? 500 : 1100);
     }
   }

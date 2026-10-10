@@ -21,7 +21,7 @@ describe('ResetPasswordPageComponent', () => {
     const {component} = createComponent(null);
 
     expect(component.missingToken()).toBe(true);
-    component.form.setValue({password: 'new-password', confirmation: 'new-password'});
+    component.model.set({password: 'new-password', confirmation: 'new-password'});
     component.submit();
     expect(facade.confirmPasswordReset).not.toHaveBeenCalled();
   });
@@ -34,7 +34,7 @@ describe('ResetPasswordPageComponent', () => {
       fragment: undefined,
       replaceUrl: true,
     });
-    component.form.setValue({password: 'new-password', confirmation: 'new-password'});
+    component.model.set({password: 'new-password', confirmation: 'new-password'});
     component.submit();
     expect(facade.confirmPasswordReset).toHaveBeenCalledWith('secret+value', 'new-password');
   });
@@ -42,14 +42,14 @@ describe('ResetPasswordPageComponent', () => {
   it('validates password length and matching confirmation', () => {
     const {component} = createComponent('token=secret');
 
-    component.form.setValue({password: 'short', confirmation: 'short'});
-    expect(component.form.invalid).toBe(true);
+    component.model.set({password: 'short', confirmation: 'short'});
+    expect(component.form().invalid()).toBe(true);
 
-    component.form.setValue({password: 'long-enough', confirmation: 'different'});
-    expect(component.form.hasError('passwordMismatch')).toBe(true);
+    component.model.set({password: 'long-enough', confirmation: 'different'});
+    expect(component.form.confirmation().errors().some(error => error.kind === 'passwordMismatch')).toBe(true);
 
-    component.form.setValue({password: 'x'.repeat(101), confirmation: 'x'.repeat(101)});
-    expect(component.form.invalid).toBe(true);
+    component.model.set({password: 'x'.repeat(101), confirmation: 'x'.repeat(101)});
+    expect(component.form().invalid()).toBe(true);
   });
 
   it('renders accessible missing-token and invalid-token errors', () => {
@@ -72,11 +72,12 @@ describe('ResetPasswordPageComponent', () => {
     fixture.detectChanges();
     const component = fixture.componentInstance;
 
-    component.form.setValue({password: 'short', confirmation: 'different'});
-    component.form.markAllAsTouched();
+    component.model.set({password: 'short', confirmation: 'different'});
+    component.form.password().markAsTouched();
+    component.form.confirmation().markAsTouched();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelectorAll('small.error')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('.form-field__error')).toHaveLength(2);
     expect(fixture.nativeElement.querySelectorAll('input[aria-invalid="true"]')).toHaveLength(2);
   });
 

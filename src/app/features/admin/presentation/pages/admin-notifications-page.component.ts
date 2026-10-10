@@ -1,11 +1,11 @@
+import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {AdminApi} from '../../infrastructure/admin.api';
-import {HgButtonComponent, HgInputComponent, HgTextareaComponent} from '@shared/components/controls';
+import {ButtonComponent, BasicInputComponent, TextareaComponent} from 'springest';
 
 @Component({
   selector: 'hg-admin-notifications-page',
-  imports: [FormsModule, HgButtonComponent, HgInputComponent, HgTextareaComponent],
+  imports: [FormField, ButtonComponent, BasicInputComponent, TextareaComponent],
   template: `
     <h2 class="pagettl">Уведомления</h2>
     <p class="pagesub">Системная рассылка — уходит всем пользователям (in-app).</p>
@@ -18,9 +18,9 @@ import {HgButtonComponent, HgInputComponent, HgTextareaComponent} from '@shared/
     }
 
     <div class="panel form">
-      <hg-input label="Заголовок" required [(ngModel)]="title" placeholder="Новые уроки уже в курсе!"/>
-      <hg-textarea label="Текст" [(ngModel)]="body" placeholder="Юнит 3 «В кафе» опубликован…"/>
-      <hg-button label="Отправить всем" [loading]="sending()" [disabled]="!title.trim()" (pressed)="send()"/>
+      <app-basic-input label="Заголовок" [formField]="titleField" placeholder="Новые уроки уже в курсе!"/>
+      <app-textarea label="Текст" [formField]="bodyField" placeholder="Юнит 3 «В кафе» опубликован…"/>
+      <app-button label="Отправить всем" [loading]="sending()" [disabled]="!title().trim()" (click)="send()" styleClass="hg-button"></app-button>
     </div>
   `,
   styleUrl: './_admin.scss',
@@ -31,7 +31,7 @@ import {HgButtonComponent, HgInputComponent, HgTextareaComponent} from '@shared/
       flex-direction: column;
       gap: 14px;
 
-      hg-button { align-self: flex-start; }
+      app-button { align-self: flex-start; }
     }
 
     .okbar {
@@ -49,23 +49,26 @@ import {HgButtonComponent, HgInputComponent, HgTextareaComponent} from '@shared/
 export class AdminNotificationsPageComponent {
   private api = inject(AdminApi);
 
-  title = '';
-  body = '';
+  readonly title = signal('');
+  readonly titleField = form(this.title, path => required(path));
+  readonly body = signal('');
+  readonly bodyField = form(this.body);
   readonly sending = signal(false);
   readonly sent = signal(false);
   readonly error = signal<string | null>(null);
 
   send(): void {
-    if (!confirm(`Отправить рассылку «${this.title}» всем пользователям?`)) return;
+    if (this.sending() || !this.title().trim()) return;
+    if (!confirm(`Отправить рассылку «${this.title()}» всем пользователям?`)) return;
     this.sending.set(true);
     this.sent.set(false);
     this.error.set(null);
-    this.api.broadcast(this.title.trim(), this.body.trim()).subscribe({
+    this.api.broadcast(this.title().trim(), this.body().trim()).subscribe({
       next: () => {
         this.sending.set(false);
         this.sent.set(true);
-        this.title = '';
-        this.body = '';
+        this.title.set('');
+        this.body.set('');
       },
       error: () => {
         this.sending.set(false);

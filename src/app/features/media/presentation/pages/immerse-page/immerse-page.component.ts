@@ -1,3 +1,4 @@
+import {ButtonComponent, SegmentedControlComponent} from 'springest';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -6,23 +7,23 @@ import {
   Injector,
   OnDestroy,
   afterNextRender,
+  computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {ImmerseFacade} from '../../../application/immerse.facade';
 import {Clip} from '../../../domain/clip.entity';
-import {HgButtonComponent, HgSegmentedControlComponent} from '@shared/components/controls';
 import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
-type SubMode = 'ko' | 'ru' | 'both';
+const SubMode = {KO: 'ko', RU: 'ru', BOTH: 'both'} as const;
+type SubMode = typeof SubMode[keyof typeof SubMode];
 
 @Component({
   selector: 'hg-immerse-page',
-  imports: [FormsModule, RouterLink, HgButtonComponent, HgSegmentedControlComponent, TranslatePipe],
+  imports: [RouterLink, ButtonComponent, SegmentedControlComponent, TranslatePipe],
   templateUrl: './immerse-page.component.html',
   styleUrl: './immerse-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,11 +35,11 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   private injector = inject(Injector);
   private translate = inject(TranslateService);
 
-  readonly subMode = signal<SubMode>('both');
+  readonly subMode = signal<SubMode>(SubMode.BOTH);
   readonly subModeOptions = [
-    {value: 'ko' as const, label: this.translate.instant('media.subtitles.korean')},
-    {value: 'ru' as const, label: this.translate.instant('media.subtitles.translation')},
-    {value: 'both' as const, label: this.translate.instant('media.subtitles.both')},
+    {value: SubMode.KO, label: this.translate.instant('media.subtitles.korean')},
+    {value: SubMode.RU, label: this.translate.instant('media.subtitles.translation')},
+    {value: SubMode.BOTH, label: this.translate.instant('media.subtitles.both')},
   ];
   readonly currentClipIndex = signal(0);
 
@@ -83,6 +84,41 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+  }
+
+  setSubMode(value: unknown): void {
+    if (Object.values<unknown>(SubMode).includes(value)) this.subMode.set(value as SubMode);
+  }
+
+  readonly showKo = computed(() => this.subMode() !== SubMode.RU);
+  readonly showRu = computed(() => this.subMode() !== SubMode.KO);
+
+  koSubtitle(clip: Clip): string | null {
+    return this.showKo() ? this.subtitle(clip, 'ko') : null;
+  }
+
+  ruSubtitle(clip: Clip): string | null {
+    return this.showRu() ? this.subtitle(clip, 'ru') : null;
+  }
+
+  clipTitle(clip: Clip): string {
+    return this.subtitle(clip, 'ru') ?? this.subtitle(clip, 'ko') ?? this.translate.instant('media.clipFallback');
+  }
+
+  likeClass(clip: Clip): string {
+    return clip.liked ? 'hg-native-button liked' : 'hg-native-button';
+  }
+
+  likeIcon(clip: Clip): string {
+    return clip.liked ? '❤️' : '🤍';
+  }
+
+  likeLabel(clip: Clip): string {
+    return clip.liked ? 'media.unlike' : 'media.like';
+  }
+
+  saveIcon(clip: Clip): string {
+    return clip.wordId && this.vocabulary.isSaved(clip.wordId) ? '✓' : '＋';
   }
 
   subtitle(clip: Clip, lang: string): string | null {

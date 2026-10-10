@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {FormField, form, required, email, minLength, maxLength, validate} from '@angular/forms/signals';
 import {RouterLink} from '@angular/router';
 import {AuthFacade} from '../../../application/facades/auth.facade';
-import {HgButtonComponent, HgCheckboxComponent, HgInputComponent} from '@shared/components/controls';
+import {ButtonComponent, BasicInputComponent, PasswordInputComponent, CheckboxComponent, FormFieldComponent} from 'springest';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-register-page',
-  imports: [ReactiveFormsModule, RouterLink, HgButtonComponent, HgCheckboxComponent, HgInputComponent, TranslatePipe],
+  imports: [FormField, FormFieldComponent, PasswordInputComponent, RouterLink, ButtonComponent, CheckboxComponent, BasicInputComponent, TranslatePipe],
   templateUrl: './register-page.component.html',
   styleUrl: '../_auth-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,24 +15,29 @@ import {TranslatePipe} from '@ngx-translate/core';
 export class RegisterPageComponent {
   readonly facade = inject(AuthFacade);
 
-  readonly form = inject(FormBuilder).nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    consent: [false, Validators.requiredTrue],
+  readonly model = signal({name: '', email: '', password: '', consent: false});
+  readonly submitted = signal(false);
+  readonly form = form(this.model, path => {
+    required(path.name);
+    maxLength(path.name, 100);
+    required(path.email);
+    email(path.email);
+    required(path.password);
+    minLength(path.password, 8);
+    validate(path.consent, ({value}) => value() ? null : {kind: 'required'});
   });
 
   submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    this.submitted.set(true);
+    if (this.facade.loading()) return;
+    if (this.form().invalid()) {
+      this.form.name().markAsTouched();
+      this.form.email().markAsTouched();
+      this.form.password().markAsTouched();
+      this.form.consent().markAsTouched();
       return;
     }
-    const {name, email, password} = this.form.getRawValue();
+    const {name, email, password} = this.model();
     this.facade.register(name, email, password);
-  }
-
-  invalid(name: 'name' | 'email' | 'password' | 'consent'): boolean {
-    const control = this.form.controls[name];
-    return control.touched && control.invalid;
   }
 }

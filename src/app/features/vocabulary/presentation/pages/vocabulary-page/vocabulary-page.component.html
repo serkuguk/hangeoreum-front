@@ -2,17 +2,17 @@
   <h2 class="pagettl">{{ 'vocabulary.title' | translate }}</h2>
   <p class="pagesub">{{ 'vocabulary.wordCount' | translate:{count: facade.totalElements()} }}</p>
 
-  <hg-segmented-control class="tabs" [label]="'vocabulary.sectionLabel' | translate" [options]="tabs()" [(ngModel)]="tab"/>
+  <app-segmented-control class="tabs" [label]="'vocabulary.sectionLabel' | translate" [items]="tabs()" [value]="tab()" (valueChange)="setTab($event)"/>
 
-  @if (tab() === 'words') {
-    <hg-input class="searchbox" type="search" [label]="'vocabulary.search.label' | translate"
+  @if (isWordsTab()) {
+    <app-basic-input class="searchbox" type="search" [label]="'vocabulary.search.label' | translate"
               [placeholder]="'vocabulary.search.placeholder' | translate"
-              [ngModel]="search()" (ngModelChange)="search.set($event); page.set(0)"/>
+              [value]="search()" (valueChange)="search.set($event); page.set(0)"/>
 
     <div class="filters">
-      <hg-segmented-control [label]="'vocabulary.levelLabel' | translate" [options]="levels()"
-                            [ngModel]="level()" (ngModelChange)="setLevel($event)"/>
-      <hg-segmented-control [label]="'vocabulary.sortLabel' | translate" [options]="sorts()" [(ngModel)]="sort"/>
+      <app-basic-select [ariaLabel]="'vocabulary.levelLabel' | translate" [items]="levels()" optionLabel="label" optionValue="value"
+                            [value]="level()" (valueChange)="setLevel($event)"/>
+      <app-segmented-control [label]="'vocabulary.sortLabel' | translate" [items]="sorts()" [value]="sort()" (valueChange)="setSort($event)"/>
     </div>
 
     @if (facade.loading()) {
@@ -27,12 +27,10 @@
     } @else {
       <div class="word-list" role="list">
         @for (word of facade.words(); track word.id) {
-          <div class="vrow" role="listitem" [class]="'state-' + wordState(word)" [class.open]="expandedId() === word.id">
+          <div class="vrow" role="listitem" [class]="stateClass(word)" [class.open]="expandedId() === word.id">
             <div class="card-main">
-              <button type="button" data-domain-control class="rowmain" (click)="toggleExpand(word)"
-                    [attr.aria-expanded]="expandedId() === word.id"
-                    [attr.aria-controls]="word.word.exampleKo ? 'word-example-' + word.id : null"
-                    [attr.aria-label]="word.word.hangul + ', ' + word.word.translation">
+              <app-button class="hg-native-host" styleClass="hg-native-button rowmain" type="button" (click)="toggleExpand(word)"
+                    [aria]="rowAria(word)">
                 <img class="word-image" [src]="imageUrl(word.word.imageUrl)" (error)="onImageError(word.word.imageUrl)"
                      alt="" width="80" height="80" loading="lazy" decoding="async"/>
                 <span class="word-copy">
@@ -40,23 +38,21 @@
                   <span class="rom">{{ word.word.romanization }}</span>
                   <span class="tr">{{ word.word.translation }}</span>
                 </span>
-              </button>
+              </app-button>
               <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl"/>
             </div>
             <div class="card-footer">
               <span class="stars" [title]="'vocabulary.level' | translate:{level: word.level}">{{ stars(word) }}</span>
               <span class="due">{{ dueLabel(word) }}</span>
-              <button type="button" data-domain-control class="diffbtn" [class.on]="word.isDifficult"
+              <app-button class="hg-native-host" [styleClass]="difficultClass(word)" type="button"
                     (click)="facade.toggleDifficult(word)"
-                    [attr.aria-pressed]="word.isDifficult"
-                    [attr.aria-label]="(word.isDifficult ? 'vocabulary.removeDifficult' : 'vocabulary.markDifficult') | translate"
-                    [title]="(word.isDifficult ? 'vocabulary.removeDifficult' : 'vocabulary.markDifficult') | translate"><span aria-hidden="true">🔥</span></button>
-              <button type="button" data-domain-control class="deckbtn" (click)="deckPickWord.set(word)"
-                    [attr.aria-label]="'vocabulary.addToDeckAria' | translate:{word: word.word.hangul}" [title]="'vocabulary.toDeck' | translate"><span aria-hidden="true">＋</span></button>
+                    [title]="difficultLabelKey(word) | translate" [aria]="{'aria-pressed': (word.isDifficult), 'aria-label': (difficultLabelKey(word) | translate)}"><span aria-hidden="true">🔥</span></app-button>
+              <app-button class="hg-native-host" styleClass="hg-native-button deckbtn" type="button" (click)="deckPickWord.set(word)"
+                    [title]="'vocabulary.toDeck' | translate" [aria]="{'aria-label': ('vocabulary.addToDeckAria' | translate:{word: word.word.hangul})}"><span aria-hidden="true">＋</span></app-button>
             </div>
 
             @if (expandedId() === word.id && word.word.exampleKo) {
-              <div class="example" [id]="'word-example-' + word.id">
+              <div class="example" [id]="exampleId(word)">
                 <span class="kr" lang="ko">{{ word.word.exampleKo }}</span>
                 <small>{{ word.word.exampleTranslation }}</small>
               </div>
@@ -66,17 +62,16 @@
       </div>
 
       @if (totalPages() > 1) {
-        <hg-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="page.set($event)"/>
+        <app-pagination [rows]="pageSize" [first]="firstRow()" [totalRecords]="facade.totalElements()" (pageChange)="page.set($event.page ?? 0)"/>
       }
     }
   } @else {
     <!-- Колоды -->
-    <div class="newdeck">
-      <hg-input [label]="'vocabulary.deck.nameLabel' | translate" [placeholder]="'vocabulary.deck.placeholder' | translate"
-                [ngModel]="newDeckTitle()" (ngModelChange)="newDeckTitle.set($event)"
-                (keydown.enter)="createDeck()"/>
-      <hg-button [label]="'common.create' | translate" (pressed)="createDeck()"/>
-    </div>
+    <form class="newdeck" novalidate (submit)="$event.preventDefault(); createDeck()">
+      <app-basic-input [label]="'vocabulary.deck.nameLabel' | translate" [placeholder]="'vocabulary.deck.placeholder' | translate"
+                [formField]="deckForm"/>
+      <app-button styleClass="hg-button" type="submit" [label]="'common.create' | translate"/>
+    </form>
     @if (facade.decks().length === 0) {
       <div class="panel loadpanel">{{ 'vocabulary.deck.empty' | translate }}</div>
     }
@@ -86,23 +81,23 @@
           <b>{{ deck.title }}</b>
           <small>{{ 'vocabulary.wordCount' | translate:{count: deck.wordCount} }}</small>
         </div>
-        <hg-button [label]="'common.rename' | translate" variant="ghost" size="sm" (pressed)="renameDeck(deck)"/>
-        <hg-button [label]="'common.delete' | translate" variant="danger" size="sm" (pressed)="deleteDeck(deck)"/>
+        <app-button styleClass="hg-button hg-button--ghost hg-button--sm" [label]="'common.rename' | translate" (click)="renameDeck(deck)"/>
+        <app-button styleClass="hg-button hg-button--danger hg-button--sm" [label]="'common.delete' | translate" (click)="deleteDeck(deck)"/>
       </div>
     }
   }
 
   <!-- выбор колоды для слова -->
   @if (deckPickWord(); as word) {
-    <hg-dialog [visible]="true" (visibleChange)="!$event && closeDeckPicker()" [title]="'vocabulary.addToDeck' | translate">
+    <app-dialog closeAriaLabel="Закрыть" [visible]="true" (visibleChange)="!$event && closeDeckPicker()" [header]="'vocabulary.addToDeck' | translate">
       <h3>{{ 'vocabulary.deckPickerQuestion' | translate:{word: word.word.hangul} }}</h3>
       @if (facade.decks().length === 0) {
         <p class="pagesub">{{ 'vocabulary.deckPickerEmpty' | translate }}</p>
       }
       @for (deck of facade.decks(); track deck.id) {
-        <hg-button class="deckopt" [label]="deck.title" variant="ghost" block (pressed)="addToDeck(deck)"/>
+        <app-button styleClass="hg-button hg-button--ghost hg-button--block" class="deckopt" [label]="deck.title" (click)="addToDeck(deck)"/>
       }
-      <hg-button dialog-actions [label]="'common.cancel' | translate" variant="ghost" (pressed)="closeDeckPicker()"/>
-    </hg-dialog>
+      <app-button styleClass="hg-button hg-button--ghost" dialogActions [label]="'common.cancel' | translate" (click)="closeDeckPicker()"/>
+    </app-dialog>
   }
 </div>

@@ -72,6 +72,19 @@ describe('Profile avatar update', () => {
     expect(component.uploading()).toBe(false);
   });
 
+  it('ignores cancelled selection and clears files after failed upload for reselection', () => {
+    const component = page();
+    component.selectAvatar([]);
+    expect(component.uploading()).toBe(false);
+    const file = new File(['avatar'], 'avatar.png');
+    component.avatarFiles.set([file]);
+    component.selectAvatar([file]);
+    expect(component.uploading()).toBe(true);
+    upload.error(new Error('failed'));
+    expect(component.avatarFiles()).toEqual([]);
+    expect(component.uploading()).toBe(false);
+  });
+
   it('does not fabricate a gamification profile when it has not loaded', () => {
     const component = page(false);
     component.onAvatar(new File([], 'avatar.png'));

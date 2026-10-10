@@ -4,23 +4,23 @@
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
+      <app-button styleClass="hg-button hg-button--ghost" label="Повторить"  (click)="facade.load()"/>
     </div>
   } @else if (facade.profile(); as profile) {
     <div class="panel cab-head">
       <div class="ghost kr">복</div>
-      <div class="bigav" [title]="uploading() ? 'Загружаем…' : 'Аватар'">
+      <div class="bigav" [title]="avatarTitle()">
         @if (profile.avatarUrl) {
           <img [src]="profile.avatarUrl" alt="Аватар">
         } @else {
           {{ profile.name.charAt(0).toUpperCase() }}
         }
       </div>
-      <hg-file-picker label="Сменить аватар" ariaLabel="Выбрать новый аватар"
-                      accept="image/*" [disabled]="uploading()" (fileSelected)="onAvatar($event)"/>
+      <app-file-picker label="Сменить аватар" ariaLabel="Выбрать новый аватар"
+                      accept="image/*" [disabled]="uploading()" [value]="avatarFiles()" (valueChange)="avatarFiles.set($event); selectAvatar($event)"/>
       <div class="who">
         <h1>{{ profile.name }}</h1>
-        <div class="pill p-y">⭐ {{ profile.levelTitle || ('Уровень ' + profile.level) }} · {{ profile.totalXp }} XP</div>
+        <div class="pill p-y">⭐ {{ levelLabel() }} · {{ profile.totalXp }} XP</div>
         <p class="kr">한국어 · изучает корейский с {{ profile.memberSince | date:'LLLL y' }}</p>
       </div>
       <a class="editbtn" routerLink="/settings">Настройки</a>
@@ -30,7 +30,7 @@
       <div class="panel levelbox">
         <div class="lt">
           <b>До следующего уровня</b>
-          <span>{{ profile.totalXp }} / {{ profile.totalXp + profile.xpToNext }} XP</span>
+          <span>{{ profile.totalXp }} / {{ xpTarget() }} XP</span>
         </div>
         <div class="track"><div class="fill" [style.width.%]="facade.levelPercent()"></div></div>
       </div>
@@ -52,7 +52,7 @@
         @for (achievement of facade.achievements(); track achievement.id) {
           <div class="a" [class.got]="achievement.earnedAt" [class.locked]="!achievement.earnedAt"
                [title]="achievement.description">
-            <div class="ic">{{ achievement.icon || '🏅' }}</div>
+            <div class="ic">{{ achievement.icon || defaultAchievementIcon }}</div>
             {{ achievement.title }}
           </div>
         }

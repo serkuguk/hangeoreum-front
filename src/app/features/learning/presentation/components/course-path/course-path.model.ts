@@ -1,3 +1,8 @@
+export const CourseNodeState = {
+  DONE: 'done', CURRENT: 'current', OPEN: 'open', LOCKED: 'locked', PRO: 'pro', BONUS: 'bonus', FINAL: 'final',
+} as const;
+export const ChapterState = {DONE: 'done', CURRENT: 'current', LOCKED: 'locked'} as const;
+
 export type CourseNodeState =
   | 'done'     // урок пройден
   | 'current'  // следующий шаг (пульс + карточка «Сейчас проходишь»)
@@ -44,6 +49,10 @@ export interface PlacedNode extends CourseNode {
   y: number;
   size: number;
   side: 'left' | 'right';
+  /** left кнопки узла (центр x минус половина размера) */
+  left: number;
+  /** top подписи узла */
+  labelTop: number;
 }
 
 export interface ChapterDivider {

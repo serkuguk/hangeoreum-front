@@ -1,3 +1,4 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
 import {FillBlankPayload} from '../../../domain/entities/exercise.entity';
@@ -6,7 +7,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-exercise-fill-blank',
-  imports: [TranslatePipe],
+  imports: [ButtonComponent, TranslatePipe],
   template: `
     <div class="q-kind">{{ 'learning.exercise.fillBlank' | translate }}</div>
     <div class="panel gapcard">
@@ -20,23 +21,23 @@ import {TranslatePipe} from '@ngx-translate/core';
       }
       <div class="gapopts">
         @for (option of options(); track option.text) {
-          <button type="button" data-domain-control class="gapopt kr"
-                  [attr.aria-pressed]="picked() === option.text"
-                  [class.is-ok]="answered() && option.text === payload().correct"
-                  [class.is-bad]="answered() && picked() === option.text && option.text !== payload().correct"
+          <app-button class="hg-native-host" [styleClass]="'hg-native-button gapopt kr' + (answered() && option.text === payload().correct ? ' is-ok' : '') + (answered() && picked() === option.text && option.text !== payload().correct ? ' is-bad' : '')" type="button"
+
                   [disabled]="answered()"
-                  (click)="pick(option.text)">
+                  (click)="pick(option.text)" [aria]="{'aria-pressed': (picked() === option.text)}">
             {{ option.text }}
             @if (option.hint) {
               <small>{{ option.hint }}</small>
             }
-          </button>
+          </app-button>
         }
       </div>
     </div>
   `,
   styleUrl: './exercise-shared.scss',
   styles: `
+    :host ::ng-deep {
+
     .gapcard { padding: var(--hg-space-6) var(--hg-space-7); }
 
     .gapline {
@@ -77,7 +78,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 
     .gapopts { display: flex; gap: var(--hg-space-3); justify-content: center; flex-wrap: wrap; }
 
-    .gapopt {
+    button.hg-native-button.hg-native-button.hg-native-button.gapopt {
       font-family: var(--hg-font-display);
       font-size: 26px;
       min-width: 84px;
@@ -105,6 +106,7 @@ import {TranslatePipe} from '@ngx-translate/core';
       // incorrect
       &.is-bad { border-color: var(--hg-danger); background: var(--hg-danger-soft); color: var(--hg-danger); animation: shake .3s; }
       &.is-ok:disabled, &.is-bad:disabled { opacity: 1; }
+    }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

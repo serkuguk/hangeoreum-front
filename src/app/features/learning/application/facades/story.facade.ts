@@ -5,7 +5,8 @@ import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {Story, StoryLine} from '../../domain/entities/story.entity';
 import {LearnMapFacade} from './learn-map.facade';
 
-export type StoryMode = 'watch' | 'read' | 'listen';
+export const StoryMode = {WATCH: 'watch', READ: 'read', LISTEN: 'listen'} as const;
+export type StoryMode = typeof StoryMode[keyof typeof StoryMode];
 
 /** Владеет load/playback/completion Story. Добавление слов остаётся во WordAdditionFacade. */
 @Injectable()
@@ -19,7 +20,7 @@ export class StoryFacade {
   readonly story = signal<Story | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
-  readonly mode = signal<StoryMode>('watch');
+  readonly mode = signal<StoryMode>(StoryMode.WATCH);
   readonly openLine = signal<number | null>(null);
   readonly activeLine = signal<number | null>(null);
   readonly completed = signal(false);

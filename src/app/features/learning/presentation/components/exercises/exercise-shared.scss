@@ -1,3 +1,4 @@
+:host ::ng-deep {
 // Общая оболочка всех 6 exercise-компонентов: одна сетка, один набор
 // idle/selected/correct/incorrect состояний, никаких буквальных цветов —
 // только семантические --hg-* токены, чтобы light/dark темы работали одинаково.
@@ -36,7 +37,7 @@
   gap: var(--hg-space-3);
 }
 
-.opt {
+button.hg-native-button.hg-native-button.hg-native-button.opt {
   background: var(--hg-surface);
   border: 2px solid var(--hg-border);
   border-radius: var(--hg-radius-block);
@@ -61,7 +62,7 @@
 }
 
 // ---------- Токены слов (word-order: собранное предложение + банк) ----------
-.wtok {
+button.hg-native-button.hg-native-button.hg-native-button.wtok {
   background: var(--hg-surface);
   border: 1px solid var(--hg-border);
   border-radius: var(--hg-radius-control);
@@ -102,4 +103,6 @@
 
 @media (max-width: 880px) {
   .opts { grid-template-columns: 1fr; }
+}
+
 }

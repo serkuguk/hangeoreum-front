@@ -1,5 +1,6 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, booleanAttribute, computed, input, output} from '@angular/core';
-import {ChapterDivider, CourseChapter, CourseNode, CourseNodeState, PlacedNode} from './course-path.model';
+import {ChapterDivider, ChapterState, CourseChapter, CourseNode, CourseNodeState, PlacedNode} from './course-path.model';
 
 /**
  * Геометрия змейки задана долями ширины холста, а не абсолютными x:
@@ -13,10 +14,11 @@ const CURRENT_NODE = 96;
 const NODE_COMPACT = 64;
 const CURRENT_COMPACT = 72;
 const COMPACT_MAX = 660;
-const DEAD = new Set<CourseNodeState>(['locked', 'final']);
+const DEAD = new Set<CourseNodeState>([CourseNodeState.LOCKED, CourseNodeState.FINAL]);
 
 @Component({
   selector: 'hg-course-path',
+  imports: [ButtonComponent],
   templateUrl: './course-path.component.html',
   styleUrl: './course-path.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,13 +51,20 @@ export class CoursePathComponent {
 
     return nodes.map((node, index) => {
       if (index > 0 && nodes[index - 1].chapterId !== node.chapterId) gaps += gap;
-      const current = node.state === 'current' || !!node.now;
+      const current = node.state === CourseNodeState.CURRENT || !!node.now;
       const sizes = compact ? [NODE_COMPACT, CURRENT_COMPACT] : [NODE, CURRENT_NODE];
       const size = sizes[current ? 1 : 0];
       const x = Math.round(LANE[index % LANE.length] * width);
-      return {...node, x, y: TOP + index * step + gaps, size, side: x > width / 2 ? 'left' : 'right'};
+      const y = TOP + index * step + gaps;
+      return {
+        ...node, x, y, size, side: x > width / 2 ? 'left' : 'right',
+        left: x - size / 2,
+        labelTop: isNowNode(node) ? y - 10 : y + 18,
+      };
     });
   });
+
+  readonly viewBox = computed(() => `0 0 ${this.width()} ${this.canvasHeight()}`);
 
   /** Высота холста — последняя точка + запас на подпись */
   readonly canvasHeight = computed(() => {
@@ -112,10 +121,22 @@ export class CoursePathComponent {
     return index;
   });
 
+  isLockedChapter(chapter: CourseChapter): boolean { return chapter.state === ChapterState.LOCKED; }
+  hasShadow(node: PlacedNode): boolean { return node.state !== CourseNodeState.FINAL; }
+  isPro(node: PlacedNode): boolean { return node.state === CourseNodeState.PRO; }
+  isLeft(node: PlacedNode): boolean { return node.side === 'left'; }
+  chipClass(chapter: CourseChapter): string { return `hg-path__chip is-${chapter.state}`; }
+  btnClass(node: PlacedNode): string { return `hg-native-button hg-path__btn is-${node.state}`; }
+  subtitleClass(node: PlacedNode): string { return `is-${node.state}`; }
+  nodeAria(node: PlacedNode): string { return `${node.title} — ${node.subtitle}`; }
+  testOutStyle(y: number): Record<string, string> {
+    return {top: `${y}px`, left: `${this.testOutLeft()}px`, width: `${this.testOutWidth()}px`};
+  }
+
   isDead(node: PlacedNode): boolean { return DEAD.has(node.state); }
   /** Пульс и расширенная подпись: явный флаг now либо состояние current (совместимость с дашбордом). */
-  isNow(node: PlacedNode): boolean { return node.now ?? node.state === 'current'; }
-  isMuted(node: PlacedNode): boolean { return this.isDead(node) || node.state === 'pro'; }
+  isNow(node: PlacedNode): boolean { return isNowNode(node); }
+  isMuted(node: PlacedNode): boolean { return this.isDead(node) || node.state === CourseNodeState.PRO; }
 
   labelLeft(node: PlacedNode): number | null {
     return node.side === 'right' ? node.x + node.size / 2 + 26 : null;
@@ -129,6 +150,10 @@ export class CoursePathComponent {
     if (this.isDead(node)) return;
     this.nodeSelected.emit(node);
   }
+}
+
+function isNowNode(node: CourseNode): boolean {
+  return node.now ?? node.state === CourseNodeState.CURRENT;
 }
 
 /** Кубическая змейка: вертикальный выход из точки, вертикальный вход в следующую */

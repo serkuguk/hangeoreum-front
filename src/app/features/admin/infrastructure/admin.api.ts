@@ -137,6 +137,9 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export const MediaUploadKind = {VIDEO: 'video', AUDIO: 'audio', THUMBNAIL: 'thumbnail'} as const;
+export type MediaUploadKind = typeof MediaUploadKind[keyof typeof MediaUploadKind];
+
 @Injectable()
 export class AdminApi {
   private http = inject(HttpClient);
@@ -320,7 +323,7 @@ export class AdminApi {
     return this.http.delete<void>(`${this.base}/clips/${id}`);
   }
 
-  uploadClipMedia(id: string, file: File, kind: 'video' | 'audio' | 'thumbnail'): Observable<AdminClip> {
+  uploadClipMedia(id: string, file: File, kind: MediaUploadKind): Observable<AdminClip> {
     const form = new FormData();
     form.append('file', file);
     form.append('type', kind); // бэкенд читает @RequestParam("type"); с 'kind' аудио/обложка затирали videoUrl

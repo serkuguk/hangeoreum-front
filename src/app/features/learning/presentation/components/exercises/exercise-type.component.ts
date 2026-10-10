@@ -1,22 +1,23 @@
+import {FormField, disabled, form, required} from '@angular/forms/signals';
+import {ButtonComponent, BasicInputComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, input, output, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
-import {HgInputComponent} from '@shared/components/controls/hg-input.component';
 import {TypeWordPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback, gradeTypedAnswer} from '../../../domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-exercise-type',
-  imports: [FormsModule, HgButtonComponent, HgInputComponent, TranslatePipe],
+  imports: [FormField, ButtonComponent, BasicInputComponent, TranslatePipe],
   template: `
     <div class="q-kind">{{ 'learning.exercise.typeKorean' | translate }}</div>
     <div class="panel taskpanel">«{{ payload().translation }}»</div>
-    <hg-input class="krinput kr" type="text" [label]="'learning.exercise.answerKorean' | translate" [(ngModel)]="value"
-              [disabled]="answered()" lang="ko" autocomplete="off" autocapitalize="off"
-              [spellcheck]="false" [placeholder]="'learning.exercise.koreanPlaceholder' | translate" (keydown.enter)="check()"/>
-    <hg-button class="checkbtn" [label]="'common.check' | translate"
-               [disabled]="!value().trim() || answered()" (pressed)="check()"/>
+    <form novalidate (submit)="$event.preventDefault(); check()">
+      <app-basic-input class="krinput kr" type="text" [label]="'learning.exercise.answerKorean' | translate" [formField]="answerForm"
+              lang="ko" autocomplete="off" autocapitalize="off"
+              [spellcheck]="false" [placeholder]="'learning.exercise.koreanPlaceholder' | translate"/>
+      <app-button styleClass="hg-button" class="checkbtn" [label]="'common.check' | translate"
+               [disabled]="!value().trim() || answered()" type="submit"/>
+    </form>
   `,
   styleUrl: './exercise-shared.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +28,10 @@ export class ExerciseTypeComponent {
 
   readonly value = signal('');
   readonly answered = signal(false);
+  readonly answerForm = form(this.value, path => {
+    required(path);
+    disabled(path, () => this.answered());
+  });
 
   check(): void {
     if (this.answered() || !this.value().trim()) return;

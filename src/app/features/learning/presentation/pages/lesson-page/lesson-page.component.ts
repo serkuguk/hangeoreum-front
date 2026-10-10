@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, OnInit, inject, input} from '@angular/core';
+import {ButtonComponent} from 'springest';
+import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input} from '@angular/core';
 import {Router} from '@angular/router';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
 import {LessonFacade} from '../../../application/facades/lesson.facade';
 import {
@@ -29,7 +29,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
     ExerciseFillBlankComponent,
     ExerciseMatchComponent,
     ExerciseTypeComponent,
-    HgButtonComponent,
+    ButtonComponent,
     HgSessionResultCardComponent,
     TranslatePipe,
   ],
@@ -43,6 +43,21 @@ export class LessonPageComponent implements OnInit {
   readonly facade = inject(LessonFacade);
   private router = inject(Router);
   private translate = inject(TranslateService);
+
+  readonly feedbackView = computed(() => {
+    const feedback = this.facade.feedback();
+    if (!feedback) return null;
+    return {
+      icon: feedback.correct ? '✅' : '❌',
+      titleKey: feedback.correct ? 'learning.lesson.correct' : 'learning.lesson.incorrect',
+      buttonClass: feedback.correct ? 'hg-button hg-button--primary' : 'hg-button hg-button--danger',
+      showExpected: !feedback.correct && !!feedback.expected,
+      showRetryOnly: !feedback.correct && !feedback.expected,
+      expected: feedback.expected,
+    };
+  });
+
+  readonly resultSubtitle = computed(() => `«${this.facade.lesson()?.title}»`);
 
   ngOnInit(): void {
     this.facade.start(this.id());

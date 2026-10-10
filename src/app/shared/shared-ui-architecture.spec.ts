@@ -16,10 +16,7 @@ interface Violation {
 }
 
 const projectRoot = process.cwd();
-const sourceRoots = [
-  join(projectRoot, 'src', 'app', 'features'),
-  join(projectRoot, 'src', 'app', 'layouts'),
-];
+const sourceRoots = [join(projectRoot, 'src', 'app')];
 
 const nativeFieldPattern = /<\s*(input|select|textarea)\b/gi;
 const nativeButtonPattern = /<button\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi;
@@ -103,6 +100,7 @@ function boundaryIssue(from: string, to: string, specifier: string): string | nu
   const targetOwner = target?.split('/')[0];
   if (from.includes('/domain/') && (
     specifier.startsWith('@angular/') || specifier.startsWith('@ngx-translate/')
+    || specifier === 'springest' || specifier.startsWith('springest/')
     || specifier.startsWith('primeng/') || /^src\/app\/(core|layouts)\//.test(to)
     || (target && (targetOwner !== owner || !target.startsWith(`${owner}/domain/`)))
   )) return 'domain must remain independent from framework and outer layers';
@@ -136,7 +134,7 @@ function featureCycles(edges: Map<string, Set<string>>): string[][] {
 describe('shared UI architecture', () => {
   const files = sourceRoots.flatMap(sourceFiles);
 
-  it('keeps native fields and PrimeNG controls inside shared components', () => {
+  it('uses springest for fields and PrimeNG controls throughout the application', () => {
     const violations: Violation[] = [];
 
     for (const file of files) {
@@ -147,7 +145,7 @@ describe('shared UI architecture', () => {
           violations.push({
             file: displayPath(file),
             line: lineAt(source, match.index ?? 0),
-            message: `PrimeNG ${match[1]} must be wrapped by a shared component`,
+            message: `PrimeNG ${match[1]} must use springest`,
           });
         }
       }
@@ -159,7 +157,7 @@ describe('shared UI architecture', () => {
           violations.push({
             file: template.file,
             line: templateLine(template, match.index ?? 0),
-            message: `raw <${match[1].toLowerCase()}> must use a shared control`,
+            message: `raw <${match[1].toLowerCase()}> must use springest`,
           });
         }
 
@@ -167,7 +165,7 @@ describe('shared UI architecture', () => {
           violations.push({
             file: template.file,
             line: templateLine(template, match.index ?? 0),
-            message: `direct PrimeNG ${match[0].trim()} must use a shared control`,
+            message: `direct PrimeNG ${match[0].trim()} must use springest`,
           });
         }
       }
@@ -176,27 +174,42 @@ describe('shared UI architecture', () => {
     expect(violations).toEqual([]);
   });
 
-  it('allows native buttons only for explicit domain interactions', () => {
+  it('uses springest for all buttons including inline and shared templates', () => {
     const violations: Violation[] = [];
 
     for (const file of files) {
       for (const template of templates(file)) {
         const content = template.content.replace(/<!--[\s\S]*?-->/g, match => ' '.repeat(match.length));
         for (const match of content.matchAll(nativeButtonPattern)) {
-          const tag = match[0];
-          const hasButtonType = /\btype\s*=\s*(['"])button\1/i.test(tag);
-          const isDomainControl = /\bdata-domain-control(?:\s|=|>)/i.test(tag);
-          if (hasButtonType && isDomainControl) continue;
-
           violations.push({
             file: template.file,
             line: templateLine(template, match.index ?? 0),
-            message: 'raw <button> requires type="button" and data-domain-control',
+            message: 'raw <button> must use springest',
           });
         }
       }
     }
 
+    expect(violations).toEqual([]);
+  });
+
+  it('removes legacy controls and imports rather than wrapping or re-exporting springest', () => {
+    const violations: string[] = [];
+    for (const file of files) {
+      const source = readFileSync(file, 'utf8');
+      if (/<\/?hg-(button|input|textarea|select|checkbox|toggle|segmented-control|file-picker|dialog|pagination)\b|\bHg(Button|Input|Textarea|Select|Checkbox|Toggle|SegmentedControl|FilePicker|Dialog|Pagination)Component\b|components\/controls\b/.test(source)) {
+        violations.push(displayPath(file));
+      }
+      if (file.endsWith('.ts')) {
+        const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+        for (const statement of ast.statements) {
+          if (ts.isExportDeclaration(statement) && statement.moduleSpecifier
+              && ts.isStringLiteral(statement.moduleSpecifier) && statement.moduleSpecifier.text === 'springest') {
+            violations.push(`${displayPath(file)}: springest must be imported directly by consumers`);
+          }
+        }
+      }
+    }
     expect(violations).toEqual([]);
   });
 

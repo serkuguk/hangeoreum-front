@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, inject, OnDestroy} from '@angular/core';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, inject, OnDestroy, signal} from '@angular/core';
+import {FormField, form, required, email} from '@angular/forms/signals';
 import {Router, RouterLink} from '@angular/router';
 import {AuthFacade} from '../../../application/facades/auth.facade';
-import {HgButtonComponent, HgInputComponent} from '@shared/components/controls';
+import {ButtonComponent, BasicInputComponent, PasswordInputComponent, FormFieldComponent} from 'springest';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-login-page',
-  imports: [ReactiveFormsModule, RouterLink, HgButtonComponent, HgInputComponent, TranslatePipe],
+  imports: [FormField, FormFieldComponent, PasswordInputComponent, RouterLink, ButtonComponent, BasicInputComponent, TranslatePipe],
   templateUrl: './login-page.component.html',
   styleUrl: '../_auth-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,9 +16,12 @@ export class LoginPageComponent implements OnDestroy {
   readonly facade = inject(AuthFacade);
   readonly passwordChanged = inject(Router).getCurrentNavigation()?.extras.state?.['passwordReset'] === true;
 
-  readonly form = inject(FormBuilder).nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+  readonly model = signal({email: '', password: ''});
+  readonly submitted = signal(false);
+  readonly form = form(this.model, path => {
+    required(path.email);
+    email(path.email);
+    required(path.password);
   });
 
   constructor() {
@@ -30,16 +33,14 @@ export class LoginPageComponent implements OnDestroy {
   }
 
   submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    this.submitted.set(true);
+    if (this.facade.loading()) return;
+    if (this.form().invalid()) {
+      this.form.email().markAsTouched();
+      this.form.password().markAsTouched();
       return;
     }
-    const {email, password} = this.form.getRawValue();
+    const {email, password} = this.model();
     this.facade.login(email, password);
-  }
-
-  invalid(name: 'email' | 'password'): boolean {
-    const control = this.form.controls[name];
-    return control.touched && control.invalid;
   }
 }

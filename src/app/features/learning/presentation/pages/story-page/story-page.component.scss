@@ -1,5 +1,6 @@
 :host { display: block; }
 
+:host ::ng-deep {
 .storybox { max-width: var(--hg-content-lesson); }
 
 .loadpanel {
@@ -16,7 +17,7 @@
   gap: var(--hg-space-2);
   margin-bottom: var(--hg-space-5);
 
-  button {
+  button.hg-native-button.hg-native-button.hg-native-button {
     background: var(--hg-surface);
     border: 1px solid var(--hg-border);
     color: var(--hg-text-muted);
@@ -122,4 +123,6 @@
   padding: var(--hg-space-4) var(--hg-space-5);
   color: var(--hg-success);
   font-weight: 600;
+}
+
 }

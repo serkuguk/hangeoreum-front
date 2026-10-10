@@ -1,23 +1,32 @@
 <div class="land-hero">
-  <div class="ghost kr">{{ 'landing.brand' | translate }}</div>
-  <div class="eyebrow">{{ 'landing.brandName' | translate }}</div>
-  <h1>{{ 'landing.hero.title' | translate }}</h1>
-  <p>{{ 'landing.hero.subtitle' | translate }}</p>
+  <div class="ghost kr">{{ "landing.brand" | translate }}</div>
+  <div class="eyebrow">{{ "landing.brandName" | translate }}</div>
+  <h1>{{ "landing.hero.title" | translate }}</h1>
+  <p>{{ "landing.hero.subtitle" | translate }}</p>
   <div class="btns">
-    <a class="cta" routerLink="/auth/register">{{ 'landing.hero.startFree' | translate }}</a>
-    <a class="ghostbtn" routerLink="/auth/login">{{ 'landing.hero.hasAccount' | translate }}</a>
+    <a class="cta" routerLink="/auth/register">{{
+      "landing.hero.startFree" | translate
+    }}</a>
+    <a class="ghostbtn" routerLink="/auth/login">{{
+      "landing.hero.hasAccount" | translate
+    }}</a>
   </div>
-  <div class="proverb kr">{{ 'landing.proverb.korean' | translate }}<small>{{ 'landing.proverb.translation' | translate }}</small></div>
+  <div class="proverb kr">
+    {{ "landing.proverb.korean" | translate
+    }}<small>{{ "landing.proverb.translation" | translate }}</small>
+  </div>
 </div>
 
 <div class="wrap">
-  <h2 class="secttl">{{ 'landing.featuresHeading' | translate }}</h2>
-  <p class="secsub">{{ 'landing.featuresSubheading' | translate }}</p>
+  <h2 class="secttl">{{ "landing.featuresHeading" | translate }}</h2>
+  <p class="secsub">{{ "landing.featuresSubheading" | translate }}</p>
   <div class="feat3">
     @for (feature of features; track feature.title) {
       <div class="panel feat">
         <div class="ghost kr">{{ feature.ghost }}</div>
-        <div class="ic" [class]="'ic c-' + feature.color">{{ feature.icon }}</div>
+        <div class="ic" [class]="'ic c-' + feature.color">
+          {{ feature.icon }}
+        </div>
         <h3>{{ feature.title | translate }}</h3>
         <p>{{ feature.text | translate }}</p>
         <div class="src">{{ feature.src | translate }}</div>
@@ -25,29 +34,48 @@
     }
   </div>
 
-  <h2 class="secttl">{{ 'landing.pricing.heading' | translate }}</h2>
-  <p class="secsub">{{ 'landing.pricing.subheading' | translate }}</p>
+  <h2 class="secttl">{{ "landing.pricing.heading" | translate }}</h2>
+  <p class="secsub">{{ "landing.pricing.subheading" | translate }}</p>
   <div class="plans">
     <div class="panel plan">
-      <h3>{{ 'landing.pricing.free.title' | translate }}</h3>
-      <p class="plansub">{{ 'landing.pricing.free.subtitle' | translate }}</p>
-      <div class="price">0 €<small>{{ 'landing.pricing.free.priceSuffix' | translate }}</small></div>
+      <h3>{{ "landing.pricing.free.title" | translate }}</h3>
+      <p class="plansub">{{ "landing.pricing.free.subtitle" | translate }}</p>
+      <div class="price">
+        0 €<small>{{ "landing.pricing.free.priceSuffix" | translate }}</small>
+      </div>
       <ul>
-        <li>{{ 'landing.pricing.free.benefit1' | translate }}</li><li>{{ 'landing.pricing.free.benefit2' | translate }}</li><li>{{ 'landing.pricing.free.benefit3' | translate }}</li><li>{{ 'landing.pricing.free.benefit4' | translate }}</li>
+        <li>{{ "landing.pricing.free.benefit1" | translate }}</li>
+        <li>{{ "landing.pricing.free.benefit2" | translate }}</li>
+        <li>{{ "landing.pricing.free.benefit3" | translate }}</li>
+        <li>{{ "landing.pricing.free.benefit4" | translate }}</li>
       </ul>
-      <a class="ghostbtn" routerLink="/auth/register">{{ 'common.start' | translate }}</a>
+      <a class="ghostbtn" routerLink="/auth/register">{{
+        "common.start" | translate
+      }}</a>
     </div>
     <div class="panel plan pro">
-      <span class="pill p-y poppill">{{ 'landing.pricing.pro.popular' | translate }}</span>
-      <h3>{{ 'landing.pricing.pro.title' | translate }}</h3><p class="plansub">{{ 'landing.pricing.pro.subtitle' | translate }}</p><div class="price">9 €<small>{{ 'landing.pricing.pro.priceSuffix' | translate }}</small></div>
+      <span class="pill p-y poppill">{{
+        "landing.pricing.pro.popular" | translate
+      }}</span>
+      <h3>{{ "landing.pricing.pro.title" | translate }}</h3>
+      <p class="plansub">{{ "landing.pricing.pro.subtitle" | translate }}</p>
+      <div class="price">
+        9 €<small>{{ "landing.pricing.pro.priceSuffix" | translate }}</small>
+      </div>
       <ul>
-        <li>{{ 'landing.pricing.pro.benefit1' | translate }}</li><li>{{ 'landing.pricing.pro.benefit2' | translate }}</li><li>{{ 'landing.pricing.pro.benefit3' | translate }}</li><li>{{ 'landing.pricing.pro.benefit4' | translate }}</li>
+        <li>{{ "landing.pricing.pro.benefit1" | translate }}</li>
+        <li>{{ "landing.pricing.pro.benefit2" | translate }}</li>
+        <li>{{ "landing.pricing.pro.benefit3" | translate }}</li>
+        <li>{{ "landing.pricing.pro.benefit4" | translate }}</li>
       </ul>
-      <a class="cta" routerLink="/auth/register">{{ 'landing.pricing.pro.cta' | translate }}</a>
+      <a class="cta" routerLink="/auth/register">{{
+        "landing.pricing.pro.cta" | translate
+      }}</a>
     </div>
   </div>
 
   <div class="land-foot">
-    <span>© {{ year }} {{ 'landing.brandName' | translate }}</span><span>{{ 'landing.footerLinks' | translate }}</span>
+    <span>© {{ year }} {{ "landing.brandName" | translate }}</span
+    ><span>{{ "landing.footerLinks" | translate }}</span>
   </div>
 </div>

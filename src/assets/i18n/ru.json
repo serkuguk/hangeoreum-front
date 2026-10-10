@@ -22,7 +22,9 @@
     "billing": "Подписка",
     "logout": "Выйти",
     "userMenu": "Меню пользователя",
-    "main": "Основная навигация"
+    "main": "Основная навигация",
+    "expandMenu": "Развернуть меню",
+    "collapseMenu": "Свернуть меню"
   },
   "billing": {
     "title": "Hangeoreum Pro",

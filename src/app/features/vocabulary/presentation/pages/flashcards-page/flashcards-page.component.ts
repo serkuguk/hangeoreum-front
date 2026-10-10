@@ -1,7 +1,7 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, HostListener, OnInit, computed, inject, input, signal} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
-import {HgButtonComponent} from '@shared/components/controls';
 import {ReviewFacade} from '../../../application/facades/review.facade';
 import {SrsQuality} from '../../../domain/entities/user-word.entity';
 import {FinishResult} from '../../../domain/repositories/vocabulary.repository';
@@ -9,7 +9,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-flashcards-page',
-  imports: [RouterLink, HgAudioButtonComponent, HgButtonComponent, HgSessionResultCardComponent, TranslatePipe],
+  imports: [RouterLink, HgAudioButtonComponent, ButtonComponent, HgSessionResultCardComponent, TranslatePipe],
   templateUrl: './flashcards-page.component.html',
   styleUrl: './flashcards-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +24,17 @@ export class FlashcardsPageComponent implements OnInit {
   private translate = inject(TranslateService);
 
   readonly isFlipped = signal(false);
+  readonly counterLabel = computed(() => `${this.facade.index() + 1} / ${this.facade.total()}`);
+  readonly progressPercent = computed(() => (this.facade.index() / this.facade.total()) * 100);
+
+  ratingClass(rating: {cls: string}): string {
+    return `hg-native-button ${rating.cls}`;
+  }
+
+  ratingAria(rating: {label: string; quality: SrsQuality}): string {
+    return `${rating.label}: ${this.facade.intervalLabel(rating.quality)}`;
+  }
+
   readonly accuracy = computed(() => {
     const answered = this.facade.index();
     return answered === 0 ? 100 : Math.round(this.facade.correctCount() / answered * 100);

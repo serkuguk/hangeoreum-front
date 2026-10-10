@@ -1,3 +1,4 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {HgAudioButtonComponent} from '@shared/components/hg';
 import {shuffle} from '@shared/utils/shuffle';
@@ -7,7 +8,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-exercise-choice',
-  imports: [HgAudioButtonComponent, TranslatePipe],
+  imports: [ButtonComponent, HgAudioButtonComponent, TranslatePipe],
   template: `
     <div class="q-kind">{{ 'learning.exercise.chooseTranslation' | translate }}</div>
     <div class="q-word">
@@ -21,17 +22,15 @@ import {TranslatePipe} from '@ngx-translate/core';
     </div>
     <div class="opts">
       @for (option of options(); track option.text) {
-        <button type="button" data-domain-control class="opt"
-                [attr.aria-pressed]="picked() === option"
-                [class.pick]="answered() && option.correct"
-                [class.wrong]="answered() && picked() === option && !option.correct"
+        <app-button class="hg-native-host" [styleClass]="'hg-native-button opt' + (answered() && option.correct ? ' pick' : '') + (answered() && picked() === option && !option.correct ? ' wrong' : '')" type="button"
+
                 [disabled]="answered()"
-                (click)="pick(option)">
+                (click)="pick(option)" [aria]="{'aria-pressed': (picked() === option)}">
           @if (option.icon) {
             <span class="oi">{{ option.icon }}</span>
           }
           {{ option.text }}
-        </button>
+        </app-button>
       }
     </div>
   `,

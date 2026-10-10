@@ -1,13 +1,15 @@
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
-import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {RouterLink, RouterOutlet} from '@angular/router';
 import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {PaywallDialogComponent} from '@features/billing/presentation/paywall-dialog/paywall-dialog.component';
-import {HgButtonComponent} from '@shared/components/controls';
-import {TranslatePipe} from '@ngx-translate/core';
+import {ButtonComponent} from 'springest';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {HgSidebarComponent} from '@shared/components/sidebar/hg-sidebar.component';
 
 @Component({
   selector: 'hg-main-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, PaywallDialogComponent, HgButtonComponent, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, HgSidebarComponent, PaywallDialogComponent, ButtonComponent, TranslatePipe],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +28,9 @@ export class MainLayoutComponent {
     {link: '/immerse', label: 'navigation.immerse', icon: 'pi-play-circle'},
     {link: '/vocabulary', label: 'navigation.vocabulary', icon: 'pi-book'},
   ];
+
+  private readonly labels = toSignal(inject(TranslateService).stream(this.nav.map(item => item.label)));
+  readonly sidebarItems = computed(() => this.nav.map(item => ({...item, label: this.labels()?.[item.label] ?? item.label})));
 
   logout(): void {
     this.menuOpen.set(false);

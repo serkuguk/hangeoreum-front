@@ -8,12 +8,12 @@
       }
       <div class="gpick">
         @for (game of games; track game.mode) {
-          <button type="button" data-domain-control class="panel gcard" (click)="start(game.mode)"
-                  [disabled]="facade.loading()" [attr.aria-label]="game.title + ': ' + game.hint">
+          <app-button class="hg-native-host" styleClass="hg-native-button panel gcard" type="button" (click)="start(game.mode)"
+                  [disabled]="facade.loading()" [aria]="gameAria(game)">
             <span class="gic">{{ game.icon }}</span>
             <h3>{{ game.title }}</h3>
             <p>{{ game.hint }}</p>
-          </button>
+          </app-button>
         }
       </div>
       @if (facade.loading()) {
@@ -22,24 +22,19 @@
     }
     @case ('playing') {
       <div class="g-top">
-        <div class="timer" [class.low]="facade.timeLeft() < 15">{{ clock() }}</div>
+        <div class="timer" [class.low]="isTimeLow()">{{ clock() }}</div>
         <div class="combo">{{ 'vocabulary.games.combo' | translate:{combo: facade.combo(), score: facade.score()} }}</div>
-        <hg-button class="exitbtn" [label]="'common.exit' | translate" variant="ghost" size="sm" (pressed)="facade.backToPick()"/>
+        <app-button styleClass="hg-button hg-button--ghost hg-button--sm" class="exitbtn" [label]="'common.exit' | translate" (click)="facade.backToPick()"/>
       </div>
 
       @switch (facade.mode()) {
         @case ('MATCH') {
           <div class="match">
             @for (cell of facade.matchCells(); track cell.wordId + cell.side) {
-              <button type="button" data-domain-control class="mcell"
-                      [attr.aria-pressed]="facade.matchSelected() === cell"
-                      [class.kr]="cell.side === 'ko'"
-                      [class.hit]="facade.matchHits().has(cell.wordId + cell.side)"
-                      [class.sel]="facade.matchSelected() === cell"
-                      [class.miss]="facade.matchMiss() === cell"
-                      (click)="facade.pickMatch(cell)">
+              <app-button class="hg-native-host" [styleClass]="cellClass(cell)" type="button"
+                      (click)="facade.pickMatch(cell)" [aria]="{'aria-pressed': (facade.matchSelected() === cell)}">
                 {{ cell.text }}
-              </button>
+              </app-button>
             }
           </div>
         }
@@ -49,12 +44,10 @@
               <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl" size="lg"/>
               <div class="opts">
                 @for (option of facade.options(); track option) {
-                  <button type="button" data-domain-control class="mcell"
-                          [class.hit]="facade.lastAnswer() === 'ok' && option === word.word.translation"
-                          [class.miss]="facade.lastAnswer() === 'bad' && option === word.word.translation"
+                  <app-button class="hg-native-host" [styleClass]="optionClass(option, word.word.translation)" type="button"
                           (click)="facade.pickOption(option)">
                     {{ option }}
-                  </button>
+                  </app-button>
                 }
               </div>
             </div>
@@ -64,7 +57,7 @@
           @if (facade.currentWord(); as word) {
             <div class="spellbox">
               <div class="task">«{{ word.word.translation }}»</div>
-              <div class="typed kr" [class.ok]="facade.lastAnswer() === 'ok'" [class.bad]="facade.lastAnswer() === 'bad'">
+              <div class="typed kr" [class.ok]="isAnswerOk()" [class.bad]="isAnswerBad()">
                 @if (facade.typed().length === 0) {
                   <span class="ph">{{ 'vocabulary.games.spell.hint' | translate }}</span>
                 }
@@ -72,12 +65,11 @@
               </div>
               <div class="bank">
                 @for (syllable of facade.bank(); track $index) {
-                  <button type="button" data-domain-control class="mcell kr syl"
-                          [attr.aria-label]="'vocabulary.games.addSyllable' | translate:{syllable}"
-                          (click)="facade.pickSyllable($index)">{{ syllable }}</button>
+                  <app-button class="hg-native-host" styleClass="hg-native-button mcell kr syl" type="button"
+                          (click)="facade.pickSyllable($index)" [aria]="{'aria-label': ('vocabulary.games.addSyllable' | translate:{syllable})}">{{ syllable }}</app-button>
                 }
               </div>
-              <hg-button [label]="'common.reset' | translate" variant="ghost" (pressed)="facade.resetTyped()"/>
+              <app-button styleClass="hg-button hg-button--ghost" [label]="'common.reset' | translate" (click)="facade.resetTyped()"/>
             </div>
           }
         }
@@ -86,7 +78,7 @@
     @case ('done') {
       <hg-session-result-card [eyebrow]="'vocabulary.games.koreanEyebrow' | translate" [koreanTitle]="'vocabulary.games.koreanTitle' | translate" [title]="'vocabulary.games.roundComplete' | translate"
                               [stats]="resultStats(facade.result())">
-        <hg-button result-actions [label]="'vocabulary.games.anotherRound' | translate" (pressed)="facade.backToPick()"/>
+        <app-button styleClass="hg-button" result-actions [label]="'vocabulary.games.anotherRound' | translate" (click)="facade.backToPick()"/>
         <a result-actions class="ghostbtn" routerLink="/review">{{ 'vocabulary.toModes' | translate }}</a>
       </hg-session-result-card>
     }

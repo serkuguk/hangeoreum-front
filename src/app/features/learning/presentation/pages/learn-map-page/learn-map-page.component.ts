@@ -1,9 +1,9 @@
+import {ButtonComponent} from 'springest';
 import {
   ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector,
   afterNextRender, computed, effect, inject, signal,
 } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {MascotComponent} from '@shared/components/hg/mascot/mascot.component';
 import {LearnMapFacade} from '../../../application/facades/learn-map.facade';
 import {LessonNode, UnitNode} from '../../../domain/entities/course-map.entity';
@@ -20,7 +20,7 @@ const FINISH_ID = 'course-finish';
 
 @Component({
   selector: 'hg-learn-map-page',
-  imports: [RouterLink, HgButtonComponent, CoursePathComponent, MascotComponent],
+  imports: [RouterLink, ButtonComponent, CoursePathComponent, MascotComponent],
   templateUrl: './learn-map-page.component.html',
   styleUrl: './learn-map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -149,6 +149,11 @@ export class LearnMapPageComponent {
       percent: lessons.length ? Math.round((done / lessons.length) * 100) : 0,
     };
   });
+
+  readonly mapTitle = computed(() => this.facade.map()?.title || 'Курс');
+  readonly progressAria = computed(() => `Пройдено ${this.progress().percent}%`);
+  readonly currentChapterClass = computed(() => this.showAll() ? 'hg-native-button' : 'hg-native-button is-on');
+  readonly allChaptersClass = computed(() => this.showAll() ? 'hg-native-button is-on' : 'hg-native-button');
 
   /** Есть ли на карте уроки под подпиской — от этого зависит бейдж Pro в шапке. */
   readonly hasPaywall = computed(() =>

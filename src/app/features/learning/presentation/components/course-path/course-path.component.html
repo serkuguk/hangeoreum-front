@@ -3,7 +3,7 @@
   <span class="hg-path__watermark hg-path__watermark--end" aria-hidden="true">歩</span>
 
   <svg class="hg-path__track" [attr.width]="width()" [attr.height]="canvasHeight()"
-       [attr.viewBox]="'0 0 ' + width() + ' ' + canvasHeight()" aria-hidden="true">
+       [attr.viewBox]="viewBox()" aria-hidden="true">
     @if (startStub()) {
       <path class="hg-path__track-done" [attr.d]="stubPath()"></path>
     }
@@ -15,13 +15,13 @@
     <div class="hg-path__divider" [style.top.px]="divider.y" [attr.data-chapter]="divider.chapter.id">
       @if (divider.chapter.icon; as icon) {
         <img [src]="icon" alt="" width="40" height="40"
-             [class.is-locked]="divider.chapter.state === 'locked'">
+             [class.is-locked]="isLockedChapter(divider.chapter)">
       } @else {
         <span class="hg-path__glyph" aria-hidden="true">章</span>
       }
       <i></i>
       <span class="hg-path__chapter">
-        <span [class]="'hg-path__chip is-' + divider.chapter.state">
+        <span [class]="chipClass(divider.chapter)">
           {{ divider.chapter.title }}
           @if (divider.chapter.counter; as counter) { <b>{{ counter }}</b> }
         </span>
@@ -33,25 +33,23 @@
 
   @for (node of placed(); track node.id) {
     <div class="hg-path__node"
-         [style.left.px]="node.x - node.size / 2"
+         [style.left.px]="node.left"
          [style.top.px]="node.y"
          [style.width.px]="node.size"
          [style.height.px]="node.size">
       @if (isNow(node)) { <span class="hg-path__pulse" aria-hidden="true"></span> }
-      @if (node.state !== 'final') { <span class="hg-path__shadow" aria-hidden="true"></span> }
-      <button type="button" data-domain-control
-              [class]="'hg-path__btn is-' + node.state"
+      @if (hasShadow(node)) { <span class="hg-path__shadow" aria-hidden="true"></span> }
+      <app-button class="hg-native-host" [styleClass]="btnClass(node)" type="button"
               [disabled]="isDead(node)"
               [attr.data-node]="node.id"
-              [attr.aria-label]="node.title + ' — ' + node.subtitle"
-              (click)="select(node)">{{ node.glyph }}</button>
-      @if (node.state === 'pro') { <span class="hg-path__badge">PRO</span> }
+              (click)="select(node)" [aria]="{'aria-label': nodeAria(node)}">{{ node.glyph }}</app-button>
+      @if (isPro(node)) { <span class="hg-path__badge">PRO</span> }
     </div>
 
     <div class="hg-path__label"
-         [class.is-left]="node.side === 'left'"
+         [class.is-left]="isLeft(node)"
          [class.is-now]="isNow(node)"
-         [style.top.px]="isNow(node) ? node.y - 10 : node.y + 18"
+         [style.top.px]="node.labelTop"
          [style.left.px]="labelLeft(node)"
          [style.right.px]="labelRight(node)">
       @if (isNow(node) && node.icon) {
@@ -60,7 +58,7 @@
       <div class="hg-path__labeltext">
         @if (isNow(node)) { <span class="hg-path__eyebrow">Сейчас проходишь</span> }
         <b [class.is-muted]="isMuted(node)">{{ node.title }}</b>
-        <small [class]="'is-' + node.state">{{ node.subtitle }}</small>
+        <small [class]="subtitleClass(node)">{{ node.subtitle }}</small>
         @if (node.progress != null) {
           <div class="hg-path__progress"><i [style.width.%]="node.progress"></i></div>
         }
@@ -69,13 +67,11 @@
   }
 
   @for (test of testOuts(); track test.chapter.id) {
-    <button type="button" data-domain-control class="hg-path__testout"
-            [style.top.px]="test.y"
-            [style.left.px]="testOutLeft()"
-            [style.width.px]="testOutWidth()"
-            (click)="testOutSelected.emit(test.chapter)">
+    <app-button class="hg-native-host" styleClass="hg-native-button hg-path__testout" type="button"
+
+            (click)="testOutSelected.emit(test.chapter)" [style]="testOutStyle(test.y)">
       <b>ПРОВЕРКА ГЛАВЫ · TEST OUT</b>
       <i class="hg-path__sheen" aria-hidden="true"></i>
-    </button>
+    </app-button>
   }
 </div>

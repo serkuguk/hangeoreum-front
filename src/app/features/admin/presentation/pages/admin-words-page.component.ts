@@ -1,45 +1,44 @@
+import {FormField, form, required, disabled} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, finalize, of, switchMap} from 'rxjs';
 import {
-  HgButtonComponent,
-  HgDialogComponent,
-  HgFilePickerComponent,
-  HgInputComponent,
-  HgPaginationComponent,
-  HgSelectComponent,
-  HgSelectOption,
-} from '@shared/components/controls';
+  ButtonComponent,
+  DialogComponent,
+  FilePickerComponent,
+  BasicInputComponent,
+  PaginationComponent,
+  BasicSelectComponent,
+} from 'springest';
 import {AdminApi, AdminWord, Topic, WordRequest} from '@features/admin/infrastructure/admin.api';
 
-const EMPTY_DRAFT: WordRequest = {
+const EMPTY_DRAFT = {
   hangul: '', romanization: '', translation: '',
-  partOfSpeech: '', topicId: null, exampleKo: '', exampleTranslation: '', grammarNote: '',
-};
+  partOfSpeech: '', topicId: null as string | null, exampleKo: '', exampleTranslation: '', grammarNote: '',
+} satisfies WordRequest;
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 @Component({
   selector: 'hg-admin-words-page',
   imports: [
-    FormsModule,
-    HgButtonComponent,
-    HgDialogComponent,
-    HgFilePickerComponent,
-    HgInputComponent,
-    HgPaginationComponent,
-    HgSelectComponent,
+    FormField,
+    ButtonComponent,
+    DialogComponent,
+    FilePickerComponent,
+    BasicInputComponent,
+    PaginationComponent,
+    BasicSelectComponent,
   ],
   template: `
     <h2 class="pagettl">Слова</h2>
     <p class="pagesub">{{ total() }} слов в базе.</p>
 
     <div class="toolbar">
-      <hg-input class="search" type="search" label="Поиск слов"
-                placeholder="Хангыль или перевод…" [ngModel]="search()"
-                (ngModelChange)="onSearch($event)" />
-      <hg-button label="Новое слово" icon="+" (pressed)="openCreate()" />
+      <app-basic-input class="search" type="search" label="Поиск слов"
+                placeholder="Хангыль или перевод…" [value]="search()"
+                (valueChange)="onSearch($event)" />
+      <app-button label="Новое слово" (click)="openCreate()" styleClass="hg-button"><span aria-hidden="true">+</span></app-button>
     </div>
 
     @if (error()) {
@@ -61,13 +60,13 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
                 <div class="word-media">
                   <img class="word-thumbnail" [src]="imageUrl(word.imageUrl)" (error)="onImageError($event)"
                        alt="" width="48" height="48" loading="lazy" decoding="async" />
-                <hg-file-picker label="🔊" ariaLabel="Загрузить аудио слова"
-                                accept="audio/*" (fileSelected)="upload(word, $event, 'audio')" />
+                <app-file-picker #picker1 label="🔊" ariaLabel="Загрузить аудио слова"
+                                accept="audio/*" (changed)="$event[0] && upload(word, $event[0], 'audio'); picker1.value.set([])" />
                 </div>
               </td>
               <td>
-                <hg-button size="sm" variant="ghost" label="Изменить" (pressed)="openEdit(word)" />
-                <hg-button size="sm" variant="danger" label="Удалить" (pressed)="remove(word)" />
+                <app-button label="Изменить" (click)="openEdit(word)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
+                <app-button label="Удалить" (click)="remove(word)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
               </td>
             </tr>
           } @empty {
@@ -76,41 +75,42 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
         </tbody>
       </table>
       @if (totalPages() > 1) {
-        <hg-pagination [page]="page()" [totalPages]="totalPages()"
-                       ariaLabel="Страницы слов" (pageChange)="goToPage($event)" />
+        <app-pagination [rows]="20" [first]="page() * 20" [totalRecords]="total()"
+                       aria-label="Страницы слов" (pageChange)="goToPage($event.page ?? 0)" />
       }
     </div>
 
     @if (dialogOpen()) {
-    <hg-dialog [visible]="true" (visibleChange)="!$event && closeDialog()"
+    <app-dialog closeAriaLabel="Закрыть" [visible]="true" (visibleChange)="!$event && closeDialog()"
                [closable]="!saving()" [closeOnEscape]="!saving()" [dismissableMask]="false"
-               [title]="editing() ? 'Изменить слово' : 'Новое слово'">
+               [header]="editing() ? 'Изменить слово' : 'Новое слово'">
       <div class="word-image-field">
         <img class="word-preview" [src]="previewImage()" (error)="onImageError($event)"
              alt="" width="96" height="96" decoding="async" />
         <div>
-          <hg-file-picker label="Выбрать изображение" ariaLabel="Изображение слова"
-                          accept="image/png,image/jpeg,image/webp" hint="PNG, JPEG или WebP, до 5 МиБ."
-                          [disabled]="saving()" (fileSelected)="onImageSelected($event)" />
+          <app-file-picker #picker2 label="Выбрать изображение" ariaLabel="Изображение слова"
+                          accept="image/png,image/jpeg,image/webp" ariaDescribedBy="image-picker-hint"
+                          [disabled]="saving()" (changed)="$event[0] && onImageSelected($event[0]); picker2.value.set([])" />
+          <p id="image-picker-hint">PNG, JPEG или WebP, до 5 МиБ.</p>
           @if (imageError()) { <p class="image-error" role="alert">{{ imageError() }}</p> }
         </div>
       </div>
       @if (saveError()) { <div class="errbar" role="alert">{{ saveError() }}</div> }
-      <hg-input label="Хангыль" [(ngModel)]="draft.hangul" lang="ko" required [disabled]="saving()" />
-      <hg-input label="Транскрипция (латиницей)" placeholder="Например, keopi" [(ngModel)]="draft.romanization" required [disabled]="saving()" />
-      <hg-input label="Перевод" [(ngModel)]="draft.translation" required [disabled]="saving()" />
-      <hg-input label="Часть речи" [(ngModel)]="draft.partOfSpeech" placeholder="существительное" [disabled]="saving()" />
-      <hg-select label="Тема" placeholder="" [options]="topicOptions()" [(ngModel)]="draft.topicId" [disabled]="saving()" />
-      <hg-input label="Пример (ko)" [(ngModel)]="draft.exampleKo" lang="ko" [disabled]="saving()" />
-      <hg-input label="Перевод примера" [(ngModel)]="draft.exampleTranslation" [disabled]="saving()" />
-      <hg-input label="Грамматическая пометка" [(ngModel)]="draft.grammarNote" [disabled]="saving()" />
-      <div dialog-actions class="btns">
-        <hg-button [label]="saving() ? 'Сохранение…' : 'Сохранить'"
-                   [disabled]="saving() || !draft.hangul.trim() || !draft.romanization.trim() || !draft.translation.trim()"
-                   (pressed)="save()" />
-        <hg-button label="Отмена" variant="ghost" [disabled]="saving()" (pressed)="closeDialog()" />
+      <app-basic-input label="Хангыль" [formField]="fields.hangul" lang="ko" />
+      <app-basic-input label="Транскрипция (латиницей)" placeholder="Например, keopi" [formField]="fields.romanization" />
+      <app-basic-input label="Перевод" [formField]="fields.translation" />
+      <app-basic-input label="Часть речи" [formField]="fields.partOfSpeech" placeholder="существительное" />
+      <app-basic-select ariaLabel="Тема" placeholder="Тема" [items]="topicOptions()" [formField]="fields.topicId" optionLabel="label" optionValue="value" />
+      <app-basic-input label="Пример (ko)" [formField]="fields.exampleKo" lang="ko" />
+      <app-basic-input label="Перевод примера" [formField]="fields.exampleTranslation" />
+      <app-basic-input label="Грамматическая пометка" [formField]="fields.grammarNote" />
+      <div dialogActions class="btns">
+        <app-button [label]="saving() ? 'Сохранение…' : 'Сохранить'"
+                   [disabled]="saving() || !draft().hangul.trim() || !draft().romanization.trim() || !draft().translation.trim()"
+                   (click)="save()" styleClass="hg-button"></app-button>
+        <app-button label="Отмена" [disabled]="saving()" (click)="closeDialog()" styleClass="hg-button hg-button--ghost"></app-button>
       </div>
-    </hg-dialog>
+    </app-dialog>
     }
   `,
   styleUrl: './_admin.scss',
@@ -135,7 +135,7 @@ export class AdminWordsPageComponent {
   readonly search = signal('');
   readonly error = signal<string | null>(null);
   readonly topics = signal<Topic[]>([]);
-  readonly topicOptions = computed<readonly HgSelectOption<string | null>[]>(() => [
+  readonly topicOptions = computed<{label: string; value: string | null}[]>(() => [
     {label: '— без темы —', value: null},
     ...this.topics().map(topic => ({label: topic.title, value: topic.id})),
   ]);
@@ -149,7 +149,13 @@ export class AdminWordsPageComponent {
   readonly saveError = signal<string | null>(null);
   readonly defaultWordImage = '/assets/illustrations/word-default.svg';
   readonly previewImage = computed(() => this.imagePreviewUrl() ?? this.imageUrl(this.editing()?.imageUrl ?? null));
-  draft: WordRequest = {...EMPTY_DRAFT};
+  readonly draft = signal({...EMPTY_DRAFT});
+  readonly fields = form(this.draft, path => {
+    required(path.hangul);
+    required(path.romanization);
+    required(path.translation);
+    disabled(path, () => this.saving());
+  });
 
   readonly totalPages = computed(() => Math.ceil(this.total() / 20));
 
@@ -204,7 +210,7 @@ export class AdminWordsPageComponent {
     if (this.saving()) return;
     this.resetImageForm();
     this.editing.set(null);
-    this.draft = {...EMPTY_DRAFT};
+    this.fields().reset({...EMPTY_DRAFT});
     this.dialogOpen.set(true);
   }
 
@@ -212,19 +218,19 @@ export class AdminWordsPageComponent {
     if (this.saving()) return;
     this.resetImageForm();
     this.editing.set(word);
-    this.draft = {
+    this.fields().reset({
       hangul: word.hangul, romanization: word.romanization, translation: word.translation,
       partOfSpeech: word.partOfSpeech ?? '', topicId: word.topicId,
       exampleKo: word.exampleKo ?? '', exampleTranslation: word.exampleTranslation ?? '',
       grammarNote: word.grammarNote ?? '',
-    };
+    });
     this.dialogOpen.set(true);
   }
 
   save(): void {
-    if (this.saving() || !this.draft.hangul.trim() || !this.draft.romanization.trim() || !this.draft.translation.trim()) return;
+    if (this.saving() || !this.draft().hangul.trim() || !this.draft().romanization.trim() || !this.draft().translation.trim()) return;
     const editing = this.editing();
-    const draft = {...this.draft};
+    const draft = {...this.draft()};
     const image = this.selectedImage();
     let wordSaved = false;
     this.saving.set(true);
@@ -244,6 +250,7 @@ export class AdminWordsPageComponent {
     ).subscribe({
       next: () => {
         this.dialogOpen.set(false);
+        this.fields().reset({...EMPTY_DRAFT});
         this.resetImageForm();
         this.load();
       },
@@ -271,6 +278,7 @@ export class AdminWordsPageComponent {
   closeDialog(): void {
     if (this.saving()) return;
     this.dialogOpen.set(false);
+    this.fields().reset({...EMPTY_DRAFT});
     this.resetImageForm();
   }
 

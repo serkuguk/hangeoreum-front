@@ -153,41 +153,6 @@
   }
 }
 
-.hg-btn {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: none;
-  border-radius: var(--hg-radius-md);
-  font-family: inherit;
-  font-size: var(--hg-fs-base);
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
-
-  &--light {
-    padding: var(--hg-space-4) 26px;
-    background: oklch(98% 0.02 90);
-    color: var(--hg-route);
-    box-shadow: 0 6px 0 oklch(82% 0.03 88);
-
-    &:hover { transform: translateY(3px); box-shadow: 0 3px 0 oklch(82% 0.03 88); }
-  }
-
-  &--ghost {
-    padding: var(--hg-space-4) 22px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    color: var(--hg-on-route);
-    font-size: 14px;
-    font-weight: 600;
-
-    &:hover { background: rgba(255, 255, 255, 0.12); }
-  }
-}
 
 .hg-sheen {
   position: absolute;

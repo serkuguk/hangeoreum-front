@@ -1,16 +1,14 @@
+import {ButtonComponent, SegmentedControlComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input} from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {StoryFacade, StoryMode} from '../../../application/facades/story.facade';
 import {StoryLine} from '../../../domain/entities/story.entity';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
-import {HgSegmentedControlComponent, HgSegmentedOption} from '@shared/components/controls/hg-segmented-control.component';
 import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-story-page',
-  imports: [FormsModule, RouterLink, HgButtonComponent, HgSegmentedControlComponent, TranslatePipe],
+  imports: [RouterLink, ButtonComponent, SegmentedControlComponent, TranslatePipe],
   templateUrl: './story-page.component.html',
   styleUrl: './story-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,20 +21,33 @@ export class StoryPageComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private router = inject(Router);
 
-  readonly modeOptions = computed<readonly HgSegmentedOption<StoryMode>[]>(() => {
+  readonly modeOptions = computed(() => {
     const story = this.facade.story();
     return [
-      ...(this.facade.hasVideo() ? [{value: 'watch' as const, label: '▶ ' + this.translate.instant('learning.story.watch')}] : []),
-      {value: 'read' as const, label: '📖 ' + this.translate.instant('learning.story.read')},
+      ...(this.facade.hasVideo() ? [{value: StoryMode.WATCH, label: '▶ ' + this.translate.instant('learning.story.watch')}] : []),
+      {value: StoryMode.READ, label: '📖 ' + this.translate.instant('learning.story.read')},
       ...((story?.clip?.audioUrl || this.facade.hasVideo())
-        ? [{value: 'listen' as const, label: '🎧 ' + this.translate.instant('learning.story.listen')}]
+        ? [{value: StoryMode.LISTEN, label: '🎧 ' + this.translate.instant('learning.story.listen')}]
         : []),
     ];
   });
 
 
+  readonly isWatchMode = computed(() => this.facade.mode() === StoryMode.WATCH);
+  readonly isListenMode = computed(() => this.facade.mode() === StoryMode.LISTEN);
+  readonly completeLabel = computed(() =>
+    this.facade.completionError() ? 'learning.story.retrySaving' : 'learning.story.complete');
+
+  retryOrAddLabel(wordId: string): string {
+    return this.vocabulary.isFailed(wordId) ? 'common.retry' : 'learning.story.addToVocabulary';
+  }
+
   ngOnInit(): void {
     this.facade.load(this.id());
+  }
+
+  setMode(value: unknown): void {
+    if (Object.values<unknown>(StoryMode).includes(value)) this.facade.mode.set(value as StoryMode);
   }
 
   toggleLine(line: StoryLine): void {

@@ -1,10 +1,10 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {AdminApi, AdminLetter} from '../../infrastructure/admin.api';
-import {HgFilePickerComponent} from '@shared/components/controls';
+import {FilePickerComponent} from 'springest';
 
 @Component({
   selector: 'hg-admin-alphabet-page',
-  imports: [HgFilePickerComponent],
+  imports: [FilePickerComponent],
   template: `
     <h2 class="pagettl">Алфавит</h2>
     <p class="pagesub">40 букв 자모: озвучка и порядок. Буквы создаются миграцией БД.</p>
@@ -24,8 +24,8 @@ import {HgFilePickerComponent} from '@shared/components/controls';
               <td>{{ letter.letterGroup }}</td>
               <td>{{ letter.position }}</td>
               <td>
-                <hg-file-picker [label]="letter.audioUrl ? '🔊 Заменить' : '⬆ Загрузить'"
-                                accept="audio/*" (fileSelected)="upload(letter, $event)"/>
+                <app-file-picker #picker1 [label]="letter.audioUrl ? '🔊 Заменить' : '⬆ Загрузить'"
+                                accept="audio/*" (changed)="$event[0] && upload(letter, $event[0]); picker1.value.set([])" />
               </td>
             </tr>
           } @empty {

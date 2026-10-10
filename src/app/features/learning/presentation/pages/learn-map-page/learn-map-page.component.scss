@@ -1,5 +1,6 @@
 :host { display: block; }
 
+:host ::ng-deep {
 .mapbox {
   max-width: var(--hg-content-main);
   margin: 0 auto;
@@ -66,7 +67,7 @@
   background: var(--hg-surface-muted);
   border: 1px solid var(--hg-border);
 
-  button {
+  button.hg-native-button.hg-native-button.hg-native-button {
     padding: 8px 16px;
     min-height: 0;
     border: none;
@@ -138,7 +139,7 @@
 }
 
 // ---------- Свёрнутая пройденная глава ----------
-.unit-row {
+button.hg-native-button.hg-native-button.hg-native-button.unit-row {
   display: flex;
   align-items: center;
   gap: var(--hg-space-4);
@@ -263,10 +264,12 @@
 
 @media (max-width: 767px) {
   .seg { margin-left: 0; }
-  .unit-row { padding: var(--hg-space-3) var(--hg-space-4); }
-  .unit-row .expand { display: none; }
+  button.hg-native-button.hg-native-button.hg-native-button.unit-row { padding: var(--hg-space-3) var(--hg-space-4); }
+  button.hg-native-button.hg-native-button.hg-native-button.unit-row .expand { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .skeleton .sk-node { animation: none; }
+}
+
 }

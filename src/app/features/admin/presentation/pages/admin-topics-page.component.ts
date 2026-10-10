@@ -1,20 +1,20 @@
+import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
 import {AdminApi, Topic} from '../../infrastructure/admin.api';
-import {HgButtonComponent, HgInputComponent} from '@shared/components/controls';
+import {ButtonComponent, BasicInputComponent} from 'springest';
 
 @Component({
   selector: 'hg-admin-topics-page',
-  imports: [FormsModule, HgButtonComponent, HgInputComponent],
+  imports: [FormField, ButtonComponent, BasicInputComponent],
   template: `
     <h2 class="pagettl">Темы словаря</h2>
     <p class="pagesub">Категории слов: еда, знакомство, погода…</p>
 
     <div class="toolbar">
-      <hg-input class="search" label="Code" placeholder="Например, food" [(ngModel)]="draftCode"/>
-      <hg-input class="search" label="Название" [(ngModel)]="draftTitle"/>
-      <hg-input class="search icon" label="Иконка" placeholder="🍜" [(ngModel)]="draftIcon"/>
-      <hg-button label="Добавить" [disabled]="!draftCode || !draftTitle" (pressed)="create()"/>
+      <app-basic-input class="search" label="Code" placeholder="Например, food" [formField]="draftCodeField"/>
+      <app-basic-input class="search" label="Название" [formField]="draftTitleField"/>
+      <app-basic-input class="search icon" label="Иконка" placeholder="🍜" [formField]="draftIconField"/>
+      <app-button label="Добавить" [disabled]="!draftCode() || !draftTitle()" (click)="create()" styleClass="hg-button"></app-button>
     </div>
 
     @if (error()) {
@@ -31,8 +31,8 @@ import {HgButtonComponent, HgInputComponent} from '@shared/components/controls';
               <td>{{ topic.code }}</td>
               <td>{{ topic.title }}</td>
               <td>
-                <hg-button label="Переименовать" variant="ghost" size="sm" (pressed)="rename(topic)"/>
-                <hg-button label="Удалить" variant="danger" size="sm" (pressed)="remove(topic)"/>
+                <app-button label="Переименовать" (click)="rename(topic)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
+                <app-button label="Удалить" (click)="remove(topic)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
               </td>
             </tr>
           } @empty {
@@ -55,9 +55,12 @@ export class AdminTopicsPageComponent {
   readonly topics = signal<Topic[]>([]);
   readonly error = signal<string | null>(null);
 
-  draftCode = '';
-  draftTitle = '';
-  draftIcon = '';
+  readonly draftCode = signal('');
+  readonly draftCodeField = form(this.draftCode, path => required(path));
+  readonly draftTitle = signal('');
+  readonly draftTitleField = form(this.draftTitle, path => required(path));
+  readonly draftIcon = signal('');
+  readonly draftIconField = form(this.draftIcon);
 
   constructor() {
     this.load();
@@ -71,10 +74,13 @@ export class AdminTopicsPageComponent {
   }
 
   create(): void {
-    this.api.createTopic({code: this.draftCode.trim(), title: this.draftTitle.trim(), icon: this.draftIcon.trim() || null})
+    if (this.draftCodeField().invalid() || this.draftTitleField().invalid()) return;
+    this.api.createTopic({code: this.draftCode().trim(), title: this.draftTitle().trim(), icon: this.draftIcon().trim() || null})
       .subscribe({
         next: () => {
-          this.draftCode = this.draftTitle = this.draftIcon = '';
+          this.draftCodeField().reset('');
+          this.draftTitleField().reset('');
+          this.draftIconField().reset('');
           this.load();
         },
         error: () => this.error.set('Не получилось создать тему (code должен быть уникальным).'),

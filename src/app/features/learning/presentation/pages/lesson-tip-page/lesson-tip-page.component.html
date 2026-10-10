@@ -17,13 +17,22 @@
         <div class="ex-line">
           <span class="kr" [innerHTML]="highlighted(example)"></span>
           @if (example.translation || example.note) {
-            <small>{{ example.translation }}@if (example.note) { · {{ example.note }}}</small>
+            <small
+              >{{ example.translation }}
+              @if (example.note) {
+                · {{ example.note }}
+              }
+            </small>
           }
         </div>
       }
       <div class="tipbtns">
         <a class="cta" [routerLink]="['/learn', id()]">Понятно, начать урок</a>
-        <hg-button label="Позже" variant="ghost" (pressed)="back()"/>
+        <app-button
+          styleClass="hg-button hg-button--ghost"
+          label="Позже"
+          (click)="back()"
+        />
       </div>
     </div>
   }

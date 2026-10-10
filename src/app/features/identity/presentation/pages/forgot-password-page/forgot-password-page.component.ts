@@ -1,21 +1,24 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {FormField, form, required, email} from '@angular/forms/signals';
 import {RouterLink} from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
-import {HgButtonComponent, HgInputComponent} from '@shared/components/controls';
+import {ButtonComponent, BasicInputComponent, FormFieldComponent} from 'springest';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 
 @Component({
   selector: 'hg-forgot-password-page',
-  imports: [ReactiveFormsModule, RouterLink, HgButtonComponent, HgInputComponent, TranslatePipe],
+  imports: [FormField, FormFieldComponent, RouterLink, ButtonComponent, BasicInputComponent, TranslatePipe],
   templateUrl: './forgot-password-page.component.html',
   styleUrl: '../_auth-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPasswordPageComponent {
   readonly facade = inject(AuthFacade);
-  readonly form = inject(FormBuilder).nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
+  readonly model = signal({email: ''});
+  readonly submitted = signal(false);
+  readonly form = form(this.model, path => {
+    required(path.email);
+    email(path.email);
   });
 
   constructor() {
@@ -23,15 +26,12 @@ export class ForgotPasswordPageComponent {
   }
 
   submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    this.submitted.set(true);
+    if (this.facade.loading()) return;
+    if (this.form().invalid()) {
+      this.form.email().markAsTouched();
       return;
     }
-    this.facade.requestPasswordReset(this.form.controls.email.value);
-  }
-
-  invalidEmail(): boolean {
-    const control = this.form.controls.email;
-    return control.touched && control.invalid;
+    this.facade.requestPasswordReset(this.model().email);
   }
 }

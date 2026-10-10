@@ -1,16 +1,17 @@
 :host {
   display: grid;
   min-height: 100vh;
-  // ≥1120px: sidebar-left | content. Overridden per-tier below.
-  grid-template-columns: 224px 1fr;
+  --sidebar-top: 0px;
+  grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto 1fr;
   grid-template-areas:
-    "topbar topbar"
+    "nav    topbar"
     "nav    content";
 }
 
 .topbar {
   grid-area: topbar;
+  height: 69px;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -28,36 +29,11 @@
   color: var(--hg-reward);
   text-decoration: none;
   line-height: 1;
+  transition: transform var(--hg-motion-route) ease;
   flex-shrink: 0;
 }
 
-.mainnav {
-  grid-area: nav;
-  display: flex;
-  flex-direction: column;
-  gap: var(--hg-space-1);
-  padding: var(--hg-space-4) var(--hg-space-3);
-  border-right: 1px solid var(--hg-border);
-
-  a {
-    display: flex;
-    align-items: center;
-    gap: var(--hg-space-3);
-    min-height: var(--hg-touch-min);
-    padding: var(--hg-space-2) var(--hg-space-3);
-    border-radius: var(--hg-radius-block);
-    font-size: var(--hg-fs-sm);
-    color: var(--hg-text-muted);
-    text-decoration: none;
-    transition: background var(--hg-motion-nav), color var(--hg-motion-nav);
-
-    .pi { font-size: 18px; flex-shrink: 0; }
-    .navlabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    &:hover { background: var(--hg-surface-muted); color: var(--hg-text); }
-    &.is-active { background: var(--hg-route-soft); color: var(--hg-route-text); }
-  }
-}
+.mainnav { grid-area: nav; }
 
 .userbox {
   position: relative;
@@ -69,7 +45,7 @@
 
 .adminlink { text-decoration: none; }
 
-.userbtn {
+:host ::ng-deep button.hg-native-button.hg-native-button.userbtn {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -137,52 +113,13 @@
 
 .content { grid-area: content; min-width: 0; padding: var(--hg-space-6) var(--hg-space-5) 0; }
 
-// ---------- Rail: 768–1119px — иконка + tooltip, подпись скрыта ----------
-@media (max-width: 1119px) {
-  :host { grid-template-columns: 72px 1fr; }
-
-  .mainnav a {
-    justify-content: center;
-    padding: var(--hg-space-2);
-
-    .navlabel { display: none; }
-  }
-}
-
-// ---------- Bottom navigation: ≤767px — фиксированная нижняя панель ----------
 @media (max-width: 767px) {
-  :host {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "topbar"
-      "content";
-    padding-bottom: calc(64px + env(safe-area-inset-bottom));
-  }
-
-  .uname { display: none; }
-
-  .mainnav {
-    position: fixed;
-    inset: auto 0 0 0;
-    z-index: 40;
-    flex-direction: row;
-    justify-content: space-around;
-    gap: 0;
-    padding: var(--hg-space-1) var(--hg-space-2) calc(var(--hg-space-1) + env(safe-area-inset-bottom));
-    background: var(--hg-surface);
-    border-right: none;
-    border-top: 1px solid var(--hg-border);
-
-    a {
-      flex-direction: column;
-      gap: 2px;
-      min-width: var(--hg-touch-min);
-      padding: var(--hg-space-1);
-
-      .pi { font-size: 20px; }
-      .navlabel { display: block; font-size: var(--hg-fs-2xs); }
-    }
-  }
-
-  .content { padding: var(--hg-space-5) var(--hg-space-4) 0; }
+  :host ::ng-deep .userbtn .uname { display: none; }
+  .topbar { gap: var(--hg-space-2); padding-inline: var(--hg-space-3); }
+  .content { padding: var(--hg-space-5) var(--hg-space-3) 0; }
+  .mainnav { z-index: 50; }
+  :host:has(.mainnav.expanded) .logo { transform: translateX(158px); }
+  :host:has(.mainnav.expanded) .userbox { visibility: hidden; }
 }
+
+@media (prefers-reduced-motion: reduce) { .logo { transition: none; } }

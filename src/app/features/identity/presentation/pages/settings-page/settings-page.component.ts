@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {FormsModule} from '@angular/forms';
+import {FormField, form, required, minLength, maxLength} from '@angular/forms/signals';
 import {
   ReplaySubject,
   Subject,
@@ -23,13 +23,7 @@ import {
   ThemeService,
 } from '@core/services/theme.service';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {
-  HgButtonComponent,
-  HgInputComponent,
-  HgSegmentedControlComponent,
-  HgSegmentedOption,
-  HgToggleComponent,
-} from '@shared/components/controls';
+import {ButtonComponent, BasicInputComponent, PasswordInputComponent, SegmentedControlComponent, ToggleComponent, ControlItemInterface, Value} from 'springest';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {ME_REPOSITORY} from '../../../application/me-repository.token';
 import {UserSettings} from '../../../domain/user.entity';
@@ -42,7 +36,7 @@ interface SettingsSaveRequest {
 
 @Component({
   selector: 'hg-settings-page',
-  imports: [FormsModule, HgButtonComponent, HgInputComponent, HgToggleComponent, HgSegmentedControlComponent],
+  imports: [FormField, ButtonComponent, BasicInputComponent, PasswordInputComponent, ToggleComponent, SegmentedControlComponent],
   templateUrl: './settings-page.component.html',
   styleUrl: './settings-page.component.scss',
   host: {'(window:beforeunload)': 'warnBeforeUnload($event)'},
@@ -60,6 +54,7 @@ export class SettingsPageComponent {
   readonly saving = signal(false);
   readonly dirty = signal(false);
   readonly error = signal<string | null>(null);
+  readonly reminderTimeValue = computed(() => this.settings()?.reminderTime?.slice(0, 5) ?? null);
 
   // тема
   readonly accents = THEME_ACCENTS;
@@ -70,30 +65,34 @@ export class SettingsPageComponent {
 
   // смена имени/пароля
   readonly nameDraft = signal('');
+  readonly nameForm = form(this.nameDraft, path => {required(path); maxLength(path, 100);});
   readonly showPassword = signal(false);
-  readonly passwordCurrent = signal('');
-  readonly passwordNext = signal('');
+  readonly passwordModel = signal({current: '', next: ''});
+  readonly passwordForm = form(this.passwordModel, path => {
+    required(path.current); required(path.next); minLength(path.next, 8);
+  });
+  readonly passwordSaving = signal(false);
   readonly passwordError = signal<string | null>(null);
 
   readonly goals = [10, 20, 50];
   readonly speeds = [0.75, 1.0, 1.25];
   readonly times = ['09:00', '12:00', '19:00', '21:00'];
-  readonly goalOptions: readonly HgSegmentedOption<number>[] = this.goals.map(goal =>
+  readonly goalOptions: ControlItemInterface[] = this.goals.map(goal =>
     ({value: goal, label: `${goal} XP`}));
-  readonly speedOptions: readonly HgSegmentedOption<number>[] = this.speeds.map(speed =>
+  readonly speedOptions: ControlItemInterface[] = this.speeds.map(speed =>
     ({value: speed, label: `${speed}×`}));
-  readonly timeOptions: readonly HgSegmentedOption<string>[] = this.times.map(time =>
+  readonly timeOptions: ControlItemInterface[] = this.times.map(time =>
     ({value: time, label: time}));
-  readonly modeOptions: readonly HgSegmentedOption<ColorMode>[] = [
+  readonly modeOptions: (ControlItemInterface & {value: ColorMode})[] = [
     {value: 'light', label: 'Светлая'},
     {value: 'dark', label: 'Тёмная'},
     {value: 'system', label: 'Системная'},
   ];
-  readonly accentOptions: readonly HgSegmentedOption<string>[] = this.accents.map(accent =>
+  readonly accentOptions: ControlItemInterface[] = this.accents.map(accent =>
     ({value: accent.value, label: accent.name}));
-  readonly fontScaleOptions: readonly HgSegmentedOption<number>[] = this.fontScales.map(scale =>
+  readonly fontScaleOptions: ControlItemInterface[] = this.fontScales.map(scale =>
     ({value: scale.value, label: scale.name}));
-  readonly radiusOptions: readonly HgSegmentedOption<string>[] = this.radii.map(radius =>
+  readonly radiusOptions: ControlItemInterface[] = this.radii.map(radius =>
     ({value: radius.value, label: radius.name}));
 
   private readonly saveRequests$ = new Subject<SettingsSaveRequest>();
@@ -176,32 +175,33 @@ export class SettingsPageComponent {
     this.patch({theme: {...this.theme(), mode}});
   }
 
-  updateGoal(goal: number | null): void {
-    if (goal !== null) this.patch({dailyGoalXp: goal});
+  updateGoal(goal: Value | null): void {
+    if (typeof goal === 'number') this.patch({dailyGoalXp: goal});
   }
 
-  updateReminderTime(time: string | null): void {
-    if (time !== null) this.patch({reminderTime: time});
+  updateReminderTime(time: Value | null): void {
+    if (typeof time === 'string') this.patch({reminderTime: time});
   }
 
-  updatePlaybackSpeed(speed: number | null): void {
-    if (speed !== null) this.patch({playbackSpeed: speed});
+  updatePlaybackSpeed(speed: Value | null): void {
+    if (typeof speed === 'number') this.patch({playbackSpeed: speed});
   }
 
-  updateMode(mode: ColorMode | null): void {
-    if (mode !== null) this.setMode(mode);
+  updateMode(mode: Value | null): void {
+    const option = this.modeOptions.find(option => option.value === mode);
+    if (option) this.setMode(option.value);
   }
 
-  updateAccent(accent: string | null): void {
-    if (accent !== null) this.setTheme({accent});
+  updateAccent(accent: Value | null): void {
+    if (typeof accent === 'string') this.setTheme({accent});
   }
 
-  updateFontScale(fontScale: number | null): void {
-    if (fontScale !== null) this.setTheme({fontScale});
+  updateFontScale(fontScale: Value | null): void {
+    if (typeof fontScale === 'number') this.setTheme({fontScale});
   }
 
-  updateRadius(radius: string | null): void {
-    if (radius !== null) this.setTheme({radius});
+  updateRadius(radius: Value | null): void {
+    if (typeof radius === 'string') this.setTheme({radius});
   }
 
   canDeactivate(): boolean | Promise<boolean> {
@@ -217,6 +217,7 @@ export class SettingsPageComponent {
   }
 
   saveName(): void {
+    if (this.nameForm().invalid()) return;
     const name = this.nameDraft().trim();
     const user = this.auth.user();
     if (!name || !user || name === user.name) return;
@@ -227,16 +228,19 @@ export class SettingsPageComponent {
   }
 
   changePassword(): void {
+    if (this.passwordSaving()) return;
+    this.passwordForm.current().markAsTouched();
+    this.passwordForm.next().markAsTouched();
     this.passwordError.set(null);
-    if (this.passwordNext().length < 8) {
-      this.passwordError.set('Новый пароль — минимум 8 символов');
+    if (this.passwordForm().invalid()) {
+      this.passwordError.set(this.passwordForm.current().invalid() ? 'Введи текущий пароль' : 'Новый пароль — минимум 8 символов');
       return;
     }
-    this.meRepository.changePassword(this.passwordCurrent(), this.passwordNext()).subscribe({
+    this.passwordSaving.set(true);
+    this.meRepository.changePassword(this.passwordModel().current, this.passwordModel().next).pipe(finalize(() => this.passwordSaving.set(false))).subscribe({
       next: () => {
         this.showPassword.set(false);
-        this.passwordCurrent.set('');
-        this.passwordNext.set('');
+        this.passwordForm().reset({current: '', next: ''});
         this.showSaved();
       },
       error: () => this.passwordError.set('Не получилось — проверь текущий пароль'),

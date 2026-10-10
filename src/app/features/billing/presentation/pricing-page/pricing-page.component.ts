@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {ButtonComponent} from 'springest';
 import {BillingFacade} from '../../application/billing.facade';
-import {Plan} from '../../domain/billing.model';
+import {CheckoutResult, Plan, PlanInterval} from '../../domain/billing.model';
 import {TranslatePipe} from '@ngx-translate/core';
 
-const INTERVAL_LABEL: Record<Plan['interval'], string> = {
+const INTERVAL_LABEL: Record<PlanInterval, string> = {
   MONTH: 'billing.month',
   YEAR: 'billing.year',
   LIFETIME: 'billing.lifetime',
@@ -12,7 +12,7 @@ const INTERVAL_LABEL: Record<Plan['interval'], string> = {
 
 @Component({
   selector: 'hg-pricing-page',
-  imports: [HgButtonComponent, TranslatePipe],
+  imports: [ButtonComponent, TranslatePipe],
   templateUrl: './pricing-page.component.html',
   styleUrl: './pricing-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,8 +22,20 @@ export class PricingPageComponent {
   readonly result = input<string | undefined>();
   readonly facade = inject(BillingFacade);
 
+  readonly paymentSucceeded = computed(() => this.result() === CheckoutResult.SUCCESS);
+  readonly paymentCancelled = computed(() => this.result() === CheckoutResult.CANCEL);
+  readonly checkoutLabel = computed(() => this.facade.redirecting() ? 'billing.openingCheckout' : 'billing.select');
+
   constructor() {
     this.facade.load();
+  }
+
+  isBest(plan: Plan): boolean {
+    return plan.interval === PlanInterval.YEAR;
+  }
+
+  periodEndDate(isoDate: string): string {
+    return isoDate.slice(0, 10);
   }
 
   price(plan: Plan): string {

@@ -10,26 +10,56 @@
   <div class="panel">
     <div class="eyebrow">Профиль</div>
     <div class="setrow">
-      <hg-input class="inline" type="text" label="Имя" [ngModel]="nameDraft()"
-                (ngModelChange)="nameDraft.set($event)" (blur)="saveName()" (keydown.enter)="saveName()"/>
+      <app-basic-input
+        class="inline"
+        type="text"
+        label="Имя"
+        [formField]="nameForm"
+        (focusout)="saveName()"
+        (keydown.enter)="saveName()"
+      />
     </div>
-    <div class="setrow"><span>Email</span><b>{{ auth.user()?.email }}</b></div>
+    <div class="setrow">
+      <span>Email</span><b>{{ auth.user()?.email }}</b>
+    </div>
     <div class="setrow">
       <span>Пароль</span>
-      <hg-button label="Изменить" variant="ghost" size="sm"
-                 (pressed)="showPassword.set(!showPassword())"/>
+      <app-button
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        label="Изменить"
+        (click)="showPassword.set(!showPassword())"
+      />
     </div>
     @if (showPassword()) {
-      <div class="pwbox">
-        <hg-input type="password" label="Текущий пароль" autocomplete="current-password"
-                  [ngModel]="passwordCurrent()" (ngModelChange)="passwordCurrent.set($event)"/>
-        <hg-input type="password" label="Новый пароль" hint="Минимум 8 символов" autocomplete="new-password"
-                  [ngModel]="passwordNext()" (ngModelChange)="passwordNext.set($event)"/>
+      <form
+        class="pwbox"
+        novalidate
+        (submit)="$event.preventDefault(); changePassword()"
+      >
+        <app-password-input
+          [toggleMask]="false"
+          ariaLabel="Текущий пароль"
+          autocomplete="current-password"
+          [formField]="passwordForm.current"
+          placeholder="Текущий пароль"
+        />
+        <app-password-input
+          [toggleMask]="false"
+          ariaLabel="Новый пароль"
+          autocomplete="new-password"
+          [formField]="passwordForm.next"
+          placeholder="Новый пароль — минимум 8 символов"
+        />
         @if (passwordError(); as pwError) {
           <div class="apierr">{{ pwError }}</div>
         }
-        <hg-button label="Сменить пароль" size="sm" (pressed)="changePassword()"/>
-      </div>
+        <app-button
+          styleClass="hg-button hg-button--sm"
+          label="Сменить пароль"
+          type="submit"
+          [loading]="passwordSaving()"
+        />
+      </form>
     }
   </div>
 
@@ -37,56 +67,111 @@
     <div class="panel">
       <div class="eyebrow">Обучение</div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Цель в день" [options]="goalOptions"
-                              [ngModel]="s.dailyGoalXp" (ngModelChange)="updateGoal($event)"/>
+        <app-segmented-control
+          class="segpick"
+          label="Цель в день"
+          [items]="goalOptions"
+          [value]="s.dailyGoalXp"
+          (valueChange)="updateGoal($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-toggle label="Напоминания" [ngModel]="s.remindersEnabled"
-                   (ngModelChange)="patch({remindersEnabled: $event})"/>
+        <app-toggle
+          label="Напоминания"
+          [value]="s.remindersEnabled"
+          (valueChange)="patch({ remindersEnabled: $event })"
+        />
       </div>
       @if (s.remindersEnabled) {
         <div class="setrow">
-          <hg-segmented-control class="segpick" label="Время напоминания" [options]="timeOptions"
-                                [ngModel]="s.reminderTime?.slice(0, 5)"
-                                (ngModelChange)="updateReminderTime($event)"/>
+          <app-segmented-control
+            class="segpick"
+            label="Время напоминания"
+            [items]="timeOptions"
+            [value]="reminderTimeValue()"
+            (valueChange)="updateReminderTime($event)"
+          />
         </div>
       }
       <div class="setrow">
-        <hg-toggle label="Автозвук в карточках" hint="скоро" disabled [ngModel]="s.soundEnabled"/>
+        <span>Автозвук в карточках <span class="soon">скоро</span></span>
+        <app-toggle
+          class="coming-toggle"
+          ariaLabel="Автозвук в карточках"
+          [disabled]="true"
+          [value]="s.soundEnabled"
+        />
       </div>
       <div class="setrow">
-        <hg-toggle label="Романизация в карточках" hint="скоро" disabled [ngModel]="s.showRomanization"/>
+        <span>Романизация в карточках <span class="soon">скоро</span></span>
+        <app-toggle
+          class="coming-toggle"
+          ariaLabel="Романизация в карточках"
+          [disabled]="true"
+          [value]="s.showRomanization"
+        />
       </div>
     </div>
 
     <div class="panel">
       <div class="eyebrow">Аудио и видео</div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Скорость речи" [options]="speedOptions"
-                              [ngModel]="s.playbackSpeed" (ngModelChange)="updatePlaybackSpeed($event)"/>
+        <app-segmented-control
+          class="segpick"
+          label="Скорость речи"
+          [items]="speedOptions"
+          [value]="s.playbackSpeed"
+          (valueChange)="updatePlaybackSpeed($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-toggle label="Автовоспроизведение" hint="скоро" disabled [ngModel]="s.autoplayAudio"/>
+        <span>Автовоспроизведение <span class="soon">скоро</span></span>
+        <app-toggle
+          class="coming-toggle"
+          ariaLabel="Автовоспроизведение"
+          [disabled]="true"
+          [value]="s.autoplayAudio"
+        />
       </div>
     </div>
 
     <div class="panel">
       <div class="eyebrow">Тема</div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Оформление" [options]="modeOptions"
-                              [ngModel]="mode()" (ngModelChange)="updateMode($event)"/>
+        <app-segmented-control
+          class="segpick"
+          label="Оформление"
+          [items]="modeOptions"
+          [value]="mode()"
+          (valueChange)="updateMode($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Акцент" [options]="accentOptions"
-                              [ngModel]="theme().accent" (ngModelChange)="updateAccent($event)"/>
+        <app-segmented-control
+          class="segpick"
+          label="Акцент"
+          [items]="accentOptions"
+          [value]="theme().accent"
+          (valueChange)="updateAccent($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Размер текста" [options]="fontScaleOptions"
-                              [ngModel]="theme().fontScale" (ngModelChange)="updateFontScale($event)"/>
+        <app-segmented-control
+          class="segpick"
+          label="Размер текста"
+          [items]="fontScaleOptions"
+          [value]="theme().fontScale"
+          (valueChange)="updateFontScale($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Скругления" [options]="radiusOptions"
-                              [ngModel]="theme().radius" (ngModelChange)="updateRadius($event)"/>
+        <app-segmented-control
+          class="segpick"
+          label="Скругления"
+          [items]="radiusOptions"
+          [value]="theme().radius"
+          (valueChange)="updateRadius($event)"
+        />
       </div>
     </div>
   }
@@ -95,11 +180,19 @@
     <div class="eyebrow">Аккаунт</div>
     <div class="setrow">
       <span>Выйти из аккаунта</span>
-      <hg-button label="Выйти" variant="ghost" size="sm" (pressed)="logout()"/>
+      <app-button
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        label="Выйти"
+        (click)="logout()"
+      />
     </div>
     <div class="setrow">
       <span>Удалить аккаунт</span>
-      <hg-button label="Удалить навсегда" variant="danger" size="sm" (pressed)="deleteAccount()"/>
+      <app-button
+        styleClass="hg-button hg-button--danger hg-button--sm"
+        label="Удалить навсегда"
+        (click)="deleteAccount()"
+      />
     </div>
   </div>
 </div>

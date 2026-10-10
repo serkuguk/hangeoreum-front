@@ -1,5 +1,6 @@
 :host { display: block; }
 
+:host ::ng-deep {
 .abox { max-width: 860px; }
 
 .loadpanel {
@@ -74,7 +75,7 @@
   gap: 12px;
 }
 
-.tile {
+button.hg-native-button.hg-native-button.hg-native-button.tile {
   position: relative;
   background: var(--hg-card);
   border: 2px solid var(--hg-line);
@@ -103,4 +104,6 @@
     font-weight: 700;
     font-size: 13px;
   }
+}
+
 }

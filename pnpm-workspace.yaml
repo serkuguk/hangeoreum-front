@@ -8,3 +8,7 @@ allowBuilds:
   lmdb: true
   msgpackr-extract: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - springest@0.2.0 || 0.2.1
+patchedDependencies:
+  springest@0.2.1: patches/springest@0.2.1.patch

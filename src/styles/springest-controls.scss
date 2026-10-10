@@ -1,0 +1,259 @@
+// Keep application tokens on springest's internal focusable controls.
+app-button {
+  .hg-button.p-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-width: 0;
+    min-height: 2.75rem;
+    border: 1px solid transparent;
+    border-radius: var(--hg-radius-control, .75rem);
+    padding: .65rem 1rem;
+    font: inherit;
+    font-weight: 700;
+    background: var(--hg-blue);
+    color: #fff;
+    box-shadow: none;
+    cursor: pointer;
+    transition: .15s;
+
+    &:hover:not(:disabled) { background: var(--hg-blue); border-color: transparent; box-shadow: none; transform: translateY(-1px); }
+    &:focus-visible { outline: 3px solid color-mix(in srgb, var(--hg-blue) 35%, transparent); outline-offset: 2px; box-shadow: none; }
+    &:disabled { background: var(--hg-blue); border-color: transparent; color: #fff; cursor: not-allowed; opacity: .58; }
+    &.hg-button--secondary, &.hg-button--ghost {
+      &, &:hover:not(:disabled), &:disabled {
+        background: var(--hg-card-2);
+        color: var(--hg-text);
+        border-color: var(--hg-border);
+      }
+      &.hg-button--ghost { &, &:hover:not(:disabled), &:disabled { background: transparent; } }
+    }
+    &.hg-button--danger { &, &:hover:not(:disabled), &:disabled { background: var(--hg-danger); } }
+    &.hg-button--sm { min-height: 2.25rem; padding: .4rem .7rem; font-size: .875rem; }
+    &.hg-button--lg { min-height: 3.25rem; padding: .8rem 1.25rem; font-size: 1.05rem; }
+  }
+  &:has(.hg-button--block) {
+    display: block;
+    .default-button, p-button, .hg-button { width: 100%; }
+  }
+}
+
+// Preserve native grid/flex placement through the library's projection containers.
+app-button.hg-native-host {
+  display: contents;
+  > .default-button, > .default-button > p-button, .default-button__content { display: contents; }
+  button.hg-native-button { font: inherit; }
+  button.hg-native-button.hg-native-button.hg-native-button { min-width: 0; box-shadow: none; }
+}
+
+:is(app-basic-input, app-password-input, app-textarea, app-basic-select, app-file-picker) {
+  display: block;
+  width: 100%;
+  :is(input:not([type=checkbox]):not([type=file]), textarea, .p-select) {
+    width: 100%;
+    min-height: 2.75rem;
+    background: var(--hg-card);
+    color: var(--hg-text);
+    border: 1px solid var(--hg-border);
+    border-radius: var(--hg-radius-control, .75rem);
+    padding: .65rem .8rem;
+    font: inherit;
+    &:focus-visible { border-color: var(--hg-blue); outline: 3px solid color-mix(in srgb, var(--hg-blue) 22%, transparent); }
+    &:disabled { opacity: .62; }
+  }
+  .p-password { display: flex; width: 100%; }
+  .p-select { padding: 0; }
+  .p-select-label { color: var(--hg-text); padding: .65rem .8rem; }
+  label { color: var(--hg-text); }
+}
+app-form-field {
+  display: block;
+  .form-field .form-field__label { color: var(--hg-text); font-size: .9rem; font-weight: 700; }
+  .form-field .form-field__error { color: var(--hg-danger); }
+}
+
+app-password-input .password-input input.p-inputtext.p-inputtext {
+  background: var(--hg-card);
+  color: var(--hg-text);
+  border-color: var(--hg-border);
+  border-radius: var(--hg-radius-control, .75rem);
+  min-height: 2.75rem;
+  padding: .65rem .8rem;
+  font: inherit;
+}
+
+// Bare controls keep the old static labels; auth FormField owns its label layout.
+:is(app-basic-input, app-password-input, app-textarea, app-basic-select):not(app-form-field *) {
+  p-floatlabel.p-floatlabel.p-floatlabel { display: flex; flex-direction: column-reverse; gap: .4rem; }
+  p-floatlabel.p-floatlabel.p-floatlabel > label {
+    position: static;
+    transform: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--hg-text);
+    font-size: .9rem;
+    font-weight: 700;
+  }
+}
+app-textarea textarea { min-height: 6rem; resize: vertical; }
+app-basic-select .p-select-label.p-select-label { color: var(--hg-text); }
+
+app-segmented-control:has(.p-selectbutton) {
+  display: grid;
+  min-width: 0;
+  gap: .45rem;
+  > span { color: var(--hg-text); font-weight: 700; }
+  .p-selectbutton {
+    display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+    gap: .25rem;
+    padding: .25rem;
+    border-radius: .75rem;
+    background: var(--hg-card-2);
+  }
+  .p-selectbutton .p-togglebutton {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    border-radius: .55rem;
+    padding: .55rem .8rem;
+    background: transparent;
+    color: var(--hg-text-muted);
+    font: inherit;
+    white-space: normal;
+    box-shadow: none;
+    &[aria-pressed=true] { background: var(--hg-card); color: var(--hg-text); box-shadow: 0 1px 4px #14213d1c; }
+    &:focus-visible { outline: 3px solid color-mix(in srgb, var(--hg-blue) 30%, transparent); outline-offset: 2px; }
+    &[aria-disabled=true] { opacity: .55; }
+  }
+  .p-togglebutton .p-togglebutton-content { background: transparent; padding: 0; color: inherit; box-shadow: none; }
+  .p-togglebutton-label { color: inherit; font: inherit; white-space: normal; }
+  .p-selectbutton.cards { padding: 0; background: transparent; gap: .65rem; }
+}
+hg-settings-page {
+  app-segmented-control.segpick.segpick { display: grid; width: 100%; min-width: 0; > span { text-align: right; } }
+  app-basic-input.inline.inline { border: 0; padding: 0; background: transparent; min-width: 0; }
+  app-toggle.coming-toggle { width: auto; }
+}
+
+app-toggle:has(.p-toggleswitch) {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 1rem;
+  > label { order: -1; color: var(--hg-text); font-weight: 700; }
+  .p-toggleswitch { flex-shrink: 0; }
+  .p-toggleswitch-slider { background: var(--hg-border); }
+  .p-toggleswitch-checked .p-toggleswitch-slider { background: var(--hg-blue); }
+  .p-toggleswitch .p-toggleswitch-handle { background: #fff; }
+}
+app-checkbox .checkbox-wrapper.checkbox-wrapper {
+  align-items: flex-start;
+  gap: .65rem;
+  .checkbox-label { color: var(--hg-text); }
+  .p-checkbox .p-checkbox-box { background: var(--hg-card) !important; border-color: var(--hg-border) !important; }
+  .p-checkbox:not(.p-disabled):hover .p-checkbox-box { background: var(--hg-card) !important; border-color: var(--hg-blue) !important; }
+  .p-checkbox.p-checkbox-checked .p-checkbox-box { background: var(--hg-blue) !important; border-color: var(--hg-blue) !important; }
+  .p-checkbox:has(input:focus-visible) .p-checkbox-box { outline: 3px solid color-mix(in srgb, var(--hg-blue) 30%, transparent) !important; outline-offset: 2px; }
+}
+app-file-picker {
+  position: relative;
+  > label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    min-height: 2.75rem;
+    padding: .65rem 1rem;
+    border: 1px dashed var(--hg-border);
+    border-radius: .75rem;
+    background: var(--hg-card);
+    color: var(--hg-text);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  > input[type=file] { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+  &:has(> input:focus-visible) > label { outline: 3px solid color-mix(in srgb, var(--hg-blue) 30%, transparent); outline-offset: 2px; }
+  &:has(> input:disabled) > label { opacity: .58; cursor: not-allowed; }
+}
+app-dialog {
+  .p-dialog { width: min(42rem, calc(100vw - 2rem)); max-height: 90vh; background: var(--hg-card); color: var(--hg-text); border-color: var(--hg-border); }
+  :is(.p-dialog-header, .p-dialog-content, .p-dialog-footer) { background: var(--hg-card); color: var(--hg-text); }
+  .p-dialog-content { display: grid; gap: 1rem; }
+  [dialogActions] { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .65rem; }
+  .p-dialog-close-button { color: var(--hg-text-muted); }
+}
+app-pagination .p-paginator { flex-wrap: wrap; max-width: 100%; background: transparent; color: var(--hg-text); }
+
+hg-admin-lesson-builder-page .wordpick button.wchip {
+  min-width: 0;
+  background: var(--hg-card-2);
+  border: 1px solid var(--hg-line);
+  border-radius: 99px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--hg-txt);
+  &.on { border-color: var(--hg-jade); background: rgba(31, 199, 155, .12); }
+}
+hg-admin-media-page button.rowbtn {
+  min-width: 0;
+  background: none;
+  border: 1px solid var(--hg-line);
+  border-radius: 8px;
+  color: var(--hg-muted);
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: .15s;
+  margin-right: 6px;
+  &:hover { color: var(--hg-txt); border-color: rgba(255, 255, 255, .3); }
+  &.danger:hover { color: var(--hg-red); border-color: rgba(255, 77, 94, .5); }
+  &.on { color: var(--hg-jade); border-color: rgba(31, 199, 155, .5); }
+}
+
+hg-onboarding-page app-segmented-control.oblist {
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  .cards .p-togglebutton { width: 100%; background: var(--hg-card); color: var(--hg-text); border: 2px solid var(--hg-line); border-radius: 18px; padding: 18px 20px; text-align: left; }
+  .cards .p-togglebutton[aria-pressed=true] { border-color: var(--hg-blue); background: var(--hg-route-soft); }
+}
+
+hg-dashboard-page .hg-btn.hg-btn.hg-btn.hg-btn.hg-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  border-radius: var(--hg-radius-md);
+  font-family: inherit;
+  font-size: var(--hg-fs-base);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+
+  &--light {
+    padding: var(--hg-space-4) 26px;
+    background: oklch(98% 0.02 90);
+    color: var(--hg-route);
+    box-shadow: 0 6px 0 oklch(82% 0.03 88);
+
+    &:hover { transform: translateY(3px); box-shadow: 0 3px 0 oklch(82% 0.03 88); }
+  }
+
+  &--ghost {
+    padding: var(--hg-space-4) 22px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: var(--hg-on-route);
+    font-size: 14px;
+    font-weight: 600;
+
+    &:hover { background: rgba(255, 255, 255, 0.12); }
+  }
+}

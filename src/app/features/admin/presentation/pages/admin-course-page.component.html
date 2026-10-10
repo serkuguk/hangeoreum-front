@@ -1,5 +1,7 @@
 <h2 class="pagettl">Курс и уроки</h2>
-<p class="pagesub">Структура: курс → юниты → уроки. Стрелки — порядок, глазик — публикация.</p>
+<p class="pagesub">
+  Структура: курс → юниты → уроки. Стрелки — порядок, глазик — публикация.
+</p>
 
 @if (error()) {
   <div class="errbar">{{ error() }}</div>
@@ -7,40 +9,101 @@
 
 @if (!course()) {
   <div class="panel coursehead">
-    <hg-input class="search" label="Название курса" placeholder="Например, Корейский с нуля" [(ngModel)]="newCourseTitle"/>
-    <hg-button label="Создать курс" (pressed)="createCourse()"/>
+    <app-basic-input
+      class="search"
+      label="Название курса"
+      placeholder="Например, Корейский с нуля"
+      [formField]="newCourseTitleField"
+    />
+    <app-button
+      label="Создать курс"
+      (click)="createCourse()"
+      styleClass="hg-button"
+    ></app-button>
   </div>
 } @else {
   <div class="panel coursehead">
     <h3>{{ course()!.title }}</h3>
-    <hg-button [label]="course()!.published ? '👁 Опубликован' : '🚫 Черновик'"
-               variant="ghost" size="sm" (pressed)="toggleCoursePublish()"/>
+    <app-button
+      [label]="publishLabel()"
+      (click)="toggleCoursePublish()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+    ></app-button>
   </div>
 
   @for (unit of units(); track unit.id) {
     <div class="panel unit">
       <div class="uhead">
         <b>{{ unit.position }} · {{ unit.title }}</b>
-        <hg-button icon="↑" ariaLabel="Переместить юнит выше" variant="ghost" size="sm" (pressed)="moveUnit(unit, -1)"/>
-        <hg-button icon="↓" ariaLabel="Переместить юнит ниже" variant="ghost" size="sm" (pressed)="moveUnit(unit, 1)"/>
-        <hg-button [icon]="unit.published ? '👁' : '🚫'" ariaLabel="Изменить публикацию юнита"
-                   variant="ghost" size="sm" (pressed)="toggleUnitPublish(unit)"/>
-        <hg-button label="Удалить" variant="danger" size="sm" (pressed)="removeUnit(unit)"/>
+        <app-button
+          (click)="moveUnit(unit, -1)"
+          [aria]="{ 'aria-label': 'Переместить юнит выше' }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">↑</span></app-button
+        >
+        <app-button
+          (click)="moveUnit(unit, 1)"
+          [aria]="{ 'aria-label': 'Переместить юнит ниже' }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">↓</span></app-button
+        >
+        <app-button
+          (click)="toggleUnitPublish(unit)"
+          [aria]="{ 'aria-label': 'Изменить публикацию юнита' }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">{{
+            publishIcon(unit)
+          }}</span></app-button
+        >
+        <app-button
+          label="Удалить"
+          (click)="removeUnit(unit)"
+          styleClass="hg-button hg-button--danger hg-button--sm"
+        ></app-button>
       </div>
 
       <div class="lessons">
         @for (lesson of lessonsByUnit()[unit.id] ?? []; track lesson.id) {
           <div class="lrow">
             <span class="ttl">{{ lesson.position }} · {{ lesson.title }}</span>
-            <span class="meta">{{ lesson.type }} · {{ lesson.xpReward }} XP</span>
-            <a [routerLink]="['/admin/course/lessons', lesson.id]">Конструктор →</a>
-            <hg-button icon="↑" ariaLabel="Переместить урок выше" variant="ghost" size="sm" (pressed)="moveLesson(unit, lesson, -1)"/>
-            <hg-button icon="↓" ariaLabel="Переместить урок ниже" variant="ghost" size="sm" (pressed)="moveLesson(unit, lesson, 1)"/>
-            <hg-button [label]="lesson.free ? 'Free' : 'Pro'" ariaLabel="Изменить доступность урока"
-                       variant="ghost" size="sm" (pressed)="toggleLessonFree(unit, lesson)"/>
-            <hg-button [icon]="lesson.published ? '👁' : '🚫'" ariaLabel="Изменить публикацию урока"
-                       variant="ghost" size="sm" (pressed)="toggleLessonPublish(unit, lesson)"/>
-            <hg-button icon="✕" ariaLabel="Удалить урок" variant="danger" size="sm" (pressed)="removeLesson(unit, lesson)"/>
+            <span class="meta"
+              >{{ lesson.type }} · {{ lesson.xpReward }} XP</span
+            >
+            <a [routerLink]="['/admin/course/lessons', lesson.id]"
+              >Конструктор →</a
+            >
+            <app-button
+              (click)="moveLesson(unit, lesson, -1)"
+              [aria]="{ 'aria-label': 'Переместить урок выше' }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+              ><span aria-hidden="true">↑</span></app-button
+            >
+            <app-button
+              (click)="moveLesson(unit, lesson, 1)"
+              [aria]="{ 'aria-label': 'Переместить урок ниже' }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+              ><span aria-hidden="true">↓</span></app-button
+            >
+            <app-button
+              [label]="accessLabel(lesson)"
+              (click)="toggleLessonFree(unit, lesson)"
+              [aria]="{ 'aria-label': 'Изменить доступность урока' }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+            ></app-button>
+            <app-button
+              (click)="toggleLessonPublish(unit, lesson)"
+              [aria]="{ 'aria-label': 'Изменить публикацию урока' }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+              ><span aria-hidden="true">{{
+                publishIcon(lesson)
+              }}</span></app-button
+            >
+            <app-button
+              (click)="removeLesson(unit, lesson)"
+              [aria]="{ 'aria-label': 'Удалить урок' }"
+              styleClass="hg-button hg-button--danger hg-button--sm"
+              ><span aria-hidden="true">✕</span></app-button
+            >
           </div>
         } @empty {
           <div class="empty">Уроков нет.</div>
@@ -48,18 +111,40 @@
       </div>
 
       <div class="addrow">
-        <hg-input label="Название нового урока" [(ngModel)]="newLessonTitle[unit.id]"
-                  (keydown.enter)="addLesson(unit)"/>
-        <hg-select label="Тип урока" [options]="lessonTypes" [(ngModel)]="newLessonType[unit.id]"/>
-        <hg-button label="+ Урок" variant="secondary" size="sm" (pressed)="addLesson(unit)"/>
+        <app-basic-input
+          label="Название нового урока"
+          [formField]="lessonFields[unit.id].title"
+          (keydown.enter)="addLesson(unit)"
+        />
+        <app-basic-select
+          ariaLabel="Тип урока"
+          placeholder="Тип урока"
+          [items]="lessonTypes"
+          [formField]="lessonFields[unit.id].type"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <app-button
+          label="+ Урок"
+          (click)="addLesson(unit)"
+          styleClass="hg-button hg-button--secondary hg-button--sm"
+        ></app-button>
       </div>
     </div>
   }
 
   <div class="panel unit">
     <div class="addrow">
-      <hg-input label="Название нового юнита" [(ngModel)]="newUnitTitle" (keydown.enter)="addUnit()"/>
-      <hg-button label="+ Юнит" variant="secondary" size="sm" (pressed)="addUnit()"/>
+      <app-basic-input
+        label="Название нового юнита"
+        [formField]="newUnitTitleField"
+        (keydown.enter)="addUnit()"
+      />
+      <app-button
+        label="+ Юнит"
+        (click)="addUnit()"
+        styleClass="hg-button hg-button--secondary hg-button--sm"
+      ></app-button>
     </div>
   </div>
 }

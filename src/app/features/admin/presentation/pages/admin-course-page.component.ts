@@ -1,12 +1,12 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormField, form, required} from '@angular/forms/signals';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '../../infrastructure/admin.api';
-import {HgButtonComponent, HgInputComponent, HgSelectComponent} from '@shared/components/controls';
+import {ButtonComponent, BasicInputComponent, BasicSelectComponent} from 'springest';
 
 @Component({
   selector: 'hg-admin-course-page',
-  imports: [FormsModule, RouterLink, HgButtonComponent, HgInputComponent, HgSelectComponent],
+  imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent],
   templateUrl: './admin-course-page.component.html',
   styleUrl: './_admin.scss',
   styles: `
@@ -57,13 +57,25 @@ export class AdminCoursePageComponent {
 
   readonly course = signal<AdminCourse | null>(null);
   readonly units = signal<AdminUnit[]>([]);
+
+  readonly publishLabel = computed(() => this.course()?.published ? '👁 Опубликован' : '🚫 Черновик');
+
+  publishIcon(entity: {published: boolean}): string {
+    return entity.published ? '👁' : '🚫';
+  }
+
+  accessLabel(lesson: AdminLesson): string {
+    return lesson.free ? 'Free' : 'Pro';
+  }
   readonly lessonsByUnit = signal<Partial<Record<string, AdminLesson[]>>>({});
   readonly error = signal<string | null>(null);
 
-  newCourseTitle = '';
-  newUnitTitle = '';
-  newLessonTitle: Record<string, string> = {};
-  newLessonType: Record<string, string> = {};
+  readonly newCourseTitle = signal('');
+  readonly newCourseTitleField = form(this.newCourseTitle, path => required(path));
+  readonly newUnitTitle = signal('');
+  readonly newUnitTitleField = form(this.newUnitTitle, path => required(path));
+  readonly lessonDrafts = signal<Record<string, {title: string; type: string}>>({});
+  readonly lessonFields = form(this.lessonDrafts);
   readonly lessonTypes = ['LESSON', 'GRAMMAR', 'STORY', 'ALPHABET'].map(value => ({value, label: value}));
 
   constructor() {
@@ -84,6 +96,7 @@ export class AdminCoursePageComponent {
   private loadUnits(courseId: string): void {
     this.api.units(courseId).subscribe(units => {
       this.units.set(units);
+      this.lessonDrafts.update(drafts => Object.fromEntries(units.map(unit => [unit.id, drafts[unit.id] ?? {title: '', type: 'LESSON'}])));
       for (const unit of units) {
         this.api.lessons(unit.id).subscribe(lessons =>
           this.lessonsByUnit.update(map => ({...map, [unit.id]: lessons})));
@@ -92,8 +105,8 @@ export class AdminCoursePageComponent {
   }
 
   createCourse(): void {
-    if (!this.newCourseTitle.trim()) return;
-    this.api.createCourse({title: this.newCourseTitle.trim()}).subscribe(() => this.load());
+    if (!this.newCourseTitle().trim()) return;
+    this.api.createCourse({title: this.newCourseTitle().trim()}).subscribe(() => this.load());
   }
 
   toggleCoursePublish(): void {
@@ -104,11 +117,11 @@ export class AdminCoursePageComponent {
 
   addUnit(): void {
     const course = this.course();
-    const title = this.newUnitTitle.trim();
+    const title = this.newUnitTitle().trim();
     if (!course || !title) return;
     this.api.createUnit({courseId: course.id, position: this.units().length + 1, title})
       .subscribe(() => {
-        this.newUnitTitle = '';
+        this.newUnitTitle.set('');
         this.loadUnits(course.id);
       });
   }
@@ -141,18 +154,18 @@ export class AdminCoursePageComponent {
   }
 
   addLesson(unit: AdminUnit): void {
-    const title = (this.newLessonTitle[unit.id] ?? '').trim();
+    const title = this.lessonDrafts()[unit.id].title.trim();
     if (!title) return;
     const lessons = this.lessonsByUnit()[unit.id] ?? [];
     this.api.createLesson({
       unitId: unit.id,
       position: lessons.length + 1,
-      type: this.newLessonType[unit.id] || 'LESSON',
+      type: this.lessonDrafts()[unit.id].type,
       title,
       xpReward: 10,
       isFree: false,
     }).subscribe(created => {
-      this.newLessonTitle[unit.id] = '';
+      this.lessonFields[unit.id].title().reset('');
       this.lessonsByUnit.update(map => ({...map, [unit.id]: [...lessons, created]}));
     });
   }

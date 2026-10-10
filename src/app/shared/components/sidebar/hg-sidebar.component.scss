@@ -1,0 +1,54 @@
+:host {
+  display: block;
+  width: 72px;
+  position: sticky;
+  top: var(--sidebar-top, 0px);
+  height: calc(100dvh - var(--sidebar-top, 0px));
+  align-self: start;
+  z-index: 30;
+  transition: width var(--hg-motion-route) ease;
+}
+:host.expanded { width: 230px; }
+.sidebar-panel {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--hg-space-3);
+  border-right: 1px solid var(--hg-border);
+  background: var(--sidebar-bg, var(--hg-bg));
+  gap: var(--hg-space-3);
+  transition: width var(--hg-motion-route) ease;
+}
+.header { display: flex; align-items: center; flex-wrap: wrap; gap: var(--hg-space-2); min-height: 44px; }
+.brand { min-width: 0; flex-basis: 100%; padding: 0 10px; }
+:host ::ng-deep button.hg-native-button.hg-native-button.toggle {
+  display: grid; place-items: center; width: 44px; min-height: 44px; flex-shrink: 0;
+  background: transparent; color: var(--hg-text-muted); border: 0;
+  border-radius: 0; cursor: pointer; font-size: 18px;
+}
+nav { display: flex; flex-direction: column; gap: var(--hg-space-1); flex: 1; overflow-y: auto; min-height: 0; }
+a {
+  display: flex; align-items: center; gap: var(--hg-space-3); min-height: 44px;
+  padding: var(--hg-space-2) var(--hg-space-3); border-radius: 0;
+  font-size: var(--hg-fs-sm); color: var(--sidebar-muted, var(--hg-text-muted));
+  text-decoration: none; flex-shrink: 0;
+  transition: background var(--hg-motion-nav), color var(--hg-motion-nav), gap var(--hg-motion-route) ease, padding var(--hg-motion-route) ease;
+}
+.icon { flex: 0 0 20px; text-align: center; font-size: 18px; }
+.label { min-width: 0; max-width: 160px; opacity: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: max-width var(--hg-motion-route) ease, opacity var(--hg-motion-route) ease; }
+a:hover, :host ::ng-deep button.hg-native-button.hg-native-button.toggle:hover { background: var(--sidebar-hover, var(--hg-surface-muted)); color: var(--hg-text); }
+a.is-active { background: var(--sidebar-active-bg, var(--hg-route-soft)); color: var(--sidebar-active-text, var(--hg-route-text)); }
+.footer { font-size: var(--hg-fs-xs); }
+:host:not(.expanded) a { gap: 0; padding-inline: 14px; }
+:host:not(.expanded) .label { max-width: 0; opacity: 0; }
+.backdrop { display: none; }
+a:focus-visible, :host ::ng-deep button.hg-native-button.hg-native-button.toggle:focus-visible { outline: 2px solid var(--hg-focus); outline-offset: -2px; }
+@media (max-width: 767px) {
+  :host.expanded { width: 72px; }
+  .sidebar-panel { width: 72px; }
+  :host.expanded .sidebar-panel { width: 230px; z-index: 1; box-shadow: 12px 0 32px rgba(0, 0, 0, .25); }
+  .backdrop { display: block; position: fixed; inset: var(--sidebar-top, 0px) 0 0; background: rgba(0, 0, 0, .35); }
+}
+@media (prefers-reduced-motion: reduce) { :host, .sidebar-panel, a, .label { transition: none; } }

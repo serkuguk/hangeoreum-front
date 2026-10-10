@@ -28,7 +28,7 @@
   margin-top: 12px;
   flex-wrap: wrap;
 
-  hg-input { flex: 1; min-width: 160px; }
+  app-basic-input { flex: 1; min-width: 160px; }
 }
 
 .atable {
@@ -56,85 +56,6 @@
   tr:last-child td { border: none; }
 
   .kr { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 400; font-size: 18px; letter-spacing: .04em; }
-}
-
-.rowbtn {
-  background: none;
-  border: 1px solid var(--hg-line);
-  border-radius: 8px;
-  color: var(--hg-muted);
-  font-size: 12px;
-  padding: 6px 10px;
-  cursor: pointer;
-  transition: .15s;
-  margin-right: 6px;
-
-  &:hover { color: var(--hg-txt); border-color: rgba(255, 255, 255, .3); }
-  &.danger:hover { color: var(--hg-red); border-color: rgba(255, 77, 94, .5); }
-  &.on { color: var(--hg-jade); border-color: rgba(31, 199, 155, .5); }
-}
-
-.pager {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 16px;
-  color: var(--hg-muted);
-  font-size: 13.5px;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .55);
-  z-index: 70;
-}
-
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 71;
-  width: min(94vw, 560px);
-  max-height: 90vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
-
-  label {
-    font-size: 12px;
-    color: var(--hg-muted);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  input, select, textarea {
-    background: var(--hg-card-2);
-    border: 1px solid var(--hg-line);
-    border-radius: 10px;
-    padding: 10px 12px;
-    color: var(--hg-txt);
-    font-size: 14px;
-    font-family: inherit;
-
-    &:focus { outline: none; border-color: var(--hg-blue); }
-  }
-
-  textarea { min-height: 120px; font-family: monospace; font-size: 12.5px; }
-
-  .btns {
-    display: flex;
-    gap: 10px;
-    margin-top: 8px;
-
-    .cta { flex: 1; padding: 12px; }
-  }
 }
 
 .empty { color: var(--hg-muted); font-size: 13.5px; padding: 20px; text-align: center; }

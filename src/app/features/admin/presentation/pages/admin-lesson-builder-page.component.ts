@@ -1,45 +1,98 @@
-import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {RouterLink} from '@angular/router';
-import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
-import {AdminApi, AdminExercise, AdminLessonFull, AdminWord} from '../../infrastructure/admin.api';
+import { FormField, form } from '@angular/forms/signals';
 import {
-  HgButtonComponent,
-  HgInputComponent,
-  HgSelectComponent,
-  HgSelectOption,
-  HgTextareaComponent,
-} from '@shared/components/controls';
-import {TranslatePipe} from '@ngx-translate/core';
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import {
+  Subject,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  of,
+  switchMap,
+} from 'rxjs';
+import {
+  AdminApi,
+  AdminExercise,
+  AdminLessonFull,
+  AdminWord,
+} from '../../infrastructure/admin.api';
+import {
+  ButtonComponent,
+  BasicInputComponent,
+  BasicSelectComponent,
+  TextareaComponent,
+} from 'springest';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /** Шаблоны payload по kind — подставляются в JSON-редактор при добавлении. */
 const PAYLOAD_TEMPLATES: Record<string, unknown> = {
-  CHOICE: {question: '친구', romanization: 'chingu', options: [
-    {text: 'друг', icon: '🧑‍🤝‍🧑', correct: true}, {text: 'школа', icon: '🏫'},
-    {text: 'время', icon: '⏰'}, {text: 'любовь', icon: '❤️'}]},
-  LISTEN_CHOICE: {audioUrl: '', text: '안녕하세요', options: [
-    {text: 'здравствуйте', correct: true}, {text: 'до свидания'}, {text: 'спасибо'}, {text: 'извините'}]},
-  WORD_ORDER: {translation: 'Я — студент', tokens: ['저는', '학생', '이에요'], extra: ['친구는']},
-  FILL_BLANK: {sentence: '저 ___ 학생이에요.', translation: 'Я — студент', hint: '저 кончается на гласную',
-    options: [{text: '는', hint: 'после гласной'}, {text: '은', hint: 'после согласной'}], correct: '는'},
-  MATCH_PAIRS: {pairs: [{left: '친구', right: 'друг'}, {left: '학교', right: 'школа'},
-    {left: '사랑', right: 'любовь'}, {left: '시간', right: 'время'}]},
-  TYPE_WORD: {translation: 'друг', answer: '친구', romanization: 'chingu'},
+  CHOICE: {
+    question: '친구',
+    romanization: 'chingu',
+    options: [
+      { text: 'друг', icon: '🧑‍🤝‍🧑', correct: true },
+      { text: 'школа', icon: '🏫' },
+      { text: 'время', icon: '⏰' },
+      { text: 'любовь', icon: '❤️' },
+    ],
+  },
+  LISTEN_CHOICE: {
+    audioUrl: '',
+    text: '안녕하세요',
+    options: [
+      { text: 'здравствуйте', correct: true },
+      { text: 'до свидания' },
+      { text: 'спасибо' },
+      { text: 'извините' },
+    ],
+  },
+  WORD_ORDER: {
+    translation: 'Я — студент',
+    tokens: ['저는', '학생', '이에요'],
+    extra: ['친구는'],
+  },
+  FILL_BLANK: {
+    sentence: '저 ___ 학생이에요.',
+    translation: 'Я — студент',
+    hint: '저 кончается на гласную',
+    options: [
+      { text: '는', hint: 'после гласной' },
+      { text: '은', hint: 'после согласной' },
+    ],
+    correct: '는',
+  },
+  MATCH_PAIRS: {
+    pairs: [
+      { left: '친구', right: 'друг' },
+      { left: '학교', right: 'школа' },
+      { left: '사랑', right: 'любовь' },
+      { left: '시간', right: 'время' },
+    ],
+  },
+  TYPE_WORD: { translation: 'друг', answer: '친구', romanization: 'chingu' },
 };
 
 const KINDS = Object.keys(PAYLOAD_TEMPLATES);
-const KIND_OPTIONS: readonly HgSelectOption<string>[] = KINDS.map(value => ({label: value, value}));
+const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
+  label: value,
+  value,
+}));
 
 @Component({
   selector: 'hg-admin-lesson-builder-page',
   imports: [
-    FormsModule,
+    FormField,
     RouterLink,
-    HgButtonComponent,
-    HgInputComponent,
-    HgSelectComponent,
-    HgTextareaComponent,
+    ButtonComponent,
+    BasicInputComponent,
+    BasicSelectComponent,
+    TextareaComponent,
     TranslatePipe,
   ],
   templateUrl: './admin-lesson-builder-page.component.html',
@@ -52,18 +105,26 @@ const KIND_OPTIONS: readonly HgSelectOption<string>[] = KINDS.map(value => ({lab
       padding: 12px 0;
       border-bottom: 1px solid var(--hg-line);
 
-      &:last-child { border: none; }
+      &:last-child {
+        border: none;
+      }
 
-      .kind { font-weight: 700; font-size: 13px; min-width: 120px; padding-top: 4px; }
+      .kind {
+        font-weight: 700;
+        font-size: 13px;
+        min-width: 120px;
+        padding-top: 4px;
+      }
 
-      hg-textarea { flex: 1; }
+      app-textarea {
+        flex: 1;
+      }
     }
 
     .addex {
       display: flex;
       gap: 8px;
       margin-top: 14px;
-
     }
 
     .tipform {
@@ -71,33 +132,42 @@ const KIND_OPTIONS: readonly HgSelectOption<string>[] = KINDS.map(value => ({lab
       flex-direction: column;
       gap: 10px;
 
-      .mono { font-family: monospace; font-size: 12px; }
+      .mono {
+        font-family: monospace;
+        font-size: 12px;
+      }
     }
 
     .wordpick {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-
-      .wchip {
-        background: var(--hg-card-2);
-        border: 1px solid var(--hg-line);
-        border-radius: 99px;
-        padding: 6px 12px;
-        font-size: 13px;
-        cursor: pointer;
-        color: var(--hg-txt);
-
-        &.on { border-color: var(--hg-jade); background: rgba(31, 199, 155, .12); }
-      }
     }
 
-    .savedmark { color: var(--hg-jade); font-size: 12.5px; margin-left: 8px; }
-    section.panel { margin-bottom: 16px; }
+    .savedmark {
+      color: var(--hg-jade);
+      font-size: 12.5px;
+      margin-left: 8px;
+    }
+    section.panel {
+      margin-bottom: 16px;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLessonBuilderPageComponent {
+  payloadAria(exercise: { position: number }): string {
+    return `Payload упражнения ${exercise.position}`;
+  }
+
+  removeWordAria(word: AdminWord): string {
+    return `Убрать слово ${word.hangul}, ${word.translation}`;
+  }
+
+  bindWordAria(word: AdminWord): string {
+    return `Привязать слово ${word.hangul}, ${word.translation}`;
+  }
+
   readonly id = input.required<string>();
 
   private api = inject(AdminApi);
@@ -107,15 +177,20 @@ export class AdminLessonBuilderPageComponent {
   readonly savedFlash = signal<string | null>(null);
 
   readonly kindOptions = KIND_OPTIONS;
-  newKind = 'CHOICE';
+  readonly newKind = signal('CHOICE');
+  readonly newKindField = form(this.newKind);
 
   // черновики payload как JSON-строки по id упражнения
-  payloadDrafts: Record<string, string> = {};
+  readonly payloadDrafts = signal<Record<string, string>>({});
+  readonly payloadFields = form(this.payloadDrafts);
   badJson: Record<string, boolean> = {};
 
-  tipTitle = '';
-  tipBody = '';
-  tipExamples = '';
+  readonly tipTitle = signal('');
+  readonly tipTitleField = form(this.tipTitle);
+  readonly tipBody = signal('');
+  readonly tipBodyField = form(this.tipBody);
+  readonly tipExamples = signal('');
+  readonly tipExamplesField = form(this.tipExamples);
 
   // поиск слов для привязки
   wordSearch = '';
@@ -123,30 +198,53 @@ export class AdminLessonBuilderPageComponent {
   private readonly wordSearch$ = new Subject<string>();
 
   constructor() {
-    this.wordSearch$.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(value => this.api.words(value, 0).pipe(
-        catchError(() => {
-          this.error.set('Не получилось найти слова.');
-          return of(null);
-        }),
-      )),
-      takeUntilDestroyed(),
-    ).subscribe(result => this.foundWords.set(result?.content ?? []));
+    this.wordSearch$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((value) =>
+          this.api.words(value, 0).pipe(
+            catchError(() => {
+              this.error.set('Не получилось найти слова.');
+              return of(null);
+            }),
+          ),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((result) => this.foundWords.set(result?.content ?? []));
     setTimeout(() => this.load());
   }
 
   load(): void {
     this.api.lessonFull(this.id()).subscribe({
-      next: data => {
+      next: (data) => {
         this.data.set(data);
-        this.payloadDrafts = Object.fromEntries(
-          data.exercises.map(e => [e.id, JSON.stringify(e.payload, null, 2)]));
-        this.tipTitle = data.tip?.title ?? '';
-        this.tipBody = data.tip?.bodyMd ?? '';
-        this.tipExamples = data.tip?.examples ? JSON.stringify(data.tip.examples, null, 2)
-          : JSON.stringify([{ko: '저는 학생이에요.', translation: 'Я — студент', highlight: ['는']}], null, 2);
+        this.payloadFields().reset(
+          Object.fromEntries(
+            data.exercises.map((e) => [
+              e.id,
+              JSON.stringify(e.payload, null, 2),
+            ]),
+          ),
+        );
+        this.tipTitle.set(data.tip?.title ?? '');
+        this.tipBody.set(data.tip?.bodyMd ?? '');
+        this.tipExamples.set(
+          data.tip?.examples
+            ? JSON.stringify(data.tip.examples, null, 2)
+            : JSON.stringify(
+                [
+                  {
+                    ko: '저는 학생이에요.',
+                    translation: 'Я — студент',
+                    highlight: ['는'],
+                  },
+                ],
+                null,
+                2,
+              ),
+        );
       },
       error: () => this.error.set('Не получилось загрузить урок.'),
     });
@@ -155,33 +253,38 @@ export class AdminLessonBuilderPageComponent {
   addExercise(): void {
     const data = this.data();
     if (!data) return;
-    this.api.createExercise(this.id(), {
-      position: data.exercises.length + 1,
-      kind: this.newKind,
-      payload: PAYLOAD_TEMPLATES[this.newKind],
-    }).subscribe({
-      next: () => this.load(),
-      error: () => this.error.set('Не получилось добавить упражнение.'),
-    });
+    this.api
+      .createExercise(this.id(), {
+        position: data.exercises.length + 1,
+        kind: this.newKind(),
+        payload: PAYLOAD_TEMPLATES[this.newKind()],
+      })
+      .subscribe({
+        next: () => this.load(),
+        error: () => this.error.set('Не получилось добавить упражнение.'),
+      });
   }
 
   saveExercise(exercise: AdminExercise): void {
     let payload: unknown;
     try {
-      payload = JSON.parse(this.payloadDrafts[exercise.id]);
+      payload = JSON.parse(this.payloadDrafts()[exercise.id]);
       this.badJson[exercise.id] = false;
     } catch {
       this.badJson[exercise.id] = true;
       return;
     }
-    this.api.updateExercise(this.id(), exercise.id, {
-      position: exercise.position,
-      kind: exercise.kind,
-      payload,
-    }).subscribe({
-      next: () => this.flash('Упражнение сохранено'),
-      error: () => this.error.set('Бэк отклонил payload — проверь обязательные поля.'),
-    });
+    this.api
+      .updateExercise(this.id(), exercise.id, {
+        position: exercise.position,
+        kind: exercise.kind,
+        payload,
+      })
+      .subscribe({
+        next: () => this.flash('Упражнение сохранено'),
+        error: () =>
+          this.error.set('Бэк отклонил payload — проверь обязательные поля.'),
+      });
   }
 
   removeExercise(exercise: AdminExercise): void {
@@ -194,15 +297,20 @@ export class AdminLessonBuilderPageComponent {
 
   saveTip(): void {
     let examples: unknown = null;
-    if (this.tipExamples.trim()) {
+    if (this.tipExamples().trim()) {
       try {
-        examples = JSON.parse(this.tipExamples);
+        examples = JSON.parse(this.tipExamples());
       } catch {
         this.error.set('Examples — некорректный JSON.');
         return;
       }
     }
-    this.api.putTip(this.id(), {title: this.tipTitle, bodyMd: this.tipBody, examples})
+    this.api
+      .putTip(this.id(), {
+        title: this.tipTitle(),
+        bodyMd: this.tipBody(),
+        examples,
+      })
       .subscribe({
         next: () => this.flash('Tip сохранён'),
         error: () => this.error.set('Не получилось сохранить tip.'),
@@ -215,18 +323,18 @@ export class AdminLessonBuilderPageComponent {
   }
 
   isLinked(word: AdminWord): boolean {
-    return !!this.data()?.words.some(w => w.id === word.id);
+    return !!this.data()?.words.some((w) => w.id === word.id);
   }
 
   toggleWord(word: AdminWord): void {
     const data = this.data();
     if (!data) return;
     const ids = this.isLinked(word)
-      ? data.words.filter(w => w.id !== word.id).map(w => w.id)
-      : [...data.words.map(w => w.id), word.id];
+      ? data.words.filter((w) => w.id !== word.id).map((w) => w.id)
+      : [...data.words.map((w) => w.id), word.id];
     this.api.putLessonWords(this.id(), ids).subscribe({
-      next: words => {
-        this.data.set({...data, words});
+      next: (words) => {
+        this.data.set({ ...data, words });
         this.flash('Слова урока обновлены');
       },
       error: () => this.error.set('Не получилось обновить слова урока.'),

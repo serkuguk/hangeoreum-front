@@ -1,8 +1,9 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {jest} from '@jest/globals';
+import {provideTranslateService} from '@ngx-translate/core';
 import {of, Subject, throwError} from 'rxjs';
-import {HgDialogComponent} from '@shared/components/controls';
+import {DialogComponent} from 'springest';
 import {AdminApi, AdminWord} from '../../infrastructure/admin.api';
 import {AdminWordsPageComponent} from './admin-words-page.component';
 
@@ -38,7 +39,7 @@ describe('AdminWords image saving', () => {
     Object.defineProperty(URL, 'createObjectURL', {configurable: true, value: createPreview});
     Object.defineProperty(URL, 'revokeObjectURL', {configurable: true, value: revokePreview});
     TestBed.configureTestingModule({
-      imports: [AdminWordsPageComponent], providers: [{provide: AdminApi, useValue: api}],
+      imports: [AdminWordsPageComponent], providers: [provideTranslateService(), {provide: AdminApi, useValue: api}],
     });
     fixture = TestBed.createComponent(AdminWordsPageComponent);
     component = fixture.componentInstance;
@@ -56,9 +57,9 @@ describe('AdminWords image saving', () => {
 
   function openNewWord(): void {
     component.openCreate();
-    component.draft.hangul = word.hangul;
-    component.draft.romanization = word.romanization;
-    component.draft.translation = word.translation;
+    component.draft.update(draft => ({...draft, hangul: word.hangul}));
+    component.draft.update(draft => ({...draft, romanization: word.romanization}));
+    component.draft.update(draft => ({...draft, translation: word.translation}));
   }
 
   it('creates a word without requiring an image', () => {
@@ -88,7 +89,7 @@ describe('AdminWords image saving', () => {
 
   it('updates a word without replacing its existing image when no file was selected', () => {
     component.openEdit(word);
-    component.draft.translation = 'Обновлённый перевод';
+    component.draft.update(draft => ({...draft, translation: 'Обновлённый перевод'}));
     component.save();
     expect(api.updateWord).toHaveBeenCalledWith(word.id, expect.objectContaining({translation: 'Обновлённый перевод'}));
     expect(api.createWord).not.toHaveBeenCalled();
@@ -103,7 +104,7 @@ describe('AdminWords image saving', () => {
 
     expect(component.dialogOpen()).toBe(true);
     expect(component.editing()).toBeNull();
-    expect(component.draft.hangul).toBe('커피');
+    expect(component.draft().hangul).toBe('커피');
     expect(component.selectedImage()).toBe(image);
     expect(component.imagePreviewUrl()).toBe('blob:preview-1');
     expect(component.saveError()).toContain('сохранить');
@@ -130,7 +131,7 @@ describe('AdminWords image saving', () => {
     expect(api.words).toHaveBeenCalledTimes(initialLoads + 1);
     expect(component.words()).toEqual([word]);
 
-    component.draft.translation = 'Кофе (исправлено)';
+    component.draft.update(draft => ({...draft, translation: 'Кофе (исправлено)'}));
     component.save();
     expect(api.createWord).toHaveBeenCalledTimes(1);
     expect(api.updateWord).toHaveBeenCalledWith(word.id, expect.objectContaining({translation: 'Кофе (исправлено)'}));
@@ -182,7 +183,7 @@ describe('AdminWords image saving', () => {
 
   it('rejects empty required text even when save is called directly', () => {
     openNewWord();
-    component.draft.hangul = '  ';
+    component.draft.update(draft => ({...draft, hangul: '  '}));
     component.save();
     expect(api.createWord).not.toHaveBeenCalled();
     expect(api.uploadWordMedia).not.toHaveBeenCalled();
@@ -260,13 +261,13 @@ describe('AdminWords image saving', () => {
     expect(preview.getAttribute('src')).toBe('blob:preview-1');
     component.save();
     fixture.detectChanges();
-    const dialog = fixture.debugElement.query(By.directive(HgDialogComponent)).componentInstance as HgDialogComponent;
+    const dialog = fixture.debugElement.query(By.directive(DialogComponent)).componentInstance as DialogComponent;
     expect(dialog.closable()).toBe(false);
     expect(dialog.closeOnEscape()).toBe(false);
-    const picker: HTMLInputElement = fixture.nativeElement.querySelector('hg-dialog input[type=file]');
+    const picker: HTMLInputElement = fixture.nativeElement.querySelector('app-dialog input[type=file]');
     expect(picker.disabled).toBe(true);
     expect(picker.accept).toBe('image/png,image/jpeg,image/webp');
-    const buttons: NodeListOf<HTMLButtonElement> = fixture.nativeElement.querySelectorAll('hg-dialog hg-button button');
+    const buttons: NodeListOf<HTMLButtonElement> = fixture.nativeElement.querySelectorAll('app-dialog app-button button');
     expect(Array.from(buttons).every(button => button.disabled)).toBe(true);
 
     pending.error(new Error('upload failed'));
@@ -274,7 +275,7 @@ describe('AdminWords image saving', () => {
     expect(dialog.closable()).toBe(true);
     expect(dialog.closeOnEscape()).toBe(true);
     expect(picker.disabled).toBe(false);
-    expect(fixture.nativeElement.querySelector('hg-dialog [role=alert]').textContent).toContain('Слово сохранено');
+    expect(fixture.nativeElement.querySelector('app-dialog [role=alert]').textContent).toContain('Слово сохранено');
     expect(preview.getAttribute('src')).toBe('blob:preview-1');
   });
 

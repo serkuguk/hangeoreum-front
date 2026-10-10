@@ -1,5 +1,5 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {shuffle} from '@shared/utils/shuffle';
 import {WordOrderPayload} from '../../../domain/entities/exercise.entity';
 import {Feedback, gradeWordOrder} from '../../../domain/services/exercise-grading';
@@ -12,7 +12,7 @@ interface BankToken {
 
 @Component({
   selector: 'hg-exercise-word-order',
-  imports: [HgButtonComponent, TranslatePipe],
+  imports: [ButtonComponent, TranslatePipe],
   template: `
     <div class="q-kind">{{ 'learning.exercise.buildSentence' | translate }}</div>
     <div class="panel taskpanel">{{ payload().translation }}</div>
@@ -22,25 +22,27 @@ interface BankToken {
         <span class="placeholder">{{ 'learning.exercise.chooseWords' | translate }}</span>
       }
       @for (token of chosen(); track token.id) {
-        <button type="button" data-domain-control class="wtok kr" [disabled]="answered()"
-                [attr.aria-label]="'learning.exercise.removeWord' | translate:{word: token.text}" (click)="remove(token)">{{ token.text }}</button>
+        <app-button class="hg-native-host" styleClass="hg-native-button wtok kr" type="button" [disabled]="answered()"
+                (click)="remove(token)" [aria]="{'aria-label': ('learning.exercise.removeWord' | translate:{word: token.text})}">{{ token.text }}</app-button>
       }
     </div>
 
     <div class="wbank">
       @for (token of bank(); track token.id) {
         @if (!isChosen(token)) {
-          <button type="button" data-domain-control class="wtok kr" [disabled]="answered()"
-                  [attr.aria-label]="'learning.exercise.addWord' | translate:{word: token.text}" (click)="add(token)">{{ token.text }}</button>
+          <app-button class="hg-native-host" styleClass="hg-native-button wtok kr" type="button" [disabled]="answered()"
+                  (click)="add(token)" [aria]="{'aria-label': ('learning.exercise.addWord' | translate:{word: token.text})}">{{ token.text }}</app-button>
         }
       }
     </div>
 
-    <hg-button class="checkbtn" [label]="'common.check' | translate"
-               [disabled]="chosen().length === 0 || answered()" (pressed)="check()"/>
+    <app-button styleClass="hg-button" class="checkbtn" [label]="'common.check' | translate"
+               [disabled]="chosen().length === 0 || answered()" (click)="check()"/>
   `,
   styleUrl: './exercise-shared.scss',
   styles: `
+    :host ::ng-deep {
+
     .assembled {
       min-height: var(--hg-touch-min);
       border: 2px dashed var(--hg-border);
@@ -56,6 +58,7 @@ interface BankToken {
     }
 
     .wbank { display: flex; flex-wrap: wrap; gap: var(--hg-space-3); }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
