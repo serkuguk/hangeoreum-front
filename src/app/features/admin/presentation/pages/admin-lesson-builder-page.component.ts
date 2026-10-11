@@ -28,7 +28,7 @@ import {
   BasicSelectComponent,
   TextareaComponent,
 } from 'springest';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 /** Шаблоны payload по kind — подставляются в JSON-редактор при добавлении. */
 const PAYLOAD_TEMPLATES: Record<string, unknown> = {
@@ -156,21 +156,30 @@ const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLessonBuilderPageComponent {
-  payloadAria(exercise: { position: number }): string {
-    return `Payload упражнения ${exercise.position}`;
-  }
-
-  removeWordAria(word: AdminWord): string {
-    return `Убрать слово ${word.hangul}, ${word.translation}`;
-  }
-
-  bindWordAria(word: AdminWord): string {
-    return `Привязать слово ${word.hangul}, ${word.translation}`;
-  }
-
   readonly id = input.required<string>();
 
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
+
+  payloadAria(exercise: { position: number }): string {
+    return this.translate.instant('admin.builder.payloadAria', {
+      position: exercise.position,
+    });
+  }
+
+  removeWordAria(word: AdminWord): string {
+    return this.translate.instant('admin.builder.removeWordAria', {
+      hangul: word.hangul,
+      translation: word.translation,
+    });
+  }
+
+  bindWordAria(word: AdminWord): string {
+    return this.translate.instant('admin.builder.bindWordAria', {
+      hangul: word.hangul,
+      translation: word.translation,
+    });
+  }
 
   readonly data = signal<AdminLessonFull | null>(null);
   readonly error = signal<string | null>(null);
@@ -205,7 +214,7 @@ export class AdminLessonBuilderPageComponent {
         switchMap((value) =>
           this.api.words(value, 0).pipe(
             catchError(() => {
-              this.error.set('Не получилось найти слова.');
+              this.error.set(this.translate.instant('admin.builder.errors.findWords'));
               return of(null);
             }),
           ),
@@ -246,7 +255,8 @@ export class AdminLessonBuilderPageComponent {
               ),
         );
       },
-      error: () => this.error.set('Не получилось загрузить урок.'),
+      error: () =>
+        this.error.set(this.translate.instant('admin.builder.errors.loadLesson')),
     });
   }
 
@@ -261,7 +271,8 @@ export class AdminLessonBuilderPageComponent {
       })
       .subscribe({
         next: () => this.load(),
-        error: () => this.error.set('Не получилось добавить упражнение.'),
+        error: () =>
+          this.error.set(this.translate.instant('admin.builder.errors.addExercise')),
       });
   }
 
@@ -281,17 +292,19 @@ export class AdminLessonBuilderPageComponent {
         payload,
       })
       .subscribe({
-        next: () => this.flash('Упражнение сохранено'),
+        next: () =>
+          this.flash(this.translate.instant('admin.builder.flash.exerciseSaved')),
         error: () =>
-          this.error.set('Бэк отклонил payload — проверь обязательные поля.'),
+          this.error.set(this.translate.instant('admin.builder.errors.payloadRejected')),
       });
   }
 
   removeExercise(exercise: AdminExercise): void {
-    if (!confirm('Удалить упражнение?')) return;
+    if (!confirm(this.translate.instant('admin.builder.errors.deleteConfirm'))) return;
     this.api.deleteExercise(this.id(), exercise.id).subscribe({
       next: () => this.load(),
-      error: () => this.error.set('Не получилось удалить упражнение.'),
+      error: () =>
+        this.error.set(this.translate.instant('admin.builder.errors.deleteExercise')),
     });
   }
 
@@ -301,7 +314,7 @@ export class AdminLessonBuilderPageComponent {
       try {
         examples = JSON.parse(this.tipExamples());
       } catch {
-        this.error.set('Examples — некорректный JSON.');
+        this.error.set(this.translate.instant('admin.builder.errors.examplesJson'));
         return;
       }
     }
@@ -312,8 +325,9 @@ export class AdminLessonBuilderPageComponent {
         examples,
       })
       .subscribe({
-        next: () => this.flash('Tip сохранён'),
-        error: () => this.error.set('Не получилось сохранить tip.'),
+        next: () => this.flash(this.translate.instant('admin.builder.flash.tipSaved')),
+        error: () =>
+          this.error.set(this.translate.instant('admin.builder.errors.saveTip')),
       });
   }
 
@@ -335,9 +349,10 @@ export class AdminLessonBuilderPageComponent {
     this.api.putLessonWords(this.id(), ids).subscribe({
       next: (words) => {
         this.data.set({ ...data, words });
-        this.flash('Слова урока обновлены');
+        this.flash(this.translate.instant('admin.builder.flash.wordsSaved'));
       },
-      error: () => this.error.set('Не получилось обновить слова урока.'),
+      error: () =>
+        this.error.set(this.translate.instant('admin.builder.errors.saveWords')),
     });
   }
 

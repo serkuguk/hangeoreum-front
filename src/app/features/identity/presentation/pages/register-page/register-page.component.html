@@ -53,14 +53,14 @@
       [label]="'common.password' | translate"
       [showLabel]="true"
       [errorMessages]="{
-        required: ('identity.validation.passwordMin' | translate),
+        required: ('identity.validation.passwordRequired' | translate),
         minLength: ('identity.validation.passwordMin' | translate),
       }"
     >
       <app-password-input
         [toggleMask]="false"
         [formField]="form.password"
-        [placeholder]="'identity.validation.passwordMin' | translate"
+        [placeholder]="'identity.register.passwordPlaceholder' | translate"
         autocomplete="new-password"
       />
     </app-form-field>

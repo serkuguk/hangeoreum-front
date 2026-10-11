@@ -1,17 +1,17 @@
 <div class="wrap tipbox">
   @if (facade.loading()) {
-    <div class="panel loadpanel">Загружаем подсказку…</div>
+    <div class="panel loadpanel">{{ 'learning.lessonTip.loading' | translate }}</div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <a class="cta" [routerLink]="['/learn', id()]">Сразу к уроку</a>
+      <a class="cta" [routerLink]="['/learn', id()]">{{ 'learning.lessonTip.startNow' | translate }}</a>
     </div>
   } @else if (facade.tip(); as tip) {
     <div class="panel tipcard">
       <div class="ghost kr">{{ tip.title.charAt(0) }}</div>
-      <div class="eyebrow">Learning Tip · перед уроком</div>
+      <div class="eyebrow">{{ 'learning.lessonTip.eyebrow' | translate }}</div>
       <h2 class="pagettl">{{ tip.title }}</h2>
-      <p class="pagesub">Одна минута — и упражнения станут понятными.</p>
+      <p class="pagesub">{{ 'learning.lessonTip.subtitle' | translate }}</p>
       <div class="rule">{{ tip.bodyMd }}</div>
       @for (example of tip.examples ?? []; track example.ko) {
         <div class="ex-line">
@@ -27,10 +27,10 @@
         </div>
       }
       <div class="tipbtns">
-        <a class="cta" [routerLink]="['/learn', id()]">Понятно, начать урок</a>
+        <a class="cta" [routerLink]="['/learn', id()]">{{ 'learning.lessonTip.startLesson' | translate }}</a>
         <app-button
           styleClass="hg-button hg-button--ghost"
-          label="Позже"
+          [label]="'learning.lessonTip.later' | translate"
           (click)="back()"
         />
       </div>

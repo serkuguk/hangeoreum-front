@@ -1,5 +1,6 @@
 import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, booleanAttribute, computed, input, output} from '@angular/core';
+import {TranslatePipe} from '@ngx-translate/core';
 import {ChapterDivider, ChapterState, CourseChapter, CourseNode, CourseNodeState, PlacedNode} from './course-path.model';
 
 /**
@@ -18,7 +19,7 @@ const DEAD = new Set<CourseNodeState>([CourseNodeState.LOCKED, CourseNodeState.F
 
 @Component({
   selector: 'hg-course-path',
-  imports: [ButtonComponent],
+  imports: [ButtonComponent, TranslatePipe],
   templateUrl: './course-path.component.html',
   styleUrl: './course-path.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,7 +1,8 @@
 import {provideHttpClient, withInterceptors} from "@angular/common/http";
 import {registerLocaleData} from "@angular/common";
 import localeRu from "@angular/common/locales/ru";
-import {ApplicationConfig, LOCALE_ID, provideZonelessChangeDetection} from "@angular/core";
+import {ApplicationConfig, LOCALE_ID, inject, provideAppInitializer, provideZonelessChangeDetection} from "@angular/core";
+import {firstValueFrom} from "rxjs";
 
 registerLocaleData(localeRu);
 import {
@@ -23,7 +24,7 @@ import {ME_REPOSITORY} from "@features/identity/application/me-repository.token"
 import {MeHttpRepository} from "@features/identity/infrastructure/repositories/me.http-repository";
 import {BILLING_REPOSITORY} from "@features/billing/application/billing-repository.token";
 import {BillingHttpRepository} from "@features/billing/infrastructure/billing.http-repository";
-import {provideTranslateService} from '@ngx-translate/core';
+import {provideTranslateService, TranslateService} from '@ngx-translate/core';
 import {provideTranslateHttpLoader} from '@ngx-translate/http-loader';
 
 // ---------- PrimeNG: тема Hangeoreum (오방색) поверх Aura ----------
@@ -74,6 +75,8 @@ const ANGULAR_PROVIDERS = [
         lang: 'ru',
         fallbackLang: 'ru',
     }),
+    // ponytail: ждём загрузку ru.json до старта приложения, иначе instant() в полях/геттерах вернёт ключи
+    provideAppInitializer(() => firstValueFrom(inject(TranslateService).use('ru'))),
     provideZonelessChangeDetection()
 ];
 

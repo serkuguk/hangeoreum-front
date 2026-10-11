@@ -1,7 +1,6 @@
-<h2 class="pagettl">Медиа / Story</h2>
+<h2 class="pagettl">{{ 'admin.media.title' | translate }}</h2>
 <p class="pagesub">
-  Клипы носителей: видео для Immerse (kind=IMMERSE) и Story (kind=STORY).
-  Story-линии привязываются к уроку в конструкторе.
+  {{ 'admin.media.subtitle' | translate }}
   @if (flash(); as f) {
     <span style="color: var(--hg-jade)">✓ {{ f }}</span>
   }
@@ -12,24 +11,24 @@
 }
 
 <section class="panel">
-  <div class="eyebrow">Спикеры</div>
+  <div class="eyebrow">{{ 'admin.media.speakers' | translate }}</div>
   @for (speaker of speakers(); track speaker.id) {
     <div class="sprow">
       @if (editingSpeaker() === speaker.id) {
         <app-basic-input
           class="grow"
-          ariaLabel="Имя спикера"
+          [ariaLabel]="'admin.media.speakerNameAria' | translate"
           [formField]="speakerDraftField"
           (keydown.enter)="saveSpeaker(speaker)"
         />
         <app-button
-          label="Сохранить"
+          [label]="'common.save' | translate"
           (click)="saveSpeaker(speaker)"
           styleClass="hg-button hg-button--ghost hg-button--sm"
           ><span aria-hidden="true">✓</span></app-button
         >
         <app-button
-          label="Отмена"
+          [label]="'common.cancel' | translate"
           (click)="editingSpeaker.set(null)"
           styleClass="hg-button hg-button--ghost hg-button--sm"
         ></app-button>
@@ -37,29 +36,29 @@
         <span class="grow">{{ speaker.name }}</span>
         <app-button
           (click)="startEditSpeaker(speaker)"
-          [aria]="{ 'aria-label': 'Изменить спикера' }"
+          [aria]="{ 'aria-label': ('admin.media.editSpeakerAria' | translate) }"
           styleClass="hg-button hg-button--ghost hg-button--sm"
           ><span aria-hidden="true">✎</span></app-button
         >
         <app-button
-          label="Удалить"
+          [label]="'common.delete' | translate"
           (click)="removeSpeaker(speaker)"
           styleClass="hg-button hg-button--danger hg-button--sm"
         ></app-button>
       }
     </div>
   } @empty {
-    <div class="empty">Спикеров нет.</div>
+    <div class="empty">{{ 'admin.media.noSpeakers' | translate }}</div>
   }
   <div class="addrow">
     <app-basic-input
-      label="Имя носителя"
-      placeholder="지민…"
+      [label]="'admin.media.speakerNameLabel' | translate"
+      [placeholder]="'admin.media.speakerNamePlaceholder' | translate"
       [formField]="newSpeakerNameField"
       (keydown.enter)="addSpeaker()"
     />
     <app-button
-      label="Спикер"
+      [label]="'admin.media.addSpeaker' | translate"
       (click)="addSpeaker()"
       styleClass="hg-button hg-button--ghost hg-button--sm"
       ><span aria-hidden="true">+</span></app-button
@@ -68,7 +67,7 @@
 </section>
 
 <section class="panel">
-  <div class="eyebrow">Клипы</div>
+  <div class="eyebrow">{{ 'admin.media.clips' | translate }}</div>
   @for (clip of clips(); track clip.id) {
     <div class="cliprow">
       <span class="pill p-b">{{ clip.kind }}</span>
@@ -77,7 +76,7 @@
         #picker1
         class="media-picker"
         label="🎬"
-        ariaLabel="Загрузить видео клипа"
+        [ariaLabel]="'admin.media.uploadVideoAria' | translate"
         accept="video/*"
         (changed)="
           $event[0] && upload(clip, $event[0], uploadKind.VIDEO); picker1.value.set([])
@@ -87,7 +86,7 @@
         #picker2
         class="media-picker"
         label="🔊"
-        ariaLabel="Загрузить аудио клипа"
+        [ariaLabel]="'admin.media.uploadAudioAria' | translate"
         accept="audio/*"
         (changed)="
           $event[0] && upload(clip, $event[0], uploadKind.AUDIO); picker2.value.set([])
@@ -97,7 +96,7 @@
         #picker3
         class="media-picker"
         label="🖼"
-        ariaLabel="Загрузить обложку клипа"
+        [ariaLabel]="'admin.media.uploadThumbnailAria' | translate"
         accept="image/*"
         (changed)="
           $event[0] && upload(clip, $event[0], uploadKind.THUMBNAIL);
@@ -106,12 +105,12 @@
       />
       <app-button
         (click)="openEdit(clip)"
-        [aria]="{ 'aria-label': 'Изменить клип' }"
+        [aria]="{ 'aria-label': ('admin.media.editClipAria' | translate) }"
         [styleClass]="editButtonClass(clip)"
         ><span aria-hidden="true">✎</span></app-button
       >
       <app-button
-        label="Сабы"
+        [label]="'admin.media.subtitles' | translate"
         (click)="openSubtitles(clip)"
         styleClass="hg-button hg-button--ghost hg-button--sm"
       ></app-button>
@@ -127,7 +126,7 @@
       >
       <app-button
         (click)="removeClip(clip)"
-        [aria]="{ 'aria-label': 'Удалить клип' }"
+        [aria]="{ 'aria-label': ('admin.media.deleteClipAria' | translate) }"
         styleClass="hg-button hg-button--danger hg-button--sm"
         ><span aria-hidden="true">✕</span></app-button
       >
@@ -135,7 +134,7 @@
       @if (isEditing(clip)) {
         <div class="editbox">
           <app-basic-select
-            ariaLabel="Тип клипа"
+            [ariaLabel]="'admin.media.clipKindAria' | translate"
             placeholder=""
             [items]="clipKindOptions"
             [formField]="clipFields.kind"
@@ -143,7 +142,7 @@
             optionValue="value"
           />
           <app-basic-select
-            ariaLabel="Спикер клипа"
+            [ariaLabel]="'admin.media.clipSpeakerAria' | translate"
             placeholder=""
             [items]="speakerOptions()"
             [formField]="clipFields.speakerId"
@@ -152,14 +151,14 @@
           />
           <app-basic-input
             type="number"
-            label="Длительность, мс"
+            [label]="'admin.media.durationLabel' | translate"
             [formField]="clipFields.durationMs"
           />
           <div class="wordpick">
             @if (clipDraft().wordId) {
               <span class="pill p-b">{{ clipWordLabel }}</span>
               <app-button
-                label="Убрать слово"
+                [label]="'admin.media.unlinkWord' | translate"
                 (click)="clearWord()"
                 styleClass="hg-button hg-button--ghost hg-button--sm"
                 ><span aria-hidden="true">✕</span></app-button
@@ -167,8 +166,8 @@
             } @else {
               <app-basic-input
                 type="search"
-                ariaLabel="Поиск слова"
-                placeholder="Поиск слова…"
+                [ariaLabel]="'admin.media.searchWordAria' | translate"
+                [placeholder]="'admin.media.searchWordPlaceholder' | translate"
                 [value]="wordSearch"
                 (valueChange)="searchWords($event)"
               />
@@ -186,7 +185,7 @@
             }
           </div>
           <app-button
-            label="Сохранить клип"
+            [label]="'admin.media.saveClip' | translate"
             (click)="saveClip(clip)"
             styleClass="hg-button hg-button--ghost hg-button--sm"
           ></app-button>
@@ -196,12 +195,12 @@
       @if (subtitlesFor() === clip.id) {
         <div class="subsbox">
           <app-textarea
-            label="Субтитры в JSON"
+            [label]="'admin.media.subtitlesLabel' | translate"
             [rows]="7"
             [formField]="subsField"
           />
           <app-button
-            label="Сохранить субтитры"
+            [label]="'admin.media.saveSubtitles' | translate"
             (click)="saveSubtitles(clip)"
             styleClass="hg-button hg-button--ghost hg-button--sm"
           ></app-button>
@@ -209,19 +208,19 @@
       }
     </div>
   } @empty {
-    <div class="empty">Клипов нет — создай первый.</div>
+    <div class="empty">{{ 'admin.media.noClips' | translate }}</div>
   }
   <div class="addrow">
     <app-basic-select
-      ariaLabel="Тип нового клипа"
-      placeholder="Тип нового клипа"
+      [ariaLabel]="'admin.media.newClipKindAria' | translate"
+      [placeholder]="'admin.media.newClipKindAria' | translate"
       [items]="clipKindOptions"
       [formField]="newClipKindField"
       optionLabel="label"
       optionValue="value"
     />
     <app-button
-      label="Клип"
+      [label]="'admin.media.addClip' | translate"
       (click)="addClip()"
       styleClass="hg-button hg-button--ghost hg-button--sm"
       ><span aria-hidden="true">+</span></app-button

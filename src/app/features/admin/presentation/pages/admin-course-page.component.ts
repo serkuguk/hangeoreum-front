@@ -3,10 +3,11 @@ import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@ang
 import {RouterLink} from '@angular/router';
 import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '../../infrastructure/admin.api';
 import {ButtonComponent, BasicInputComponent, BasicSelectComponent} from 'springest';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-admin-course-page',
-  imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent],
+  imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent, TranslatePipe],
   templateUrl: './admin-course-page.component.html',
   styleUrl: './_admin.scss',
   styles: `
@@ -54,18 +55,21 @@ import {ButtonComponent, BasicInputComponent, BasicSelectComponent} from 'spring
 })
 export class AdminCoursePageComponent {
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
 
   readonly course = signal<AdminCourse | null>(null);
   readonly units = signal<AdminUnit[]>([]);
 
-  readonly publishLabel = computed(() => this.course()?.published ? '👁 Опубликован' : '🚫 Черновик');
+  readonly publishLabel = computed(() => this.course()?.published
+    ? this.translate.instant('admin.course.published')
+    : this.translate.instant('admin.course.draft'));
 
   publishIcon(entity: {published: boolean}): string {
     return entity.published ? '👁' : '🚫';
   }
 
   accessLabel(lesson: AdminLesson): string {
-    return lesson.free ? 'Free' : 'Pro';
+    return this.translate.instant(lesson.free ? 'admin.course.free' : 'admin.course.pro');
   }
   readonly lessonsByUnit = signal<Partial<Record<string, AdminLesson[]>>>({});
   readonly error = signal<string | null>(null);
@@ -89,7 +93,7 @@ export class AdminCoursePageComponent {
         this.course.set(course);
         if (course) this.loadUnits(course.id);
       },
-      error: () => this.error.set('Не получилось загрузить курс.'),
+      error: () => this.error.set(this.translate.instant('admin.course.errors.loadCourse')),
     });
   }
 
@@ -132,7 +136,7 @@ export class AdminCoursePageComponent {
   }
 
   removeUnit(unit: AdminUnit): void {
-    if (!confirm(`Удалить юнит «${unit.title}» со всеми уроками?`)) return;
+    if (!confirm(this.translate.instant('admin.course.confirm.deleteUnit', {title: unit.title}))) return;
     this.api.deleteUnit(unit.id).subscribe(() =>
       this.units.update(list => list.filter(u => u.id !== unit.id)));
   }
@@ -148,7 +152,7 @@ export class AdminCoursePageComponent {
     this.api.reorderUnits(list.map((u, i) => ({id: u.id, position: i + 1}))).subscribe({
       error: () => {
         this.units.set(previous);
-        this.error.set('Не получилось изменить порядок юнитов.');
+        this.error.set(this.translate.instant('admin.course.errors.reorderUnits'));
       },
     });
   }
@@ -183,7 +187,7 @@ export class AdminCoursePageComponent {
   }
 
   removeLesson(unit: AdminUnit, lesson: AdminLesson): void {
-    if (!confirm(`Удалить урок «${lesson.title}»?`)) return;
+    if (!confirm(this.translate.instant('admin.course.confirm.deleteLesson', {title: lesson.title}))) return;
     this.api.deleteLesson(lesson.id).subscribe(() =>
       this.lessonsByUnit.update(map => ({
         ...map,
@@ -202,7 +206,7 @@ export class AdminCoursePageComponent {
     this.api.reorderLessons(list.map((l, i) => ({id: l.id, position: i + 1}))).subscribe({
       error: () => {
         this.lessonsByUnit.update(map => ({...map, [unit.id]: previous}));
-        this.error.set('Не получилось изменить порядок уроков.');
+        this.error.set(this.translate.instant('admin.course.errors.reorderLessons'));
       },
     });
   }

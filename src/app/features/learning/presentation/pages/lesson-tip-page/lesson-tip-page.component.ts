@@ -3,6 +3,7 @@ import {ChangeDetectionStrategy, Component, OnInit, inject, input} from '@angula
 import {Location} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {TranslatePipe} from '@ngx-translate/core';
 import {LessonFacade} from '../../../application/facades/lesson.facade';
 import {TipExample} from '../../../domain/entities/exercise.entity';
 
@@ -11,7 +12,7 @@ const escapeHtml = (s: string) =>
 
 @Component({
   selector: 'hg-lesson-tip-page',
-  imports: [RouterLink, ButtonComponent],
+  imports: [RouterLink, ButtonComponent, TranslatePipe],
   templateUrl: './lesson-tip-page.component.html',
   styleUrl: './lesson-tip-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

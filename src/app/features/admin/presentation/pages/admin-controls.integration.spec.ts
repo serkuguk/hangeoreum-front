@@ -1,6 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {provideTranslateService} from '@ngx-translate/core';
 import {jest} from '@jest/globals';
 import {of} from 'rxjs';
 import {FilePickerComponent, PaginationComponent} from 'springest';
@@ -26,7 +25,7 @@ describe('admin springest controls', () => {
       updateClip: jest.fn().mockReturnValue(of(clip)), courses: jest.fn().mockReturnValue(of([])),
       topics: jest.fn().mockReturnValue(of([])), words: jest.fn().mockReturnValue(of({content: [], totalElements: 45, page: 0})),
     };
-    TestBed.configureTestingModule({providers: [provideTranslateService(), {provide: AdminApi, useValue: api}]});
+    TestBed.configureTestingModule({providers: [{provide: AdminApi, useValue: api}]});
   });
 
   afterEach(() => {

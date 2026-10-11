@@ -1,6 +1,6 @@
-<h2 class="pagettl">Курс и уроки</h2>
+<h2 class="pagettl">{{ 'admin.navigation.course' | translate }}</h2>
 <p class="pagesub">
-  Структура: курс → юниты → уроки. Стрелки — порядок, глазик — публикация.
+  {{ 'admin.course.subtitle' | translate }}
 </p>
 
 @if (error()) {
@@ -11,12 +11,12 @@
   <div class="panel coursehead">
     <app-basic-input
       class="search"
-      label="Название курса"
-      placeholder="Например, Корейский с нуля"
+      [label]="'admin.course.courseTitleLabel' | translate"
+      [placeholder]="'admin.course.courseTitlePlaceholder' | translate"
       [formField]="newCourseTitleField"
     />
     <app-button
-      label="Создать курс"
+      [label]="'admin.course.createCourse' | translate"
       (click)="createCourse()"
       styleClass="hg-button"
     ></app-button>
@@ -37,26 +37,26 @@
         <b>{{ unit.position }} · {{ unit.title }}</b>
         <app-button
           (click)="moveUnit(unit, -1)"
-          [aria]="{ 'aria-label': 'Переместить юнит выше' }"
+          [aria]="{ 'aria-label': ('admin.course.moveUnitUp' | translate) }"
           styleClass="hg-button hg-button--ghost hg-button--sm"
           ><span aria-hidden="true">↑</span></app-button
         >
         <app-button
           (click)="moveUnit(unit, 1)"
-          [aria]="{ 'aria-label': 'Переместить юнит ниже' }"
+          [aria]="{ 'aria-label': ('admin.course.moveUnitDown' | translate) }"
           styleClass="hg-button hg-button--ghost hg-button--sm"
           ><span aria-hidden="true">↓</span></app-button
         >
         <app-button
           (click)="toggleUnitPublish(unit)"
-          [aria]="{ 'aria-label': 'Изменить публикацию юнита' }"
+          [aria]="{ 'aria-label': ('admin.course.toggleUnitPublish' | translate) }"
           styleClass="hg-button hg-button--ghost hg-button--sm"
           ><span aria-hidden="true">{{
             publishIcon(unit)
           }}</span></app-button
         >
         <app-button
-          label="Удалить"
+          [label]="'common.delete' | translate"
           (click)="removeUnit(unit)"
           styleClass="hg-button hg-button--danger hg-button--sm"
         ></app-button>
@@ -70,29 +70,29 @@
               >{{ lesson.type }} · {{ lesson.xpReward }} XP</span
             >
             <a [routerLink]="['/admin/course/lessons', lesson.id]"
-              >Конструктор →</a
+              >{{ 'admin.course.openConstructor' | translate }}</a
             >
             <app-button
               (click)="moveLesson(unit, lesson, -1)"
-              [aria]="{ 'aria-label': 'Переместить урок выше' }"
+              [aria]="{ 'aria-label': ('admin.course.moveLessonUp' | translate) }"
               styleClass="hg-button hg-button--ghost hg-button--sm"
               ><span aria-hidden="true">↑</span></app-button
             >
             <app-button
               (click)="moveLesson(unit, lesson, 1)"
-              [aria]="{ 'aria-label': 'Переместить урок ниже' }"
+              [aria]="{ 'aria-label': ('admin.course.moveLessonDown' | translate) }"
               styleClass="hg-button hg-button--ghost hg-button--sm"
               ><span aria-hidden="true">↓</span></app-button
             >
             <app-button
               [label]="accessLabel(lesson)"
               (click)="toggleLessonFree(unit, lesson)"
-              [aria]="{ 'aria-label': 'Изменить доступность урока' }"
+              [aria]="{ 'aria-label': ('admin.course.toggleLessonAccess' | translate) }"
               styleClass="hg-button hg-button--ghost hg-button--sm"
             ></app-button>
             <app-button
               (click)="toggleLessonPublish(unit, lesson)"
-              [aria]="{ 'aria-label': 'Изменить публикацию урока' }"
+              [aria]="{ 'aria-label': ('admin.course.toggleLessonPublish' | translate) }"
               styleClass="hg-button hg-button--ghost hg-button--sm"
               ><span aria-hidden="true">{{
                 publishIcon(lesson)
@@ -100,32 +100,32 @@
             >
             <app-button
               (click)="removeLesson(unit, lesson)"
-              [aria]="{ 'aria-label': 'Удалить урок' }"
+              [aria]="{ 'aria-label': ('admin.course.deleteLesson' | translate) }"
               styleClass="hg-button hg-button--danger hg-button--sm"
               ><span aria-hidden="true">✕</span></app-button
             >
           </div>
         } @empty {
-          <div class="empty">Уроков нет.</div>
+          <div class="empty">{{ 'admin.course.noLessons' | translate }}</div>
         }
       </div>
 
       <div class="addrow">
         <app-basic-input
-          label="Название нового урока"
+          [label]="'admin.course.lessonTitleLabel' | translate"
           [formField]="lessonFields[unit.id].title"
           (keydown.enter)="addLesson(unit)"
         />
         <app-basic-select
-          ariaLabel="Тип урока"
-          placeholder="Тип урока"
+          [ariaLabel]="'admin.course.lessonTypeLabel' | translate"
+          [placeholder]="'admin.course.lessonTypeLabel' | translate"
           [items]="lessonTypes"
           [formField]="lessonFields[unit.id].type"
           optionLabel="label"
           optionValue="value"
         />
         <app-button
-          label="+ Урок"
+          [label]="'admin.course.addLesson' | translate"
           (click)="addLesson(unit)"
           styleClass="hg-button hg-button--secondary hg-button--sm"
         ></app-button>
@@ -136,12 +136,12 @@
   <div class="panel unit">
     <div class="addrow">
       <app-basic-input
-        label="Название нового юнита"
+        [label]="'admin.course.unitTitleLabel' | translate"
         [formField]="newUnitTitleField"
         (keydown.enter)="addUnit()"
       />
       <app-button
-        label="+ Юнит"
+        [label]="'admin.course.addUnit' | translate"
         (click)="addUnit()"
         styleClass="hg-button hg-button--secondary hg-button--sm"
       ></app-button>

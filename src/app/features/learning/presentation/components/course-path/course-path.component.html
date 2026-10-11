@@ -43,7 +43,7 @@
               [disabled]="isDead(node)"
               [attr.data-node]="node.id"
               (click)="select(node)" [aria]="{'aria-label': nodeAria(node)}">{{ node.glyph }}</app-button>
-      @if (isPro(node)) { <span class="hg-path__badge">PRO</span> }
+      @if (isPro(node)) { <span class="hg-path__badge">{{ 'learning.coursePath.pro' | translate }}</span> }
     </div>
 
     <div class="hg-path__label"
@@ -56,7 +56,7 @@
         <img [src]="node.icon" alt="" width="56" height="56">
       }
       <div class="hg-path__labeltext">
-        @if (isNow(node)) { <span class="hg-path__eyebrow">Сейчас проходишь</span> }
+        @if (isNow(node)) { <span class="hg-path__eyebrow">{{ 'learning.coursePath.nowLabel' | translate }}</span> }
         <b [class.is-muted]="isMuted(node)">{{ node.title }}</b>
         <small [class]="subtitleClass(node)">{{ node.subtitle }}</small>
         @if (node.progress != null) {
@@ -70,7 +70,7 @@
     <app-button class="hg-native-host" styleClass="hg-native-button hg-path__testout" type="button"
 
             (click)="testOutSelected.emit(test.chapter)" [style]="testOutStyle(test.y)">
-      <b>ПРОВЕРКА ГЛАВЫ · TEST OUT</b>
+      <b>{{ 'learning.coursePath.testOut' | translate }}</b>
       <i class="hg-path__sheen" aria-hidden="true"></i>
     </app-button>
   }

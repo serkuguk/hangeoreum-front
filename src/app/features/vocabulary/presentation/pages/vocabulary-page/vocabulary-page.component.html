@@ -89,7 +89,7 @@
 
   <!-- выбор колоды для слова -->
   @if (deckPickWord(); as word) {
-    <app-dialog closeAriaLabel="Закрыть" [visible]="true" (visibleChange)="!$event && closeDeckPicker()" [header]="'vocabulary.addToDeck' | translate">
+    <app-dialog [closeAriaLabel]="'common.closeDialog' | translate"[visible]="true" (visibleChange)="!$event && closeDeckPicker()" [header]="'vocabulary.addToDeck' | translate">
       <h3>{{ 'vocabulary.deckPickerQuestion' | translate:{word: word.word.hangul} }}</h3>
       @if (facade.decks().length === 0) {
         <p class="pagesub">{{ 'vocabulary.deckPickerEmpty' | translate }}</p>

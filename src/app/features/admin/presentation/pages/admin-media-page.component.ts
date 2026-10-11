@@ -9,6 +9,7 @@ import {
   BasicSelectComponent,
   TextareaComponent,
 } from 'springest';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AdminApi, AdminClip, AdminWord, MediaUploadKind, Speaker} from '../../infrastructure/admin.api';
 
 const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY', 'WORD']
@@ -23,6 +24,7 @@ const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY',
     BasicInputComponent,
     BasicSelectComponent,
     TextareaComponent,
+    TranslatePipe,
   ],
   templateUrl: './admin-media-page.component.html',
   styleUrl: './_admin.scss',
@@ -73,6 +75,7 @@ const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY',
 })
 export class AdminMediaPageComponent {
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
 
   readonly speakers = signal<Speaker[]>([]);
   readonly clips = signal<AdminClip[]>([]);
@@ -84,7 +87,7 @@ export class AdminMediaPageComponent {
   readonly foundWords = signal<AdminWord[]>([]);
   readonly clipKindOptions = CLIP_KIND_OPTIONS;
   readonly speakerOptions = computed<{label: string; value: string | null}[]>(() => [
-    {label: 'без спикера', value: null},
+    {label: this.translate.instant('admin.media.noSpeaker'), value: null},
     ...this.speakers().map(speaker => ({label: speaker.name, value: speaker.id})),
   ]);
 
@@ -112,7 +115,7 @@ export class AdminMediaPageComponent {
       switchMap(value => value.trim()
         ? this.api.words(value, 0).pipe(
           catchError(() => {
-            this.error.set('Не получилось найти слова.');
+            this.error.set(this.translate.instant('admin.media.errors.findWords'));
             return of(null);
           }),
         )
@@ -125,11 +128,11 @@ export class AdminMediaPageComponent {
   load(): void {
     this.api.speakers().subscribe({
       next: speakers => this.speakers.set(speakers),
-      error: () => this.error.set('Не получилось загрузить спикеров.'),
+      error: () => this.error.set(this.translate.instant('admin.media.errors.loadSpeakers')),
     });
     this.api.clips().subscribe({
       next: clips => this.clips.set(clips),
-      error: () => this.error.set('Не получилось загрузить клипы.'),
+      error: () => this.error.set(this.translate.instant('admin.media.errors.loadClips')),
     });
   }
 
@@ -141,15 +144,15 @@ export class AdminMediaPageComponent {
         this.newSpeakerName.set('');
         this.load();
       },
-      error: err => this.fail('Не получилось добавить спикера', err),
+      error: err => this.fail('admin.media.errors.addSpeaker', err),
     });
   }
 
   removeSpeaker(speaker: Speaker): void {
-    if (!confirm(`Удалить спикера «${speaker.name}»?`)) return;
+    if (!confirm(this.translate.instant('admin.media.confirm.deleteSpeaker', {name: speaker.name}))) return;
     this.api.deleteSpeaker(speaker.id).subscribe({
       next: () => this.load(),
-      error: err => this.fail('Не получилось удалить спикера', err),
+      error: err => this.fail('admin.media.errors.deleteSpeaker', err),
     });
   }
 
@@ -165,10 +168,10 @@ export class AdminMediaPageComponent {
     this.api.updateSpeaker(speaker.id, {name, avatarUrl: speaker.avatarUrl, bio: speaker.bio}).subscribe({
       next: () => {
         this.editingSpeaker.set(null);
-        this.showFlash('Спикер обновлён');
+        this.showFlash(this.translate.instant('admin.media.flash.speakerUpdated'));
         this.load();
       },
-      error: err => this.fail('Не получилось обновить спикера', err),
+      error: err => this.fail('admin.media.errors.updateSpeaker', err),
     });
   }
 
@@ -179,15 +182,15 @@ export class AdminMediaPageComponent {
   addClip(): void {
     this.api.createClip({kind: this.newClipKind()}).subscribe({
       next: () => this.load(),
-      error: err => this.fail('Не получилось добавить клип', err),
+      error: err => this.fail('admin.media.errors.addClip', err),
     });
   }
 
   removeClip(clip: AdminClip): void {
-    if (!confirm('Удалить клип?')) return;
+    if (!confirm(this.translate.instant('admin.media.confirm.deleteClip'))) return;
     this.api.deleteClip(clip.id).subscribe({
       next: () => this.load(),
-      error: err => this.fail('Не получилось удалить клип', err),
+      error: err => this.fail('admin.media.errors.deleteClip', err),
     });
   }
 
@@ -195,7 +198,7 @@ export class AdminMediaPageComponent {
     this.api.publishClip(clip.id, !clip.published).subscribe({
       next: updated =>
         this.clips.update(list => list.map(c => c.id === clip.id ? updated : c)),
-      error: err => this.fail('Не получилось изменить публикацию', err),
+      error: err => this.fail('admin.media.errors.publishClip', err),
     });
   }
 
@@ -206,7 +209,9 @@ export class AdminMediaPageComponent {
     }
     this.editingClip.set(clip.id);
     this.clipFields().reset({kind: clip.kind, speakerId: clip.speakerId, wordId: clip.wordId, durationMs: clip.durationMs});
-    this.clipWordLabel = clip.wordId ? `ID ${clip.wordId.slice(0, 8)}…` : '';
+    this.clipWordLabel = clip.wordId
+      ? this.translate.instant('admin.media.wordIdLabel', {id: clip.wordId.slice(0, 8)})
+      : '';
     this.wordSearch = '';
     this.foundWords.set([]);
   }
@@ -218,7 +223,7 @@ export class AdminMediaPageComponent {
 
   pickWord(word: AdminWord): void {
     this.clipDraft.update(draft => ({...draft, wordId: word.id}));
-    this.clipWordLabel = `${word.hangul} — ${word.translation}`;
+    this.clipWordLabel = this.translate.instant('admin.media.wordLabel', {hangul: word.hangul, translation: word.translation});
     this.wordSearch = '';
     this.foundWords.set([]);
   }
@@ -230,17 +235,17 @@ export class AdminMediaPageComponent {
 
   saveClip(clip: AdminClip): void {
     if (this.clipFields().invalid()) {
-      this.error.set('Длительность должна быть не меньше 0 мс.');
+      this.error.set(this.translate.instant('admin.media.errors.durationNegative'));
       return;
     }
     this.error.set(null);
     this.api.updateClip(clip.id, this.clipDraft()).subscribe({
       next: () => {
         this.editingClip.set(null);
-        this.showFlash('Клип обновлён');
+        this.showFlash(this.translate.instant('admin.media.flash.clipUpdated'));
         this.load();
       },
-      error: err => this.fail('Не получилось обновить клип', err),
+      error: err => this.fail('admin.media.errors.updateClip', err),
     });
   }
 
@@ -263,27 +268,27 @@ export class AdminMediaPageComponent {
   }
 
   publishAria(clip: AdminClip): string {
-    return clip.published ? 'Снять клип с публикации' : 'Опубликовать клип';
+    return this.translate.instant(clip.published ? 'admin.media.unpublishClip' : 'admin.media.publishClip');
   }
 
   mediaSummary(clip: AdminClip): string {
-    const video = clip.videoUrl ? '🎬 видео' : 'без видео';
-    const audio = clip.audioUrl ? '🔊 аудио' : 'без аудио';
-    return `${this.speakerName(clip.speakerId)} · ${video} · ${audio}`;
+    const video = this.translate.instant(clip.videoUrl ? 'admin.media.videoPresent' : 'admin.media.videoAbsent');
+    const audio = this.translate.instant(clip.audioUrl ? 'admin.media.audioPresent' : 'admin.media.audioAbsent');
+    return this.translate.instant('admin.media.summary', {speaker: this.speakerName(clip.speakerId), video, audio});
   }
 
   wordAria(word: AdminWord): string {
-    return `Привязать слово ${word.hangul}, ${word.translation}`;
+    return this.translate.instant('admin.builder.bindWordAria', {hangul: word.hangul, translation: word.translation});
   }
 
   upload(clip: AdminClip, file: File, kind: MediaUploadKind): void {
-    this.showFlash('Загружаем файл…');
+    this.showFlash(this.translate.instant('admin.media.uploading'));
     this.api.uploadClipMedia(clip.id, file, kind).subscribe({
       next: () => {
-        this.showFlash('Файл загружен');
+        this.showFlash(this.translate.instant('admin.media.uploaded'));
         this.load();
       },
-      error: () => this.error.set('Не получилось загрузить файл.'),
+      error: () => this.error.set(this.translate.instant('admin.media.errors.uploadFile')),
     });
   }
 
@@ -312,15 +317,15 @@ export class AdminMediaPageComponent {
     try {
       subtitles = JSON.parse(this.subsDraft());
     } catch {
-      this.error.set('Субтитры — некорректный JSON.');
+      this.error.set(this.translate.instant('admin.media.errors.subtitlesJson'));
       return;
     }
     this.api.putSubtitles(clip.id, subtitles).subscribe({
       next: () => {
-        this.showFlash('Субтитры сохранены');
+        this.showFlash(this.translate.instant('admin.media.flash.subtitlesSaved'));
         this.subtitlesFor.set(null);
       },
-      error: err => this.fail('Не получилось сохранить субтитры', err),
+      error: err => this.fail('admin.media.errors.saveSubtitles', err),
     });
   }
 
@@ -329,7 +334,10 @@ export class AdminMediaPageComponent {
     setTimeout(() => this.flash.set(null), 1600);
   }
 
-  private fail(prefix: string, err: {error?: {message?: string}; status?: number}): void {
-    this.error.set(`${prefix}: ${err?.error?.message ?? err?.status ?? 'ошибка'}`);
+  private fail(messageKey: string, err: {error?: {message?: string}; status?: number}): void {
+    this.error.set(this.translate.instant('admin.media.errors.errorWithDetail', {
+      prefix: this.translate.instant(messageKey),
+      detail: err?.error?.message ?? err?.status ?? this.translate.instant('admin.media.errors.unknownDetail'),
+    }));
   }
 }

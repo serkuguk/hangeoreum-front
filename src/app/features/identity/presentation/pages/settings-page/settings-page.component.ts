@@ -24,6 +24,7 @@ import {
 } from '@core/services/theme.service';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {ButtonComponent, BasicInputComponent, PasswordInputComponent, SegmentedControlComponent, ToggleComponent, ControlItemInterface, Value} from 'springest';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {ME_REPOSITORY} from '../../../application/me-repository.token';
 import {UserSettings} from '../../../domain/user.entity';
@@ -36,7 +37,7 @@ interface SettingsSaveRequest {
 
 @Component({
   selector: 'hg-settings-page',
-  imports: [FormField, ButtonComponent, BasicInputComponent, PasswordInputComponent, ToggleComponent, SegmentedControlComponent],
+  imports: [FormField, ButtonComponent, BasicInputComponent, PasswordInputComponent, ToggleComponent, SegmentedControlComponent, TranslatePipe],
   templateUrl: './settings-page.component.html',
   styleUrl: './settings-page.component.scss',
   host: {'(window:beforeunload)': 'warnBeforeUnload($event)'},
@@ -48,6 +49,7 @@ export class SettingsPageComponent {
   private themeService = inject(ThemeService);
   private tts = inject(KoreanTtsService);
   private destroyRef = inject(DestroyRef);
+  private translate = inject(TranslateService);
 
   readonly settings = signal<UserSettings | null>(null);
   readonly saved = signal(false);
@@ -84,9 +86,9 @@ export class SettingsPageComponent {
   readonly timeOptions: ControlItemInterface[] = this.times.map(time =>
     ({value: time, label: time}));
   readonly modeOptions: (ControlItemInterface & {value: ColorMode})[] = [
-    {value: 'light', label: 'Светлая'},
-    {value: 'dark', label: 'Тёмная'},
-    {value: 'system', label: 'Системная'},
+    {value: 'light', label: this.translate.instant('identity.settings.modes.light')},
+    {value: 'dark', label: this.translate.instant('identity.settings.modes.dark')},
+    {value: 'system', label: this.translate.instant('identity.settings.modes.system')},
   ];
   readonly accentOptions: ControlItemInterface[] = this.accents.map(accent =>
     ({value: accent.value, label: accent.name}));
@@ -119,7 +121,7 @@ export class SettingsPageComponent {
       this.saving.set(false);
       const savedLatestValue = success && sameSettings(this.settings(), request.settings);
       if (savedLatestValue) this.dirty.set(false);
-      this.error.set(success ? null : 'Не удалось сохранить. Проверь соединение.');
+      this.error.set(success ? null : this.translate.instant('identity.settings.errors.save'));
       if (success) this.showSaved();
       if (request.completion) this.resolveCompletion(request.completion, savedLatestValue);
     });
@@ -147,7 +149,7 @@ export class SettingsPageComponent {
         this.tts.setRate(settings.playbackSpeed);
         this.dirty.set(false);
       },
-      error: () => this.error.set('Не получилось загрузить настройки.'),
+      error: () => this.error.set(this.translate.instant('identity.settings.errors.load')),
     });
   }
 
@@ -206,7 +208,7 @@ export class SettingsPageComponent {
 
   canDeactivate(): boolean | Promise<boolean> {
     if (!this.dirty()) return true;
-    if (!confirm('Настройки ещё не сохранены. Сохранить их перед выходом?')) return false;
+    if (!confirm(this.translate.instant('identity.settings.confirm.unsaved'))) return false;
     return this.saveLatestSettings();
   }
 
@@ -223,7 +225,7 @@ export class SettingsPageComponent {
     if (!name || !user || name === user.name) return;
     this.meRepository.update({name}).subscribe({
       next: updated => this.auth.syncUser(updated),
-      error: () => this.error.set('Не получилось изменить имя.'),
+      error: () => this.error.set(this.translate.instant('identity.settings.errors.name')),
     });
   }
 
@@ -233,7 +235,9 @@ export class SettingsPageComponent {
     this.passwordForm.next().markAsTouched();
     this.passwordError.set(null);
     if (this.passwordForm().invalid()) {
-      this.passwordError.set(this.passwordForm.current().invalid() ? 'Введи текущий пароль' : 'Новый пароль — минимум 8 символов');
+      this.passwordError.set(this.translate.instant(this.passwordForm.current().invalid()
+        ? 'identity.settings.errors.currentPasswordRequired'
+        : 'identity.settings.errors.newPasswordMin'));
       return;
     }
     this.passwordSaving.set(true);
@@ -243,15 +247,15 @@ export class SettingsPageComponent {
         this.passwordForm().reset({current: '', next: ''});
         this.showSaved();
       },
-      error: () => this.passwordError.set('Не получилось — проверь текущий пароль'),
+      error: () => this.passwordError.set(this.translate.instant('identity.settings.errors.changePassword')),
     });
   }
 
   deleteAccount(): void {
-    if (!confirm('Удалить аккаунт навсегда? Прогресс, слова и подписка будут стёрты.')) return;
+    if (!confirm(this.translate.instant('identity.settings.confirm.deleteAccount'))) return;
     this.meRepository.deleteAccount().subscribe({
       next: () => this.auth.logout(),
-      error: () => this.error.set('Не получилось удалить аккаунт.'),
+      error: () => this.error.set(this.translate.instant('identity.settings.errors.deleteAccount')),
     });
   }
 

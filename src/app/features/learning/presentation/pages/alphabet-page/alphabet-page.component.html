@@ -1,36 +1,36 @@
 <div class="wrap abox">
-  <h2 class="pagettl">Алфавит хангыль</h2>
+  <h2 class="pagettl">{{ 'learning.alphabet.title' | translate }}</h2>
   <p class="pagesub">
-    자모 · тапни букву — услышишь звук и отметишь её изученной.
+    {{ 'learning.alphabet.subtitle' | translate }}
   </p>
 
   @if (facade.loading()) {
-    <div class="panel loadpanel">Загружаем алфавит…</div>
+    <div class="panel loadpanel">{{ 'learning.alphabet.loading' | translate }}</div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
       <app-button
         styleClass="hg-button hg-button--ghost"
-        label="Повторить"
+        [label]="'common.retry' | translate"
         (click)="facade.load()"
       />
     </div>
   } @else if (facade.alphabet(); as alphabet) {
     @if (alphabet.total === 0) {
       <div class="panel loadpanel">
-        Буквы ещё загружаются в курс — загляни чуть позже.
+        {{ 'learning.alphabet.empty' | translate }}
       </div>
     } @else {
       <div class="panel proghead">
         <div class="progtxt">
           <b>{{ alphabet.learnedCount }} / {{ alphabet.total }}</b>
-          <span>букв изучено</span>
+          <span>{{ 'learning.alphabet.learned' | translate }}</span>
         </div>
         <div class="progbar"><i [style.width.%]="percent()"></i></div>
         @if (facade.justCompleted()) {
           <div class="confetti" aria-hidden="true">🎉</div>
           <div class="congrats">
-            모두 완료! Алфавит пройден — XP уже начислен.
+            {{ 'learning.alphabet.congrats' | translate }}
           </div>
         }
       </div>
@@ -56,7 +56,7 @@
                 <span class="jamo han kr">{{ letter.jamo }}</span>
                 <span class="rom">{{ letter.romanization }}</span>
                 @if (letter.learned) {
-                  <span class="check" aria-label="Изучена">✓</span>
+                  <span class="check" [attr.aria-label]="'learning.alphabet.checkAria' | translate">✓</span>
                 }
               </app-button>
             }

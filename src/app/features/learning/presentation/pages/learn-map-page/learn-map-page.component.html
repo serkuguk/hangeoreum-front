@@ -2,33 +2,33 @@
   <header class="maphead">
     <div class="maphead-row">
       <div class="maphead-title">
-        <div class="eyebrow">Карта курса</div>
+        <div class="eyebrow">{{ 'learning.map.eyebrow' | translate }}</div>
         <h2 class="pagettl">{{ mapTitle() }}</h2>
       </div>
 
       <div class="maphead-chips">
         <span class="pill p-n"
-          >{{ progress().done }} / {{ progress().total }} уроков</span
+          >{{ 'learning.map.progress' | translate: { done: progress().done, total: progress().total } }}</span
         >
         @if (hasPaywall()) {
-          <a class="pill p-y" routerLink="/billing">Часть уроков — Pro</a>
+          <a class="pill p-y" routerLink="/billing">{{ 'learning.map.paywallBadge' | translate }}</a>
         }
       </div>
 
-      <div class="seg" role="group" aria-label="Показ карты">
+      <div class="seg" role="group" [attr.aria-label]="'learning.map.displayAria' | translate">
         <app-button
           class="hg-native-host"
           [styleClass]="currentChapterClass()"
           type="button"
           (click)="focusCurrent()"
-          >Текущая глава</app-button
+          >{{ 'learning.map.currentChapter' | translate }}</app-button
         >
         <app-button
           class="hg-native-host"
           [styleClass]="allChaptersClass()"
           type="button"
           (click)="showAll.set(true)"
-          >Весь путь</app-button
+          >{{ 'learning.map.allChapters' | translate }}</app-button
         >
       </div>
     </div>
@@ -45,10 +45,10 @@
   <a class="foundation" routerLink="/learn/alphabet">
     <span class="fglyph">가</span>
     <span class="fbody">
-      <b>Алфавит хангыль</b>
-      <small>Фундамент пути · <span class="han">자모</span> · 40 букв</small>
+      <b>{{ 'learning.map.foundationTitle' | translate }}</b>
+      <small>{{ 'learning.map.foundationPrefix' | translate }} <span class="han">자모</span> · {{ 'learning.map.foundationLetters' | translate }}</small>
     </span>
-    <span class="pill p-j">Открыть →</span>
+    <span class="pill p-j">{{ 'learning.map.open' | translate }}</span>
   </a>
 
   @if (facade.loading()) {
@@ -57,28 +57,27 @@
       <span class="sk-node"></span>
       <span class="sk-node"></span>
       <span class="sk-node"></span>
-      <p>Загружаем карту курса…</p>
+      <p>{{ 'dashboard.loadingCourseMap' | translate }}</p>
     </div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
       <app-button
         styleClass="hg-button hg-button--ghost"
-        label="Повторить"
+        [label]="'common.retry' | translate"
         (click)="facade.invalidate()"
       />
     </div>
   } @else if (facade.map(); as map) {
     @if (map.units.length === 0) {
       <div class="panel emptypanel">
-        <hg-mascot speech="Начнём с алфавита — я подожду здесь!" [size]="150" />
+        <hg-mascot [speech]="'learning.map.mascotSpeech' | translate" [size]="150" />
         <div>
-          <h3>Курс ещё наполняется</h3>
+          <h3>{{ 'learning.map.emptyTitle' | translate }}</h3>
           <p>
-            Главы появятся здесь в виде пути. Алфавит уже доступен — с него
-            начинается любой маршрут.
+            {{ 'learning.map.emptyText' | translate }}
           </p>
-          <a class="cta" routerLink="/learn/alphabet">К алфавиту</a>
+          <a class="cta" routerLink="/learn/alphabet">{{ 'learning.map.toAlphabet' | translate }}</a>
         </div>
       </div>
     } @else {
@@ -98,15 +97,15 @@
           <span class="unit-row-body">
             <b>{{ unit.title }}</b>
             <small>
-              {{ unitProgress(unit.lessons) }} уроков
+              {{ 'learning.map.unitProgress' | translate: { progress: unitProgress(unit.lessons) } }}
               @if (unitScore(unit.lessons); as score) {
-                · средний балл {{ score }}%
+                {{ 'learning.map.averageScore' | translate: { score } }}
               }
             </small>
           </span>
           <span class="unit-row-tail">
-            <span class="pill p-j">✓ Пройдено</span>
-            <span class="expand">развернуть ▾</span>
+            <span class="pill p-j">{{ 'learning.map.done' | translate }}</span>
+            <span class="expand">{{ 'learning.map.expand' | translate }}</span>
           </span>
         </app-button>
       }

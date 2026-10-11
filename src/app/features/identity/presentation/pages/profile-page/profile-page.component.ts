@@ -2,13 +2,14 @@ import {GamificationFacade, provideGamification} from '@features/gamification/pu
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AuthFacade} from '../../../application/facades/auth.facade';
 import {ME_REPOSITORY} from '../../../application/me-repository.token';
 import {ButtonComponent, FilePickerComponent} from 'springest';
 
 @Component({
   selector: 'hg-profile-page',
-  imports: [RouterLink, DatePipe, ButtonComponent, FilePickerComponent],
+  imports: [RouterLink, DatePipe, ButtonComponent, FilePickerComponent, TranslatePipe],
   providers: provideGamification(),
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.scss',
@@ -18,15 +19,17 @@ export class ProfilePageComponent {
   readonly facade = inject(GamificationFacade);
   readonly auth = inject(AuthFacade);
   private meRepository = inject(ME_REPOSITORY);
+  private translate = inject(TranslateService);
 
   readonly uploading = signal(false);
   readonly avatarFiles = signal<File[]>([]);
 
-  readonly avatarTitle = computed(() => this.uploading() ? 'Загружаем…' : 'Аватар');
+  readonly avatarTitle = computed(() => this.translate.instant(
+    this.uploading() ? 'identity.profile.avatarUploading' : 'identity.profile.avatar'));
 
   readonly levelLabel = computed(() => {
     const profile = this.facade.profile();
-    return profile?.levelTitle || `Уровень ${profile?.level}`;
+    return profile?.levelTitle || this.translate.instant('identity.profile.levelFallback', {level: profile?.level});
   });
 
   readonly xpTarget = computed(() => {

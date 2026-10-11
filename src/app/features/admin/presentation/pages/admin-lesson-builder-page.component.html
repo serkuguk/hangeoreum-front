@@ -1,10 +1,14 @@
-<a routerLink="/admin/course" class="backlink">← Курс и уроки</a>
+<a routerLink="/admin/course" class="backlink">← {{ 'admin.navigation.course' | translate }}</a>
 
 @if (data(); as d) {
-  <h2 class="pagettl">Конструктор · {{ d.lesson.title }}</h2>
+  <h2 class="pagettl">
+    {{ 'admin.builder.heading' | translate: { title: d.lesson.title } }}
+  </h2>
   <p class="pagesub">
-    {{ d.lesson.type }} · {{ d.lesson.xpReward }} XP ·
-    {{ d.exercises.length }} упражнений
+    {{
+      'admin.builder.meta'
+        | translate: { type: d.lesson.type, xp: d.lesson.xpReward, count: d.exercises.length }
+    }}
     @if (savedFlash(); as flash) {
       <span class="savedmark">✓ {{ flash }}</span>
     }
@@ -15,7 +19,7 @@
   }
 
   <section class="panel">
-    <div class="eyebrow">Упражнения (payload — JSON по kind)</div>
+    <div class="eyebrow">{{ 'admin.builder.exercisesTitle' | translate }}</div>
     @for (exercise of d.exercises; track exercise.id) {
       <div class="exrow">
         <span class="kind">{{ exercise.position }} · {{ exercise.kind }}</span>
@@ -27,35 +31,35 @@
         />
         <div>
           @if (badJson[exercise.id]) {
-            <p class="errbar" role="alert">Некорректный JSON</p>
+            <p class="errbar" role="alert">{{ 'admin.builder.badJson' | translate }}</p>
           }
           <app-button
-            label="Сохранить"
+            [label]="'common.save' | translate"
             (click)="saveExercise(exercise)"
             styleClass="hg-button hg-button--ghost hg-button--sm"
           ></app-button>
           <app-button
             (click)="removeExercise(exercise)"
-            [aria]="{ 'aria-label': 'Удалить упражнение' }"
+            [aria]="{ 'aria-label': ('admin.builder.removeExercise' | translate) }"
             styleClass="hg-button hg-button--danger hg-button--sm"
             ><span aria-hidden="true">✕</span></app-button
           >
         </div>
       </div>
     } @empty {
-      <div class="empty">Упражнений нет — добавь первое.</div>
+      <div class="empty">{{ 'admin.builder.noExercises' | translate }}</div>
     }
     <div class="addex">
       <app-basic-select
-        ariaLabel="Тип упражнения"
-        placeholder="Тип упражнения"
+        [ariaLabel]="'admin.builder.kindLabel' | translate"
+        [placeholder]="'admin.builder.kindLabel' | translate"
         [items]="kindOptions"
         [formField]="newKindField"
         optionLabel="label"
         optionValue="value"
       />
       <app-button
-        label="Упражнение с шаблоном"
+        [label]="'admin.builder.addExercise' | translate"
         (click)="addExercise()"
         styleClass="hg-button hg-button--ghost hg-button--sm"
         ><span aria-hidden="true">+</span></app-button
@@ -68,7 +72,7 @@
     <div class="tipform">
       <app-basic-input
         [label]="'admin.tipTitle' | translate"
-        [placeholder]="'learning.particlesPlaceholder' | translate"
+        [placeholder]="'admin.tipTitlePlaceholder' | translate"
         [formField]="tipTitleField"
       />
       <app-textarea
@@ -93,9 +97,7 @@
   </section>
 
   <section class="panel">
-    <div class="eyebrow">
-      Слова урока ({{ d.words.length }}) — попадают в SRS после прохождения
-    </div>
+    <div class="eyebrow">{{ 'admin.builder.wordsTitle' | translate: { count: d.words.length } }}</div>
     <div class="wordpick">
       @for (word of d.words; track word.id) {
         <app-button
@@ -106,7 +108,7 @@
             'aria-label': removeWordAria(word),
           }"
           (click)="toggleWord(word)"
-          title="Убрать"
+          [title]="'admin.builder.unlinkWord' | translate"
         >
           {{ word.hangul }} · {{ word.translation }} ✕
         </app-button>
@@ -116,7 +118,7 @@
       <app-basic-input
         class="search"
         type="search"
-        label="Найти слово для привязки"
+        [label]="'admin.builder.findWord' | translate"
         [value]="wordSearch"
         (valueChange)="searchWords($event)"
       />
@@ -141,5 +143,5 @@
 } @else if (error()) {
   <div class="errbar">{{ error() }}</div>
 } @else {
-  <div class="empty">Загружаем…</div>
+  <div class="empty">{{ 'common.loading' | translate }}</div>
 }
