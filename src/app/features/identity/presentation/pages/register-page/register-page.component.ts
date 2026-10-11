@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {FormField, form, required, email, minLength, maxLength, validate} from '@angular/forms/signals';
 import {RouterLink} from '@angular/router';
-import {AuthFacade} from '../../../application/facades/auth.facade';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {ButtonComponent, BasicInputComponent, PasswordInputComponent, CheckboxComponent, FormFieldComponent} from 'springest';
 import {TranslatePipe} from '@ngx-translate/core';
 

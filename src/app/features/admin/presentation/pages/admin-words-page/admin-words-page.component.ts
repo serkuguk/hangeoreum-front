@@ -113,7 +113,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     </app-dialog>
     }
   `,
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     .word-media, .word-image-field { display: flex; align-items: center; gap: 1rem; }
     .word-media { flex-wrap: wrap; gap: .5rem; }

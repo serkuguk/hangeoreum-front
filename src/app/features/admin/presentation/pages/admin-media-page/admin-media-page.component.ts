@@ -10,7 +10,7 @@ import {
   TextareaComponent,
 } from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {AdminApi, AdminClip, AdminWord, MediaUploadKind, Speaker} from '../../infrastructure/admin.api';
+import {AdminApi, AdminClip, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
 
 const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY', 'WORD']
   .map(value => ({label: value, value}));
@@ -27,7 +27,7 @@ const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY',
     TranslatePipe,
   ],
   templateUrl: './admin-media-page.component.html',
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     section.panel { margin-bottom: 16px; }
 

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {AdminApi, AdminLetter} from '../../infrastructure/admin.api';
+import {AdminApi, AdminLetter} from '@features/admin/infrastructure/admin.api';
 import {FilePickerComponent} from 'springest';
 
 @Component({
@@ -35,7 +35,7 @@ import {FilePickerComponent} from 'springest';
       </table>
     </div>
   `,
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminAlphabetPageComponent {

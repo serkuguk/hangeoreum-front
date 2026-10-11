@@ -1,8 +1,8 @@
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {Subject, of, throwError} from 'rxjs';
-import {Lesson} from '../../domain/entities/exercise.entity';
-import {CompletionAccepted, CompletionStatus, CompleteResult, LearningRepository} from '../../domain/repositories/learning.repository';
+import {Lesson} from '@features/learning/domain/entities/exercise.entity';
+import {CompletionAccepted, CompletionStatus, CompleteResult, LearningRepository} from '@features/learning/domain/repositories/learning.repository';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 import {LessonFacade} from './lesson.facade';

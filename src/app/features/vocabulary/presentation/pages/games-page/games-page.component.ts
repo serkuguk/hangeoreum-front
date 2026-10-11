@@ -3,8 +3,8 @@ import {ChangeDetectionStrategy, Component, computed, effect, inject} from '@ang
 import {RouterLink} from '@angular/router';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
-import {FinishResult} from '../../../domain/repositories/vocabulary.repository';
-import {AnswerResult, GameMode, GamesFacade, MatchCell, MatchSide} from '../../../application/facades/games.facade';
+import {FinishResult} from '@features/vocabulary/domain/repositories/vocabulary.repository';
+import {AnswerResult, GameMode, GamesFacade, MatchCell, MatchSide} from '@features/vocabulary/application/facades/games.facade';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({

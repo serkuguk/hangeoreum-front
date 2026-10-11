@@ -1,6 +1,6 @@
 import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {AdminApi, Topic} from '../../infrastructure/admin.api';
+import {AdminApi, Topic} from '@features/admin/infrastructure/admin.api';
 import {ButtonComponent, BasicInputComponent} from 'springest';
 
 @Component({
@@ -42,7 +42,7 @@ import {ButtonComponent, BasicInputComponent} from 'springest';
       </table>
     </div>
   `,
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     .icon { max-width: 90px; flex: 0; }
     .cta { padding: 11px 20px; font-size: 14px; }

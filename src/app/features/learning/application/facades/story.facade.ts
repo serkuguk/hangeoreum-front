@@ -2,7 +2,7 @@ import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Subscription, filter, switchMap, take, timer} from 'rxjs';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
-import {Story, StoryLine} from '../../domain/entities/story.entity';
+import {Story, StoryLine} from '@features/learning/domain/entities/story.entity';
 import {LearnMapFacade} from './learn-map.facade';
 
 export const StoryMode = {WATCH: 'watch', READ: 'read', LISTEN: 'listen'} as const;

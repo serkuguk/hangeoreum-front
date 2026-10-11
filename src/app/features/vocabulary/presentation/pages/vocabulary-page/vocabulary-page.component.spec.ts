@@ -5,8 +5,8 @@ import {jest} from '@jest/globals';
 import {Subject} from 'rxjs';
 import {provideTranslateService, TranslateLoader} from '@ngx-translate/core';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {VocabularyFacade} from '../../../application/facades/vocabulary.facade';
-import {UserWord} from '../../../domain/entities/user-word.entity';
+import {VocabularyFacade} from '@features/vocabulary/application/facades/vocabulary.facade';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
 import {VocabularyPageComponent} from './vocabulary-page.component';
 
 const userWord: UserWord = {

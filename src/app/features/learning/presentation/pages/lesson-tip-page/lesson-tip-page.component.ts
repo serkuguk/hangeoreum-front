@@ -4,8 +4,8 @@ import {Location} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {TranslatePipe} from '@ngx-translate/core';
-import {LessonFacade} from '../../../application/facades/lesson.facade';
-import {TipExample} from '../../../domain/entities/exercise.entity';
+import {LessonFacade} from '@features/learning/application/facades/lesson.facade';
+import {TipExample} from '@features/learning/domain/entities/exercise.entity';
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

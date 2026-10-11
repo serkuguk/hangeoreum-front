@@ -1,4 +1,4 @@
-import {CourseMap, LessonNode, LessonStatus, LessonType} from '../../../domain/entities/course-map.entity';
+import {CourseMap, LessonNode, LessonStatus, LessonType} from '@features/learning/domain/entities/course-map.entity';
 import {toCoursePath} from './course-path.mapper';
 import {CoursePathInput} from './course-path-input';
 import {DashboardCourseMap} from '@features/dashboard/domain/dashboard.model';

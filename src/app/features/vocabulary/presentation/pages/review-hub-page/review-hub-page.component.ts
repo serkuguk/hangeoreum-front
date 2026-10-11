@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {ReviewFacade} from '../../../application/facades/review.facade';
+import {ReviewFacade} from '@features/vocabulary/application/facades/review.facade';
 
 @Component({
   selector: 'hg-review-hub-page',

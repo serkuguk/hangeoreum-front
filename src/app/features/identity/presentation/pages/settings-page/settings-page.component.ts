@@ -25,9 +25,9 @@ import {
 import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {ButtonComponent, BasicInputComponent, PasswordInputComponent, SegmentedControlComponent, ToggleComponent, ControlItemInterface, Value} from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {AuthFacade} from '../../../application/facades/auth.facade';
-import {ME_REPOSITORY} from '../../../application/me-repository.token';
-import {UserSettings} from '../../../domain/user.entity';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
+import {ME_REPOSITORY} from '@features/identity/application/me-repository.token';
+import {UserSettings} from '@features/identity/domain/user.entity';
 
 interface SettingsSaveRequest {
   settings: UserSettings;

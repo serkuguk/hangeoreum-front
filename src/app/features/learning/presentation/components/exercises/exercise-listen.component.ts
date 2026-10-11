@@ -3,8 +3,8 @@ import {ChangeDetectionStrategy, Component, afterNextRender, computed, inject, i
 import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {HgAudioButtonComponent} from '@shared/components/hg';
 import {shuffle} from '@shared/utils/shuffle';
-import {ChoiceOption, ListenChoicePayload} from '../../../domain/entities/exercise.entity';
-import {Feedback, gradeChoice} from '../../../domain/services/exercise-grading';
+import {ChoiceOption, ListenChoicePayload} from '@features/learning/domain/entities/exercise.entity';
+import {Feedback, gradeChoice} from '@features/learning/domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({

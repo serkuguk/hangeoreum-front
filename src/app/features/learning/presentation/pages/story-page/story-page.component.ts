@@ -1,8 +1,8 @@
 import {ButtonComponent, SegmentedControlComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {StoryFacade, StoryMode} from '../../../application/facades/story.facade';
-import {StoryLine} from '../../../domain/entities/story.entity';
+import {StoryFacade, StoryMode} from '@features/learning/application/facades/story.facade';
+import {StoryLine} from '@features/learning/domain/entities/story.entity';
 import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 

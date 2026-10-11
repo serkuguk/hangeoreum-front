@@ -3,8 +3,8 @@ import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@ang
 import {DatePipe} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {AuthFacade} from '../../../application/facades/auth.facade';
-import {ME_REPOSITORY} from '../../../application/me-repository.token';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
+import {ME_REPOSITORY} from '@features/identity/application/me-repository.token';
 import {ButtonComponent, FilePickerComponent} from 'springest';
 
 @Component({

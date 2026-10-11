@@ -2,7 +2,7 @@ import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input} from '@angular/core';
 import {Router} from '@angular/router';
 import {HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
-import {LessonFacade} from '../../../application/facades/lesson.facade';
+import {LessonFacade} from '@features/learning/application/facades/lesson.facade';
 import {
   ChoicePayload,
   FillBlankPayload,
@@ -10,14 +10,14 @@ import {
   MatchPairsPayload,
   TypeWordPayload,
   WordOrderPayload,
-} from '../../../domain/entities/exercise.entity';
-import {ExerciseChoiceComponent} from '../../components/exercises/exercise-choice.component';
-import {ExerciseListenComponent} from '../../components/exercises/exercise-listen.component';
-import {ExerciseWordOrderComponent} from '../../components/exercises/exercise-word-order.component';
-import {ExerciseFillBlankComponent} from '../../components/exercises/exercise-fill-blank.component';
-import {ExerciseMatchComponent} from '../../components/exercises/exercise-match.component';
-import {ExerciseTypeComponent} from '../../components/exercises/exercise-type.component';
-import {CompleteResult} from '../../../domain/repositories/learning.repository';
+} from '@features/learning/domain/entities/exercise.entity';
+import {ExerciseChoiceComponent} from '@features/learning/presentation/components/exercises/exercise-choice.component';
+import {ExerciseListenComponent} from '@features/learning/presentation/components/exercises/exercise-listen.component';
+import {ExerciseWordOrderComponent} from '@features/learning/presentation/components/exercises/exercise-word-order.component';
+import {ExerciseFillBlankComponent} from '@features/learning/presentation/components/exercises/exercise-fill-blank.component';
+import {ExerciseMatchComponent} from '@features/learning/presentation/components/exercises/exercise-match.component';
+import {ExerciseTypeComponent} from '@features/learning/presentation/components/exercises/exercise-type.component';
+import {CompleteResult} from '@features/learning/domain/repositories/learning.repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({

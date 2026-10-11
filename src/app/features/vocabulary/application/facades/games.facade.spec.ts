@@ -1,7 +1,7 @@
 import {signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
-import {UserWord} from '../../domain/entities/user-word.entity';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
 import {GamesFacade} from './games.facade';
 import {ReviewFacade} from './review.facade';
 

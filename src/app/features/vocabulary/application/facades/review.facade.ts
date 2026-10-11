@@ -1,13 +1,13 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {concatMap} from 'rxjs';
-import {SrsQuality, UserWord} from '../../domain/entities/user-word.entity';
-import {previewLabel} from '../../domain/services/srs';
+import {SrsQuality, UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
+import {previewLabel} from '@features/vocabulary/domain/services/srs';
 import {
   FinishResult,
   ReviewMode,
   ReviewSummary,
-} from '../../domain/repositories/vocabulary.repository';
+} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {VOCABULARY_REPOSITORY} from '../vocabulary-repository.token';
 import {TranslateService} from '@ngx-translate/core';
 

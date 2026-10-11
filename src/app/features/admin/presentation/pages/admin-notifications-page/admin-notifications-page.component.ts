@@ -1,6 +1,6 @@
 import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {AdminApi} from '../../infrastructure/admin.api';
+import {AdminApi} from '@features/admin/infrastructure/admin.api';
 import {ButtonComponent, BasicInputComponent, TextareaComponent} from 'springest';
 
 @Component({
@@ -23,7 +23,7 @@ import {ButtonComponent, BasicInputComponent, TextareaComponent} from 'springest
       <app-button label="Отправить всем" [loading]="sending()" [disabled]="!title().trim()" (click)="send()" styleClass="hg-button"></app-button>
     </div>
   `,
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     .form {
       max-width: 560px;

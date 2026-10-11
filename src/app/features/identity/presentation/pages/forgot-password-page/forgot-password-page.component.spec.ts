@@ -3,7 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {provideRouter} from '@angular/router';
 import {jest} from '@jest/globals';
 import {provideTranslateService} from '@ngx-translate/core';
-import {AuthFacade} from '../../../application/facades/auth.facade';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {ForgotPasswordPageComponent} from './forgot-password-page.component';
 
 describe('ForgotPasswordPageComponent', () => {

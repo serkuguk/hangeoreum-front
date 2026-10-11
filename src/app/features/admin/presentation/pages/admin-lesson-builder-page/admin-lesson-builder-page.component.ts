@@ -21,7 +21,7 @@ import {
   AdminExercise,
   AdminLessonFull,
   AdminWord,
-} from '../../infrastructure/admin.api';
+} from '@features/admin/infrastructure/admin.api';
 import {
   ButtonComponent,
   BasicInputComponent,
@@ -96,7 +96,7 @@ const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
     TranslatePipe,
   ],
   templateUrl: './admin-lesson-builder-page.component.html',
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     .exrow {
       display: flex;

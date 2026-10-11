@@ -4,7 +4,7 @@ import {EMPTY, Observable, Subject, catchError, debounceTime, distinctUntilChang
 import {HttpErrorResponse} from '@angular/common/http';
 import {AuthService} from '@core/auth/auth.service';
 import {ButtonComponent, DialogComponent, BasicInputComponent, PaginationComponent, BasicSelectComponent} from 'springest';
-import {AdminApi, AdminUser} from '../../infrastructure/admin.api';
+import {AdminApi, AdminUser} from '@features/admin/infrastructure/admin.api';
 
 enum UserRole { Admin = 'ADMIN', User = 'USER', Editor = 'EDITOR' }
 enum UserActionKind { Role = 'role', Status = 'status', Delete = 'delete' }
@@ -88,7 +88,7 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
       </div>
     </app-dialog>
   `,
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     .user-actions { min-width: 15rem; }
     .role-select { display: inline-block; min-width: 9rem; }

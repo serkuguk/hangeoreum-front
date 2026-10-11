@@ -3,9 +3,9 @@ import {Router, RouterLink} from '@angular/router';
 import {HgAudioButtonComponent, HgProgressRingComponent, MascotComponent} from '@shared/components/hg';
 import {ButtonComponent} from 'springest';
 import {CoursePathComponent, toCoursePath} from '@features/learning/course-path';
-import {DashboardFacade} from '../../../application/dashboard.facade';
-import {DASHBOARD_REPOSITORY} from '../../../application/dashboard-repository.token';
-import {DashboardHttpRepository} from '../../../infrastructure/dashboard.http-repository';
+import {DashboardFacade} from '@features/dashboard/application/dashboard.facade';
+import {DASHBOARD_REPOSITORY} from '@features/dashboard/application/dashboard-repository.token';
+import {DashboardHttpRepository} from '@features/dashboard/infrastructure/dashboard.http-repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 const WEEKDAY_KEYS = ['dashboard.weekdays.mon', 'dashboard.weekdays.tue', 'dashboard.weekdays.wed', 'dashboard.weekdays.thu', 'dashboard.weekdays.fri', 'dashboard.weekdays.sat', 'dashboard.weekdays.sun'];

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, OnDestroy, signal} from '@angular/core';
 import {FormField, form, required, email} from '@angular/forms/signals';
 import {Router, RouterLink} from '@angular/router';
-import {AuthFacade} from '../../../application/facades/auth.facade';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {ButtonComponent, BasicInputComponent, PasswordInputComponent, FormFieldComponent} from 'springest';
 import {TranslatePipe} from '@ngx-translate/core';
 

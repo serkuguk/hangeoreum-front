@@ -1,8 +1,8 @@
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {of, throwError} from 'rxjs';
-import {Story} from '../../domain/entities/story.entity';
-import {CompletionAccepted, CompleteResult, LearningRepository} from '../../domain/repositories/learning.repository';
+import {Story} from '@features/learning/domain/entities/story.entity';
+import {CompletionAccepted, CompleteResult, LearningRepository} from '@features/learning/domain/repositories/learning.repository';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 import {StoryFacade} from './story.facade';

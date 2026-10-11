@@ -13,8 +13,8 @@ import {
   signal,
 } from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {ImmerseFacade} from '../../../application/immerse.facade';
-import {Clip} from '../../../domain/clip.entity';
+import {ImmerseFacade} from '@features/media/application/immerse.facade';
+import {Clip} from '@features/media/domain/clip.entity';
 import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 

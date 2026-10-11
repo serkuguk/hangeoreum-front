@@ -6,12 +6,12 @@ import {
 import {Router, RouterLink} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MascotComponent} from '@shared/components/hg/mascot/mascot.component';
-import {LearnMapFacade} from '../../../application/facades/learn-map.facade';
-import {LessonNode, UnitNode} from '../../../domain/entities/course-map.entity';
-import {CoursePathComponent} from '../../components/course-path/course-path.component';
-import {chapterSceneUrl} from '../../components/course-path/course-path.mapper';
-import {CourseChapter, CourseNode, CourseNodeState} from '../../components/course-path/course-path.model';
-import {lessonRoute} from '../../lesson-route';
+import {LearnMapFacade} from '@features/learning/application/facades/learn-map.facade';
+import {LessonNode, UnitNode} from '@features/learning/domain/entities/course-map.entity';
+import {CoursePathComponent} from '@features/learning/presentation/components/course-path/course-path.component';
+import {chapterSceneUrl} from '@features/learning/presentation/components/course-path/course-path.mapper';
+import {CourseChapter, CourseNode, CourseNodeState} from '@features/learning/presentation/components/course-path/course-path.model';
+import {lessonRoute} from '@features/learning/presentation/lesson-route';
 
 type UnitState = 'done' | 'current' | 'locked';
 

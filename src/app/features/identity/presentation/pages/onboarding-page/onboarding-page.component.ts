@@ -5,8 +5,8 @@ import {
   signal,
 } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
-import { AuthFacade } from '../../../application/facades/auth.facade';
-import { StartLevel } from '../../../domain/user.entity';
+import { AuthFacade } from '@features/identity/application/facades/auth.facade';
+import { StartLevel } from '@features/identity/domain/user.entity';
 import {
   ButtonComponent,
   SegmentedControlComponent,

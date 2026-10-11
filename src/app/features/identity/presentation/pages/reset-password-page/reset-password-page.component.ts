@@ -3,7 +3,7 @@ import {FormField, form, required, minLength, maxLength, validate} from '@angula
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
 import {ButtonComponent, PasswordInputComponent, FormFieldComponent} from 'springest';
-import {AuthFacade} from '../../../application/facades/auth.facade';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 
 @Component({
   selector: 'hg-reset-password-page',

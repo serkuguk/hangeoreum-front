@@ -4,7 +4,7 @@ import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {of, Subject} from 'rxjs';
 import {AuthService} from '@core/auth/auth.service';
-import {AdminApi, AdminUser} from '../../infrastructure/admin.api';
+import {AdminApi, AdminUser} from '@features/admin/infrastructure/admin.api';
 import {AdminUsersPageComponent} from './admin-users-page.component';
 
 const user: AdminUser = {

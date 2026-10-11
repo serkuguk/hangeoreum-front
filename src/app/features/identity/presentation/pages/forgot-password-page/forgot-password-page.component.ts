@@ -3,7 +3,7 @@ import {FormField, form, required, email} from '@angular/forms/signals';
 import {RouterLink} from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
 import {ButtonComponent, BasicInputComponent, FormFieldComponent} from 'springest';
-import {AuthFacade} from '../../../application/facades/auth.facade';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 
 @Component({
   selector: 'hg-forgot-password-page',

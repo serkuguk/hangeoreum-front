@@ -2,8 +2,8 @@ import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {AlphabetFacade} from '../../../application/facades/alphabet.facade';
-import {AlphabetLetter} from '../../../domain/entities/alphabet.entity';
+import {AlphabetFacade} from '@features/learning/application/facades/alphabet.facade';
+import {AlphabetLetter} from '@features/learning/domain/entities/alphabet.entity';
 
 @Component({
   selector: 'hg-alphabet-page',

@@ -1,8 +1,8 @@
 import {DestroyRef, Injectable, computed, effect, inject, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
-import {UserWord} from '../../domain/entities/user-word.entity';
-import {GameEngine, syllables} from '../../domain/services/game-engine';
-import {ReviewMode} from '../../domain/repositories/vocabulary.repository';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
+import {GameEngine, syllables} from '@features/vocabulary/domain/services/game-engine';
+import {ReviewMode} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {ReviewFacade} from './review.facade';
 
 export type GameMode = Extract<ReviewMode, 'MATCH' | 'LISTEN' | 'SPELL'>;

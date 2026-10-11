@@ -1,8 +1,8 @@
 import {FormField, disabled, form, required} from '@angular/forms/signals';
 import {ButtonComponent, BasicInputComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, input, output, signal} from '@angular/core';
-import {TypeWordPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback, gradeTypedAnswer} from '../../../domain/services/exercise-grading';
+import {TypeWordPayload} from '@features/learning/domain/entities/exercise.entity';
+import {Feedback, gradeTypedAnswer} from '@features/learning/domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({

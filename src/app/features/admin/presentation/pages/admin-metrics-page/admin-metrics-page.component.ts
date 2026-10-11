@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {AdminApi, AdminMetrics} from '../../infrastructure/admin.api';
+import {AdminApi, AdminMetrics} from '@features/admin/infrastructure/admin.api';
 
 @Component({
   selector: 'hg-admin-metrics-page',
@@ -20,7 +20,7 @@ import {AdminApi, AdminMetrics} from '../../infrastructure/admin.api';
       <div class="empty">Загружаем…</div>
     }
   `,
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
 

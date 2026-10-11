@@ -1,7 +1,7 @@
 import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '../../infrastructure/admin.api';
+import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '@features/admin/infrastructure/admin.api';
 import {ButtonComponent, BasicInputComponent, BasicSelectComponent} from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
@@ -9,7 +9,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
   selector: 'hg-admin-course-page',
   imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent, TranslatePipe],
   templateUrl: './admin-course-page.component.html',
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `
     .coursehead {
       display: flex;

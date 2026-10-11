@@ -4,7 +4,7 @@ import {jest} from '@jest/globals';
 import {provideTranslateService} from '@ngx-translate/core';
 import {of, Subject, throwError} from 'rxjs';
 import {DialogComponent} from 'springest';
-import {AdminApi, AdminWord} from '../../infrastructure/admin.api';
+import {AdminApi, AdminWord} from '@features/admin/infrastructure/admin.api';
 import {AdminWordsPageComponent} from './admin-words-page.component';
 
 const word: AdminWord = {

@@ -2,9 +2,9 @@ import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, HostListener, OnInit, computed, inject, input, signal} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
-import {ReviewFacade} from '../../../application/facades/review.facade';
-import {SrsQuality} from '../../../domain/entities/user-word.entity';
-import {FinishResult} from '../../../domain/repositories/vocabulary.repository';
+import {ReviewFacade} from '@features/vocabulary/application/facades/review.facade';
+import {SrsQuality} from '@features/vocabulary/domain/entities/user-word.entity';
+import {FinishResult} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({

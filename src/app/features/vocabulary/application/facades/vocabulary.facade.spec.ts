@@ -1,8 +1,8 @@
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {Subject, of, throwError} from 'rxjs';
-import {UserWord} from '../../domain/entities/user-word.entity';
-import {VocabularyRepository} from '../../domain/repositories/vocabulary.repository';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
+import {VocabularyRepository} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {VOCABULARY_REPOSITORY} from '../vocabulary-repository.token';
 import {VocabularyFacade} from './vocabulary.facade';
 

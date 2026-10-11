@@ -1,16 +1,16 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Subscription, filter, map, switchMap, take, timer} from 'rxjs';
-import {Exercise, Lesson, Tip} from '../../domain/entities/exercise.entity';
-import {LessonSession} from '../../domain/services/lesson-session';
+import {Exercise, Lesson, Tip} from '@features/learning/domain/entities/exercise.entity';
+import {LessonSession} from '@features/learning/domain/services/lesson-session';
 import {
   CompleteRequest,
   CompleteResult,
-} from '../../domain/repositories/learning.repository';
+} from '@features/learning/domain/repositories/learning.repository';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 
-import {Feedback} from '../../domain/services/exercise-grading';
+import {Feedback} from '@features/learning/domain/services/exercise-grading';
 
 export type LessonPhase = 'idle' | 'loading' | 'active' | 'saving' | 'save-error' | 'completed' | 'load-error';
 

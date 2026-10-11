@@ -1,8 +1,8 @@
 import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
-import {FillBlankPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback, gradeExactAnswer} from '../../../domain/services/exercise-grading';
+import {FillBlankPayload} from '@features/learning/domain/entities/exercise.entity';
+import {Feedback, gradeExactAnswer} from '@features/learning/domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({

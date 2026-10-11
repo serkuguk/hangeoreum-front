@@ -1,5 +1,5 @@
 import {Injectable, computed, inject, signal} from '@angular/core';
-import {Alphabet, AlphabetLetter, LETTER_GROUPS} from '../../domain/entities/alphabet.entity';
+import {Alphabet, AlphabetLetter, LETTER_GROUPS} from '@features/learning/domain/entities/alphabet.entity';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 
 @Injectable()

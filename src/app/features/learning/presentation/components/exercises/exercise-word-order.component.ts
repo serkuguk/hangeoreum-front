@@ -1,8 +1,8 @@
 import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
-import {WordOrderPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback, gradeWordOrder} from '../../../domain/services/exercise-grading';
+import {WordOrderPayload} from '@features/learning/domain/entities/exercise.entity';
+import {Feedback, gradeWordOrder} from '@features/learning/domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 interface BankToken {

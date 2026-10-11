@@ -6,9 +6,9 @@ import {Subject} from 'rxjs';
 import {jest} from '@jest/globals';
 import {ENV} from '@core/tokens/environment.token';
 import {Profile} from '@features/gamification/domain/gamification.model';
-import {AuthFacade} from '../../../application/facades/auth.facade';
-import {ME_REPOSITORY} from '../../../application/me-repository.token';
-import {User} from '../../../domain/user.entity';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
+import {ME_REPOSITORY} from '@features/identity/application/me-repository.token';
+import {User} from '@features/identity/domain/user.entity';
 import {ProfilePageComponent} from './profile-page.component';
 
 describe('Profile avatar update', () => {

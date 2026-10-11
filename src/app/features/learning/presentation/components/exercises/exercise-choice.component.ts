@@ -2,8 +2,8 @@ import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {HgAudioButtonComponent} from '@shared/components/hg';
 import {shuffle} from '@shared/utils/shuffle';
-import {ChoiceOption, ChoicePayload} from '../../../domain/entities/exercise.entity';
-import {Feedback, gradeChoice} from '../../../domain/services/exercise-grading';
+import {ChoiceOption, ChoicePayload} from '@features/learning/domain/entities/exercise.entity';
+import {Feedback, gradeChoice} from '@features/learning/domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({

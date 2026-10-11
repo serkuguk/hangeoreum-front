@@ -1,8 +1,8 @@
 import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
-import {MatchPairsPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback, isMatchingPair, gradeMatch} from '../../../domain/services/exercise-grading';
+import {MatchPairsPayload} from '@features/learning/domain/entities/exercise.entity';
+import {Feedback, isMatchingPair, gradeMatch} from '@features/learning/domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 interface MatchCell {

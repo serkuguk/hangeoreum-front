@@ -3,7 +3,7 @@ import {computed, Injectable, inject, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '@core/auth/auth.service';
 import {ME_REPOSITORY} from '../me-repository.token';
-import {OnboardingData, User} from '../../domain/user.entity';
+import {OnboardingData, User} from '@features/identity/domain/user.entity';
 import {TranslateService} from '@ngx-translate/core';
 import {Subscription} from 'rxjs';
 

@@ -1,7 +1,7 @@
 import {TestBed} from '@angular/core/testing';
 import {provideRouter} from '@angular/router';
 import {jest} from '@jest/globals';
-import {ReviewFacade} from '../../../application/facades/review.facade';
+import {ReviewFacade} from '@features/vocabulary/application/facades/review.facade';
 import {FlashcardsPageComponent} from './flashcards-page.component';
 
 describe('FlashcardsPageComponent route inputs', () => {

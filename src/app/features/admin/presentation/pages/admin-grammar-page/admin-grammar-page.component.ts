@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {AdminApi, AdminTip} from '../../infrastructure/admin.api';
+import {AdminApi, AdminTip} from '@features/admin/infrastructure/admin.api';
 
 @Component({
   selector: 'hg-admin-grammar-page',
@@ -27,7 +27,7 @@ import {AdminApi, AdminTip} from '../../infrastructure/admin.api';
       </table>
     </div>
   `,
-  styleUrl: './_admin.scss',
+  styleUrl: '../_admin.scss',
   styles: `.body { color: var(--hg-muted); max-width: 560px; }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -3,8 +3,8 @@ import {Injectable, inject} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ENV} from '@core/tokens/environment.token';
 import {EnvironmentInterface} from '@core/interfaces/environment.interface';
-import {MeRepository} from '../../domain/repositories/me.repository';
-import {OnboardingData, User, UserSettings} from '../../domain/user.entity';
+import {MeRepository} from '@features/identity/domain/repositories/me.repository';
+import {OnboardingData, User, UserSettings} from '@features/identity/domain/user.entity';
 
 // DTO бэка совпадают с доменными типами 1:1 — отдельный маппер не нужен.
 @Injectable()

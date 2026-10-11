@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {ButtonComponent} from 'springest';
-import {BillingFacade} from '../../application/billing.facade';
-import {CheckoutResult, Plan, PlanInterval} from '../../domain/billing.model';
+import {BillingFacade} from '@features/billing/application/billing.facade';
+import {CheckoutResult, Plan, PlanInterval} from '@features/billing/domain/billing.model';
 import {TranslatePipe} from '@ngx-translate/core';
 
 const INTERVAL_LABEL: Record<PlanInterval, string> = {
