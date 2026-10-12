@@ -53,3 +53,9 @@ CLAUDE.md
 .vscode/*
 docs/*
 .playwright-mcp
+/.pnpm-store/
+/.ua/
+/graphify-out/
+/output/
+/patches/
+/AGENTS.md
