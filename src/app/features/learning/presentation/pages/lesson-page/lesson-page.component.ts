@@ -1,8 +1,8 @@
-import {ChangeDetectionStrategy, Component, OnInit, inject, input} from '@angular/core';
+import {ButtonComponent} from 'springest';
+import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input} from '@angular/core';
 import {Router} from '@angular/router';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
 import {HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
-import {LessonFacade} from '../../../application/facades/lesson.facade';
+import {LessonFacade} from '@features/learning/application/facades/lesson.facade';
 import {
   ChoicePayload,
   FillBlankPayload,
@@ -10,14 +10,14 @@ import {
   MatchPairsPayload,
   TypeWordPayload,
   WordOrderPayload,
-} from '../../../domain/entities/exercise.entity';
-import {ExerciseChoiceComponent} from '../../components/exercises/exercise-choice.component';
-import {ExerciseListenComponent} from '../../components/exercises/exercise-listen.component';
-import {ExerciseWordOrderComponent} from '../../components/exercises/exercise-word-order.component';
-import {ExerciseFillBlankComponent} from '../../components/exercises/exercise-fill-blank.component';
-import {ExerciseMatchComponent} from '../../components/exercises/exercise-match.component';
-import {ExerciseTypeComponent} from '../../components/exercises/exercise-type.component';
-import {CompleteResult} from '../../../domain/repositories/learning.repository';
+} from '@features/learning/domain/entities/exercise.entity';
+import {ExerciseChoiceComponent} from '@features/learning/presentation/components/exercises/exercise-choice.component';
+import {ExerciseListenComponent} from '@features/learning/presentation/components/exercises/exercise-listen.component';
+import {ExerciseWordOrderComponent} from '@features/learning/presentation/components/exercises/exercise-word-order.component';
+import {ExerciseFillBlankComponent} from '@features/learning/presentation/components/exercises/exercise-fill-blank.component';
+import {ExerciseMatchComponent} from '@features/learning/presentation/components/exercises/exercise-match.component';
+import {ExerciseTypeComponent} from '@features/learning/presentation/components/exercises/exercise-type.component';
+import {CompleteResult} from '@features/learning/domain/repositories/learning.repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
@@ -29,7 +29,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
     ExerciseFillBlankComponent,
     ExerciseMatchComponent,
     ExerciseTypeComponent,
-    HgButtonComponent,
+    ButtonComponent,
     HgSessionResultCardComponent,
     TranslatePipe,
   ],
@@ -43,6 +43,21 @@ export class LessonPageComponent implements OnInit {
   readonly facade = inject(LessonFacade);
   private router = inject(Router);
   private translate = inject(TranslateService);
+
+  readonly feedbackView = computed(() => {
+    const feedback = this.facade.feedback();
+    if (!feedback) return null;
+    return {
+      icon: feedback.correct ? '✅' : '❌',
+      titleKey: feedback.correct ? 'learning.lesson.correct' : 'learning.lesson.incorrect',
+      buttonClass: feedback.correct ? 'hg-button hg-button--primary' : 'hg-button hg-button--danger',
+      showExpected: !feedback.correct && !!feedback.expected,
+      showRetryOnly: !feedback.correct && !feedback.expected,
+      expected: feedback.expected,
+    };
+  });
+
+  readonly resultSubtitle = computed(() => `«${this.facade.lesson()?.title}»`);
 
   ngOnInit(): void {
     this.facade.start(this.id());

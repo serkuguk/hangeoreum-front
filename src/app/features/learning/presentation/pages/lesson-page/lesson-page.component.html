@@ -1,79 +1,145 @@
 <div class="wrap lessonbox">
   @if (facade.loading()) {
-    <div class="panel loadpanel">{{ 'learning.lesson.loading' | translate }}</div>
+    <div class="panel loadpanel">
+      {{ "learning.lesson.loading" | translate }}
+    </div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <hg-button [label]="'learning.lesson.backToMap' | translate" variant="ghost" (pressed)="exit()"/>
+      <app-button
+        styleClass="hg-button hg-button--ghost"
+        [label]="'learning.lesson.backToMap' | translate"
+        (click)="exit()"
+      />
     </div>
   } @else if (facade.result(); as result) {
     <!-- Экран награды -->
-    <hg-session-result-card [eyebrow]="'learning.lesson.congratulations' | translate" [koreanTitle]="'learning.lesson.koreanCongratulations' | translate" [title]="'learning.lesson.completed' | translate"
-                            [subtitle]="'«' + facade.lesson()?.title + '»'" [stats]="resultStats(result)">
+    <hg-session-result-card
+      [eyebrow]="'learning.lesson.congratulations' | translate"
+      [koreanTitle]="'learning.lesson.koreanCongratulations' | translate"
+      [title]="'learning.lesson.completed' | translate"
+      [subtitle]="resultSubtitle()"
+      [stats]="resultStats(result)"
+    >
       @if (result.newWords.length > 0) {
         <div result-details class="rewwords">
           @for (word of result.newWords; track word.id) {
             <span class="pill p-b kr">{{ word.hangul }}</span>
           }
-          <p class="pagesub">{{ 'learning.lesson.newWordsSaved' | translate }}</p>
+          <p class="pagesub">
+            {{ "learning.lesson.newWordsSaved" | translate }}
+          </p>
         </div>
       }
       <div result-actions>
-        <hg-button class="grow" [label]="'learning.lesson.backToMap' | translate" (pressed)="exit()"/>
+        <app-button
+          styleClass="hg-button"
+          class="grow"
+          [label]="'learning.lesson.backToMap' | translate"
+          (click)="exit()"
+        />
       </div>
     </hg-session-result-card>
   } @else if (facade.current(); as exercise) {
     <div class="l-top">
-      <hg-button class="x" icon="✕" [ariaLabel]="'learning.lesson.exit' | translate" variant="ghost" size="sm" (pressed)="exit()"/>
+      <app-button
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        class="x"
+        (click)="exit()"
+        [aria]="{ 'aria-label': 'learning.lesson.exit' | translate }"
+        ><span aria-hidden="true">✕</span></app-button
+      >
       <div class="segs">
         @for (done of facade.progressSegments(); track $index) {
-          <i [class.d]="done" [class.c]="!done && $index === facade.solved()"></i>
+          <i
+            [class.d]="done"
+            [class.c]="!done && $index === facade.solved()"
+          ></i>
         }
       </div>
       <span class="pill p-b">{{ facade.solved() }} / {{ facade.total() }}</span>
     </div>
 
     @switch (exercise.kind) {
-      @case ('CHOICE') {
-        <hg-exercise-choice [payload]="asChoice(exercise.payload)" (result)="facade.answered($event)"/>
+      @case ("CHOICE") {
+        <hg-exercise-choice
+          [payload]="asChoice(exercise.payload)"
+          (result)="facade.answered($event)"
+        />
       }
-      @case ('LISTEN_CHOICE') {
-        <hg-exercise-listen [payload]="asListen(exercise.payload)" (result)="facade.answered($event)"/>
+      @case ("LISTEN_CHOICE") {
+        <hg-exercise-listen
+          [payload]="asListen(exercise.payload)"
+          (result)="facade.answered($event)"
+        />
       }
-      @case ('WORD_ORDER') {
-        <hg-exercise-word-order [payload]="asWordOrder(exercise.payload)" (result)="facade.answered($event)"/>
+      @case ("WORD_ORDER") {
+        <hg-exercise-word-order
+          [payload]="asWordOrder(exercise.payload)"
+          (result)="facade.answered($event)"
+        />
       }
-      @case ('FILL_BLANK') {
-        <hg-exercise-fill-blank [payload]="asFillBlank(exercise.payload)" (result)="facade.answered($event)"/>
+      @case ("FILL_BLANK") {
+        <hg-exercise-fill-blank
+          [payload]="asFillBlank(exercise.payload)"
+          (result)="facade.answered($event)"
+        />
       }
-      @case ('MATCH_PAIRS') {
-        <hg-exercise-match [payload]="asMatch(exercise.payload)" (result)="facade.answered($event)"/>
+      @case ("MATCH_PAIRS") {
+        <hg-exercise-match
+          [payload]="asMatch(exercise.payload)"
+          (result)="facade.answered($event)"
+        />
       }
-      @case ('TYPE_WORD') {
-        <hg-exercise-type [payload]="asType(exercise.payload)" (result)="facade.answered($event)"/>
+      @case ("TYPE_WORD") {
+        <hg-exercise-type
+          [payload]="asType(exercise.payload)"
+          (result)="facade.answered($event)"
+        />
       }
     }
 
     @if (facade.feedback(); as feedback) {
-      <div class="fb" [class.ok]="feedback.correct" [class.bad]="!feedback.correct" role="status">
-        <div>{{ feedback.correct ? '✅' : '❌' }}</div>
+      @let view = feedbackView()!;
+      <div
+        class="fb"
+        [class.ok]="feedback.correct"
+        [class.bad]="!feedback.correct"
+        role="status"
+      >
+        <div>{{ view.icon }}</div>
         <div>
-          <b>{{ (feedback.correct ? 'learning.lesson.correct' : 'learning.lesson.incorrect') | translate }}</b>
-          @if (!feedback.correct && feedback.expected) {
-            <small>{{ 'learning.lesson.correctAnswer' | translate }}: <span class="kr">{{ feedback.expected }}</span>. {{ 'learning.lesson.retryAtEnd' | translate }}</small>
-          } @else if (!feedback.correct) {
-            <small>{{ 'learning.lesson.retryAtEnd' | translate }}</small>
+          <b>{{ view.titleKey | translate }}</b>
+          @if (view.showExpected) {
+            <small
+              >{{ "learning.lesson.correctAnswer" | translate }}:
+              <span class="kr">{{ feedback.expected }}</span
+              >. {{ "learning.lesson.retryAtEnd" | translate }}</small
+            >
+          } @else if (view.showRetryOnly) {
+            <small>{{ "learning.lesson.retryAtEnd" | translate }}</small>
           }
         </div>
-        <hg-button class="next" [label]="'common.next' | translate" [variant]="feedback.correct ? 'primary' : 'danger'" (pressed)="facade.next()"/>
+        <app-button
+          [styleClass]="view.buttonClass"
+          class="next"
+          [label]="'common.next' | translate"
+          (click)="facade.next()"
+        />
       </div>
     }
   } @else if (facade.saveError()) {
     <div class="panel loadpanel" role="alert" aria-live="polite">
-      <p>{{ 'learning.lesson.saveError' | translate }}</p>
-      <hg-button [label]="'common.retry' | translate" (pressed)="facade.retryFinish()"/>
+      <p>{{ "learning.lesson.saveError" | translate }}</p>
+      <app-button
+        styleClass="hg-button"
+        [label]="'common.retry' | translate"
+        (click)="facade.retryFinish()"
+      />
     </div>
   } @else if (facade.finishing()) {
-    <div class="panel loadpanel" aria-live="polite">{{ 'learning.lesson.saving' | translate }}</div>
+    <div class="panel loadpanel" aria-live="polite">
+      {{ "learning.lesson.saving" | translate }}
+    </div>
   }
 </div>

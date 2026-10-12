@@ -24,14 +24,16 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       // Протух access-токен → один общий refresh (httpOnly-cookie) и повтор запроса.
       if (err.status === 401 && !isAuthEndpoint(req.url)) {
         return authService.refreshAccessToken().pipe(
-          switchMap(res => next(req.clone({setHeaders: {Authorization: `Bearer ${res.accessToken}`}}))),
           catchError(refreshErr => {
             router.navigate(['/auth/login']);
             return throwError(() => refreshErr);
           }),
+          switchMap(res => next(req.clone({setHeaders: {Authorization: `Bearer ${res.accessToken}`}}))),
         );
       }
-
+      return throwError(() => err);
+    }),
+    catchError((err: HttpErrorResponse) => {
       const code = (err.error as { code?: string } | null)?.code;
       if (err.status === 403 && (code === 'PRO_REQUIRED' || code === 'LIMIT_REACHED')) {
         paywall.open(code);

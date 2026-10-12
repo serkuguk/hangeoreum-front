@@ -1,13 +1,13 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {concatMap} from 'rxjs';
-import {SrsQuality, UserWord} from '../../domain/entities/user-word.entity';
-import {previewLabel} from '../../domain/services/srs';
+import {SrsQuality, UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
+import {computeNextReview} from '@features/vocabulary/domain/services/srs';
 import {
   FinishResult,
   ReviewMode,
   ReviewSummary,
-} from '../../domain/repositories/vocabulary.repository';
+} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {VOCABULARY_REPOSITORY} from '../vocabulary-repository.token';
 import {TranslateService} from '@ngx-translate/core';
 
@@ -81,10 +81,15 @@ export class ReviewFacade {
     // interval приближаем из dueDate (бэк не отдаёт его в DTO) — подписи ориентировочные
     const approxInterval = Math.max(1, Math.round(
       (new Date(word.dueDate).getTime() - Date.now()) / 86_400_000));
-    return previewLabel(
+    const next = computeNextReview(
       {repetitions: word.repetitions, easeFactor: word.easeFactor, interval: approxInterval},
       quality,
     );
+    if (quality < 3) return this.translate.instant('vocabulary.intervals.lessThanDay');
+    if (next.interval === 1) return this.translate.instant('vocabulary.intervals.oneDay');
+    return next.interval < 30
+      ? this.translate.instant('vocabulary.intervals.days', {count: next.interval})
+      : this.translate.instant('vocabulary.intervals.months', {count: Math.round(next.interval / 30)});
   }
 
   rate(quality: SrsQuality): void {

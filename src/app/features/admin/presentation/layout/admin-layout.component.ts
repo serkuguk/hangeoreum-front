@@ -1,98 +1,54 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
+import {AuthService, UserRole} from '@core/auth/auth.service';
+import {RouterLink, RouterOutlet} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {HgSidebarComponent} from '@shared/components/sidebar/hg-sidebar.component';
 
 @Component({
   selector: 'hg-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, HgSidebarComponent, TranslatePipe],
   template: `
     <div class="admin">
-      <aside class="sidebar">
+      <hg-sidebar [items]="sidebarItems()" [navLabel]="'navigation.admin' | translate"
+                  [expandLabel]="'navigation.expandMenu' | translate" [collapseLabel]="'navigation.collapseMenu' | translate"
+                  [footerItem]="{link: '/dashboard', label: ('admin.backToApp' | translate), icon: 'pi-arrow-left'}">
         <a class="logo han" routerLink="/dashboard">한걸음 <span>{{ 'admin.brand' | translate }}</span></a>
-        <nav>
-          @for (item of nav; track item.link) {
-            <a [routerLink]="item.link" [routerLinkActiveOptions]="{exact: item.exact}"
-               routerLinkActive="is-active">{{ item.icon }} {{ item.label }}</a>
-          }
-        </nav>
-        <a class="back" routerLink="/dashboard">{{ 'admin.backToApp' | translate }}</a>
-      </aside>
+      </hg-sidebar>
       <main class="content">
         <router-outlet/>
       </main>
     </div>
   `,
   styles: `
-    .admin {
-      display: grid;
-      grid-template-columns: 230px 1fr;
-      min-height: 100vh;
+    .admin { display: grid; grid-template-columns: auto minmax(0, 1fr); min-height: 100vh; }
+    hg-sidebar {
+      --sidebar-bg: var(--hg-ink-2);
+      --sidebar-muted: var(--hg-muted);
+      --sidebar-hover: var(--hg-card);
     }
-
-    .sidebar {
-      background: var(--hg-ink-2);
-      border-right: 1px solid var(--hg-line);
-      padding: 22px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-
-      .logo {
-        font-size: 22px;
-        color: var(--hg-yellow);
-        text-decoration: none;
-        padding: 0 10px;
-
-        span { font-family: var(--hg-font-ui); font-size: 11px; color: var(--hg-muted); letter-spacing: 2px; text-transform: uppercase; }
-      }
-
-      nav {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        flex: 1;
-
-        a {
-          color: var(--hg-muted);
-          text-decoration: none;
-          font-size: 13.5px;
-          padding: 10px 12px;
-          border-radius: 10px;
-          transition: .15s;
-
-          &:hover { color: var(--hg-txt); background: var(--hg-card); }
-          &.is-active { background: var(--hg-blue); color: #fff; }
-        }
-      }
-
-      .back { color: var(--hg-muted); font-size: 12.5px; text-decoration: none; padding: 0 10px; }
-    }
-
+    .logo { font-size: 22px; color: var(--hg-yellow); text-decoration: none; white-space: nowrap; }
+    .logo span { font-family: var(--hg-font-ui); font-size: 11px; color: var(--hg-muted); letter-spacing: 2px; text-transform: uppercase; }
     .content { padding: 30px; min-width: 0; }
-
-    @media (max-width: 860px) {
-      .admin { grid-template-columns: 1fr; }
-      .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
-      .sidebar nav { flex-direction: row; flex-wrap: wrap; }
-    }
+    @media (max-width: 767px) { .content { padding: 20px 12px; } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLayoutComponent {
-  private readonly translate = inject(TranslateService);
+  readonly auth = inject(AuthService);
   readonly nav = [
-    {link: '/admin', label: this.translate.instant('admin.navigation.dashboard'), icon: '📊', exact: true},
-    {link: '/admin/words', label: this.translate.instant('admin.navigation.words'), icon: '📚', exact: false},
-    {link: '/admin/topics', label: this.translate.instant('admin.navigation.topics'), icon: '🏷️', exact: false},
-    {link: '/admin/course', label: this.translate.instant('admin.navigation.course'), icon: '🗺️', exact: false},
-    {link: '/admin/alphabet', label: this.translate.instant('admin.navigation.alphabet'), icon: '가', exact: false},
-    {link: '/admin/grammar', label: this.translate.instant('admin.navigation.grammar'), icon: '💡', exact: false},
-    {link: '/admin/media', label: this.translate.instant('admin.navigation.media'), icon: '🎬', exact: false},
-    {link: '/admin/users', label: this.translate.instant('admin.navigation.users'), icon: '👥', exact: false},
-    {link: '/admin/notifications', label: this.translate.instant('admin.navigation.notifications'), icon: '📣', exact: false},
+    {link: '/admin', label: 'admin.navigation.dashboard', icon: 'pi-home', exact: true, adminOnly: true},
+    {link: '/admin/words', label: 'admin.navigation.words', icon: 'pi-book', exact: false},
+    {link: '/admin/topics', label: 'admin.navigation.topics', icon: 'pi-tag', exact: false},
+    {link: '/admin/course', label: 'admin.navigation.course', icon: 'pi-map', exact: false},
+    {link: '/admin/alphabet', label: 'admin.navigation.alphabet', icon: 'pi-language', exact: false},
+    {link: '/admin/grammar', label: 'admin.navigation.grammar', icon: 'pi-lightbulb', exact: false},
+    {link: '/admin/media', label: 'admin.navigation.media', icon: 'pi-play-circle', exact: false},
+    {link: '/admin/users', label: 'admin.navigation.users', icon: 'pi-users', exact: false, adminOnly: true},
+    {link: '/admin/notifications', label: 'admin.navigation.notifications', icon: 'pi-bell', exact: false},
   ];
+  private readonly labels = toSignal(inject(TranslateService).stream(this.nav.map(item => item.label)));
+  readonly sidebarItems = computed(() => this.nav
+    .filter(item => !item.adminOnly || this.auth.currentUser()?.role === UserRole.Admin)
+    .map(item => ({...item, label: this.labels()?.[item.label] ?? item.label})));
 }

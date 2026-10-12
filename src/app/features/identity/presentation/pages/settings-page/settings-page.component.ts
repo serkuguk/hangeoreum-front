@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {FormsModule} from '@angular/forms';
+import {FormField, form, required, minLength, maxLength} from '@angular/forms/signals';
 import {
   ReplaySubject,
   Subject,
@@ -23,16 +23,11 @@ import {
   ThemeService,
 } from '@core/services/theme.service';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {
-  HgButtonComponent,
-  HgInputComponent,
-  HgSegmentedControlComponent,
-  HgSegmentedOption,
-  HgToggleComponent,
-} from '@shared/components/controls';
-import {AuthFacade} from '../../../application/facades/auth.facade';
-import {ME_REPOSITORY} from '../../../application/me-repository.token';
-import {UserSettings} from '../../../domain/user.entity';
+import {ButtonComponent, BasicInputComponent, PasswordInputComponent, SegmentedControlComponent, ToggleComponent, ControlItemInterface, Value} from 'springest';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {AuthFacade} from '@features/identity/application/facades/auth.facade';
+import {ME_REPOSITORY} from '@features/identity/application/me-repository.token';
+import {DAILY_GOAL_XP, REMINDER_TIMES, UserSettings} from '@features/identity/domain/user.entity';
 
 interface SettingsSaveRequest {
   settings: UserSettings;
@@ -42,7 +37,7 @@ interface SettingsSaveRequest {
 
 @Component({
   selector: 'hg-settings-page',
-  imports: [FormsModule, HgButtonComponent, HgInputComponent, HgToggleComponent, HgSegmentedControlComponent],
+  imports: [FormField, ButtonComponent, BasicInputComponent, PasswordInputComponent, ToggleComponent, SegmentedControlComponent, TranslatePipe],
   templateUrl: './settings-page.component.html',
   styleUrl: './settings-page.component.scss',
   host: {'(window:beforeunload)': 'warnBeforeUnload($event)'},
@@ -54,12 +49,14 @@ export class SettingsPageComponent {
   private themeService = inject(ThemeService);
   private tts = inject(KoreanTtsService);
   private destroyRef = inject(DestroyRef);
+  private translate = inject(TranslateService);
 
   readonly settings = signal<UserSettings | null>(null);
   readonly saved = signal(false);
   readonly saving = signal(false);
   readonly dirty = signal(false);
   readonly error = signal<string | null>(null);
+  readonly reminderTimeValue = computed(() => this.settings()?.reminderTime?.slice(0, 5) ?? null);
 
   // тема
   readonly accents = THEME_ACCENTS;
@@ -70,31 +67,35 @@ export class SettingsPageComponent {
 
   // смена имени/пароля
   readonly nameDraft = signal('');
+  readonly nameForm = form(this.nameDraft, path => {required(path); maxLength(path, 100);});
   readonly showPassword = signal(false);
-  readonly passwordCurrent = signal('');
-  readonly passwordNext = signal('');
+  readonly passwordModel = signal({current: '', next: ''});
+  readonly passwordForm = form(this.passwordModel, path => {
+    required(path.current); required(path.next); minLength(path.next, 8);
+  });
+  readonly passwordSaving = signal(false);
   readonly passwordError = signal<string | null>(null);
 
-  readonly goals = [10, 20, 50];
+  readonly goals = Object.values(DAILY_GOAL_XP);
   readonly speeds = [0.75, 1.0, 1.25];
-  readonly times = ['09:00', '12:00', '19:00', '21:00'];
-  readonly goalOptions: readonly HgSegmentedOption<number>[] = this.goals.map(goal =>
+  readonly times = REMINDER_TIMES;
+  readonly goalOptions: ControlItemInterface[] = this.goals.map(goal =>
     ({value: goal, label: `${goal} XP`}));
-  readonly speedOptions: readonly HgSegmentedOption<number>[] = this.speeds.map(speed =>
+  readonly speedOptions: ControlItemInterface[] = this.speeds.map(speed =>
     ({value: speed, label: `${speed}×`}));
-  readonly timeOptions: readonly HgSegmentedOption<string>[] = this.times.map(time =>
+  readonly timeOptions: ControlItemInterface[] = this.times.map(time =>
     ({value: time, label: time}));
-  readonly modeOptions: readonly HgSegmentedOption<ColorMode>[] = [
-    {value: 'light', label: 'Светлая'},
-    {value: 'dark', label: 'Тёмная'},
-    {value: 'system', label: 'Системная'},
+  readonly modeOptions: (ControlItemInterface & {value: ColorMode})[] = [
+    {value: 'light', label: this.translate.instant('identity.settings.modes.light')},
+    {value: 'dark', label: this.translate.instant('identity.settings.modes.dark')},
+    {value: 'system', label: this.translate.instant('identity.settings.modes.system')},
   ];
-  readonly accentOptions: readonly HgSegmentedOption<string>[] = this.accents.map(accent =>
-    ({value: accent.value, label: accent.name}));
-  readonly fontScaleOptions: readonly HgSegmentedOption<number>[] = this.fontScales.map(scale =>
-    ({value: scale.value, label: scale.name}));
-  readonly radiusOptions: readonly HgSegmentedOption<string>[] = this.radii.map(radius =>
-    ({value: radius.value, label: radius.name}));
+  readonly accentOptions: ControlItemInterface[] = this.accents.map(accent =>
+    ({value: accent.value, label: this.translate.instant(accent.name)}));
+  readonly fontScaleOptions: ControlItemInterface[] = this.fontScales.map(scale =>
+    ({value: scale.value, label: this.translate.instant(scale.name)}));
+  readonly radiusOptions: ControlItemInterface[] = this.radii.map(radius =>
+    ({value: radius.value, label: this.translate.instant(radius.name)}));
 
   private readonly saveRequests$ = new Subject<SettingsSaveRequest>();
   private readonly pendingCompletions = new Set<ReplaySubject<boolean>>();
@@ -120,7 +121,7 @@ export class SettingsPageComponent {
       this.saving.set(false);
       const savedLatestValue = success && sameSettings(this.settings(), request.settings);
       if (savedLatestValue) this.dirty.set(false);
-      this.error.set(success ? null : 'Не удалось сохранить. Проверь соединение.');
+      this.error.set(success ? null : this.translate.instant('identity.settings.errors.save'));
       if (success) this.showSaved();
       if (request.completion) this.resolveCompletion(request.completion, savedLatestValue);
     });
@@ -148,7 +149,7 @@ export class SettingsPageComponent {
         this.tts.setRate(settings.playbackSpeed);
         this.dirty.set(false);
       },
-      error: () => this.error.set('Не получилось загрузить настройки.'),
+      error: () => this.error.set(this.translate.instant('identity.settings.errors.load')),
     });
   }
 
@@ -176,37 +177,38 @@ export class SettingsPageComponent {
     this.patch({theme: {...this.theme(), mode}});
   }
 
-  updateGoal(goal: number | null): void {
-    if (goal !== null) this.patch({dailyGoalXp: goal});
+  updateGoal(goal: Value | null): void {
+    if (typeof goal === 'number') this.patch({dailyGoalXp: goal});
   }
 
-  updateReminderTime(time: string | null): void {
-    if (time !== null) this.patch({reminderTime: time});
+  updateReminderTime(time: Value | null): void {
+    if (typeof time === 'string') this.patch({reminderTime: time});
   }
 
-  updatePlaybackSpeed(speed: number | null): void {
-    if (speed !== null) this.patch({playbackSpeed: speed});
+  updatePlaybackSpeed(speed: Value | null): void {
+    if (typeof speed === 'number') this.patch({playbackSpeed: speed});
   }
 
-  updateMode(mode: ColorMode | null): void {
-    if (mode !== null) this.setMode(mode);
+  updateMode(mode: Value | null): void {
+    const option = this.modeOptions.find(option => option.value === mode);
+    if (option) this.setMode(option.value);
   }
 
-  updateAccent(accent: string | null): void {
-    if (accent !== null) this.setTheme({accent});
+  updateAccent(accent: Value | null): void {
+    if (typeof accent === 'string') this.setTheme({accent});
   }
 
-  updateFontScale(fontScale: number | null): void {
-    if (fontScale !== null) this.setTheme({fontScale});
+  updateFontScale(fontScale: Value | null): void {
+    if (typeof fontScale === 'number') this.setTheme({fontScale});
   }
 
-  updateRadius(radius: string | null): void {
-    if (radius !== null) this.setTheme({radius});
+  updateRadius(radius: Value | null): void {
+    if (typeof radius === 'string') this.setTheme({radius});
   }
 
   canDeactivate(): boolean | Promise<boolean> {
     if (!this.dirty()) return true;
-    if (!confirm('Настройки ещё не сохранены. Сохранить их перед выходом?')) return false;
+    if (!confirm(this.translate.instant('identity.settings.confirm.unsaved'))) return false;
     return this.saveLatestSettings();
   }
 
@@ -217,37 +219,43 @@ export class SettingsPageComponent {
   }
 
   saveName(): void {
+    if (this.nameForm().invalid()) return;
     const name = this.nameDraft().trim();
     const user = this.auth.user();
     if (!name || !user || name === user.name) return;
     this.meRepository.update({name}).subscribe({
       next: updated => this.auth.syncUser(updated),
-      error: () => this.error.set('Не получилось изменить имя.'),
+      error: () => this.error.set(this.translate.instant('identity.settings.errors.name')),
     });
   }
 
   changePassword(): void {
+    if (this.passwordSaving()) return;
+    this.passwordForm.current().markAsTouched();
+    this.passwordForm.next().markAsTouched();
     this.passwordError.set(null);
-    if (this.passwordNext().length < 8) {
-      this.passwordError.set('Новый пароль — минимум 8 символов');
+    if (this.passwordForm().invalid()) {
+      this.passwordError.set(this.translate.instant(this.passwordForm.current().invalid()
+        ? 'identity.settings.errors.currentPasswordRequired'
+        : 'identity.settings.errors.newPasswordMin'));
       return;
     }
-    this.meRepository.changePassword(this.passwordCurrent(), this.passwordNext()).subscribe({
+    this.passwordSaving.set(true);
+    this.meRepository.changePassword(this.passwordModel().current, this.passwordModel().next).pipe(finalize(() => this.passwordSaving.set(false))).subscribe({
       next: () => {
         this.showPassword.set(false);
-        this.passwordCurrent.set('');
-        this.passwordNext.set('');
+        this.passwordForm().reset({current: '', next: ''});
         this.showSaved();
       },
-      error: () => this.passwordError.set('Не получилось — проверь текущий пароль'),
+      error: () => this.passwordError.set(this.translate.instant('identity.settings.errors.changePassword')),
     });
   }
 
   deleteAccount(): void {
-    if (!confirm('Удалить аккаунт навсегда? Прогресс, слова и подписка будут стёрты.')) return;
+    if (!confirm(this.translate.instant('identity.settings.confirm.deleteAccount'))) return;
     this.meRepository.deleteAccount().subscribe({
       next: () => this.auth.logout(),
-      error: () => this.error.set('Не получилось удалить аккаунт.'),
+      error: () => this.error.set(this.translate.instant('identity.settings.errors.deleteAccount')),
     });
   }
 

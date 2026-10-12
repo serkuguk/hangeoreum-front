@@ -1,0 +1,113 @@
+// Scope library internals to the learning course path; retain its theme and node states.
+hg-course-path {
+  button.hg-native-button.hg-native-button.hg-native-button.hg-native-button.hg-path__btn {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-family: var(--hg-font-kr);
+    font-size: 30px;
+    color: #fff;
+    transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+
+    &.is-done {
+      background: var(--hg-success);
+      color: var(--hg-on-success);
+      box-shadow: 0 8px 0 var(--hg-success-deep);
+    }
+
+    &.is-current {
+      background: var(--hg-route);
+      border: 4px solid var(--hg-surface);
+      font-size: 32px;
+      box-shadow: 0 9px 0 var(--hg-route-deep);
+    }
+
+    &.is-open {
+      background: var(--hg-surface);
+      border: 2px solid var(--hg-route);
+      color: var(--hg-route-text);
+      box-shadow: 0 8px 0 var(--hg-route-soft);
+    }
+
+    &.is-locked {
+      background: var(--hg-surface-muted);
+      color: var(--hg-text-muted);
+      font-size: 28px;
+      box-shadow: 0 8px 0 var(--hg-border);
+      opacity: .85;
+      cursor: not-allowed;
+    }
+
+    &.is-pro {
+      background: var(--hg-reward-soft);
+      border: 2px solid var(--hg-reward);
+      color: var(--hg-reward-deep);
+      font-size: 28px;
+      box-shadow: 0 8px 0 var(--hg-reward);
+    }
+
+    &.is-bonus {
+      background: var(--hg-reward);
+      color: var(--hg-on-reward);
+      font-size: 28px;
+      box-shadow: 0 8px 0 var(--hg-reward-deep);
+    }
+
+    &.is-final {
+      background: transparent;
+      border: 2px dashed var(--hg-border);
+      color: var(--hg-text-muted);
+      font-size: 26px;
+      cursor: default;
+    }
+
+    &:not(:disabled):hover { transform: translateY(4px); }
+    &.is-done:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-success-deep); }
+    &.is-current:not(:disabled):hover { box-shadow: 0 5px 0 var(--hg-route-deep); }
+    &.is-open:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-route-soft); }
+    &.is-pro:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-reward); }
+    &.is-bonus:not(:disabled):hover { box-shadow: 0 4px 0 var(--hg-reward-deep); }
+
+    &:focus-visible {
+      outline: 3px solid var(--hg-focus);
+      outline-offset: 4px;
+    }
+  }
+
+  button.hg-native-button.hg-native-button.hg-native-button.hg-native-button.hg-path__testout {
+    position: absolute;
+    height: 60px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(100deg, var(--hg-reward), oklch(84% 0.150 92));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 7px 0 var(--hg-reward-deep);
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+
+    b {
+      font-size: var(--hg-fs-base);
+      letter-spacing: 2px;
+      color: var(--hg-on-reward);
+    }
+
+    &:hover {
+      transform: translateY(3px);
+      box-shadow: 0 4px 0 var(--hg-reward-deep);
+    }
+  }
+  .hg-path.is-compact button.hg-native-button.hg-native-button.hg-native-button.hg-native-button.hg-path__btn {
+    font-size: 22px;
+    &.is-current { font-size: 24px; border-width: 3px; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  hg-course-path button.hg-native-button { animation: none !important; transition: none !important; }
+}

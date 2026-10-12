@@ -1,5 +1,6 @@
 :host { display: block; }
 
+:host ::ng-deep {
 .gamebox { max-width: 640px; }
 
 .errpanel {
@@ -14,7 +15,10 @@
 
 .gpick { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--hg-space-4); }
 
-.gcard {
+button.hg-native-button.hg-native-button.hg-native-button.gcard {
+  background: var(--hg-card);
+  border: 1px solid var(--hg-line);
+  border-radius: var(--hg-radius-lg);
   cursor: pointer;
   text-align: center;
   padding: 26px var(--hg-space-4);
@@ -52,7 +56,7 @@
   gap: var(--hg-space-3);
 }
 
-.mcell {
+button.hg-native-button.hg-native-button.hg-native-button.mcell {
   background: var(--hg-surface);
   border: 2px solid var(--hg-border);
   border-radius: var(--hg-radius-block);
@@ -131,4 +135,6 @@
 
 @media (max-width: 880px) {
   .gpick { grid-template-columns: 1fr; }
+}
+
 }

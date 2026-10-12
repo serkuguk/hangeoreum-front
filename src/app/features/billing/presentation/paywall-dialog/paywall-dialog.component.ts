@@ -1,17 +1,17 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {Router} from '@angular/router';
 import {PaywallService} from '@core/services/paywall.service';
-import {HgButtonComponent, HgDialogComponent} from '@shared/components/controls';
+import {ButtonComponent, DialogComponent} from 'springest';
 import {TranslatePipe} from '@ngx-translate/core';
 
 /** Один на приложение (рендерится в main-layout), открывается interceptor'ом на 403. */
 @Component({
   selector: 'hg-paywall-dialog',
-  imports: [HgButtonComponent, HgDialogComponent, TranslatePipe],
+  imports: [ButtonComponent, DialogComponent, TranslatePipe],
   template: `
     @if (paywall.reason(); as reason) {
-      <hg-dialog [visible]="true" (visibleChange)="!$event && paywall.close()"
-                 [title]="'billing.title' | translate" dismissableMask>
+      <app-dialog [visible]="true" (visibleChange)="!$event && paywall.close()"
+                 [header]="'billing.title' | translate" [dismissableMask]="true" closeAriaLabel="Закрыть">
         <div class="ghost kr">{{ 'billing.ghost' | translate }}</div>
         <h3>
           @if (reason === 'LIMIT_REACHED') {
@@ -27,11 +27,11 @@ import {TranslatePipe} from '@ngx-translate/core';
             {{ 'billing.proFeatureText' | translate }}
           }
         </p>
-        <div dialog-actions class="btns">
-          <hg-button [label]="'billing.viewPlans' | translate" (pressed)="toPricing()"/>
-          <hg-button [label]="'billing.later' | translate" variant="ghost" (pressed)="paywall.close()"/>
+        <div dialogActions class="btns">
+          <app-button [label]="'billing.viewPlans' | translate" (click)="toPricing()" styleClass="hg-button"/>
+          <app-button [label]="'billing.later' | translate" (click)="paywall.close()" styleClass="hg-button hg-button--ghost"/>
         </div>
-      </hg-dialog>
+      </app-dialog>
     }
   `,
   styles: `

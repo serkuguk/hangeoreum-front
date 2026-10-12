@@ -2,7 +2,8 @@ import {Observable} from 'rxjs';
 import {UserWord} from '../entities/user-word.entity';
 import {Page} from '@shared/types/page';
 
-export type ReviewMode = 'FLASHCARDS' | 'MATCH' | 'LISTEN' | 'SPELL' | 'QUICK';
+export const ReviewMode = {FLASHCARDS: 'FLASHCARDS', MATCH: 'MATCH', LISTEN: 'LISTEN', SPELL: 'SPELL', QUICK: 'QUICK'} as const;
+export type ReviewMode = typeof ReviewMode[keyof typeof ReviewMode];
 
 export interface ReviewSummary {
   dueCount: number;

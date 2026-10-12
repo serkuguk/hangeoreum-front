@@ -1,105 +1,198 @@
 <div class="wrap setbox">
-  <h2 class="pagettl">Настройки</h2>
+  <h2 class="pagettl">{{ 'identity.settings.title' | translate }}</h2>
   @if (saved()) {
-    <div class="savedtoast" role="status">✓ Сохранено</div>
+    <div class="savedtoast" role="status">{{ 'identity.settings.saved' | translate }}</div>
   }
   @if (error(); as err) {
     <div class="apierr">{{ err }}</div>
   }
 
   <div class="panel">
-    <div class="eyebrow">Профиль</div>
+    <div class="eyebrow">{{ 'identity.settings.profile' | translate }}</div>
     <div class="setrow">
-      <hg-input class="inline" type="text" label="Имя" [ngModel]="nameDraft()"
-                (ngModelChange)="nameDraft.set($event)" (blur)="saveName()" (keydown.enter)="saveName()"/>
+      <app-basic-input
+        class="inline"
+        type="text"
+        [label]="'common.name' | translate"
+        [formField]="nameForm"
+        (focusout)="saveName()"
+        (keydown.enter)="saveName()"
+      />
     </div>
-    <div class="setrow"><span>Email</span><b>{{ auth.user()?.email }}</b></div>
     <div class="setrow">
-      <span>Пароль</span>
-      <hg-button label="Изменить" variant="ghost" size="sm"
-                 (pressed)="showPassword.set(!showPassword())"/>
+      <span>{{ 'common.email' | translate }}</span><b>{{ auth.user()?.email }}</b>
+    </div>
+    <div class="setrow">
+      <span>{{ 'identity.settings.password' | translate }}</span>
+      <app-button
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        [label]="'identity.settings.change' | translate"
+        (click)="showPassword.set(!showPassword())"
+      />
     </div>
     @if (showPassword()) {
-      <div class="pwbox">
-        <hg-input type="password" label="Текущий пароль" autocomplete="current-password"
-                  [ngModel]="passwordCurrent()" (ngModelChange)="passwordCurrent.set($event)"/>
-        <hg-input type="password" label="Новый пароль" hint="Минимум 8 символов" autocomplete="new-password"
-                  [ngModel]="passwordNext()" (ngModelChange)="passwordNext.set($event)"/>
+      <form
+        class="pwbox"
+        novalidate
+        (submit)="$event.preventDefault(); changePassword()"
+      >
+        <app-password-input
+          [toggleMask]="false"
+          [ariaLabel]="'identity.settings.currentPassword' | translate"
+          autocomplete="current-password"
+          [formField]="passwordForm.current"
+          [placeholder]="'identity.settings.currentPassword' | translate"
+        />
+        <app-password-input
+          [toggleMask]="false"
+          [ariaLabel]="'identity.settings.newPassword' | translate"
+          autocomplete="new-password"
+          [formField]="passwordForm.next"
+          [placeholder]="'identity.settings.newPasswordPlaceholder' | translate"
+        />
         @if (passwordError(); as pwError) {
           <div class="apierr">{{ pwError }}</div>
         }
-        <hg-button label="Сменить пароль" size="sm" (pressed)="changePassword()"/>
-      </div>
+        <app-button
+          styleClass="hg-button hg-button--sm"
+          [label]="'identity.settings.changePassword' | translate"
+          type="submit"
+          [loading]="passwordSaving()"
+        />
+      </form>
     }
   </div>
 
   @if (settings(); as s) {
     <div class="panel">
-      <div class="eyebrow">Обучение</div>
+      <div class="eyebrow">{{ 'identity.settings.learning' | translate }}</div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Цель в день" [options]="goalOptions"
-                              [ngModel]="s.dailyGoalXp" (ngModelChange)="updateGoal($event)"/>
+        <app-segmented-control
+          class="segpick"
+          [label]="'identity.settings.dailyGoal' | translate"
+          [items]="goalOptions"
+          [value]="s.dailyGoalXp"
+          (valueChange)="updateGoal($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-toggle label="Напоминания" [ngModel]="s.remindersEnabled"
-                   (ngModelChange)="patch({remindersEnabled: $event})"/>
+        <app-toggle
+          [label]="'identity.settings.reminders' | translate"
+          [value]="s.remindersEnabled"
+          (valueChange)="patch({ remindersEnabled: $event })"
+        />
       </div>
       @if (s.remindersEnabled) {
         <div class="setrow">
-          <hg-segmented-control class="segpick" label="Время напоминания" [options]="timeOptions"
-                                [ngModel]="s.reminderTime?.slice(0, 5)"
-                                (ngModelChange)="updateReminderTime($event)"/>
+          <app-segmented-control
+            class="segpick"
+            [label]="'identity.settings.reminderTime' | translate"
+            [items]="timeOptions"
+            [value]="reminderTimeValue()"
+            (valueChange)="updateReminderTime($event)"
+          />
         </div>
       }
       <div class="setrow">
-        <hg-toggle label="Автозвук в карточках" hint="скоро" disabled [ngModel]="s.soundEnabled"/>
+        <span>{{ 'identity.settings.autoSound' | translate }} <span class="soon">{{ 'identity.settings.soon' | translate }}</span></span>
+        <app-toggle
+          class="coming-toggle"
+          [ariaLabel]="'identity.settings.autoSound' | translate"
+          [disabled]="true"
+          [value]="s.soundEnabled"
+        />
       </div>
       <div class="setrow">
-        <hg-toggle label="Романизация в карточках" hint="скоро" disabled [ngModel]="s.showRomanization"/>
+        <span>{{ 'identity.settings.romanization' | translate }} <span class="soon">{{ 'identity.settings.soon' | translate }}</span></span>
+        <app-toggle
+          class="coming-toggle"
+          [ariaLabel]="'identity.settings.romanization' | translate"
+          [disabled]="true"
+          [value]="s.showRomanization"
+        />
       </div>
     </div>
 
     <div class="panel">
-      <div class="eyebrow">Аудио и видео</div>
+      <div class="eyebrow">{{ 'identity.settings.audioVideo' | translate }}</div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Скорость речи" [options]="speedOptions"
-                              [ngModel]="s.playbackSpeed" (ngModelChange)="updatePlaybackSpeed($event)"/>
+        <app-segmented-control
+          class="segpick"
+          [label]="'identity.settings.speechSpeed' | translate"
+          [items]="speedOptions"
+          [value]="s.playbackSpeed"
+          (valueChange)="updatePlaybackSpeed($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-toggle label="Автовоспроизведение" hint="скоро" disabled [ngModel]="s.autoplayAudio"/>
+        <span>{{ 'identity.settings.autoplay' | translate }} <span class="soon">{{ 'identity.settings.soon' | translate }}</span></span>
+        <app-toggle
+          class="coming-toggle"
+          [ariaLabel]="'identity.settings.autoplay' | translate"
+          [disabled]="true"
+          [value]="s.autoplayAudio"
+        />
       </div>
     </div>
 
     <div class="panel">
-      <div class="eyebrow">Тема</div>
+      <div class="eyebrow">{{ 'identity.settings.theme' | translate }}</div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Оформление" [options]="modeOptions"
-                              [ngModel]="mode()" (ngModelChange)="updateMode($event)"/>
+        <app-segmented-control
+          class="segpick"
+          [label]="'identity.settings.appearance' | translate"
+          [items]="modeOptions"
+          [value]="mode()"
+          (valueChange)="updateMode($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Акцент" [options]="accentOptions"
-                              [ngModel]="theme().accent" (ngModelChange)="updateAccent($event)"/>
+        <app-segmented-control
+          class="segpick"
+          [label]="'identity.settings.accent' | translate"
+          [items]="accentOptions"
+          [value]="theme().accent"
+          (valueChange)="updateAccent($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Размер текста" [options]="fontScaleOptions"
-                              [ngModel]="theme().fontScale" (ngModelChange)="updateFontScale($event)"/>
+        <app-segmented-control
+          class="segpick"
+          [label]="'identity.settings.fontSize' | translate"
+          [items]="fontScaleOptions"
+          [value]="theme().fontScale"
+          (valueChange)="updateFontScale($event)"
+        />
       </div>
       <div class="setrow">
-        <hg-segmented-control class="segpick" label="Скругления" [options]="radiusOptions"
-                              [ngModel]="theme().radius" (ngModelChange)="updateRadius($event)"/>
+        <app-segmented-control
+          class="segpick"
+          [label]="'identity.settings.radius' | translate"
+          [items]="radiusOptions"
+          [value]="theme().radius"
+          (valueChange)="updateRadius($event)"
+        />
       </div>
     </div>
   }
 
   <div class="panel">
-    <div class="eyebrow">Аккаунт</div>
+    <div class="eyebrow">{{ 'identity.settings.account' | translate }}</div>
     <div class="setrow">
-      <span>Выйти из аккаунта</span>
-      <hg-button label="Выйти" variant="ghost" size="sm" (pressed)="logout()"/>
+      <span>{{ 'identity.settings.logoutLabel' | translate }}</span>
+      <app-button
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        [label]="'common.exit' | translate"
+        (click)="logout()"
+      />
     </div>
     <div class="setrow">
-      <span>Удалить аккаунт</span>
-      <hg-button label="Удалить навсегда" variant="danger" size="sm" (pressed)="deleteAccount()"/>
+      <span>{{ 'identity.settings.deleteAccount' | translate }}</span>
+      <app-button
+        styleClass="hg-button hg-button--danger hg-button--sm"
+        [label]="'identity.settings.deleteForever' | translate"
+        (click)="deleteAccount()"
+      />
     </div>
   </div>
 </div>

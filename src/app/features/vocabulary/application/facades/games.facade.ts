@@ -1,18 +1,27 @@
 import {DestroyRef, Injectable, computed, effect, inject, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
-import {UserWord} from '../../domain/entities/user-word.entity';
-import {GameEngine, syllables} from '../../domain/services/game-engine';
-import {ReviewMode} from '../../domain/repositories/vocabulary.repository';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
+import {GameEngine, syllables} from '@features/vocabulary/domain/services/game-engine';
+import {ReviewMode} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {ReviewFacade} from './review.facade';
 
 export type GameMode = Extract<ReviewMode, 'MATCH' | 'LISTEN' | 'SPELL'>;
 
+export const GamePhase = {PICK: 'pick', PLAYING: 'playing', DONE: 'done'} as const;
+type GamePhase = typeof GamePhase[keyof typeof GamePhase];
+
 const ROUND_SECONDS = 90;
 const MATCH_BATCH = 6;
 
+export const MatchSide = {KO: 'ko', RU: 'ru'} as const;
+export type MatchSide = typeof MatchSide[keyof typeof MatchSide];
+
+export const AnswerResult = {OK: 'ok', BAD: 'bad'} as const;
+export type AnswerResult = typeof AnswerResult[keyof typeof AnswerResult];
+
 export interface MatchCell {
   wordId: string;
-  side: 'ko' | 'ru';
+  side: MatchSide;
   text: string;
 }
 
@@ -29,7 +38,7 @@ export class GamesFacade {
   private pool: UserWord[] = [];
 
   readonly mode = signal<GameMode | null>(null);
-  readonly phase = signal<'pick' | 'playing' | 'done'>('pick');
+  readonly phase = signal<GamePhase>(GamePhase.PICK);
   readonly timeLeft = signal(ROUND_SECONDS);
   readonly score = signal(0);
   readonly combo = signal(0);
@@ -46,9 +55,11 @@ export class GamesFacade {
   readonly options = signal<string[]>([]);       // LISTEN: переводы
   readonly bank = signal<string[]>([]);          // SPELL: слоги
   readonly typed = signal<string[]>([]);         // SPELL: собранное
-  readonly lastAnswer = signal<'ok' | 'bad' | null>(null);
+  readonly lastAnswer = signal<AnswerResult | null>(null);
   private wordQueue: UserWord[] = [];
 
+  readonly saving = this.review.saving;
+  readonly saveError = this.review.saveError;
   readonly result = this.review.result;
   readonly loadError = this.review.error;
   readonly loading = this.review.loading;
@@ -78,7 +89,7 @@ export class GamesFacade {
   }
 
   start(mode: GameMode): void {
-    if (this.phase() !== 'pick' || this.pendingMode()) return;
+    if (this.phase() !== GamePhase.PICK || this.pendingMode()) return;
     this.mode.set(mode);
     this.pendingMode.set(mode);
     this.review.start(mode, {limit: 20});
@@ -91,10 +102,10 @@ export class GamesFacade {
     this.score.set(0);
     this.combo.set(0);
     this.currentWord.set(null);
-    this.phase.set('playing');
+    this.phase.set(GamePhase.PLAYING);
     this.timeLeft.set(ROUND_SECONDS);
     this.startTimer();
-    if (mode === 'MATCH') {
+    if (mode === ReviewMode.MATCH) {
       this.matchQueue = [...cards];
       this.dealMatch();
     } else {
@@ -113,8 +124,8 @@ export class GamesFacade {
     this.matchHits.set(new Set());
     this.matchSelected.set(null);
     this.matchCells.set(shuffle(batch.flatMap((uw): MatchCell[] => [
-      {wordId: uw.word.id, side: 'ko', text: uw.word.hangul},
-      {wordId: uw.word.id, side: 'ru', text: uw.word.translation},
+      {wordId: uw.word.id, side: MatchSide.KO, text: uw.word.hangul},
+      {wordId: uw.word.id, side: MatchSide.RU, text: uw.word.translation},
     ])));
     this.answerStart = Date.now();
   }
@@ -136,7 +147,7 @@ export class GamesFacade {
     if (hit) {
       this.matchHits.update(set => {
         const next = new Set(set);
-        next.add(cell.wordId + 'ko').add(cell.wordId + 'ru');
+        next.add(cell.wordId + MatchSide.KO).add(cell.wordId + MatchSide.RU);
         return next;
       });
       this.answerStart = Date.now();
@@ -159,7 +170,7 @@ export class GamesFacade {
       this.finish();
       return;
     }
-    if (this.mode() === 'LISTEN') {
+    if (this.mode() === ReviewMode.LISTEN) {
       const distractors = shuffle(this.pool.filter(w => w.id !== word.id))
         .slice(0, 3).map(w => w.word.translation);
       this.options.set(shuffle([word.word.translation, ...distractors]));
@@ -177,7 +188,7 @@ export class GamesFacade {
     if (!word || this.lastAnswer()) return;
     const correct = translation === word.word.translation;
     this.registerAnswer(word.word.id, correct);
-    this.lastAnswer.set(correct ? 'ok' : 'bad');
+    this.lastAnswer.set(correct ? AnswerResult.OK : AnswerResult.BAD);
     this.schedule(() => this.nextWord(), correct ? 500 : 1100);
   }
 
@@ -193,7 +204,7 @@ export class GamesFacade {
     if (typed.length === target.length) {
       const correct = typed.join('') === target.join('');
       this.registerAnswer(word.word.id, correct);
-      this.lastAnswer.set(correct ? 'ok' : 'bad');
+      this.lastAnswer.set(correct ? AnswerResult.OK : AnswerResult.BAD);
       this.schedule(() => this.nextWord(), correct ? 500 : 1100);
     }
   }
@@ -241,18 +252,23 @@ export class GamesFacade {
   }
 
   private finish(): void {
-    if (this.phase() !== 'playing') return;
+    if (this.phase() !== GamePhase.PLAYING) return;
     this.stopTimer();
     this.clearScheduled();
-    this.phase.set('done');
+    this.phase.set(GamePhase.DONE);
     this.review.finishWithAnswers(this.engine.answers);
   }
 
+  retryFinish(): void {
+    this.review.retryFinish();
+  }
+
   backToPick(): void {
+    if (this.saving() || this.saveError()) return;
     this.stopTimer();
     this.clearScheduled();
     this.pendingMode.set(null);
-    this.phase.set('pick');
+    this.phase.set(GamePhase.PICK);
     this.mode.set(null);
   }
 }

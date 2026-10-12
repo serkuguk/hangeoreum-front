@@ -2,9 +2,9 @@
   <h2 class="pagettl center">{{ 'billing.title' | translate }}</h2>
   <p class="pagesub center">{{ 'billing.subtitle' | translate }}</p>
 
-  @if (result() === 'success') {
+  @if (paymentSucceeded()) {
     <div class="banner ok">{{ 'billing.paymentSuccess' | translate }}</div>
-  } @else if (result() === 'cancel') {
+  } @else if (paymentCancelled()) {
     <div class="banner">{{ 'billing.paymentCancelled' | translate }}</div>
   }
 
@@ -18,11 +18,11 @@
         <div>
           <b>{{ 'billing.subscriptionActive' | translate: {planCode: sub.planCode} }}</b>
           @if (sub.currentPeriodEnd) {
-            <small>{{ 'billing.activeUntil' | translate: {date: sub.currentPeriodEnd.slice(0, 10)} }}</small>
+            <small>{{ 'billing.activeUntil' | translate: {date: periodEndDate(sub.currentPeriodEnd)} }}</small>
           }
         </div>
-        <hg-button [label]="'billing.manage' | translate" variant="ghost"
-                   [disabled]="facade.redirecting()" (pressed)="facade.openPortal()"/>
+        <app-button [label]="'billing.manage' | translate"
+                   [disabled]="facade.redirecting()" (click)="facade.openPortal()" styleClass="hg-button hg-button--ghost"/>
       </div>
     }
   }
@@ -55,14 +55,14 @@
   } @else {
     <div class="plans">
       @for (plan of facade.plans(); track plan.id) {
-        <div class="panel plancard" [class.best]="plan.interval === 'YEAR'">
-          @if (plan.interval === 'YEAR') {
+        <div class="panel plancard" [class.best]="isBest(plan)">
+          @if (isBest(plan)) {
             <span class="pill p-y best-pill">{{ 'billing.popular' | translate }}</span>
           }
           <h3>{{ plan.name }}</h3>
           <div class="price">{{ price(plan) }}<small> {{ intervalLabel(plan) | translate }}</small></div>
-          <hg-button [label]="facade.redirecting() ? ('billing.openingCheckout' | translate) : ('billing.select' | translate)"
-                     [loading]="facade.redirecting()" (pressed)="facade.checkout(plan.code)"/>
+          <app-button [label]="checkoutLabel() | translate"
+                     [loading]="facade.redirecting()" (click)="facade.checkout(plan.code)" styleClass="hg-button"/>
         </div>
       }
     </div>

@@ -1,7 +1,7 @@
 import {CoursePathInput} from './course-path-input';
 type UnitNode = CoursePathInput['units'][number];
 type LessonNode = UnitNode['lessons'][number];
-import {CourseChapter, CourseNode} from './course-path.model';
+import {ChapterState, CourseChapter, CourseNode, CourseNodeState} from './course-path.model';
 
 // ponytail: статический маппинг сцен первого курса по позиции юнита;
 // серверное поле situation появится вместе с read model из lessons plan
@@ -25,12 +25,12 @@ type RawNode = Omit<CourseNode, 'state'> & {state: CourseNode['state'] | 'availa
  * `limit` обрезает список до окна вокруг текущего урока — дашборд показывает фрагмент,
  * карта курса передаёт весь путь.
  */
-export function toCoursePath(map: CoursePathInput | null, limit?: number): CoursePathView {
+export function toCoursePath(map: CoursePathInput | null, translate: (key: string, params?: Record<string, unknown>) => string, limit?: number): CoursePathView {
   if (!map) return {chapters: [], nodes: []};
 
-  const chapters = map.units.map((unit, index) => chapterOf(unit, index));
+  const chapters = map.units.map((unit, index) => chapterOf(unit, index, translate));
   const all = map.units.flatMap((unit, unitIndex) =>
-    unit.lessons.map((lesson, i) => nodeOf(lesson, unit, i === 0 ? unitIndex : null)));
+    unit.lessons.map((lesson, i) => nodeOf(lesson, unit, i === 0 ? unitIndex : null, translate)));
 
   // Первый доступный урок — единственный «current», остальные доступные идут как «bonus».
   const currentId = all.find(node => node.state === 'available')?.id;
@@ -43,7 +43,7 @@ export function toCoursePath(map: CoursePathInput | null, limit?: number): Cours
 
 function settle(node: RawNode, currentId: string | undefined): CourseNode['state'] {
   if (node.state !== 'available') return node.state;
-  return node.id === currentId ? 'current' : 'bonus';
+  return node.id === currentId ? CourseNodeState.CURRENT : CourseNodeState.BONUS;
 }
 
 /** Окно из `limit` узлов так, чтобы текущий был вторым сверху и оставался контекст пройденного. */
@@ -53,11 +53,11 @@ function takeWindow(all: RawNode[], currentIndex: number, limit?: number): RawNo
   return all.slice(start, start + limit);
 }
 
-function chapterOf(unit: UnitNode, index: number): CourseChapter {
+function chapterOf(unit: UnitNode, index: number, translate: (key: string, params?: Record<string, unknown>) => string): CourseChapter {
   const done = unit.lessons.every(l => l.status === 'COMPLETED');
   return {
     id: unit.id,
-    title: `ГЛАВА ${index + 1} · ${unit.title.toUpperCase()}${done ? ' · ЗАВЕРШЕНА' : ''}`,
+    title: translate(done ? 'learning.map.chapterDone' : 'learning.map.chapter', {number: index + 1, title: unit.title.toUpperCase()}),
     icon: chapterSceneUrl(index),
     state: chapterState(unit, done),
     // ponytail: TEST OUT ждёт бэкенда — плашку рисуем, когда в CourseMap появится флаг
@@ -65,33 +65,34 @@ function chapterOf(unit: UnitNode, index: number): CourseChapter {
 }
 
 function chapterState(unit: UnitNode, done: boolean): CourseChapter['state'] {
-  if (done) return 'done';
-  return unit.lessons.some(l => l.status !== 'LOCKED') ? 'current' : 'locked';
+  if (done) return ChapterState.DONE;
+  return unit.lessons.some(l => l.status !== 'LOCKED') ? ChapterState.CURRENT : ChapterState.LOCKED;
 }
 
 /** `sceneIndex` не null только у первого урока главы — иллюстрация ставится один раз. */
-function nodeOf(lesson: LessonNode, unit: UnitNode, sceneIndex: number | null): RawNode {
+function nodeOf(lesson: LessonNode, unit: UnitNode, sceneIndex: number | null, translate: (key: string, params?: Record<string, unknown>) => string): RawNode {
   return {
     id: lesson.id,
     chapterId: unit.id,
     glyph: lesson.type === 'STORY' ? '▶' : lesson.title.charAt(0),
     title: lesson.title,
-    subtitle: subtitleOf(lesson),
+    subtitle: subtitleOf(lesson, translate),
     state: rawState(lesson),
     icon: sceneIndex === null ? undefined : chapterSceneUrl(sceneIndex) ?? undefined,
   };
 }
 
 function rawState(lesson: LessonNode): RawNode['state'] {
-  if (lesson.status === 'COMPLETED') return 'done';
-  return lesson.status === 'LOCKED' || !lesson.hasAccess ? 'locked' : 'available';
+  if (lesson.status === 'COMPLETED') return CourseNodeState.DONE;
+  if (lesson.status === 'LOCKED') return CourseNodeState.LOCKED;
+  return !lesson.hasAccess ? CourseNodeState.PRO : 'available';
 }
 
-function subtitleOf(lesson: LessonNode): string {
+function subtitleOf(lesson: LessonNode, translate: (key: string, params?: Record<string, unknown>) => string): string {
   if (lesson.status === 'COMPLETED') {
-    return lesson.score !== null ? `✓ Пройдено · ${lesson.score}%` : '✓ Пройдено';
+    return lesson.score !== null ? translate('learning.map.nodeScore', {score: lesson.score}) : translate('learning.map.done');
   }
-  if (!lesson.hasAccess) return '🔒 Доступно по подписке Pro';
-  if (lesson.status === 'LOCKED') return 'Откроется после предыдущего урока';
-  return lesson.type === 'STORY' ? 'Видео носителя · финал главы' : `+${lesson.xpReward} XP`;
+  if (!lesson.hasAccess) return translate('learning.map.nodePro');
+  if (lesson.status === 'LOCKED') return translate('learning.map.nodeLocked');
+  return lesson.type === 'STORY' ? translate('learning.map.nodeStory') : translate('learning.map.nodeXp', {xp: lesson.xpReward});
 }

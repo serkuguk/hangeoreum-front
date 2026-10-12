@@ -1,0 +1,149 @@
+<a routerLink="/admin/course" class="backlink">← {{ 'admin.navigation.course' | translate }}</a>
+
+@if (data(); as d) {
+  <h2 class="pagettl">
+    {{ 'admin.builder.heading' | translate: { title: d.lesson.title } }}
+  </h2>
+  <p class="pagesub">
+    {{
+      'admin.builder.meta'
+        | translate: { type: d.lesson.type, xp: d.lesson.xpReward, count: d.exercises.length }
+    }}
+    @if (savedFlash(); as flash) {
+      <span class="savedmark">✓ {{ flash }}</span>
+    }
+  </p>
+
+  @if (error()) {
+    <div class="errbar">{{ error() }}</div>
+  }
+
+  <section class="panel">
+    <div class="eyebrow">{{ 'admin.builder.exercisesTitle' | translate }}</div>
+    @for (exercise of d.exercises; track exercise.id) {
+      <div class="exrow">
+        <span class="kind">{{ exercise.position }} · {{ exercise.kind }}</span>
+        <app-textarea
+          [ariaLabel]="payloadAria(exercise)"
+          [ariaInvalid]="badJson[exercise.id] || false"
+          [rows]="5"
+          [formField]="payloadFields[exercise.id]"
+        />
+        <div>
+          @if (badJson[exercise.id]) {
+            <p class="errbar" role="alert">{{ 'admin.builder.badJson' | translate }}</p>
+          }
+          <app-button
+            [label]="'common.save' | translate"
+            (click)="saveExercise(exercise)"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
+          <app-button
+            (click)="removeExercise(exercise)"
+            [aria]="{ 'aria-label': ('admin.builder.removeExercise' | translate) }"
+            styleClass="hg-button hg-button--danger hg-button--sm"
+            ><span aria-hidden="true">✕</span></app-button
+          >
+        </div>
+      </div>
+    } @empty {
+      <div class="empty">{{ 'admin.builder.noExercises' | translate }}</div>
+    }
+    <div class="addex">
+      <app-basic-select
+        [ariaLabel]="'admin.builder.kindLabel' | translate"
+        [placeholder]="'admin.builder.kindLabel' | translate"
+        [items]="kindOptions"
+        [formField]="newKindField"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <app-button
+        [label]="'admin.builder.addExercise' | translate"
+        (click)="addExercise()"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        ><span aria-hidden="true">+</span></app-button
+      >
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">{{ "admin.tipHeading" | translate }}</div>
+    <div class="tipform">
+      <app-basic-input
+        [label]="'admin.tipTitle' | translate"
+        [placeholder]="'admin.tipTitlePlaceholder' | translate"
+        [formField]="tipTitleField"
+      />
+      <app-textarea
+        [label]="'admin.tipRule' | translate"
+        [placeholder]="'learning.tipTextPlaceholder' | translate"
+        [rows]="5"
+        [formField]="tipBodyField"
+      />
+      <app-textarea
+        class="mono"
+        [label]="'admin.tipExamples' | translate"
+        [rows]="5"
+        [placeholder]="'admin.tipExamplesPlaceholder' | translate"
+        [formField]="tipExamplesField"
+      />
+      <app-button
+        [label]="'learning.saveTip' | translate"
+        (click)="saveTip()"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+      ></app-button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">{{ 'admin.builder.wordsTitle' | translate: { count: d.words.length } }}</div>
+    <div class="wordpick">
+      @for (word of d.words; track word.id) {
+        <app-button
+          type="button"
+          styleClass="wchip on"
+          [aria]="{
+            'aria-pressed': true,
+            'aria-label': removeWordAria(word),
+          }"
+          (click)="toggleWord(word)"
+          [disabled]="wordsSaving()"
+          [title]="'admin.builder.unlinkWord' | translate"
+        >
+          {{ word.hangul }} · {{ word.translation }} ✕
+        </app-button>
+      }
+    </div>
+    <div class="toolbar" style="margin-top: 12px">
+      <app-basic-input
+        class="search"
+        type="search"
+        [label]="'admin.builder.findWord' | translate"
+        [value]="wordSearch"
+        (valueChange)="searchWords($event)"
+      />
+    </div>
+    <div class="wordpick">
+      @for (word of foundWords(); track word.id) {
+        @if (!isLinked(word)) {
+          <app-button
+            type="button"
+            styleClass="wchip"
+            [aria]="{
+              'aria-pressed': false,
+              'aria-label': bindWordAria(word),
+            }"
+            (click)="toggleWord(word)"
+            [disabled]="wordsSaving()"
+            >+ {{ word.hangul }} · {{ word.translation }}</app-button
+          >
+        }
+      }
+    </div>
+  </section>
+} @else if (error()) {
+  <div class="errbar">{{ error() }}</div>
+} @else {
+  <div class="empty">{{ 'common.loading' | translate }}</div>
+}

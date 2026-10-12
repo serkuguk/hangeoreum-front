@@ -1,7 +1,8 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {shuffle} from '@shared/utils/shuffle';
-import {MatchPairsPayload} from '../../../domain/entities/exercise.entity';
-import {Feedback, isMatchingPair, gradeMatch} from '../../../domain/services/exercise-grading';
+import {MatchPairsPayload} from '@features/learning/domain/entities/exercise.entity';
+import {Feedback, isMatchingPair, gradeMatch} from '@features/learning/domain/services/exercise-grading';
 import {TranslatePipe} from '@ngx-translate/core';
 
 interface MatchCell {
@@ -12,29 +13,28 @@ interface MatchCell {
 
 @Component({
   selector: 'hg-exercise-match',
-  imports: [TranslatePipe],
+  imports: [ButtonComponent, TranslatePipe],
   template: `
     <div class="q-kind">{{ 'learning.exercise.matchPairs' | translate }}</div>
     <div class="match">
       @for (cell of cells(); track cell.side + cell.pairIndex) {
-        <button type="button" data-domain-control class="mcell"
-                [attr.aria-pressed]="selected() === cell"
-                [class.kr]="cell.side === 'left'"
-                [class.hit]="isHit(cell)"
-                [class.sel]="selected() === cell"
-                [class.miss]="missCell() === cell"
+        <app-button class="hg-native-host" [styleClass]="'hg-native-button mcell' + (isLeft(cell) ? ' kr' : '') + (isHit(cell) ? ' hit' : '') + (selected() === cell ? ' sel' : '') + (missCell() === cell ? ' miss' : '')" type="button"
+
+
                 [disabled]="isHit(cell)"
-                (click)="pick(cell)">
+                (click)="pick(cell)" [aria]="{'aria-pressed': (selected() === cell)}">
           {{ cell.text }}
-        </button>
+        </app-button>
       }
     </div>
   `,
   styleUrl: './exercise-shared.scss',
   styles: `
+    :host ::ng-deep {
+
     .match { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hg-space-3); }
 
-    .mcell {
+    button.hg-native-button.hg-native-button.hg-native-button.mcell {
       background: var(--hg-surface);
       border: 2px solid var(--hg-border);
       border-radius: var(--hg-radius-block);
@@ -55,6 +55,7 @@ interface MatchCell {
       // incorrect pair
       &.miss { border-color: var(--hg-danger); animation: shake .3s; }
     }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -73,6 +74,10 @@ export class ExerciseMatchComponent {
   readonly missCell = signal<MatchCell | null>(null);
   private hits = signal<Set<number>>(new Set());
   private mistakes = 0;
+
+  isLeft(cell: MatchCell): boolean {
+    return cell.side === 'left';
+  }
 
   isHit(cell: MatchCell): boolean {
     return this.hits().has(cell.pairIndex);

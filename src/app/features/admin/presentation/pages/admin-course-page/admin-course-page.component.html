@@ -1,0 +1,150 @@
+<h2 class="pagettl">{{ 'admin.navigation.course' | translate }}</h2>
+<p class="pagesub">
+  {{ 'admin.course.subtitle' | translate }}
+</p>
+
+@if (error()) {
+  <div class="errbar">{{ error() }}</div>
+}
+
+@if (!course()) {
+  <div class="panel coursehead">
+    <app-basic-input
+      class="search"
+      [label]="'admin.course.courseTitleLabel' | translate"
+      [placeholder]="'admin.course.courseTitlePlaceholder' | translate"
+      [formField]="newCourseTitleField"
+    />
+    <app-button
+      [label]="'admin.course.createCourse' | translate"
+      (click)="createCourse()"
+      styleClass="hg-button"
+    ></app-button>
+  </div>
+} @else {
+  <div class="panel coursehead">
+    <h3>{{ course()!.title }}</h3>
+    <app-button
+      [label]="publishLabel()"
+      (click)="toggleCoursePublish()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+    ></app-button>
+  </div>
+
+  @for (unit of units(); track unit.id) {
+    <div class="panel unit">
+      <div class="uhead">
+        <b>{{ unit.position }} · {{ unit.title }}</b>
+        <app-button
+          (click)="moveUnit(unit, -1)"
+          [aria]="{ 'aria-label': ('admin.course.moveUnitUp' | translate) }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">↑</span></app-button
+        >
+        <app-button
+          (click)="moveUnit(unit, 1)"
+          [aria]="{ 'aria-label': ('admin.course.moveUnitDown' | translate) }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">↓</span></app-button
+        >
+        <app-button
+          (click)="toggleUnitPublish(unit)"
+          [aria]="{ 'aria-label': ('admin.course.toggleUnitPublish' | translate) }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">{{
+            publishIcon(unit)
+          }}</span></app-button
+        >
+        <app-button
+          [label]="'common.delete' | translate"
+          (click)="removeUnit(unit)"
+          styleClass="hg-button hg-button--danger hg-button--sm"
+        ></app-button>
+      </div>
+
+      <div class="lessons">
+        @for (lesson of lessonsByUnit()[unit.id] ?? []; track lesson.id) {
+          <div class="lrow">
+            <span class="ttl">{{ lesson.position }} · {{ lesson.title }}</span>
+            <span class="meta"
+              >{{ lesson.type }} · {{ lesson.xpReward }} XP</span
+            >
+            <a [routerLink]="['/admin/course/lessons', lesson.id]"
+              >{{ 'admin.course.openConstructor' | translate }}</a
+            >
+            <app-button
+              (click)="moveLesson(unit, lesson, -1)"
+              [aria]="{ 'aria-label': ('admin.course.moveLessonUp' | translate) }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+              ><span aria-hidden="true">↑</span></app-button
+            >
+            <app-button
+              (click)="moveLesson(unit, lesson, 1)"
+              [aria]="{ 'aria-label': ('admin.course.moveLessonDown' | translate) }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+              ><span aria-hidden="true">↓</span></app-button
+            >
+            <app-button
+              [label]="accessLabel(lesson)"
+              (click)="toggleLessonFree(unit, lesson)"
+              [aria]="{ 'aria-label': ('admin.course.toggleLessonAccess' | translate) }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+            ></app-button>
+            <app-button
+              (click)="toggleLessonPublish(unit, lesson)"
+              [aria]="{ 'aria-label': ('admin.course.toggleLessonPublish' | translate) }"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+              ><span aria-hidden="true">{{
+                publishIcon(lesson)
+              }}</span></app-button
+            >
+            <app-button
+              (click)="removeLesson(unit, lesson)"
+              [aria]="{ 'aria-label': ('admin.course.deleteLesson' | translate) }"
+              styleClass="hg-button hg-button--danger hg-button--sm"
+              ><span aria-hidden="true">✕</span></app-button
+            >
+          </div>
+        } @empty {
+          <div class="empty">{{ 'admin.course.noLessons' | translate }}</div>
+        }
+      </div>
+
+      <div class="addrow">
+        <app-basic-input
+          [label]="'admin.course.lessonTitleLabel' | translate"
+          [formField]="lessonFields[unit.id].title"
+          (keydown.enter)="addLesson(unit)"
+        />
+        <app-basic-select
+          [ariaLabel]="'admin.course.lessonTypeLabel' | translate"
+          [placeholder]="'admin.course.lessonTypeLabel' | translate"
+          [items]="lessonTypes"
+          [formField]="lessonFields[unit.id].type"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <app-button
+          [label]="'admin.course.addLesson' | translate"
+          (click)="addLesson(unit)"
+          styleClass="hg-button hg-button--secondary hg-button--sm"
+        ></app-button>
+      </div>
+    </div>
+  }
+
+  <div class="panel unit">
+    <div class="addrow">
+      <app-basic-input
+        [label]="'admin.course.unitTitleLabel' | translate"
+        [formField]="newUnitTitleField"
+        (keydown.enter)="addUnit()"
+      />
+      <app-button
+        [label]="'admin.course.addUnit' | translate"
+        (click)="addUnit()"
+        styleClass="hg-button hg-button--secondary hg-button--sm"
+      ></app-button>
+    </div>
+  </div>
+}

@@ -1,11 +1,11 @@
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {HgAudioButtonComponent, HgProgressRingComponent, MascotComponent} from '@shared/components/hg';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
-import {CoursePathComponent, toCoursePath} from '@features/learning/course-path';
-import {DashboardFacade} from '../../../application/dashboard.facade';
-import {DASHBOARD_REPOSITORY} from '../../../application/dashboard-repository.token';
-import {DashboardHttpRepository} from '../../../infrastructure/dashboard.http-repository';
+import {ButtonComponent} from 'springest';
+import {CoursePathComponent, CourseNodeState, lessonRoute, toCoursePath} from '@features/learning/course-path';
+import {DashboardFacade} from '@features/dashboard/application/dashboard.facade';
+import {DASHBOARD_REPOSITORY} from '@features/dashboard/application/dashboard-repository.token';
+import {DashboardHttpRepository} from '@features/dashboard/infrastructure/dashboard.http-repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 const WEEKDAY_KEYS = ['dashboard.weekdays.mon', 'dashboard.weekdays.tue', 'dashboard.weekdays.wed', 'dashboard.weekdays.thu', 'dashboard.weekdays.fri', 'dashboard.weekdays.sat', 'dashboard.weekdays.sun'];
@@ -19,7 +19,7 @@ const PATH_WINDOW = 6;
     RouterLink,
     HgAudioButtonComponent,
     HgProgressRingComponent,
-    HgButtonComponent,
+    ButtonComponent,
     MascotComponent,
     CoursePathComponent,
     TranslatePipe,
@@ -51,11 +51,15 @@ export class DashboardPageComponent {
     return goal ? Math.max(goal.goalXp - goal.earnedXp, 0) : 0;
   });
 
+  readonly hasStreak = computed(() => (this.facade.data()?.streak ?? 0) > 0);
+  readonly hasDueWords = computed(() => (this.facade.data()?.dueWords ?? 0) > 0);
+  readonly courseTitle = computed(() => this.facade.courseMap()?.title || null);
+
   readonly path = computed(() => toCoursePath(
-    this.facade.courseMap(), PATH_WINDOW));
+    this.facade.courseMap(), (key, params) => this.translate.instant(key, params), PATH_WINDOW));
 
   /** Узел, на который ведёт главный CTA героя. */
-  readonly currentNode = computed(() => this.path().nodes.find(node => node.state === 'current'));
+  readonly currentNode = computed(() => this.path().nodes.find(node => node.state === CourseNodeState.CURRENT));
 
   private readonly lessons = computed(() =>
     new Map((this.facade.courseMap()?.units ?? []).flatMap(unit => unit.lessons).map(l => [l.id, l])));
@@ -67,6 +71,7 @@ export class DashboardPageComponent {
     const todayIdx = (new Date().getDay() + 6) % 7; // 0 = Пн
     return week.map((xp, i) => ({
       xp,
+      isEmpty: xp === 0,
       height: Math.max(4, Math.round(xp / max * 100)),
       label: this.translate.instant(WEEKDAY_KEYS[(todayIdx - (week.length - 1 - i) + 14) % 7]),
       isToday: i === week.length - 1,
@@ -81,13 +86,7 @@ export class DashboardPageComponent {
   openLesson(node: {id: string}): void {
     const lesson = this.lessons().get(node.id);
     if (!lesson || lesson.status === 'LOCKED') return;
-    if (!lesson.hasAccess) {
-      void this.router.navigate(['/billing']);
-      return;
-    }
-    void this.router.navigate(lesson.type === 'STORY'
-      ? ['/learn', lesson.id, 'story']
-      : lesson.status === 'COMPLETED' ? ['/learn', lesson.id] : ['/learn', lesson.id, 'tip']);
+    void this.router.navigate(lessonRoute(lesson));
   }
 
   retry(): void {

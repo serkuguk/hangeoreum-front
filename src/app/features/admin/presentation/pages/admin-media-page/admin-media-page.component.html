@@ -1,0 +1,231 @@
+<h2 class="pagettl">{{ 'admin.media.title' | translate }}</h2>
+<p class="pagesub">
+  {{ 'admin.media.subtitle' | translate }}
+  @if (flash(); as f) {
+    <span style="color: var(--hg-jade)">✓ {{ f }}</span>
+  }
+</p>
+
+@if (error()) {
+  <div class="errbar">{{ error() }}</div>
+}
+
+<section class="panel">
+  <div class="eyebrow">{{ 'admin.media.speakers' | translate }}</div>
+  @for (speaker of speakers(); track speaker.id) {
+    <div class="sprow">
+      @if (editingSpeaker() === speaker.id) {
+        <app-basic-input
+          class="grow"
+          [ariaLabel]="'admin.media.speakerNameAria' | translate"
+          [formField]="speakerDraftField"
+          (keydown.enter)="saveSpeaker(speaker)"
+        />
+        <app-button
+          [label]="'common.save' | translate"
+          (click)="saveSpeaker(speaker)"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">✓</span></app-button
+        >
+        <app-button
+          [label]="'common.cancel' | translate"
+          (click)="editingSpeaker.set(null)"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+        ></app-button>
+      } @else {
+        <span class="grow">{{ speaker.name }}</span>
+        <app-button
+          (click)="startEditSpeaker(speaker)"
+          [aria]="{ 'aria-label': ('admin.media.editSpeakerAria' | translate) }"
+          styleClass="hg-button hg-button--ghost hg-button--sm"
+          ><span aria-hidden="true">✎</span></app-button
+        >
+        <app-button
+          [label]="'common.delete' | translate"
+          (click)="removeSpeaker(speaker)"
+          styleClass="hg-button hg-button--danger hg-button--sm"
+        ></app-button>
+      }
+    </div>
+  } @empty {
+    <div class="empty">{{ 'admin.media.noSpeakers' | translate }}</div>
+  }
+  <div class="addrow">
+    <app-basic-input
+      [label]="'admin.media.speakerNameLabel' | translate"
+      [placeholder]="'admin.media.speakerNamePlaceholder' | translate"
+      [formField]="newSpeakerNameField"
+      (keydown.enter)="addSpeaker()"
+    />
+    <app-button
+      [label]="'admin.media.addSpeaker' | translate"
+      (click)="addSpeaker()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+      ><span aria-hidden="true">+</span></app-button
+    >
+  </div>
+</section>
+
+<section class="panel">
+  <div class="eyebrow">{{ 'admin.media.clips' | translate }}</div>
+  @for (clip of clips(); track clip.id) {
+    <div class="cliprow">
+      <span class="pill p-b">{{ clip.kind }}</span>
+      <span class="grow muted">{{ mediaSummary(clip) }}</span>
+      <app-file-picker
+        #picker1
+        class="media-picker"
+        label="🎬"
+        [ariaLabel]="'admin.media.uploadVideoAria' | translate"
+        accept="video/*"
+        (changed)="
+          $event[0] && upload(clip, $event[0], uploadKind.VIDEO); picker1.value.set([])
+        "
+      />
+      <app-file-picker
+        #picker2
+        class="media-picker"
+        label="🔊"
+        [ariaLabel]="'admin.media.uploadAudioAria' | translate"
+        accept="audio/*"
+        (changed)="
+          $event[0] && upload(clip, $event[0], uploadKind.AUDIO); picker2.value.set([])
+        "
+      />
+      <app-file-picker
+        #picker3
+        class="media-picker"
+        label="🖼"
+        [ariaLabel]="'admin.media.uploadThumbnailAria' | translate"
+        accept="image/*"
+        (changed)="
+          $event[0] && upload(clip, $event[0], uploadKind.THUMBNAIL);
+          picker3.value.set([])
+        "
+      />
+      <app-button
+        (click)="openEdit(clip)"
+        [aria]="{ 'aria-label': ('admin.media.editClipAria' | translate) }"
+        [styleClass]="editButtonClass(clip)"
+        ><span aria-hidden="true">✎</span></app-button
+      >
+      <app-button
+        [label]="'admin.media.subtitles' | translate"
+        (click)="openSubtitles(clip)"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+      ></app-button>
+      <app-button
+        (click)="togglePublish(clip)"
+        [aria]="{
+          'aria-label': publishAria(clip),
+        }"
+        [styleClass]="publishButtonClass(clip)"
+        ><span aria-hidden="true">{{
+          publishIcon(clip)
+        }}</span></app-button
+      >
+      <app-button
+        (click)="removeClip(clip)"
+        [aria]="{ 'aria-label': ('admin.media.deleteClipAria' | translate) }"
+        styleClass="hg-button hg-button--danger hg-button--sm"
+        ><span aria-hidden="true">✕</span></app-button
+      >
+
+      @if (isEditing(clip)) {
+        <div class="editbox">
+          <app-basic-select
+            [ariaLabel]="'admin.media.clipKindAria' | translate"
+            placeholder=""
+            [items]="clipKindOptions"
+            [formField]="clipFields.kind"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <app-basic-select
+            [ariaLabel]="'admin.media.clipSpeakerAria' | translate"
+            placeholder=""
+            [items]="speakerOptions()"
+            [formField]="clipFields.speakerId"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <app-basic-input
+            type="number"
+            [label]="'admin.media.durationLabel' | translate"
+            [formField]="clipFields.durationMs"
+          />
+          <div class="wordpick">
+            @if (clipDraft().wordId) {
+              <span class="pill p-b">{{ clipWordLabel }}</span>
+              <app-button
+                [label]="'admin.media.unlinkWord' | translate"
+                (click)="clearWord()"
+                styleClass="hg-button hg-button--ghost hg-button--sm"
+                ><span aria-hidden="true">✕</span></app-button
+              >
+            } @else {
+              <app-basic-input
+                type="search"
+                [ariaLabel]="'admin.media.searchWordAria' | translate"
+                [placeholder]="'admin.media.searchWordPlaceholder' | translate"
+                [value]="wordSearch"
+                (valueChange)="searchWords($event)"
+              />
+              @for (word of foundWords(); track word.id) {
+                <app-button
+                  type="button"
+                  styleClass="rowbtn"
+                  [aria]="{
+                    'aria-label': wordAria(word),
+                  }"
+                  (click)="pickWord(word)"
+                  >{{ word.hangul }} — {{ word.translation }}</app-button
+                >
+              }
+            }
+          </div>
+          <app-button
+            [label]="'admin.media.saveClip' | translate"
+            (click)="saveClip(clip)"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
+        </div>
+      }
+
+      @if (subtitlesFor() === clip.id) {
+        <div class="subsbox">
+          <app-textarea
+            [label]="'admin.media.subtitlesLabel' | translate"
+            [rows]="7"
+            [placeholder]="'admin.media.subtitlesPlaceholder' | translate"
+            [formField]="subsField"
+          />
+          <app-button
+            [label]="'admin.media.saveSubtitles' | translate"
+            (click)="saveSubtitles(clip)"
+            [disabled]="!subtitlesReady() || subtitlesSaving()"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
+        </div>
+      }
+    </div>
+  } @empty {
+    <div class="empty">{{ 'admin.media.noClips' | translate }}</div>
+  }
+  <div class="addrow">
+    <app-basic-select
+      [ariaLabel]="'admin.media.newClipKindAria' | translate"
+      [placeholder]="'admin.media.newClipKindAria' | translate"
+      [items]="clipKindOptions"
+      [formField]="newClipKindField"
+      optionLabel="label"
+      optionValue="value"
+    />
+    <app-button
+      [label]="'admin.media.addClip' | translate"
+      (click)="addClip()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+      ><span aria-hidden="true">+</span></app-button
+    >
+  </div>
+</section>

@@ -16,9 +16,9 @@ export interface Alphabet {
   total: number;
 }
 
-export const LETTER_GROUPS: {group: LetterGroup; title: string}[] = [
-  {group: 'VOWEL_BASIC', title: 'Гласные базовые'},
-  {group: 'VOWEL_COMPOUND', title: 'Гласные составные'},
-  {group: 'CONSONANT_BASIC', title: 'Согласные базовые'},
-  {group: 'CONSONANT_DOUBLE', title: 'Согласные двойные'},
+export const LETTER_GROUPS: {group: LetterGroup; titleKey: string}[] = [
+  {group: 'VOWEL_BASIC', titleKey: 'learning.alphabet.groups.VOWEL_BASIC'},
+  {group: 'VOWEL_COMPOUND', titleKey: 'learning.alphabet.groups.VOWEL_COMPOUND'},
+  {group: 'CONSONANT_BASIC', titleKey: 'learning.alphabet.groups.CONSONANT_BASIC'},
+  {group: 'CONSONANT_DOUBLE', titleKey: 'learning.alphabet.groups.CONSONANT_DOUBLE'},
 ];

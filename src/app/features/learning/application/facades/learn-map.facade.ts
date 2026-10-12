@@ -1,5 +1,5 @@
 import {Injectable, inject, signal} from '@angular/core';
-import {CourseMap} from '../../domain/entities/course-map.entity';
+import {CourseMap} from '@features/learning/domain/entities/course-map.entity';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 
 @Injectable()

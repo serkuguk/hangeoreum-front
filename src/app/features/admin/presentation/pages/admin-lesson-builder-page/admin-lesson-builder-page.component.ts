@@ -1,0 +1,368 @@
+import { FormField, form } from '@angular/forms/signals';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import {
+  Subject,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+  of,
+  switchMap,
+} from 'rxjs';
+import {
+  AdminApi,
+  AdminExercise,
+  AdminLessonFull,
+  AdminWord,
+} from '@features/admin/infrastructure/admin.api';
+import {
+  ButtonComponent,
+  BasicInputComponent,
+  BasicSelectComponent,
+  TextareaComponent,
+} from 'springest';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
+/** Шаблоны payload по kind — подставляются в JSON-редактор при добавлении. */
+const PAYLOAD_TEMPLATES: Record<string, unknown> = {
+  CHOICE: {
+    question: '친구',
+    romanization: 'chingu',
+    options: [
+      { text: 'друг', icon: '🧑‍🤝‍🧑', correct: true },
+      { text: 'школа', icon: '🏫' },
+      { text: 'время', icon: '⏰' },
+      { text: 'любовь', icon: '❤️' },
+    ],
+  },
+  LISTEN_CHOICE: {
+    audioUrl: '',
+    text: '안녕하세요',
+    options: [
+      { text: 'здравствуйте', correct: true },
+      { text: 'до свидания' },
+      { text: 'спасибо' },
+      { text: 'извините' },
+    ],
+  },
+  WORD_ORDER: {
+    translation: 'Я — студент',
+    tokens: ['저는', '학생', '이에요'],
+    extra: ['친구는'],
+  },
+  FILL_BLANK: {
+    sentence: '저 ___ 학생이에요.',
+    translation: 'Я — студент',
+    hint: '저 кончается на гласную',
+    options: [
+      { text: '는', hint: 'после гласной' },
+      { text: '은', hint: 'после согласной' },
+    ],
+    correct: '는',
+  },
+  MATCH_PAIRS: {
+    pairs: [
+      { left: '친구', right: 'друг' },
+      { left: '학교', right: 'школа' },
+      { left: '사랑', right: 'любовь' },
+      { left: '시간', right: 'время' },
+    ],
+  },
+  TYPE_WORD: { translation: 'друг', answer: '친구', romanization: 'chingu' },
+};
+
+const KINDS = Object.keys(PAYLOAD_TEMPLATES);
+const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
+  label: value,
+  value,
+}));
+
+@Component({
+  selector: 'hg-admin-lesson-builder-page',
+  imports: [
+    FormField,
+    RouterLink,
+    ButtonComponent,
+    BasicInputComponent,
+    BasicSelectComponent,
+    TextareaComponent,
+    TranslatePipe,
+  ],
+  templateUrl: './admin-lesson-builder-page.component.html',
+  styleUrl: '../_admin.scss',
+  styles: `
+    .exrow {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--hg-line);
+
+      &:last-child {
+        border: none;
+      }
+
+      .kind {
+        font-weight: 700;
+        font-size: 13px;
+        min-width: 120px;
+        padding-top: 4px;
+      }
+
+      app-textarea {
+        flex: 1;
+      }
+    }
+
+    .addex {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tipform {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .mono {
+        font-family: monospace;
+        font-size: 12px;
+      }
+    }
+
+    .wordpick {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .savedmark {
+      color: var(--hg-jade);
+      font-size: 12.5px;
+      margin-left: 8px;
+    }
+    section.panel {
+      margin-bottom: 16px;
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AdminLessonBuilderPageComponent {
+  readonly id = input.required<string>();
+
+  private api = inject(AdminApi);
+  private translate = inject(TranslateService);
+
+  payloadAria(exercise: { position: number }): string {
+    return this.translate.instant('admin.builder.payloadAria', {
+      position: exercise.position,
+    });
+  }
+
+  removeWordAria(word: AdminWord): string {
+    return this.translate.instant('admin.builder.removeWordAria', {
+      hangul: word.hangul,
+      translation: word.translation,
+    });
+  }
+
+  bindWordAria(word: AdminWord): string {
+    return this.translate.instant('admin.builder.bindWordAria', {
+      hangul: word.hangul,
+      translation: word.translation,
+    });
+  }
+
+  readonly data = signal<AdminLessonFull | null>(null);
+  readonly error = signal<string | null>(null);
+  readonly savedFlash = signal<string | null>(null);
+  readonly wordsSaving = signal(false);
+
+  readonly kindOptions = KIND_OPTIONS;
+  readonly newKind = signal('CHOICE');
+  readonly newKindField = form(this.newKind);
+
+  // черновики payload как JSON-строки по id упражнения
+  readonly payloadDrafts = signal<Record<string, string>>({});
+  readonly payloadFields = form(this.payloadDrafts);
+  badJson: Record<string, boolean> = {};
+
+  readonly tipTitle = signal('');
+  readonly tipTitleField = form(this.tipTitle);
+  readonly tipBody = signal('');
+  readonly tipBodyField = form(this.tipBody);
+  readonly tipExamples = signal('');
+  readonly tipExamplesField = form(this.tipExamples);
+
+  // поиск слов для привязки
+  wordSearch = '';
+  readonly foundWords = signal<AdminWord[]>([]);
+  private readonly wordSearch$ = new Subject<string>();
+
+  constructor() {
+    this.wordSearch$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((value) =>
+          this.api.words(value, 0).pipe(
+            catchError(() => {
+              this.error.set(this.translate.instant('admin.builder.errors.findWords'));
+              return of(null);
+            }),
+          ),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((result) => this.foundWords.set(result?.content ?? []));
+    setTimeout(() => this.load());
+  }
+
+  load(): void {
+    this.api.lessonFull(this.id()).subscribe({
+      next: (data) => {
+        this.data.set(data);
+        this.payloadFields().reset(
+          Object.fromEntries(
+            data.exercises.map((e) => [
+              e.id,
+              JSON.stringify(e.payload, null, 2),
+            ]),
+          ),
+        );
+        this.tipTitle.set(data.tip?.title ?? '');
+        this.tipBody.set(data.tip?.bodyMd ?? '');
+        this.tipExamples.set(
+          data.tip?.examples
+            ? JSON.stringify(data.tip.examples, null, 2)
+            : JSON.stringify(
+                [
+                  {
+                    ko: '저는 학생이에요.',
+                    translation: 'Я — студент',
+                    highlight: ['는'],
+                  },
+                ],
+                null,
+                2,
+              ),
+        );
+      },
+      error: () =>
+        this.error.set(this.translate.instant('admin.builder.errors.loadLesson')),
+    });
+  }
+
+  addExercise(): void {
+    const data = this.data();
+    if (!data) return;
+    this.api
+      .createExercise(this.id(), {
+        position: Math.max(0, ...data.exercises.map(exercise => exercise.position)) + 1,
+        kind: this.newKind(),
+        payload: PAYLOAD_TEMPLATES[this.newKind()],
+      })
+      .subscribe({
+        next: () => this.load(),
+        error: () =>
+          this.error.set(this.translate.instant('admin.builder.errors.addExercise')),
+      });
+  }
+
+  saveExercise(exercise: AdminExercise): void {
+    let payload: unknown;
+    try {
+      payload = JSON.parse(this.payloadDrafts()[exercise.id]);
+      this.badJson[exercise.id] = false;
+    } catch {
+      this.badJson[exercise.id] = true;
+      return;
+    }
+    this.api
+      .updateExercise(this.id(), exercise.id, {
+        position: exercise.position,
+        kind: exercise.kind,
+        payload,
+      })
+      .subscribe({
+        next: () =>
+          this.flash(this.translate.instant('admin.builder.flash.exerciseSaved')),
+        error: () =>
+          this.error.set(this.translate.instant('admin.builder.errors.payloadRejected')),
+      });
+  }
+
+  removeExercise(exercise: AdminExercise): void {
+    if (!confirm(this.translate.instant('admin.builder.errors.deleteConfirm'))) return;
+    this.api.deleteExercise(this.id(), exercise.id).subscribe({
+      next: () => this.load(),
+      error: () =>
+        this.error.set(this.translate.instant('admin.builder.errors.deleteExercise')),
+    });
+  }
+
+  saveTip(): void {
+    let examples: unknown = null;
+    if (this.tipExamples().trim()) {
+      try {
+        examples = JSON.parse(this.tipExamples());
+      } catch {
+        this.error.set(this.translate.instant('admin.builder.errors.examplesJson'));
+        return;
+      }
+    }
+    this.api
+      .putTip(this.id(), {
+        title: this.tipTitle(),
+        bodyMd: this.tipBody(),
+        examples,
+      })
+      .subscribe({
+        next: () => this.flash(this.translate.instant('admin.builder.flash.tipSaved')),
+        error: () =>
+          this.error.set(this.translate.instant('admin.builder.errors.saveTip')),
+      });
+  }
+
+  searchWords(value: string): void {
+    this.wordSearch = value;
+    this.wordSearch$.next(value);
+  }
+
+  isLinked(word: AdminWord): boolean {
+    return !!this.data()?.words.some((w) => w.id === word.id);
+  }
+
+  toggleWord(word: AdminWord): void {
+    const data = this.data();
+    if (!data || this.wordsSaving()) return;
+    const ids = this.isLinked(word)
+      ? data.words.filter((w) => w.id !== word.id).map((w) => w.id)
+      : [...data.words.map((w) => w.id), word.id];
+    this.wordsSaving.set(true);
+    this.api.putLessonWords(this.id(), ids).pipe(
+      finalize(() => this.wordsSaving.set(false)),
+    ).subscribe({
+      next: (words) => {
+        this.data.update(current => current ? { ...current, words } : current);
+        this.flash(this.translate.instant('admin.builder.flash.wordsSaved'));
+      },
+      error: () =>
+        this.error.set(this.translate.instant('admin.builder.errors.saveWords')),
+    });
+  }
+
+  private flash(text: string): void {
+    this.savedFlash.set(text);
+    setTimeout(() => this.savedFlash.set(null), 1500);
+  }
+}

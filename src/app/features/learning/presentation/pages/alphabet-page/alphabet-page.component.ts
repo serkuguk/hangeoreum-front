@@ -1,12 +1,13 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
+import {TranslatePipe} from '@ngx-translate/core';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
-import {AlphabetFacade} from '../../../application/facades/alphabet.facade';
-import {AlphabetLetter} from '../../../domain/entities/alphabet.entity';
+import {AlphabetFacade} from '@features/learning/application/facades/alphabet.facade';
+import {AlphabetLetter} from '@features/learning/domain/entities/alphabet.entity';
 
 @Component({
   selector: 'hg-alphabet-page',
-  imports: [HgButtonComponent],
+  imports: [ButtonComponent, TranslatePipe],
   templateUrl: './alphabet-page.component.html',
   styleUrl: './alphabet-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +21,14 @@ export class AlphabetPageComponent {
     if (!alphabet || alphabet.total === 0) return 0;
     return Math.round(alphabet.learnedCount / alphabet.total * 100);
   });
+
+  tileClass(letter: AlphabetLetter): string {
+    return letter.learned ? 'hg-native-button tile learned' : 'hg-native-button tile';
+  }
+
+  letterAria(letter: AlphabetLetter): string {
+    return `${letter.jamo}, ${letter.romanization}`;
+  }
 
   constructor() {
     this.facade.load();

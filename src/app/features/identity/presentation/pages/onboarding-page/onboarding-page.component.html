@@ -1,40 +1,110 @@
 <div class="wrap obbox">
   <div class="obdots" aria-hidden="true">
     @for (dot of [1, 2, 3]; track dot) {
-      <i [class.is-active]="step() === dot"></i>
+      <i [class.is-active]="isActiveStep(dot)"></i>
     }
   </div>
 
   @switch (step()) {
     @case (1) {
-      <h2 class="pagettl center">{{ 'identity.onboarding.level.title' | translate }}</h2><p class="pagesub center">{{ 'identity.onboarding.level.subtitle' | translate }}</p>
-      <hg-segmented-control class="oblist" [label]="'identity.onboarding.level.label' | translate" variant="cards"
-                            [options]="levelOptions" [(ngModel)]="level"/>
+      <h2 class="pagettl center">
+        {{ "identity.onboarding.level.title" | translate }}
+      </h2>
+      <p class="pagesub center">
+        {{ "identity.onboarding.level.subtitle" | translate }}
+      </p>
+      <app-segmented-control
+        class="oblist"
+        [label]="'identity.onboarding.level.label' | translate"
+        variant="cards"
+        [items]="levelOptions"
+        [formField]="form.level"
+      >
+        <ng-template #item let-item>
+          <span class="obcard-content"
+            ><b>{{ item.label }}</b
+            ><small>{{ item.description }}</small></span
+          >
+        </ng-template>
+      </app-segmented-control>
       <div class="obbtns">
-        <hg-button [label]="'common.next' | translate" (pressed)="step.set(2)"/>
+        <app-button
+          styleClass="hg-button"
+          [label]="'common.next' | translate"
+          (click)="step.set(2)"
+        />
       </div>
     }
     @case (2) {
-      <h2 class="pagettl center">{{ 'identity.onboarding.goal.title' | translate }}</h2><p class="pagesub center">{{ 'identity.onboarding.goal.subtitle' | translate }}</p>
-      <hg-segmented-control class="oblist" [label]="'identity.onboarding.goal.label' | translate" variant="cards"
-                            [options]="goalOptions" [(ngModel)]="goal"/>
+      <h2 class="pagettl center">
+        {{ "identity.onboarding.goal.title" | translate }}
+      </h2>
+      <p class="pagesub center">
+        {{ "identity.onboarding.goal.subtitle" | translate }}
+      </p>
+      <app-segmented-control
+        class="oblist"
+        [label]="'identity.onboarding.goal.label' | translate"
+        variant="cards"
+        [items]="goalOptions"
+        [formField]="form.goal"
+      >
+        <ng-template #item let-item>
+          <span class="obcard-content"
+            ><b>{{ item.label }}</b
+            ><small>{{ item.description }}</small></span
+          >
+        </ng-template>
+      </app-segmented-control>
       <div class="obbtns">
-        <hg-button [label]="'common.back' | translate" variant="ghost" (pressed)="step.set(1)"/><hg-button [label]="'common.next' | translate" (pressed)="step.set(3)"/>
+        <app-button
+          styleClass="hg-button hg-button--ghost"
+          [label]="'common.back' | translate"
+          (click)="step.set(1)"
+        /><app-button
+          styleClass="hg-button"
+          [label]="'common.next' | translate"
+          (click)="step.set(3)"
+        />
       </div>
     }
     @case (3) {
-      <h2 class="pagettl center">{{ 'identity.onboarding.reminder.title' | translate }}</h2><p class="pagesub center">{{ 'identity.onboarding.reminder.subtitle' | translate }}</p>
+      <h2 class="pagettl center">
+        {{ "identity.onboarding.reminder.title" | translate }}
+      </h2>
+      <p class="pagesub center">
+        {{ "identity.onboarding.reminder.subtitle" | translate }}
+      </p>
       <div class="panel">
         <div class="setrow">
-          <hg-toggle [label]="'identity.settings.reminders' | translate" [(ngModel)]="remindersEnabled"/>
+          <app-toggle
+            [label]="'identity.settings.reminders' | translate"
+            [formField]="form.remindersEnabled"
+          />
         </div>
-        @if (remindersEnabled()) {
-          <div class="setrow noborder"><span>{{ 'identity.onboarding.reminder.time' | translate }}</span></div><hg-segmented-control class="obtime" [label]="'identity.onboarding.reminder.time' | translate"
-                                [options]="timeOptions" [(ngModel)]="time"/>
+        @if (model().remindersEnabled) {
+          <div class="setrow noborder">
+            <span>{{ "identity.onboarding.reminder.time" | translate }}</span>
+          </div>
+          <app-segmented-control
+            class="obtime"
+            [label]="'identity.onboarding.reminder.time' | translate"
+            [items]="timeOptions"
+            [formField]="form.time"
+          />
         }
       </div>
       <div class="obbtns">
-        <hg-button [label]="'common.back' | translate" variant="ghost" (pressed)="step.set(2)"/><hg-button [label]="'identity.onboarding.finish' | translate" [loading]="saving()" (pressed)="finish()"/>
+        <app-button
+          styleClass="hg-button hg-button--ghost"
+          [label]="'common.back' | translate"
+          (click)="step.set(2)"
+        /><app-button
+          styleClass="hg-button"
+          [label]="'identity.onboarding.finish' | translate"
+          [loading]="saving()"
+          (click)="finish()"
+        />
       </div>
     }
   }

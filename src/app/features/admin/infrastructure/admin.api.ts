@@ -131,10 +131,14 @@ export interface AdminUser {
   name: string;
   email: string;
   avatarUrl: string | null;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'EDITOR' | 'ADMIN';
+  isActive: boolean;
   startLevel: string;
   createdAt: string;
 }
+
+export const MediaUploadKind = {VIDEO: 'video', AUDIO: 'audio', THUMBNAIL: 'thumbnail'} as const;
+export type MediaUploadKind = typeof MediaUploadKind[keyof typeof MediaUploadKind];
 
 @Injectable()
 export class AdminApi {
@@ -168,7 +172,7 @@ export class AdminApi {
   uploadWordMedia(id: string, file: File, kind: 'audio' | 'image'): Observable<AdminWord> {
     const form = new FormData();
     form.append('file', file);
-    form.append('kind', kind);
+    form.append('type', kind);
     return this.http.post<AdminWord>(`${this.base}/words/${id}/media`, form);
   }
 
@@ -319,7 +323,7 @@ export class AdminApi {
     return this.http.delete<void>(`${this.base}/clips/${id}`);
   }
 
-  uploadClipMedia(id: string, file: File, kind: 'video' | 'audio' | 'thumbnail'): Observable<AdminClip> {
+  uploadClipMedia(id: string, file: File, kind: MediaUploadKind): Observable<AdminClip> {
     const form = new FormData();
     form.append('file', file);
     form.append('type', kind); // бэкенд читает @RequestParam("type"); с 'kind' аудио/обложка затирали videoUrl
@@ -345,8 +349,12 @@ export class AdminApi {
     return this.http.get<Page<AdminUser>>(`${this.base}/users`, {params});
   }
 
-  patchUser(id: string, patch: {role?: string; isActive?: boolean}): Observable<AdminUser> {
+  patchUser(id: string, patch: {role?: 'USER' | 'EDITOR'; isActive?: boolean}): Observable<AdminUser> {
     return this.http.patch<AdminUser>(`${this.base}/users/${id}`, patch);
+  }
+
+  deleteUser(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/users/${id}`);
   }
 
   broadcast(title: string, body: string): Observable<void> {

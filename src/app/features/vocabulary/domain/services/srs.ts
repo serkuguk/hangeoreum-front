@@ -30,12 +30,3 @@ export function computeNextReview(state: SrsState, quality: SrsQuality): SrsStat
 
   return {repetitions, interval, easeFactor};
 }
-
-/** Подписи интервалов для кнопок оценки («Снова/Трудно/Хорошо/Легко»). */
-export function previewLabel(state: SrsState, quality: SrsQuality): string {
-  const next = computeNextReview(state, quality);
-  if (quality < 3) return '< 1 дня';
-  if (next.interval === 1) return '1 день';
-  if (next.interval < 30) return `${next.interval} дн.`;
-  return `${Math.round(next.interval / 30)} мес.`;
-}

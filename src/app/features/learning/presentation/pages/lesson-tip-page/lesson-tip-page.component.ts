@@ -1,17 +1,18 @@
+import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, OnInit, inject, input} from '@angular/core';
 import {Location} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
-import {LessonFacade} from '../../../application/facades/lesson.facade';
-import {TipExample} from '../../../domain/entities/exercise.entity';
+import {TranslatePipe} from '@ngx-translate/core';
+import {LessonFacade} from '@features/learning/application/facades/lesson.facade';
+import {TipExample} from '@features/learning/domain/entities/exercise.entity';
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 @Component({
   selector: 'hg-lesson-tip-page',
-  imports: [RouterLink, HgButtonComponent],
+  imports: [RouterLink, ButtonComponent, TranslatePipe],
   templateUrl: './lesson-tip-page.component.html',
   styleUrl: './lesson-tip-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

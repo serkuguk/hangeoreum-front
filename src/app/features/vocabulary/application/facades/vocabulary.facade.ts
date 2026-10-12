@@ -1,11 +1,11 @@
 import {Injectable, inject, signal} from '@angular/core';
 import {EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, switchMap} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {UserWord} from '../../domain/entities/user-word.entity';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
 import {
   Deck,
   VocabularyQuery,
-} from '../../domain/repositories/vocabulary.repository';
+} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {VOCABULARY_REPOSITORY} from '../vocabulary-repository.token';
 import {TranslateService} from '@ngx-translate/core';
 
@@ -49,7 +49,6 @@ export class VocabularyFacade {
   }
 
   search(query: VocabularyQuery): void {
-    this.loading.set(true);
     this.query$.next(query);
   }
 

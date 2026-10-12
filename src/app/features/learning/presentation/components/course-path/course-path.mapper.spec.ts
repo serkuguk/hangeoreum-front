@@ -1,7 +1,11 @@
-import {CourseMap, LessonNode, LessonStatus, LessonType} from '../../../domain/entities/course-map.entity';
-import {toCoursePath} from './course-path.mapper';
+import {CourseMap, LessonNode, LessonStatus, LessonType} from '@features/learning/domain/entities/course-map.entity';
+import {toCoursePath as mapCoursePath} from './course-path.mapper';
 import {CoursePathInput} from './course-path-input';
 import {DashboardCourseMap} from '@features/dashboard/domain/dashboard.model';
+
+function toCoursePath(map: CoursePathInput | null, limit?: number) {
+  return mapCoursePath(map, key => key, limit);
+}
 
 function lesson(id: string, status: LessonStatus, over: Partial<LessonNode> = {}): LessonNode {
   return {
@@ -45,11 +49,12 @@ describe('toCoursePath', () => {
     expect(view.nodes.map(n => n.state)).toEqual(['done', 'current', 'bonus', 'locked']);
   });
 
-  it('считает урок без доступа заблокированным', () => {
+  it('marks subscription-gated lessons clickable Pro nodes', () => {
     const view = toCoursePath(map({id: 'u1', lessons: [lesson('a', 'AVAILABLE', {hasAccess: false})]}));
 
-    expect(view.nodes[0].state).toBe('locked');
-    expect(view.nodes[0].subtitle).toContain('Pro');
+    expect(view.nodes[0].state).toBe('pro');
+    expect(view.nodes[0].subtitle).toBe('learning.map.nodePro');
+    expect(toCoursePath(map({id: 'u', lessons: [lesson('locked', 'LOCKED', {hasAccess: false})]})).nodes[0].state).toBe('locked');
   });
 
   it('обрезает путь до окна вокруг текущего урока и оставляет только его главы', () => {
@@ -69,7 +74,7 @@ describe('toCoursePath', () => {
     ));
 
     expect(view.chapters.map(c => c.state)).toEqual(['done', 'locked']);
-    expect(view.chapters[0].title).toContain('ЗАВЕРШЕНА');
+    expect(view.chapters[0].title).toBe('learning.map.chapterDone');
   });
 
   it('возвращает пустой путь без карты', () => {

@@ -1,8 +1,10 @@
 import {ChangeDetectionStrategy, Component, booleanAttribute, input} from '@angular/core';
+import {TranslatePipe} from '@ngx-translate/core';
 
 /** Маскот «걸음이» — тигрёнок в обанссэк-палитре. */
 @Component({
   selector: 'hg-mascot',
+  imports: [TranslatePipe],
   templateUrl: './mascot.component.html',
   styleUrl: './mascot.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

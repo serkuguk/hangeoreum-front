@@ -1,8 +1,8 @@
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {Subject, of, throwError} from 'rxjs';
-import {UserWord} from '../../domain/entities/user-word.entity';
-import {VocabularyRepository} from '../../domain/repositories/vocabulary.repository';
+import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
+import {VocabularyRepository} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {VOCABULARY_REPOSITORY} from '../vocabulary-repository.token';
 import {ReviewFacade} from './review.facade';
 
@@ -42,6 +42,13 @@ describe('ReviewFacade', () => {
   });
 
   afterEach(() => TestBed.resetTestingModule());
+
+  it.each([
+    [1, 0, 0, '< 1 дня'], [4, 0, 0, '1 день'], [4, 1, 0, '6 дн.'], [4, 2, 60, '5 мес.'],
+  ] as const)('formats SRS intervals outside domain for quality %s', (quality, repetitions, interval, expected) => {
+    facade.queue.set([{...word, repetitions, dueDate: new Date(Date.now() + interval * 86400000).toISOString()}]);
+    expect(facade.intervalLabel(quality)).toBe(expected);
+  });
 
   it('не фабрикует результат при ошибке и повторяет ту же сессию', () => {
     facade.start('FLASHCARDS');

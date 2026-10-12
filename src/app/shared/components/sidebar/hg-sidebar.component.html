@@ -1,0 +1,65 @@
+@if (expanded()) {
+  <div class="backdrop" (click)="dismiss()"></div>
+}
+<aside class="sidebar-panel">
+  <div class="header">
+    <app-button
+      #toggle
+      type="button"
+      class="hg-native-host"
+      styleClass="hg-native-button toggle"
+      (click)="expanded.set(!expanded())"
+      [aria]="{
+        'aria-expanded': expanded(),
+        'aria-label': toggleLabel(),
+      }"
+    >
+      <i class="pi pi-bars" aria-hidden="true"></i>
+    </app-button>
+    @if (expanded()) {
+      <div class="brand"><ng-content /></div>
+    }
+  </div>
+  <nav [attr.aria-label]="navLabel()">
+    @for (item of items(); track item.link) {
+      <a
+        [routerLink]="item.link"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+        ariaCurrentWhenActive="page"
+        [attr.aria-label]="item.label"
+        [pTooltip]="item.label"
+        [tooltipDisabled]="expanded()"
+        tooltipEvent="both"
+        tooltipPosition="right"
+        appendTo="body"
+      >
+        <span [class]="iconClass(item)" aria-hidden="true">{{
+          iconGlyph(item)
+        }}</span>
+        <span class="label" [attr.aria-hidden]="!expanded()">{{
+          item.label
+        }}</span>
+      </a>
+    }
+  </nav>
+  @if (footerItem(); as item) {
+    <a
+      class="footer"
+      [routerLink]="item.link"
+      [attr.aria-label]="item.label"
+      [pTooltip]="item.label"
+      [tooltipDisabled]="expanded()"
+      tooltipEvent="both"
+      tooltipPosition="right"
+      appendTo="body"
+    >
+      <span [class]="iconClass(item)" aria-hidden="true">{{
+        iconGlyph(item)
+      }}</span>
+      <span class="label" [attr.aria-hidden]="!expanded()">{{
+        item.label
+      }}</span>
+    </a>
+  }
+</aside>

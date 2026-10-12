@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, inject} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {filter, map, startWith} from 'rxjs/operators';
@@ -13,7 +13,7 @@ import {filter, map, startWith} from 'rxjs/operators';
         @if (page() === 'register') {
           <div class="ghost kr">길</div>
           <div class="mark">한</div>
-          <h2>Начни свой<br>한걸음 сегодня.</h2>
+          <h2>Начни свой<br><span class="serif">한걸음</span> сегодня.</h2>
           <p>Бесплатно. Учи слова, проходи уроки, следи за прогрессом и не теряй серию.</p>
           <div class="quote kr">시작이 반이다<small>Начало — половина дела</small></div>
         } @else {
@@ -25,7 +25,7 @@ import {filter, map, startWith} from 'rxjs/operators';
         }
       </div>
       <div class="formside">
-        <router-outlet/>
+        <router-outlet (activate)="focusHeading()"/>
       </div>
     </div>
   `,
@@ -39,34 +39,40 @@ import {filter, map, startWith} from 'rxjs/operators';
     .brand {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(150deg, var(--hg-route), var(--hg-violet));
+      background: url('/assets/img/fondo.png') center / cover no-repeat;
       color: var(--hg-on-route);
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      padding: 60px;
+      justify-content: flex-end; /* текст на воде, не перекрывает пейзаж */
+      padding: 60px 60px 48px;
+      text-shadow: 0 1px 12px rgba(0, 0, 0, .35);
 
       .ghost { right: -40px; bottom: -80px; font-size: 340px; color: currentColor; opacity: .07; }
 
+      .serif { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 400; }
+
       .mark {
-        width: 54px;
-        height: 54px;
-        border-radius: 16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
         background: rgba(255, 255, 255, .16);
+        backdrop-filter: blur(4px);
         display: grid;
         place-items: center;
-        font-family: var(--hg-font-display);
-        font-size: 30px;
-        margin-bottom: 30px;
+        font-family: 'Gowun Batang', var(--hg-font-kr);
+        font-size: 24px;
+        margin-bottom: 24px;
       }
 
       h2 { font-size: var(--hg-fs-3xl); font-weight: 600; line-height: 1.2; margin-bottom: 16px; }
       p { font-size: 15px; opacity: .85; max-width: 340px; line-height: 1.6; }
 
       .quote {
-        margin-top: 40px;
-        font-family: var(--hg-font-display);
-        font-size: 30px;
+        margin-top: 32px;
+        font-family: 'Gowun Batang', var(--hg-font-kr);
+        font-weight: 400;
+        font-size: 26px;
+        letter-spacing: .08em;
 
         small { display: block; font-family: var(--hg-font-ui); font-size: 14px; opacity: .8; margin-top: 6px; }
       }
@@ -87,6 +93,7 @@ import {filter, map, startWith} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthLayoutComponent {
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -98,4 +105,13 @@ export class AuthLayoutComponent {
     ),
     {initialValue: 'login'},
   );
+
+  focusHeading(): void {
+    queueMicrotask(() => {
+      const heading = this.element.nativeElement.querySelector<HTMLElement>('.formside h1');
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus();
+    });
+  }
 }

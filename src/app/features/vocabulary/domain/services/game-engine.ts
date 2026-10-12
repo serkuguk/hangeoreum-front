@@ -1,6 +1,5 @@
 import {SrsQuality} from '../entities/user-word.entity';
 
-export type GameMode = 'MATCH' | 'LISTEN' | 'SPELL';
 
 export interface GameAnswer {
   wordId: string;

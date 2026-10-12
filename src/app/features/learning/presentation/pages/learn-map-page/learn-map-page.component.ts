@@ -1,18 +1,18 @@
+import {ButtonComponent} from 'springest';
 import {
   ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector,
   afterNextRender, computed, effect, inject, signal,
 } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {HgButtonComponent} from '@shared/components/controls/hg-button.component';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MascotComponent} from '@shared/components/hg/mascot/mascot.component';
-import {LearnMapFacade} from '../../../application/facades/learn-map.facade';
-import {LessonNode, UnitNode} from '../../../domain/entities/course-map.entity';
-import {CoursePathComponent} from '../../components/course-path/course-path.component';
-import {chapterSceneUrl} from '../../components/course-path/course-path.mapper';
-import {CourseChapter, CourseNode, CourseNodeState} from '../../components/course-path/course-path.model';
-import {lessonRoute} from '../../lesson-route';
+import {LearnMapFacade} from '@features/learning/application/facades/learn-map.facade';
+import {LessonNode, UnitNode} from '@features/learning/domain/entities/course-map.entity';
+import {CoursePathComponent} from '@features/learning/presentation/components/course-path/course-path.component';
+import {chapterSceneUrl} from '@features/learning/presentation/components/course-path/course-path.mapper';
+import {ChapterState, CourseChapter, CourseNode, CourseNodeState} from '@features/learning/presentation/components/course-path/course-path.model';
+import {lessonRoute} from '@features/learning/presentation/lesson-route';
 
-type UnitState = 'done' | 'current' | 'locked';
 
 /** Первый слог хангыля из названия урока — глиф на кнопке; иначе номер шага. */
 const HANGUL = /[가-힣]/;
@@ -20,7 +20,7 @@ const FINISH_ID = 'course-finish';
 
 @Component({
   selector: 'hg-learn-map-page',
-  imports: [RouterLink, HgButtonComponent, CoursePathComponent, MascotComponent],
+  imports: [RouterLink, ButtonComponent, CoursePathComponent, MascotComponent, TranslatePipe],
   templateUrl: './learn-map-page.component.html',
   styleUrl: './learn-map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +30,7 @@ export class LearnMapPageComponent {
   private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly injector = inject(Injector);
+  private readonly translate = inject(TranslateService);
 
   /** Карта открывается на текущей главе: пройденный пролог свёрнут в строки. */
   readonly showAll = signal(false);
@@ -93,11 +94,11 @@ export class LearnMapPageComponent {
       const state = this.unitState(unit);
       return {
         id: unit.id,
-        title: `ГЛАВА ${index + 1} · ${unit.title.toUpperCase()}`,
+        title: this.translate.instant('learning.map.chapterTitle', {index: index + 1, title: unit.title.toUpperCase()}),
         icon: this.sceneUrl(index),
         state,
         counter: this.unitProgress(unit.lessons),
-        hint: state === 'locked' ? this.lockedReason(unit, all[index - 1]) : undefined,
+        hint: state === ChapterState.LOCKED ? this.lockedReason(unit, all[index - 1]) : undefined,
         // TEST OUT ждёт эндпоинт проверки главы — плашку включит одна строка здесь
         testOut: false,
       };
@@ -131,9 +132,9 @@ export class LearnMapPageComponent {
       out.push({
         id: FINISH_ID,
         glyph: '完',
-        title: 'Финиш курса',
-        subtitle: this.facade.map()?.title ?? 'Все главы пройдены',
-        state: 'final',
+        title: this.translate.instant('learning.map.finishTitle'),
+        subtitle: this.facade.map()?.title ?? this.translate.instant('learning.map.finishDone'),
+        state: CourseNodeState.FINAL,
         chapterId: last.id,
       });
     }
@@ -149,6 +150,12 @@ export class LearnMapPageComponent {
       percent: lessons.length ? Math.round((done / lessons.length) * 100) : 0,
     };
   });
+
+  readonly mapTitle = computed(() => this.facade.map()?.title || this.translate.instant('learning.map.fallbackTitle'));
+  readonly progressAria = computed(() =>
+    this.translate.instant('learning.map.progressAria', {percent: this.progress().percent}));
+  readonly currentChapterClass = computed(() => this.showAll() ? 'hg-native-button' : 'hg-native-button is-on');
+  readonly allChaptersClass = computed(() => this.showAll() ? 'hg-native-button is-on' : 'hg-native-button');
 
   /** Есть ли на карте уроки под подпиской — от этого зависит бейдж Pro в шапке. */
   readonly hasPaywall = computed(() =>
@@ -175,10 +182,10 @@ export class LearnMapPageComponent {
   }
 
   /** Состояние юнита целиком — какую главу свернуть, какую блокировать. */
-  unitState(unit: UnitNode): UnitState {
-    if (unit.lessons.every(lesson => lesson.status === 'COMPLETED')) return 'done';
-    if (unit.lessons.some(lesson => lesson.status === 'AVAILABLE' || lesson.status === 'COMPLETED')) return 'current';
-    return 'locked';
+  unitState(unit: UnitNode): CourseChapter['state'] {
+    if (unit.lessons.every(lesson => lesson.status === 'COMPLETED')) return ChapterState.DONE;
+    if (unit.lessons.some(lesson => lesson.status === 'AVAILABLE' || lesson.status === 'COMPLETED')) return ChapterState.CURRENT;
+    return ChapterState.LOCKED;
   }
 
   unitProgress(lessons: LessonNode[]): string {
@@ -195,8 +202,8 @@ export class LearnMapPageComponent {
 
   /** Условие открытия locked-главы — почему она закрыта, не просто иконка замка. */
   lockedReason(unit: UnitNode, previous: UnitNode | undefined): string {
-    if (!previous) return 'Пока недоступно';
-    return `Заверши «${previous.title}», чтобы открыть`;
+    if (!previous) return this.translate.instant('learning.map.lockedFirst');
+    return this.translate.instant('learning.map.lockedAfter', {title: previous.title});
   }
 
   sceneUrl(index: number): string | null {
@@ -212,11 +219,11 @@ export class LearnMapPageComponent {
   }
 
   private nodeState(lesson: LessonNode, isNow: boolean): CourseNodeState {
-    if (lesson.status === 'COMPLETED') return 'done';
-    if (!lesson.hasAccess) return 'pro';
-    if (lesson.status === 'LOCKED') return 'locked';
-    if (lesson.type === 'STORY') return 'bonus';
-    return isNow ? 'current' : 'open';
+    if (lesson.status === 'COMPLETED') return CourseNodeState.DONE;
+    if (lesson.status === 'LOCKED') return CourseNodeState.LOCKED;
+    if (!lesson.hasAccess) return CourseNodeState.PRO;
+    if (lesson.type === 'STORY') return CourseNodeState.BONUS;
+    return isNow ? CourseNodeState.CURRENT : CourseNodeState.OPEN;
   }
 
   private glyph(lesson: LessonNode): string {
@@ -227,11 +234,13 @@ export class LearnMapPageComponent {
 
   private subtitle(lesson: LessonNode): string {
     if (lesson.status === 'COMPLETED') {
-      return lesson.score !== null ? `✓ Пройдено · ${lesson.score}%` : '✓ Пройдено';
+      return lesson.score !== null
+        ? this.translate.instant('learning.map.nodeScore', {score: lesson.score})
+        : this.translate.instant('learning.map.done');
     }
-    if (!lesson.hasAccess) return 'Открыть по подписке';
-    if (lesson.status === 'LOCKED') return 'Закрыто';
-    if (lesson.type === 'STORY') return 'Видео носителя · финал главы';
-    return `+${lesson.xpReward} XP`;
+    if (!lesson.hasAccess) return this.translate.instant('learning.map.nodePro');
+    if (lesson.status === 'LOCKED') return this.translate.instant('learning.map.nodeLocked');
+    if (lesson.type === 'STORY') return this.translate.instant('learning.map.nodeStory');
+    return this.translate.instant('learning.map.nodeXp', {xp: lesson.xpReward});
   }
 }

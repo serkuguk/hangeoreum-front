@@ -1,58 +1,58 @@
 <div class="wrap cab">
   @if (facade.loading()) {
-    <div class="panel loadpanel">Загружаем профиль…</div>
+    <div class="panel loadpanel">{{ 'identity.profile.loading' | translate }}</div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>
-      <hg-button label="Повторить" variant="ghost" (pressed)="facade.load()"/>
+      <app-button styleClass="hg-button hg-button--ghost" [label]="'common.retry' | translate"  (click)="facade.load()"/>
     </div>
   } @else if (facade.profile(); as profile) {
     <div class="panel cab-head">
       <div class="ghost kr">복</div>
-      <div class="bigav" [title]="uploading() ? 'Загружаем…' : 'Аватар'">
+      <div class="bigav" [title]="avatarTitle()">
         @if (profile.avatarUrl) {
-          <img [src]="profile.avatarUrl" alt="Аватар">
+          <img [src]="profile.avatarUrl" [alt]="'identity.profile.avatar' | translate">
         } @else {
           {{ profile.name.charAt(0).toUpperCase() }}
         }
       </div>
-      <hg-file-picker label="Сменить аватар" ariaLabel="Выбрать новый аватар"
-                      accept="image/*" [disabled]="uploading()" (fileSelected)="onAvatar($event)"/>
+      <app-file-picker [label]="'identity.profile.changeAvatar' | translate" [ariaLabel]="'identity.profile.chooseAvatarAria' | translate"
+                      accept="image/*" [disabled]="uploading()" [value]="avatarFiles()" (valueChange)="avatarFiles.set($event); selectAvatar($event)"/>
       <div class="who">
         <h1>{{ profile.name }}</h1>
-        <div class="pill p-y">⭐ {{ profile.levelTitle || ('Уровень ' + profile.level) }} · {{ profile.totalXp }} XP</div>
-        <p class="kr">한국어 · изучает корейский с {{ profile.memberSince | date:'LLLL y' }}</p>
+        <div class="pill p-y">⭐ {{ levelLabel() }} · {{ profile.totalXp }} XP</div>
+        <p class="kr">{{ 'identity.profile.memberSince' | translate: { date: (profile.memberSince | date:'LLLL y') } }}</p>
       </div>
-      <a class="editbtn" routerLink="/settings">Настройки</a>
+      <a class="editbtn" routerLink="/settings">{{ 'navigation.settings' | translate }}</a>
     </div>
 
     @if (profile.xpToNext !== null) {
       <div class="panel levelbox">
         <div class="lt">
-          <b>До следующего уровня</b>
-          <span>{{ profile.totalXp }} / {{ profile.totalXp + profile.xpToNext }} XP</span>
+          <b>{{ 'identity.profile.levelUp' | translate }}</b>
+          <span>{{ profile.totalXp }} / {{ xpTarget() }} XP</span>
         </div>
         <div class="track"><div class="fill" [style.width.%]="facade.levelPercent()"></div></div>
       </div>
     }
 
     <div class="cgrid">
-      <div class="panel cstat"><b class="j">{{ profile.wordsLearned }}</b><span>слов выучено</span></div>
-      <div class="panel cstat"><b class="y">{{ profile.streak }}</b><span>дней серии (рекорд {{ profile.longestStreak }})</span></div>
-      <div class="panel cstat"><b class="bl">{{ profile.lessonsCompleted }}</b><span>уроков пройдено</span></div>
-      <div class="panel cstat"><b class="r">{{ profile.achievementsEarned }}</b><span>достижений</span></div>
+      <div class="panel cstat"><b class="j">{{ profile.wordsLearned }}</b><span>{{ 'identity.profile.wordsLearned' | translate }}</span></div>
+      <div class="panel cstat"><b class="y">{{ profile.streak }}</b><span>{{ 'identity.profile.streakRecord' | translate: { longest: profile.longestStreak } }}</span></div>
+      <div class="panel cstat"><b class="bl">{{ profile.lessonsCompleted }}</b><span>{{ 'identity.profile.lessonsCompleted' | translate }}</span></div>
+      <div class="panel cstat"><b class="r">{{ profile.achievementsEarned }}</b><span>{{ 'identity.profile.achievementsCount' | translate }}</span></div>
     </div>
 
     <div class="panel block">
-      <h3>Достижения</h3>
+      <h3>{{ 'identity.profile.achievementsTitle' | translate }}</h3>
       @if (facade.achievements().length === 0) {
-        <p class="empty">Достижения появятся после первых уроков.</p>
+        <p class="empty">{{ 'identity.profile.achievementsEmpty' | translate }}</p>
       }
       <div class="ach">
         @for (achievement of facade.achievements(); track achievement.id) {
           <div class="a" [class.got]="achievement.earnedAt" [class.locked]="!achievement.earnedAt"
                [title]="achievement.description">
-            <div class="ic">{{ achievement.icon || '🏅' }}</div>
+            <div class="ic">{{ achievement.icon || defaultAchievementIcon }}</div>
             {{ achievement.title }}
           </div>
         }
@@ -61,10 +61,10 @@
 
     <div class="panel block subrow">
       <div>
-        <h3>Подписка</h3>
-        <p class="empty">Управление тарифом и оплатой</p>
+        <h3>{{ 'identity.profile.subscriptionTitle' | translate }}</h3>
+        <p class="empty">{{ 'identity.profile.subscriptionHint' | translate }}</p>
       </div>
-      <a class="cta" routerLink="/billing">Открыть</a>
+      <a class="cta" routerLink="/billing">{{ 'identity.profile.open' | translate }}</a>
     </div>
   }
 </div>

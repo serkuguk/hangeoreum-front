@@ -1,27 +1,79 @@
 <div class="formbox">
-  <div class="eyebrow">{{ 'identity.login.eyebrow' | translate }}</div><h1>{{ 'identity.login.title' | translate }}</h1><p class="sub">{{ 'identity.login.subtitle' | translate }}</p>
+  <div class="eyebrow">{{ "identity.login.eyebrow" | translate }}</div>
+  <h1>{{ "identity.login.title" | translate }}</h1>
+  <p class="sub">{{ "identity.login.subtitle" | translate }}</p>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <hg-input id="email" type="email" [label]="'common.email' | translate" formControlName="email"
-              placeholder="you@email.com" autocomplete="email"
-              [error]="invalid('email') ? ('identity.validation.email' | translate) : ''"/>
+  @if (passwordChanged) {
+    <div class="success" role="status">
+      {{ "identity.login.passwordChanged" | translate }}
+    </div>
+  }
 
-    <hg-input id="password" type="password" [label]="'common.password' | translate" formControlName="password"
-              placeholder="••••••••" autocomplete="current-password"
-              [error]="invalid('password') ? ('identity.validation.passwordRequired' | translate) : ''"/>
+  <form novalidate (submit)="$event.preventDefault(); submit()">
+    <app-form-field
+      class="hg-auth-field"
+      [field]="form.email"
+      [isInline]="false"
+      [submitted]="submitted()"
+      [showLabel]="true"
+      [errorMessages]="{
+        required: ('identity.validation.email' | translate),
+        email: ('identity.validation.email' | translate),
+      }"
+    >
+      <app-basic-input
+        type="email"
+        [formField]="form.email"
+        placeholder="you@email.com"
+        autocomplete="email"
+        autocapitalize="off"
+      />
+    </app-form-field>
+
+    <app-form-field
+      class="hg-auth-field"
+      [field]="form.password"
+      [isInline]="false"
+      [submitted]="submitted()"
+      [showLabel]="true"
+      [errorMessages]="{
+        required: ('identity.validation.passwordRequired' | translate),
+      }"
+    >
+      <app-password-input
+        [toggleMask]="false"
+        [formField]="form.password"
+        placeholder="{{ 'identity.login.password' | translate }}"
+        autocomplete="current-password"
+      />
+    </app-form-field>
 
     @if (facade.error(); as error) {
-      <div class="apierr">{{ error }}</div>
+      <div class="apierr" role="alert">{{ error }}</div>
     }
 
-    <hg-button class="btn" type="submit" [label]="'identity.login.submit' | translate" [loading]="facade.loading()" block/>
+    @if (facade.showPasswordRecovery()) {
+      <div class="recovery" role="status">
+        {{ "identity.login.forgotPrompt" | translate }}
+        <a routerLink="/auth/forgot-password">{{
+          "identity.login.recover" | translate
+        }}</a>
+      </div>
+    }
+
+    <app-button
+      class="btn"
+      type="submit"
+      [label]="'identity.login.submit' | translate"
+      [loading]="facade.loading()"
+      styleClass="hg-button hg-button--block"
+    />
   </form>
 
-  <div class="sep">{{ 'identity.socialDivider' | translate }}</div>
-  <div class="social">
-    <hg-button label="Google" variant="secondary" block (pressed)="facade.loginWithProvider('google')"/>
-    <hg-button label="Kakao" variant="secondary" block (pressed)="facade.loginWithProvider('kakao')"/>
+  <div class="alt">
+    {{ "identity.login.noAccount" | translate }}
+    <a routerLink="/auth/register">{{
+      "identity.register.link" | translate
+    }}</a>
   </div>
-
-  <div class="alt">{{ 'identity.login.noAccount' | translate }} <a routerLink="/auth/register">{{ 'identity.register.link' | translate }}</a></div>
 </div>

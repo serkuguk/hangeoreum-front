@@ -1,5 +1,6 @@
 :host { display: block; height: 100%; }
 
+:host ::ng-deep {
 .imwrap {
   max-width: 480px;
   margin: 0 auto;
@@ -28,7 +29,7 @@
   justify-content: center;
   margin-bottom: 12px;
 
-  button {
+  button.hg-native-button.hg-native-button.hg-native-button {
     background: color-mix(in oklch, var(--hg-surface) 92%, transparent);
     backdrop-filter: blur(8px);
     border: 1px solid var(--hg-border);
@@ -64,7 +65,7 @@
   &::-webkit-scrollbar { display: none; }
 }
 
-.navbtn {
+button.hg-native-button.hg-native-button.hg-native-button.navbtn {
   position: absolute;
   top: 50%;
   z-index: 4;
@@ -139,7 +140,7 @@
   flex-direction: column;
   gap: 14px;
 
-  button {
+  button.hg-native-button.hg-native-button.hg-native-button {
     width: var(--hg-touch-min);
     height: var(--hg-touch-min);
     border-radius: 50%;
@@ -162,4 +163,6 @@
   color: var(--hg-text-muted);
   padding: 20px;
   font-size: 13px;
+}
+
 }

@@ -1,10 +1,4 @@
-export interface Subtitle {
-  lang: string;
-  position: number;
-  text: string;
-  startMs: number;
-  endMs: number;
-}
+import {ClipSubtitle} from '@shared/models/clip-subtitle';
 
 export interface StoryClip {
   id: string;
@@ -15,7 +9,7 @@ export interface StoryClip {
   audioUrl: string | null;
   thumbnailUrl: string | null;
   durationMs: number | null;
-  subtitles: Subtitle[];
+  subtitles: ClipSubtitle[];
 }
 
 export interface StoryBreakdownItem {
