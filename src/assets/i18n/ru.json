@@ -6,8 +6,26 @@
     "save": "Сохранить",
     "delete": "Удалить",
     "closeDialog": "Закрыть диалог",
-    "listen": "Прослушать", "check": "Проверить", "next": "Дальше", "back": "Назад", "start": "Начать", "email": "Email", "password": "Пароль", "name": "Имя", "all": "Все", "create": "Создать", "rename": "Переименовать", "toLessons": "К урокам", "toDashboard": "На дашборд", "openPro": "Открыть Pro →", "exit": "Выйти", "reset": "Сбросить",
-    "errors": {"serverUnavailable":"Сервер недоступен. Попробуй позже", "generic":"Что-то пошло не так. Попробуй ещё раз"}
+    "listen": "Прослушать",
+    "check": "Проверить",
+    "next": "Дальше",
+    "back": "Назад",
+    "start": "Начать",
+    "email": "Email",
+    "password": "Пароль",
+    "name": "Имя",
+    "all": "Все",
+    "create": "Создать",
+    "rename": "Переименовать",
+    "toLessons": "К урокам",
+    "toDashboard": "На дашборд",
+    "openPro": "Открыть Pro →",
+    "exit": "Выйти",
+    "reset": "Сбросить",
+    "errors": {
+      "serverUnavailable": "Сервер недоступен. Попробуй позже",
+      "generic": "Что-то пошло не так. Попробуй ещё раз"
+    }
   },
   "navigation": {
     "brand": "한걸음",
@@ -77,7 +95,13 @@
       "empty": "Буквы ещё загружаются в курс — загляни чуть позже.",
       "learned": "букв изучено",
       "congrats": "모두 완료! Алфавит пройден — XP уже начислен.",
-      "checkAria": "Изучена"
+      "checkAria": "Изучена",
+      "groups": {
+        "VOWEL_BASIC": "Гласные базовые",
+        "VOWEL_COMPOUND": "Гласные составные",
+        "CONSONANT_BASIC": "Согласные базовые",
+        "CONSONANT_DOUBLE": "Согласные двойные"
+      }
     },
     "lessonTip": {
       "loading": "Загружаем подсказку…",
@@ -117,17 +141,76 @@
       "nodePro": "Открыть по подписке",
       "nodeLocked": "Закрыто",
       "nodeStory": "Видео носителя · финал главы",
-      "nodeXp": "+{{xp}} XP"
+      "nodeXp": "+{{xp}} XP",
+      "chapter": "ГЛАВА {{number}} · {{title}}",
+      "chapterDone": "ГЛАВА {{number}} · {{title}} · ЗАВЕРШЕНА"
     },
     "particlesPlaceholder": "Частицы 은/는",
     "tipTextPlaceholder": "Текст с переносами…",
     "examplesJson": "Примеры в JSON",
     "saveTip": "Сохранить tip",
-    "exercise":{"chooseTranslation":"Выбери перевод","fillBlank":"Заполни пропуск","hint":"Подсказка","listenChoose":"Слушай и выбери","listenAgain":"Нажми, чтобы прослушать ещё раз","matchPairs":"Сопоставь пары","typeKorean":"Напечатай по-корейски","answerKorean":"Ответ по-корейски","koreanPlaceholder":"한국어로…","buildSentence":"Собери предложение","assembledSentence":"Собранное предложение","chooseWords":"Нажимай на слова внизу","removeWord":"Убрать слово {{word}}","addWord":"Добавить слово {{word}}"},
-    "lesson":{"exitConfirmation":"Выйти из урока? Прогресс этой сессии не сохранится.","newWords":"новых слов","streakDays":"дней серии","dailyGoal":"цель дня","loading":"Загружаем урок…","backToMap":"К дереву уроков","congratulations":"축하","koreanCongratulations":"참 잘했어요!","completed":"Урок пройден","newWordsSaved":"Новые слова уже в словаре — SRS напомнит о них завтра.","exit":"Выйти из урока","correct":"Верно!","incorrect":"Не совсем.","correctAnswer":"Правильно","retryAtEnd":"Без штрафа — вопрос вернётся в конце урока.","saveError":"Не получилось сохранить результат урока.","saving":"Сохраняем результат…"},
-    "story":{"watch":"Смотреть","read":"Читать","listen":"Слушать","loading":"Загружаем story…","backToLessons":"К урокам","title":"Story","instructions":"Тапни строку — увидишь перевод и разбор.","mode":"Режим Story","video":"Видео: {{title}}","highlightedLines":"Строки подсвечиваются по мере воспроизведения","inVocabulary":"✓ в словаре","addToVocabulary":"+ в словарь","retrySaving":"Повторить сохранение","complete":"Story пройдена ✓","completed":"🎉 Story пройдена — прогресс сохранён."}
+    "exercise": {
+      "chooseTranslation": "Выбери перевод",
+      "fillBlank": "Заполни пропуск",
+      "hint": "Подсказка",
+      "listenChoose": "Слушай и выбери",
+      "listenAgain": "Нажми, чтобы прослушать ещё раз",
+      "matchPairs": "Сопоставь пары",
+      "typeKorean": "Напечатай по-корейски",
+      "answerKorean": "Ответ по-корейски",
+      "koreanPlaceholder": "한국어로…",
+      "buildSentence": "Собери предложение",
+      "assembledSentence": "Собранное предложение",
+      "chooseWords": "Нажимай на слова внизу",
+      "removeWord": "Убрать слово {{word}}",
+      "addWord": "Добавить слово {{word}}"
+    },
+    "lesson": {
+      "exitConfirmation": "Выйти из урока? Прогресс этой сессии не сохранится.",
+      "newWords": "новых слов",
+      "streakDays": "дней серии",
+      "dailyGoal": "цель дня",
+      "loading": "Загружаем урок…",
+      "backToMap": "К дереву уроков",
+      "congratulations": "축하",
+      "koreanCongratulations": "참 잘했어요!",
+      "completed": "Урок пройден",
+      "newWordsSaved": "Новые слова уже в словаре — SRS напомнит о них завтра.",
+      "exit": "Выйти из урока",
+      "correct": "Верно!",
+      "incorrect": "Не совсем.",
+      "correctAnswer": "Правильно",
+      "retryAtEnd": "Без штрафа — вопрос вернётся в конце урока.",
+      "saveError": "Не получилось сохранить результат урока.",
+      "saving": "Сохраняем результат…"
+    },
+    "story": {
+      "watch": "Смотреть",
+      "read": "Читать",
+      "listen": "Слушать",
+      "loading": "Загружаем story…",
+      "backToLessons": "К урокам",
+      "title": "Story",
+      "instructions": "Тапни строку — увидишь перевод и разбор.",
+      "mode": "Режим Story",
+      "video": "Видео: {{title}}",
+      "highlightedLines": "Строки подсвечиваются по мере воспроизведения",
+      "inVocabulary": "✓ в словаре",
+      "addToVocabulary": "+ в словарь",
+      "retrySaving": "Повторить сохранение",
+      "complete": "Story пройдена ✓",
+      "completed": "🎉 Story пройдена — прогресс сохранён."
+    }
   },
   "admin": {
+    "grammar": {
+      "title": "Грамматика · Learning Tips",
+      "subtitle": "Все подсказки курса. Редактирование — в конструкторе урока.",
+      "tipTitle": "Заголовок",
+      "rule": "Правило",
+      "empty": "Tips пока нет — добавь через конструктор урока.",
+      "loadError": "Не получилось загрузить tips."
+    },
     "tipHeading": "Learning Tip (грамматика перед уроком)",
     "tipTitle": "Заголовок",
     "tipTitlePlaceholder": "Например, Частицы 은/는",
@@ -164,6 +247,7 @@
       "searchWordPlaceholder": "Поиск слова…",
       "saveClip": "Сохранить клип",
       "subtitlesLabel": "Субтитры в JSON",
+      "subtitlesPlaceholder": "[{\"lang\":\"ko\",\"position\":1,\"text\":\"안녕하세요\",\"startMs\":0,\"endMs\":3000}]",
       "saveSubtitles": "Сохранить субтитры",
       "noClips": "Клипов нет — создай первый.",
       "newClipKindAria": "Тип нового клипа",
@@ -197,6 +281,7 @@
         "updateClip": "Не получилось обновить клип",
         "uploadFile": "Не получилось загрузить файл.",
         "saveSubtitles": "Не получилось сохранить субтитры",
+        "loadSubtitles": "Не получилось загрузить субтитры.",
         "subtitlesJson": "Субтитры — некорректный JSON.",
         "durationNegative": "Длительность должна быть не меньше 0 мс.",
         "errorWithDetail": "{{prefix}}: {{detail}}",
@@ -269,7 +354,143 @@
         "wordsSaved": "Слова урока обновлены"
       }
     },
-    "brand":"admin", "backToApp":"← Вернуться в приложение", "navigation":{"dashboard":"Дашборд","words":"Слова","topics":"Темы","course":"Курс и уроки","alphabet":"Алфавит","grammar":"Грамматика","media":"Медиа / Story","users":"Пользователи","notifications":"Уведомления"}
+    "brand": "admin",
+    "backToApp": "← Вернуться в приложение",
+    "navigation": {
+      "dashboard": "Дашборд",
+      "words": "Слова",
+      "topics": "Темы",
+      "course": "Курс и уроки",
+      "alphabet": "Алфавит",
+      "grammar": "Грамматика",
+      "media": "Медиа / Story",
+      "users": "Пользователи",
+      "notifications": "Уведомления"
+    },
+    "alphabet": {
+      "title": "Алфавит",
+      "subtitle": "40 букв 자모: озвучка и порядок. Буквы создаются миграцией БД.",
+      "romanization": "Романизация",
+      "group": "Группа",
+      "position": "Позиция",
+      "audio": "Аудио",
+      "replaceAudio": "🔊 Заменить",
+      "uploadAudio": "⬆ Загрузить",
+      "empty": "Букв нет — прогони миграцию/сид БД.",
+      "loadError": "Не получилось загрузить алфавит.",
+      "uploadError": "Не получилось загрузить аудио."
+    },
+    "metrics": {
+      "title": "Админ · Дашборд",
+      "subtitle": "Ключевые метрики продукта.",
+      "loadError": "Не получилось загрузить метрики.",
+      "users": "пользователей",
+      "lessonsToday": "уроков сегодня",
+      "pro": "активных Pro",
+      "conversion": "конверсия в Pro",
+      "loading": "Загружаем…"
+    },
+    "topics": {
+      "title": "Темы словаря",
+      "subtitle": "Категории слов: еда, знакомство, погода…",
+      "codePlaceholder": "Например, food",
+      "name": "Название",
+      "icon": "Иконка",
+      "add": "Добавить",
+      "rename": "Переименовать",
+      "delete": "Удалить",
+      "empty": "Тем пока нет.",
+      "loadError": "Не получилось загрузить темы.",
+      "createError": "Не получилось создать тему (code должен быть уникальным).",
+      "renamePrompt": "Новое название:",
+      "deleteError": "Не получилось удалить — тема используется словами.",
+      "deleteConfirm": "Удалить тему «{{title}}»?"
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "subtitle": "Системная рассылка — уходит всем пользователям (in-app).",
+      "sent": "✓ Рассылка отправлена",
+      "subject": "Заголовок",
+      "subjectPlaceholder": "Новые уроки уже в курсе!",
+      "body": "Текст",
+      "bodyPlaceholder": "Юнит 3 «В кафе» опубликован…",
+      "send": "Отправить всем",
+      "sendError": "Не получилось отправить.",
+      "sendConfirm": "Отправить рассылку «{{title}}» всем пользователям?"
+    },
+    "words": {
+      "title": "Слова",
+      "search": "Поиск слов",
+      "searchPlaceholder": "Хангыль или перевод…",
+      "create": "Новое слово",
+      "hangul": "Хангыль",
+      "romanization": "Транскрипция",
+      "translation": "Перевод",
+      "media": "Медиа",
+      "uploadAudio": "Загрузить аудио слова",
+      "edit": "Изменить",
+      "delete": "Удалить",
+      "empty": "Слов пока нет — добавь первое.",
+      "pagination": "Страницы слов",
+      "close": "Закрыть",
+      "editTitle": "Изменить слово",
+      "chooseImage": "Выбрать изображение",
+      "image": "Изображение слова",
+      "imageHint": "PNG, JPEG или WebP, до 5 МиБ.",
+      "romanizationLabel": "Транскрипция (латиницей)",
+      "romanizationPlaceholder": "Например, keopi",
+      "partOfSpeech": "Часть речи",
+      "partOfSpeechPlaceholder": "существительное",
+      "topic": "Тема",
+      "exampleKo": "Пример (ko)",
+      "exampleTranslation": "Перевод примера",
+      "grammarNote": "Грамматическая пометка",
+      "saving": "Сохранение…",
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "noTopic": "— без темы —",
+      "loadError": "Не получилось загрузить слова.",
+      "topicsError": "Не получилось загрузить темы.",
+      "imageSaveError": "Слово сохранено, изображение не загружено. Попробуйте ещё раз.",
+      "saveError": "Не получилось сохранить слово. Попробуйте ещё раз.",
+      "invalidImage": "Выберите непустой PNG, JPEG или WebP размером до 5 МиБ.",
+      "deleteError": "Не получилось удалить (слово может использоваться в уроках).",
+      "uploadError": "Не получилось загрузить файл.",
+      "count": "{{count}} слов в базе.",
+      "deleteConfirm": "Удалить «{{hangul}}»?"
+    },
+    "users": {
+      "title": "Пользователи",
+      "search": "Поиск пользователей",
+      "searchPlaceholder": "Имя или email…",
+      "name": "Имя",
+      "role": "Роль",
+      "registered": "Регистрация",
+      "block": "Заблокировать",
+      "unblock": "Разблокировать",
+      "delete": "Удалить",
+      "empty": "Никого не нашли.",
+      "pagination": "Страницы пользователей",
+      "close": "Закрыть",
+      "confirm": "Подтвердить",
+      "cancel": "Отмена",
+      "deleteTitle": "Удалить пользователя",
+      "roleTitle": "Сменить роль",
+      "blockTitle": "Заблокировать пользователя",
+      "unblockTitle": "Разблокировать пользователя",
+      "loadError": "Не получилось загрузить пользователей.",
+      "activeSubscription": "У пользователя есть действующая платная подписка. Сначала отмените её.",
+      "count": "{{count}} зарегистрировано.",
+      "roleAria": "Роль {{email}}",
+      "deleteMessage": "Безвозвратно удалить {{email}} и связанные данные?",
+      "roleMessage": "Сменить роль {{email}} на {{role}}?",
+      "blockMessage": "Заблокировать {{email}}?",
+      "unblockMessage": "Разблокировать {{email}}?",
+      "deleteError": "Не получилось удалить пользователя. Попробуйте ещё раз.",
+      "roleError": "Не получилось сменить роль. Попробуйте ещё раз.",
+      "blockError": "Не получилось заблокировать. Попробуйте ещё раз.",
+      "unblockError": "Не получилось разблокировать. Попробуйте ещё раз."
+    }
   },
   "mascot": {
     "ariaLabel": "Маскот 걸음이"
@@ -283,9 +504,459 @@
     "ogTitle": "한걸음 · Hangeoreum",
     "ogDescription": "Грамматика, карточки и речь носителей — три сильных подхода в одном приложении."
   },
-  "identity":{"onboarding":{"level":{"title":"Какой у тебя уровень?","subtitle":"Подберём старт под то, что ты уже знаешь.","label":"Уровень"},"levels":{"beginner":{"title":"Начинаю с нуля","hint":"Ещё ни одной буквы хангыля"},"hangul":{"title":"Знаю хангыль","hint":"Читаю буквы, но слов почти нет"},"intermediate":{"title":"Понимаю базу","hint":"Знаю простые фразы и частицы"}},"goal":{"title":"Сколько времени в день?","subtitle":"Цель можно поменять в настройках.","label":"Цель в день"},"goals":{"calm":{"title":"Спокойно","hint":"Немного, но каждый день"},"confident":{"title":"Уверенно","hint":"Регулярная практика"},"serious":{"title":"Всерьёз","hint":"Быстрый прогресс"}},"reminder":{"title":"Напомнить о занятиях?","subtitle":"Напишем, когда пора заниматься.","time":"Время напоминания"},"finish":"Готово"},"profile":{"loading":"Загружаем профиль…","avatarUploading":"Загружаем…","avatar":"Аватар","chooseAvatarAria":"Выбрать новый аватар","changeAvatar":"Сменить аватар","levelFallback":"Уровень {{level}}","memberSince":"한국어 · изучает корейский с {{date}}","levelUp":"До следующего уровня","wordsLearned":"слов выучено","streakRecord":"дней серии (рекорд {{longest}})","lessonsCompleted":"уроков пройдено","achievementsCount":"достижений","achievementsTitle":"Достижения","achievementsEmpty":"Достижения появятся после первых уроков.","subscriptionTitle":"Подписка","subscriptionHint":"Управление тарифом и оплатой","open":"Открыть"},"settings":{"title":"Настройки","saved":"✓ Сохранено","profile":"Профиль","password":"Пароль","change":"Изменить","changePassword":"Сменить пароль","currentPassword":"Текущий пароль","newPassword":"Новый пароль","newPasswordPlaceholder":"Новый пароль — минимум 8 символов","learning":"Обучение","dailyGoal":"Цель в день","reminders":"Напоминания","reminderTime":"Время напоминания","soon":"скоро","autoSound":"Автозвук в карточках","romanization":"Романизация в карточках","audioVideo":"Аудио и видео","speechSpeed":"Скорость речи","autoplay":"Автовоспроизведение","theme":"Тема","appearance":"Оформление","accent":"Акцент","fontSize":"Размер текста","radius":"Скругления","account":"Аккаунт","logoutLabel":"Выйти из аккаунта","deleteAccount":"Удалить аккаунт","deleteForever":"Удалить навсегда","modes":{"light":"Светлая","dark":"Тёмная","system":"Системная"},"errors":{"save":"Не удалось сохранить. Проверь соединение.","load":"Не получилось загрузить настройки.","name":"Не получилось изменить имя.","currentPasswordRequired":"Введи текущий пароль","newPasswordMin":"Новый пароль — минимум 8 символов","changePassword":"Не получилось — проверь текущий пароль","deleteAccount":"Не получилось удалить аккаунт."},"confirm":{"unsaved":"Настройки ещё не сохранены. Сохранить их перед выходом?","deleteAccount":"Удалить аккаунт навсегда? Прогресс, слова и подписка будут стёрты."}},"validation":{"email":"Введи корректный email","passwordRequired":"Введи пароль","passwordMin":"Минимум 8 символов","passwordLength":"Пароль должен содержать от 8 до 100 символов","passwordMatch":"Пароли должны совпадать","name":"Как тебя зовут?","consent":"Нужно принять условия, чтобы продолжить"},"errors":{"invalidCredentials":"Неверный email или пароль","emailTaken":"Такой email уже зарегистрирован","validation":"Проверь правильность заполнения полей"},"login":{"eyebrow":"로그인 · Вход","title":"Войти в аккаунт","subtitle":"Рад снова видеть тебя 👋","submit":"Войти","noAccount":"Нет аккаунта?","forgotPrompt":"Забыли пароль?","recover":"Восстановить","passwordChanged":"Пароль изменён, войдите с новым паролем"},"register":{"eyebrow":"회원가입 · Регистрация","passwordPlaceholder":"Минимум 8 символов","title":"Создать аккаунт","subtitle":"Займёт меньше минуты.","namePlaceholder":"Сергей","consent":"Принимаю условия и политику","submit":"Создать аккаунт","link":"Зарегистрироваться","hasAccount":"Уже есть аккаунт?"},"passwordReset":{"forgotEyebrow":"비밀번호 찾기 · Восстановление","forgotTitle":"Восстановить пароль","forgotSubtitle":"Укажи email аккаунта — мы отправим ссылку для смены пароля.","send":"Отправить ссылку","requested":"Если аккаунт с таким email существует, ссылка для восстановления уже отправлена.","backToLogin":"Вернуться ко входу","resetEyebrow":"새 비밀번호 · Новый пароль","resetTitle":"Задать новый пароль","resetSubtitle":"Придумай новый пароль для входа в аккаунт.","newPassword":"Новый пароль","confirmPassword":"Повтори пароль","save":"Сохранить пароль","missingToken":"Ссылка для восстановления недействительна. Запроси новую.","invalidToken":"Ссылка недействительна или устарела. Запроси новую.","requestAgain":"Запросить новую ссылку"}},
-  "landing":{"brand":"한걸음","brandName":"한걸음 · Hangeoreum","hero":{"title":"Корейский, который ты понимаешь, а не зазубриваешь.","subtitle":"Грамматика с объяснениями до практики, визуальные карточки с умным повторением и живая речь носителей — три сильных подхода в одном приложении.","startFree":"Начать бесплатно","hasAccount":"У меня есть аккаунт"},"proverb":{"korean":"천 리 길도 한 걸음부터","translation":"Дорога в тысячу ли начинается с одного шага"},"featuresHeading":"Почему это работает","featuresSubheading":"Не механический повтор — понимание, визуальная память и живая речь.","features":{"understanding":{"title":"Сначала понимание","text":"Каждый урок начинается с короткого Learning Tip — одно правило грамматики, разобранное на живых примерах с подсветкой частиц.","source":"Подход LingoDeer"},"cards":{"title":"Карточки и мини-игры","text":"Слова закрепляются визуально: 3D-карточки, match, listen, spell.","source":"Подход Drops"},"speech":{"title":"Речь настоящих носителей","text":"Видео-Story после каждого юнита и лента Immerse с короткими клипами.","source":"Подход Memrise"}},"pricing":{"heading":"Тарифы","subheading":"Начни бесплатно. Открой всё, когда втянешься.","free":{"title":"Free","subtitle":"Для знакомства","price":"0 €","priceSuffix":" / навсегда","benefit1":"Алфавит хангыль полностью","benefit2":"Первые 2 юнита курса","benefit3":"Базовые карточки","benefit4":"1 урок или 5 минут игр в день"},"pro":{"popular":"⭐ Популярный","title":"Pro","price":"9 €","subtitle":"Весь курс без лимитов","priceSuffix":" / месяц · год и lifetime дешевле","benefit1":"Все уроки и Story","benefit2":"Лента Immerse с носителями","benefit3":"ИИ-диалог для практики","benefit4":"Офлайн-режим и полная статистика","cta":"Попробовать Pro"}},"footerLinks":"Условия · Приватность · Контакты"},
-  "dashboard":{"weekdays":{"mon":"Пн","tue":"Вт","wed":"Ср","thu":"Чт","fri":"Пт","sat":"Сб","sun":"Вс"},"errors":{"load":"Не получилось загрузить дашборд. Проверь соединение и попробуй ещё раз.","courseMap":"Не получилось загрузить карту курса."},"welcomeBack":"С возвращением, {{name}}.","goalReached":"Цель дня закрыта —","goalRemaining":"До цели дня —","koreanWellDone":"잘했어요!","koreanCheer":"화이팅! 🔥","koreanStepByStep":"한 걸음씩","streakDays":"Серия {{count}} дн. подряд.","oneMoreLesson":"Ещё один урок — и неделя закрыта полностью.","openCourseMap":"Открыть карту курса","wordsDue":"{{count}} слов на повторе","coursePath":"Путь курса","firstSteps":"Первые шаги","lessonsCompleted":"{{count}} уроков пройдено","fullMap":"Вся карта →","loadingCourseMap":"Загружаем карту курса…","emptyCourseMap":"Курс ещё наполняется контентом. Начни с алфавита — он уже доступен.","toAlphabet":"К алфавиту →","weekXp":"XP за неделю","xpValue":"{{value}} XP","wordsLearned":"слов выучено","streakLabel":"дней серии","lessonsCompletedLabel":"уроков пройдено","totalXp":"всего XP","dailyGoal":"цель дня","xpToday":"XP сегодня","todayDone":"Сегодня закрыто.","streakHolds":"Серия держится","completeTodayGoal":"Закрой сегодняшнюю цель — и неделя будет полной.","wordOfDay":"Слово дня","review":"Повторение","reviewWaiting":"{{count}} слов ждут повторения","startReview":"Начать повторение","noReviewNeeded":"Пока нечего повторять — всё в графике."},
-  "media":{"errors":{"load":"Не получилось загрузить ленту.","view":"Не получилось сохранить просмотр.","like":"Не получилось сохранить лайк."},"subtitles":{"label":"Язык субтитров","korean":"한국어","translation":"Перевод","both":"Оба"},"pro":{"title":"Immerse — Pro-фича","description":"Лента коротких видео носителей: субтитры, слова в один тап.","open":"Открыть с Pro"},"empty":{"title":"Клипы уже в пути","description":"Носители записывают видео — лента скоро наполнится."},"previousVideo":"Предыдущее видео","nextVideo":"Следующее видео","videoAria":"Видео: {{title}}","clipFallback":"клип","like":"Нравится","unlike":"Убрать лайк","addWordAria":"Слово в словарь"},
-  "vocabulary":{"title":"Мой словарь","wordCount":"{{count}} слов","sectionLabel":"Раздел словаря","tabs":{"words":"Слова","decks":"Мои колоды"},"search":{"label":"Поиск слов","placeholder":"Хангыль или перевод…"},"levelLabel":"Уровень слова","sortLabel":"Сортировка","level":"Уровень {{level}}","levels":{"new":"☆ Новые","learned":"★★★ Выучено"},"sort":{"due":"По сроку","created":"По дате","alpha":"По алфавиту"},"due":{"today":"сегодня","tomorrow":"завтра","inDays":"через {{days}} д"},"emptyWords":"Пока нет слов — пройди урок, и они появятся здесь.","emptyReview":"Пока нечего повторять — пройди урок, и слова появятся здесь.","markDifficult":"Отметить сложным","removeDifficult":"Убрать метку «сложное»","toDeck":"В колоду","addToDeck":"Добавить в колоду","addToDeckAria":"Добавить {{word}} в колоду","deckPickerQuestion":"«{{word}}» — в какую колоду?","deckPickerEmpty":"Колод пока нет. Создай её на вкладке «Мои колоды».","deck":{"nameLabel":"Название новой колоды","placeholder":"Например, Путешествие","empty":"Колод пока нет — создай первую и собирай в неё слова.","renamePrompt":"Новое название колоды:","deleteConfirm":"Удалить колоду «{{title}}»?"},"errors":{"load":"Не получилось загрузить словарь.","loadDecks":"Не получилось загрузить колоды.","createDeck":"Не получилось создать колоду.","renameDeck":"Не получилось переименовать колоду.","deleteDeck":"Не получилось удалить колоду.","addToDeck":"Не получилось добавить слово в колоду.","loadSummary":"Не получилось загрузить сводку повторения.","dailyLimit":"Дневной лимит бесплатных игр исчерпан.","startSession":"Не получилось начать сессию.","saveReview":"Не получилось сохранить повторение. Повторите попытку."},"games":{"title":"Мини-игры","subtitle":"Пять минут в день. Выбери игру — таймер пойдёт сразу.","loading":"Готовим слова…","combo":"🔥 Комбо ×{{combo}} · {{score}} очков","addSyllable":"Добавить слог {{syllable}}","roundComplete":"Раунд завершён","anotherRound":"Ещё раунд","koreanEyebrow":"놀이","koreanTitle":"잘 놀았어요!","match":{"title":"Match","hint":"Соедини слово и перевод"},"listen":{"title":"Listen","hint":"Услышь и выбери"},"spell":{"title":"Spell","hint":"Собери слово из слогов"},"stats":{"score":"очков","words":"слов","correct":"верно"}},"ratings":{"again":"Снова","hard":"Трудно","good":"Хорошо","easy":"Легко"},"stats":{"reviewed":"повторено","remembered":"крепко в памяти","difficult":"сложных"},"toModes":"К режимам","flashcards":{"loading":"Готовим карточки…","koreanEyebrow":"기억","koreanTitle":"수고했어요!","complete":"Сессия завершена","updatedIntervals":"SM-2 обновил интервалы для {{count}} слов","reviewAgain":"Стоит повторить ещё раз","againTomorrow":"снова завтра","toReviewModes":"К режимам повторения","saving":"Сохраняем повторение…","flipAria":"Перевернуть карточку","flipHint":"Клик, тап или пробел — переворот","showAnswer":"Показать ответ","rateHint":"Оцени, насколько легко вспомнилось · клавиши 1–4"}}
+  "identity": {
+    "onboarding": {
+      "level": {
+        "title": "Какой у тебя уровень?",
+        "subtitle": "Подберём старт под то, что ты уже знаешь.",
+        "label": "Уровень"
+      },
+      "levels": {
+        "beginner": {
+          "title": "Начинаю с нуля",
+          "hint": "Ещё ни одной буквы хангыля"
+        },
+        "hangul": {
+          "title": "Знаю хангыль",
+          "hint": "Читаю буквы, но слов почти нет"
+        },
+        "intermediate": {
+          "title": "Понимаю базу",
+          "hint": "Знаю простые фразы и частицы"
+        }
+      },
+      "goal": {
+        "title": "Сколько времени в день?",
+        "subtitle": "Цель можно поменять в настройках.",
+        "label": "Цель в день"
+      },
+      "goals": {
+        "calm": {
+          "title": "Спокойно",
+          "hint": "Немного, но каждый день"
+        },
+        "confident": {
+          "title": "Уверенно",
+          "hint": "Регулярная практика"
+        },
+        "serious": {
+          "title": "Всерьёз",
+          "hint": "Быстрый прогресс"
+        }
+      },
+      "reminder": {
+        "title": "Напомнить о занятиях?",
+        "subtitle": "Напишем, когда пора заниматься.",
+        "time": "Время напоминания"
+      },
+      "finish": "Готово"
+    },
+    "profile": {
+      "loading": "Загружаем профиль…",
+      "avatarUploading": "Загружаем…",
+      "avatar": "Аватар",
+      "chooseAvatarAria": "Выбрать новый аватар",
+      "changeAvatar": "Сменить аватар",
+      "levelFallback": "Уровень {{level}}",
+      "memberSince": "한국어 · изучает корейский с {{date}}",
+      "levelUp": "До следующего уровня",
+      "wordsLearned": "слов выучено",
+      "streakRecord": "дней серии (рекорд {{longest}})",
+      "lessonsCompleted": "уроков пройдено",
+      "achievementsCount": "достижений",
+      "achievementsTitle": "Достижения",
+      "achievementsEmpty": "Достижения появятся после первых уроков.",
+      "subscriptionTitle": "Подписка",
+      "subscriptionHint": "Управление тарифом и оплатой",
+      "open": "Открыть"
+    },
+    "settings": {
+      "title": "Настройки",
+      "saved": "✓ Сохранено",
+      "profile": "Профиль",
+      "password": "Пароль",
+      "change": "Изменить",
+      "changePassword": "Сменить пароль",
+      "currentPassword": "Текущий пароль",
+      "newPassword": "Новый пароль",
+      "newPasswordPlaceholder": "Новый пароль — минимум 8 символов",
+      "learning": "Обучение",
+      "dailyGoal": "Цель в день",
+      "reminders": "Напоминания",
+      "reminderTime": "Время напоминания",
+      "soon": "скоро",
+      "autoSound": "Автозвук в карточках",
+      "romanization": "Романизация в карточках",
+      "audioVideo": "Аудио и видео",
+      "speechSpeed": "Скорость речи",
+      "autoplay": "Автовоспроизведение",
+      "theme": "Тема",
+      "themeOptions": {
+        "accentBlue": "Синий (основной)",
+        "accentRed": "Красный",
+        "accentYellow": "Жёлтый",
+        "accentJade": "Нефрит",
+        "fontCompact": "Компактно",
+        "fontNormal": "Обычно",
+        "fontLarge": "Крупно",
+        "fontExtraLarge": "Очень крупно",
+        "radiusSharp": "Острые",
+        "radiusNormal": "Обычные",
+        "radiusSoft": "Мягкие"
+      },
+      "appearance": "Оформление",
+      "accent": "Акцент",
+      "fontSize": "Размер текста",
+      "radius": "Скругления",
+      "account": "Аккаунт",
+      "logoutLabel": "Выйти из аккаунта",
+      "deleteAccount": "Удалить аккаунт",
+      "deleteForever": "Удалить навсегда",
+      "modes": {
+        "light": "Светлая",
+        "dark": "Тёмная",
+        "system": "Системная"
+      },
+      "errors": {
+        "save": "Не удалось сохранить. Проверь соединение.",
+        "load": "Не получилось загрузить настройки.",
+        "name": "Не получилось изменить имя.",
+        "currentPasswordRequired": "Введи текущий пароль",
+        "newPasswordMin": "Новый пароль — минимум 8 символов",
+        "changePassword": "Не получилось — проверь текущий пароль",
+        "deleteAccount": "Не получилось удалить аккаунт."
+      },
+      "confirm": {
+        "unsaved": "Настройки ещё не сохранены. Сохранить их перед выходом?",
+        "deleteAccount": "Удалить аккаунт навсегда? Прогресс, слова и подписка будут стёрты."
+      }
+    },
+    "validation": {
+      "email": "Введи корректный email",
+      "passwordRequired": "Введи пароль",
+      "passwordMin": "Минимум 8 символов",
+      "passwordLength": "Пароль должен содержать от 8 до 100 символов",
+      "passwordMatch": "Пароли должны совпадать",
+      "name": "Как тебя зовут?",
+      "consent": "Нужно принять условия, чтобы продолжить"
+    },
+    "errors": {
+      "invalidCredentials": "Неверный email или пароль",
+      "emailTaken": "Такой email уже зарегистрирован",
+      "validation": "Проверь правильность заполнения полей"
+    },
+    "login": {
+      "eyebrow": "로그인 · Вход",
+      "title": "Войти в аккаунт",
+      "subtitle": "Рад снова видеть тебя 👋",
+      "submit": "Войти",
+      "password": "Введи пароль",
+      "noAccount": "Нет аккаунта?",
+      "forgotPrompt": "Забыли пароль?",
+      "recover": "Восстановить",
+      "passwordChanged": "Пароль изменён, войдите с новым паролем"
+    },
+    "register": {
+      "eyebrow": "회원가입 · Регистрация",
+      "passwordPlaceholder": "Минимум 8 символов",
+      "title": "Создать аккаунт",
+      "subtitle": "Займёт меньше минуты.",
+      "namePlaceholder": "Сергей",
+      "consent": "Принимаю условия и политику",
+      "submit": "Создать аккаунт",
+      "link": "Зарегистрироваться",
+      "hasAccount": "Уже есть аккаунт?"
+    },
+    "passwordReset": {
+      "forgotEyebrow": "비밀번호 찾기 · Восстановление",
+      "forgotTitle": "Восстановить пароль",
+      "forgotSubtitle": "Укажи email аккаунта — мы отправим ссылку для смены пароля.",
+      "send": "Отправить ссылку",
+      "requested": "Если аккаунт с таким email существует, ссылка для восстановления уже отправлена.",
+      "backToLogin": "Вернуться ко входу",
+      "resetEyebrow": "새 비밀번호 · Новый пароль",
+      "resetTitle": "Задать новый пароль",
+      "resetSubtitle": "Придумай новый пароль для входа в аккаунт.",
+      "newPassword": "Новый пароль",
+      "confirmPassword": "Повтори пароль",
+      "save": "Сохранить пароль",
+      "missingToken": "Ссылка для восстановления недействительна. Запроси новую.",
+      "invalidToken": "Ссылка недействительна или устарела. Запроси новую.",
+      "requestAgain": "Запросить новую ссылку"
+    }
+  },
+  "landing": {
+    "brand": "한걸음",
+    "brandName": "한걸음 · Hangeoreum",
+    "hero": {
+      "title": "Корейский, который ты понимаешь, а не зазубриваешь.",
+      "subtitle": "Грамматика с объяснениями до практики, визуальные карточки с умным повторением и живая речь носителей — три сильных подхода в одном приложении.",
+      "startFree": "Начать бесплатно",
+      "hasAccount": "У меня есть аккаунт"
+    },
+    "proverb": {
+      "korean": "천 리 길도 한 걸음부터",
+      "translation": "Дорога в тысячу ли начинается с одного шага"
+    },
+    "featuresHeading": "Почему это работает",
+    "featuresSubheading": "Не механический повтор — понимание, визуальная память и живая речь.",
+    "features": {
+      "understanding": {
+        "title": "Сначала понимание",
+        "text": "Каждый урок начинается с короткого Learning Tip — одно правило грамматики, разобранное на живых примерах с подсветкой частиц.",
+        "source": "Подход LingoDeer"
+      },
+      "cards": {
+        "title": "Карточки и мини-игры",
+        "text": "Слова закрепляются визуально: 3D-карточки, match, listen, spell.",
+        "source": "Подход Drops"
+      },
+      "speech": {
+        "title": "Речь настоящих носителей",
+        "text": "Видео-Story после каждого юнита и лента Immerse с короткими клипами.",
+        "source": "Подход Memrise"
+      }
+    },
+    "pricing": {
+      "heading": "Тарифы",
+      "subheading": "Начни бесплатно. Открой всё, когда втянешься.",
+      "free": {
+        "title": "Free",
+        "subtitle": "Для знакомства",
+        "price": "0 €",
+        "priceSuffix": " / навсегда",
+        "benefit1": "Алфавит хангыль полностью",
+        "benefit2": "Первые 2 юнита курса",
+        "benefit3": "Базовые карточки",
+        "benefit4": "1 урок или 5 минут игр в день"
+      },
+      "pro": {
+        "popular": "⭐ Популярный",
+        "title": "Pro",
+        "price": "9 €",
+        "subtitle": "Весь курс без лимитов",
+        "priceSuffix": " / месяц · год и lifetime дешевле",
+        "benefit1": "Все уроки и Story",
+        "benefit2": "Лента Immerse с носителями",
+        "benefit3": "ИИ-диалог для практики",
+        "benefit4": "Офлайн-режим и полная статистика",
+        "cta": "Попробовать Pro"
+      }
+    },
+    "footerLinks": "Условия · Приватность · Контакты"
+  },
+  "dashboard": {
+    "weekdays": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Вс"
+    },
+    "errors": {
+      "load": "Не получилось загрузить дашборд. Проверь соединение и попробуй ещё раз.",
+      "courseMap": "Не получилось загрузить карту курса."
+    },
+    "welcomeBack": "С возвращением, {{name}}.",
+    "goalReached": "Цель дня закрыта —",
+    "goalRemaining": "До цели дня —",
+    "koreanWellDone": "잘했어요!",
+    "koreanCheer": "화이팅! 🔥",
+    "koreanStepByStep": "한 걸음씩",
+    "streakDays": "Серия {{count}} дн. подряд.",
+    "oneMoreLesson": "Ещё один урок — и неделя закрыта полностью.",
+    "openCourseMap": "Открыть карту курса",
+    "wordsDue": "{{count}} слов на повторе",
+    "coursePath": "Путь курса",
+    "firstSteps": "Первые шаги",
+    "lessonsCompleted": "{{count}} уроков пройдено",
+    "fullMap": "Вся карта →",
+    "loadingCourseMap": "Загружаем карту курса…",
+    "emptyCourseMap": "Курс ещё наполняется контентом. Начни с алфавита — он уже доступен.",
+    "toAlphabet": "К алфавиту →",
+    "weekXp": "XP за неделю",
+    "xpValue": "{{value}} XP",
+    "wordsLearned": "слов выучено",
+    "streakLabel": "дней серии",
+    "lessonsCompletedLabel": "уроков пройдено",
+    "totalXp": "всего XP",
+    "dailyGoal": "цель дня",
+    "xpToday": "XP сегодня",
+    "todayDone": "Сегодня закрыто.",
+    "streakHolds": "Серия держится",
+    "completeTodayGoal": "Закрой сегодняшнюю цель — и неделя будет полной.",
+    "wordOfDay": "Слово дня",
+    "review": "Повторение",
+    "reviewWaiting": "{{count}} слов ждут повторения",
+    "startReview": "Начать повторение",
+    "noReviewNeeded": "Пока нечего повторять — всё в графике."
+  },
+  "media": {
+    "errors": {
+      "load": "Не получилось загрузить ленту.",
+      "view": "Не получилось сохранить просмотр.",
+      "like": "Не получилось сохранить лайк."
+    },
+    "subtitles": {
+      "label": "Язык субтитров",
+      "korean": "한국어",
+      "translation": "Перевод",
+      "both": "Оба"
+    },
+    "pro": {
+      "title": "Immerse — Pro-фича",
+      "description": "Лента коротких видео носителей: субтитры, слова в один тап.",
+      "open": "Открыть с Pro"
+    },
+    "empty": {
+      "title": "Клипы уже в пути",
+      "description": "Носители записывают видео — лента скоро наполнится."
+    },
+    "previousVideo": "Предыдущее видео",
+    "nextVideo": "Следующее видео",
+    "videoAria": "Видео: {{title}}",
+    "clipFallback": "клип",
+    "like": "Нравится",
+    "unlike": "Убрать лайк",
+    "addWordAria": "Слово в словарь"
+  },
+  "vocabulary": {
+    "title": "Мой словарь",
+    "wordCount": "{{count}} слов",
+    "sectionLabel": "Раздел словаря",
+    "tabs": {
+      "words": "Слова",
+      "decks": "Мои колоды"
+    },
+    "search": {
+      "label": "Поиск слов",
+      "placeholder": "Хангыль или перевод…"
+    },
+    "levelLabel": "Уровень слова",
+    "sortLabel": "Сортировка",
+    "level": "Уровень {{level}}",
+    "levels": {
+      "new": "☆ Новые",
+      "learned": "★★★ Выучено"
+    },
+    "sort": {
+      "due": "По сроку",
+      "created": "По дате",
+      "alpha": "По алфавиту"
+    },
+    "due": {
+      "today": "сегодня",
+      "tomorrow": "завтра",
+      "inDays": "через {{days}} д"
+    },
+    "emptyWords": "Пока нет слов — пройди урок, и они появятся здесь.",
+    "emptyReview": "Пока нечего повторять — пройди урок, и слова появятся здесь.",
+    "markDifficult": "Отметить сложным",
+    "removeDifficult": "Убрать метку «сложное»",
+    "toDeck": "В колоду",
+    "addToDeck": "Добавить в колоду",
+    "addToDeckAria": "Добавить {{word}} в колоду",
+    "deckPickerQuestion": "«{{word}}» — в какую колоду?",
+    "deckPickerEmpty": "Колод пока нет. Создай её на вкладке «Мои колоды».",
+    "deck": {
+      "nameLabel": "Название новой колоды",
+      "placeholder": "Например, Путешествие",
+      "empty": "Колод пока нет — создай первую и собирай в неё слова.",
+      "renamePrompt": "Новое название колоды:",
+      "deleteConfirm": "Удалить колоду «{{title}}»?"
+    },
+    "errors": {
+      "load": "Не получилось загрузить словарь.",
+      "loadDecks": "Не получилось загрузить колоды.",
+      "createDeck": "Не получилось создать колоду.",
+      "renameDeck": "Не получилось переименовать колоду.",
+      "deleteDeck": "Не получилось удалить колоду.",
+      "addToDeck": "Не получилось добавить слово в колоду.",
+      "loadSummary": "Не получилось загрузить сводку повторения.",
+      "dailyLimit": "Дневной лимит бесплатных игр исчерпан.",
+      "startSession": "Не получилось начать сессию.",
+      "saveReview": "Не получилось сохранить повторение. Повторите попытку."
+    },
+    "games": {
+      "title": "Мини-игры",
+      "subtitle": "Пять минут в день. Выбери игру — таймер пойдёт сразу.",
+      "loading": "Готовим слова…",
+      "combo": "🔥 Комбо ×{{combo}} · {{score}} очков",
+      "addSyllable": "Добавить слог {{syllable}}",
+      "roundComplete": "Раунд завершён",
+      "anotherRound": "Ещё раунд",
+      "koreanEyebrow": "놀이",
+      "koreanTitle": "잘 놀았어요!",
+      "match": {
+        "title": "Match",
+        "hint": "Соедини слово и перевод"
+      },
+      "listen": {
+        "title": "Listen",
+        "hint": "Услышь и выбери"
+      },
+      "spell": {
+        "title": "Spell",
+        "hint": "Собери слово из слогов"
+      },
+      "stats": {
+        "score": "очков",
+        "words": "слов",
+        "correct": "верно"
+      }
+    },
+    "ratings": {
+      "again": "Снова",
+      "hard": "Трудно",
+      "good": "Хорошо",
+      "easy": "Легко"
+    },
+    "stats": {
+      "reviewed": "повторено",
+      "remembered": "крепко в памяти",
+      "difficult": "сложных"
+    },
+    "toModes": "К режимам",
+    "flashcards": {
+      "loading": "Готовим карточки…",
+      "koreanEyebrow": "기억",
+      "koreanTitle": "수고했어요!",
+      "complete": "Сессия завершена",
+      "updatedIntervals": "SM-2 обновил интервалы для {{count}} слов",
+      "reviewAgain": "Стоит повторить ещё раз",
+      "againTomorrow": "снова завтра",
+      "toReviewModes": "К режимам повторения",
+      "saving": "Сохраняем повторение…",
+      "flipAria": "Перевернуть карточку",
+      "flipHint": "Клик, тап или пробел — переворот",
+      "showAnswer": "Показать ответ",
+      "rateHint": "Оцени, насколько легко вспомнилось · клавиши 1–4"
+    },
+    "intervals": {
+      "lessThanDay": "< 1 дня",
+      "oneDay": "1 день",
+      "days": "{{count}} дн.",
+      "months": "{{count}} мес."
+    },
+    "hub": {
+      "title": "Review Dojo",
+      "empty": "Всё повторено! Загляни позже или пройди новый урок.",
+      "choose": "Выбери режим повторения.",
+      "cardsTitle": "Карточки 3D",
+      "cardsDescription": "Классика: лицо → переворот → самооценка. SM-2 сам решает, когда показать слово снова.",
+      "gamesTitle": "Мини-игры",
+      "gamesDescription": "Match, Listen, Spell — быстрые визуальные раунды с таймером и комбо.",
+      "goal": "Цель: 5 минут",
+      "quickTitle": "Быстрый повтор",
+      "quickDescription": "Смешанная сессия из самого срочного — идеально, когда времени в обрез.",
+      "duration": "≈ 5 минут",
+      "hardTitle": "Сложные слова",
+      "hardDescription": "SRS собрал слова, которые ты забываешь чаще всего. Разберём их прицельно.",
+      "due": "Сегодня к повторению готово {{count}} слов. Выбери режим.",
+      "cardsWaiting": "{{count}} карточек ждут",
+      "hardWaiting": "{{count}} слов буксуют"
+    }
+  }
 }

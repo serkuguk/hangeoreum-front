@@ -35,6 +35,9 @@
       (valueChange)="setSubMode($event)"
     />
 
+    @if (facade.actionError(); as actionError) {
+      <p role="alert">{{ actionError }}</p>
+    }
     <div class="feednav">
       @if (facade.clips().length > 1) {
         <app-button

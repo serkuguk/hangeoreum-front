@@ -10,6 +10,9 @@ export interface User {
 
 export type StartLevel = 'BEGINNER' | 'KNOWS_HANGUL' | 'INTERMEDIATE';
 
+export const DAILY_GOAL_XP = {Calm: 10, Confident: 20, Serious: 50} as const;
+export const REMINDER_TIMES = ['09:00', '12:00', '19:00', '21:00'];
+
 export interface UserSettings {
   dailyGoalXp: number;
   remindersEnabled: boolean;

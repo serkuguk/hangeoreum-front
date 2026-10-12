@@ -27,7 +27,7 @@ import {ButtonComponent, BasicInputComponent, PasswordInputComponent, SegmentedC
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {ME_REPOSITORY} from '@features/identity/application/me-repository.token';
-import {UserSettings} from '@features/identity/domain/user.entity';
+import {DAILY_GOAL_XP, REMINDER_TIMES, UserSettings} from '@features/identity/domain/user.entity';
 
 interface SettingsSaveRequest {
   settings: UserSettings;
@@ -76,9 +76,9 @@ export class SettingsPageComponent {
   readonly passwordSaving = signal(false);
   readonly passwordError = signal<string | null>(null);
 
-  readonly goals = [10, 20, 50];
+  readonly goals = Object.values(DAILY_GOAL_XP);
   readonly speeds = [0.75, 1.0, 1.25];
-  readonly times = ['09:00', '12:00', '19:00', '21:00'];
+  readonly times = REMINDER_TIMES;
   readonly goalOptions: ControlItemInterface[] = this.goals.map(goal =>
     ({value: goal, label: `${goal} XP`}));
   readonly speedOptions: ControlItemInterface[] = this.speeds.map(speed =>
@@ -91,11 +91,11 @@ export class SettingsPageComponent {
     {value: 'system', label: this.translate.instant('identity.settings.modes.system')},
   ];
   readonly accentOptions: ControlItemInterface[] = this.accents.map(accent =>
-    ({value: accent.value, label: accent.name}));
+    ({value: accent.value, label: this.translate.instant(accent.name)}));
   readonly fontScaleOptions: ControlItemInterface[] = this.fontScales.map(scale =>
-    ({value: scale.value, label: scale.name}));
+    ({value: scale.value, label: this.translate.instant(scale.name)}));
   readonly radiusOptions: ControlItemInterface[] = this.radii.map(radius =>
-    ({value: radius.value, label: radius.name}));
+    ({value: radius.value, label: this.translate.instant(radius.name)}));
 
   private readonly saveRequests$ = new Subject<SettingsSaveRequest>();
   private readonly pendingCompletions = new Set<ReplaySubject<boolean>>();

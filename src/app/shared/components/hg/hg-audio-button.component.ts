@@ -1,12 +1,13 @@
 import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {ButtonComponent} from 'springest';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-audio-button',
-  imports: [ButtonComponent],
+  imports: [ButtonComponent, TranslatePipe],
   template: `<app-button class="hg-native-host" [styleClass]="'hg-native-button snd ' + size()"
-    (click)="play($event)" [aria]="{'aria-label': 'Прослушать'}">🔊</app-button>`,
+    (click)="play($event)" [aria]="{'aria-label': ('common.listen' | translate)}">🔊</app-button>`,
   styles: `
     :host ::ng-deep button.hg-native-button.hg-native-button.hg-native-button.snd {min-width:0;width:52px;height:52px;padding:0;border-radius:16px;border:none;background:linear-gradient(135deg,var(--hg-blue),#5a2bcf);color:#fff;font-size:20px;cursor:pointer;transition:.2s;flex-shrink:0}
     :host ::ng-deep button.hg-native-button.hg-native-button.hg-native-button.snd:hover {transform:scale(1.05);background:linear-gradient(135deg,var(--hg-blue),#5a2bcf)}

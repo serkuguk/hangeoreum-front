@@ -1,7 +1,6 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {jest} from '@jest/globals';
-import {provideTranslateService} from '@ngx-translate/core';
 import {of, Subject, throwError} from 'rxjs';
 import {DialogComponent} from 'springest';
 import {AdminApi, AdminWord} from '@features/admin/infrastructure/admin.api';
@@ -39,7 +38,7 @@ describe('AdminWords image saving', () => {
     Object.defineProperty(URL, 'createObjectURL', {configurable: true, value: createPreview});
     Object.defineProperty(URL, 'revokeObjectURL', {configurable: true, value: revokePreview});
     TestBed.configureTestingModule({
-      imports: [AdminWordsPageComponent], providers: [provideTranslateService(), {provide: AdminApi, useValue: api}],
+      imports: [AdminWordsPageComponent], providers: [{provide: AdminApi, useValue: api}],
     });
     fixture = TestBed.createComponent(AdminWordsPageComponent);
     component = fixture.componentInstance;

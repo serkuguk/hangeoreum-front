@@ -108,6 +108,7 @@
             'aria-label': removeWordAria(word),
           }"
           (click)="toggleWord(word)"
+          [disabled]="wordsSaving()"
           [title]="'admin.builder.unlinkWord' | translate"
         >
           {{ word.hangul }} · {{ word.translation }} ✕
@@ -134,6 +135,7 @@
               'aria-label': bindWordAria(word),
             }"
             (click)="toggleWord(word)"
+            [disabled]="wordsSaving()"
             >+ {{ word.hangul }} · {{ word.translation }}</app-button
           >
         }

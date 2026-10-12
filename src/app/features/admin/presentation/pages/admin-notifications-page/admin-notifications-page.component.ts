@@ -1,3 +1,4 @@
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {AdminApi} from '@features/admin/infrastructure/admin.api';
@@ -5,22 +6,22 @@ import {ButtonComponent, BasicInputComponent, TextareaComponent} from 'springest
 
 @Component({
   selector: 'hg-admin-notifications-page',
-  imports: [FormField, ButtonComponent, BasicInputComponent, TextareaComponent],
+  imports: [TranslatePipe, FormField, ButtonComponent, BasicInputComponent, TextareaComponent],
   template: `
-    <h2 class="pagettl">Уведомления</h2>
-    <p class="pagesub">Системная рассылка — уходит всем пользователям (in-app).</p>
+    <h2 class="pagettl">{{ 'admin.notifications.title' | translate }}</h2>
+    <p class="pagesub">{{ 'admin.notifications.subtitle' | translate }}</p>
 
     @if (sent()) {
-      <div class="okbar">✓ Рассылка отправлена</div>
+      <div class="okbar">{{ 'admin.notifications.sent' | translate }}</div>
     }
     @if (error()) {
       <div class="errbar">{{ error() }}</div>
     }
 
     <div class="panel form">
-      <app-basic-input label="Заголовок" [formField]="titleField" placeholder="Новые уроки уже в курсе!"/>
-      <app-textarea label="Текст" [formField]="bodyField" placeholder="Юнит 3 «В кафе» опубликован…"/>
-      <app-button label="Отправить всем" [loading]="sending()" [disabled]="!title().trim()" (click)="send()" styleClass="hg-button"></app-button>
+      <app-basic-input [label]="'admin.notifications.subject' | translate" [formField]="titleField" [placeholder]="'admin.notifications.subjectPlaceholder' | translate"/>
+      <app-textarea [label]="'admin.notifications.body' | translate" [formField]="bodyField" [placeholder]="'admin.notifications.bodyPlaceholder' | translate"/>
+      <app-button [label]="'admin.notifications.send' | translate" [loading]="sending()" [disabled]="!title().trim()" (click)="send()" styleClass="hg-button"></app-button>
     </div>
   `,
   styleUrl: '../_admin.scss',
@@ -48,6 +49,7 @@ import {ButtonComponent, BasicInputComponent, TextareaComponent} from 'springest
 })
 export class AdminNotificationsPageComponent {
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
 
   readonly title = signal('');
   readonly titleField = form(this.title, path => required(path));
@@ -59,7 +61,7 @@ export class AdminNotificationsPageComponent {
 
   send(): void {
     if (this.sending() || !this.title().trim()) return;
-    if (!confirm(`Отправить рассылку «${this.title()}» всем пользователям?`)) return;
+    if (!confirm(this.translate.instant('admin.notifications.sendConfirm', {title: this.title()}))) return;
     this.sending.set(true);
     this.sent.set(false);
     this.error.set(null);
@@ -72,7 +74,7 @@ export class AdminNotificationsPageComponent {
       },
       error: () => {
         this.sending.set(false);
-        this.error.set('Не получилось отправить.');
+        this.error.set(this.translate.instant('admin.notifications.sendError'));
       },
     });
   }

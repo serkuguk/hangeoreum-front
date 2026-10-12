@@ -44,6 +44,19 @@ describe('VocabularyFacade', () => {
     expect(facade.error()).toBeNull();
   });
 
+  it('does not leave duplicate debounced searches loading', () => {
+    jest.useFakeTimers();
+    repository.vocabulary.mockReturnValue(of({content: [], totalElements: 0, page: 0}));
+    facade.search({search: 'cat'});
+    jest.advanceTimersByTime(300);
+    facade.search({search: 'cats'});
+    jest.advanceTimersByTime(100);
+    facade.search({search: 'cat'});
+    jest.advanceTimersByTime(300);
+    expect(repository.vocabulary).toHaveBeenCalledTimes(1);
+    expect(facade.loading()).toBe(false);
+  });
+
   it('keeps only the latest search response', () => {
     jest.useFakeTimers();
     const first$ = new Subject<{content: UserWord[]; totalElements: number; page: number}>();

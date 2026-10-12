@@ -1,3 +1,4 @@
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {AdminApi, Topic} from '@features/admin/infrastructure/admin.api';
@@ -5,16 +6,16 @@ import {ButtonComponent, BasicInputComponent} from 'springest';
 
 @Component({
   selector: 'hg-admin-topics-page',
-  imports: [FormField, ButtonComponent, BasicInputComponent],
+  imports: [TranslatePipe, FormField, ButtonComponent, BasicInputComponent],
   template: `
-    <h2 class="pagettl">Темы словаря</h2>
-    <p class="pagesub">Категории слов: еда, знакомство, погода…</p>
+    <h2 class="pagettl">{{ 'admin.topics.title' | translate }}</h2>
+    <p class="pagesub">{{ 'admin.topics.subtitle' | translate }}</p>
 
     <div class="toolbar">
-      <app-basic-input class="search" label="Code" placeholder="Например, food" [formField]="draftCodeField"/>
-      <app-basic-input class="search" label="Название" [formField]="draftTitleField"/>
-      <app-basic-input class="search icon" label="Иконка" placeholder="🍜" [formField]="draftIconField"/>
-      <app-button label="Добавить" [disabled]="!draftCode() || !draftTitle()" (click)="create()" styleClass="hg-button"></app-button>
+      <app-basic-input class="search" label="Code" [placeholder]="'admin.topics.codePlaceholder' | translate" [formField]="draftCodeField"/>
+      <app-basic-input class="search" [label]="'admin.topics.name' | translate" [formField]="draftTitleField"/>
+      <app-basic-input class="search icon" [label]="'admin.topics.icon' | translate" placeholder="🍜" [formField]="draftIconField"/>
+      <app-button [label]="'admin.topics.add' | translate" [disabled]="!draftCode() || !draftTitle()" (click)="create()" styleClass="hg-button"></app-button>
     </div>
 
     @if (error()) {
@@ -23,7 +24,7 @@ import {ButtonComponent, BasicInputComponent} from 'springest';
 
     <div class="panel">
       <table class="atable">
-        <thead><tr><th></th><th>Code</th><th>Название</th><th></th></tr></thead>
+        <thead><tr><th></th><th>Code</th><th>{{ 'admin.topics.name' | translate }}</th><th></th></tr></thead>
         <tbody>
           @for (topic of topics(); track topic.id) {
             <tr>
@@ -31,12 +32,12 @@ import {ButtonComponent, BasicInputComponent} from 'springest';
               <td>{{ topic.code }}</td>
               <td>{{ topic.title }}</td>
               <td>
-                <app-button label="Переименовать" (click)="rename(topic)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
-                <app-button label="Удалить" (click)="remove(topic)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                <app-button [label]="'admin.topics.rename' | translate" (click)="rename(topic)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
+                <app-button [label]="'admin.topics.delete' | translate" (click)="remove(topic)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="empty">Тем пока нет.</td></tr>
+            <tr><td colspan="4" class="empty">{{ 'admin.topics.empty' | translate }}</td></tr>
           }
         </tbody>
       </table>
@@ -51,6 +52,7 @@ import {ButtonComponent, BasicInputComponent} from 'springest';
 })
 export class AdminTopicsPageComponent {
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
 
   readonly topics = signal<Topic[]>([]);
   readonly error = signal<string | null>(null);
@@ -69,7 +71,7 @@ export class AdminTopicsPageComponent {
   load(): void {
     this.api.topics().subscribe({
       next: topics => this.topics.set(topics),
-      error: () => this.error.set('Не получилось загрузить темы.'),
+      error: () => this.error.set(this.translate.instant('admin.topics.loadError')),
     });
   }
 
@@ -83,21 +85,21 @@ export class AdminTopicsPageComponent {
           this.draftIconField().reset('');
           this.load();
         },
-        error: () => this.error.set('Не получилось создать тему (code должен быть уникальным).'),
+        error: () => this.error.set(this.translate.instant('admin.topics.createError')),
       });
   }
 
   rename(topic: Topic): void {
-    const title = prompt('Новое название:', topic.title)?.trim();
+    const title = prompt(this.translate.instant('admin.topics.renamePrompt'), topic.title)?.trim();
     if (!title) return;
     this.api.updateTopic(topic.id, {code: topic.code, title, icon: topic.icon}).subscribe(() => this.load());
   }
 
   remove(topic: Topic): void {
-    if (!confirm(`Удалить тему «${topic.title}»?`)) return;
+    if (!confirm(this.translate.instant('admin.topics.deleteConfirm', {title: topic.title}))) return;
     this.api.deleteTopic(topic.id).subscribe({
       next: () => this.load(),
-      error: () => this.error.set('Не получилось удалить — тема используется словами.'),
+      error: () => this.error.set(this.translate.instant('admin.topics.deleteError')),
     });
   }
 }

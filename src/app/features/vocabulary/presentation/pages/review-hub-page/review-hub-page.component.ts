@@ -1,53 +1,54 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {TranslatePipe} from '@ngx-translate/core';
 import {RouterLink} from '@angular/router';
 import {ReviewFacade} from '@features/vocabulary/application/facades/review.facade';
 
 @Component({
   selector: 'hg-review-hub-page',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <div class="wrap hubbox">
-      <h2 class="pagettl">Review Dojo</h2>
+      <h2 class="pagettl">{{ 'vocabulary.hub.title' | translate }}</h2>
       @if (facade.summary(); as summary) {
         <p class="pagesub">
           @if (summary.dueCount > 0) {
-            Сегодня к повторению готово <b class="y">{{ summary.dueCount }} слов</b>. Выбери режим.
+            {{ 'vocabulary.hub.due' | translate:{count: summary.dueCount} }}
           } @else {
-            Всё повторено! Загляни позже или пройди новый урок.
+            {{ 'vocabulary.hub.empty' | translate }}
           }
         </p>
       } @else {
-        <p class="pagesub">Выбери режим повторения.</p>
+        <p class="pagesub">{{ 'vocabulary.hub.choose' | translate }}</p>
       }
 
       <div class="dojo">
         <a class="panel dtile" routerLink="/review/flashcards">
           <div class="ghost kr">뒤</div>
           <div class="ic c-b">🎴</div>
-          <h3>Карточки 3D</h3>
-          <p>Классика: лицо → переворот → самооценка. SM-2 сам решает, когда показать слово снова.</p>
-          <span class="pill p-b cnt">{{ facade.summary()?.dueCount ?? '…' }} карточек ждут</span>
+          <h3>{{ 'vocabulary.hub.cardsTitle' | translate }}</h3>
+          <p>{{ 'vocabulary.hub.cardsDescription' | translate }}</p>
+          <span class="pill p-b cnt">{{ 'vocabulary.hub.cardsWaiting' | translate:{count: facade.summary()?.dueCount ?? '…'} }}</span>
         </a>
         <a class="panel dtile" routerLink="/review/games">
           <div class="ghost kr">놀</div>
           <div class="ic c-y">🎮</div>
-          <h3>Мини-игры</h3>
-          <p>Match, Listen, Spell — быстрые визуальные раунды с таймером и комбо.</p>
-          <span class="pill p-y cnt">Цель: 5 минут</span>
+          <h3>{{ 'vocabulary.hub.gamesTitle' | translate }}</h3>
+          <p>{{ 'vocabulary.hub.gamesDescription' | translate }}</p>
+          <span class="pill p-y cnt">{{ 'vocabulary.hub.goal' | translate }}</span>
         </a>
         <a class="panel dtile" routerLink="/review/flashcards" [queryParams]="{quick: 1}">
           <div class="ghost kr">빠</div>
           <div class="ic c-j">⚡</div>
-          <h3>Быстрый повтор</h3>
-          <p>Смешанная сессия из самого срочного — идеально, когда времени в обрез.</p>
-          <span class="pill p-j cnt">≈ 5 минут</span>
+          <h3>{{ 'vocabulary.hub.quickTitle' | translate }}</h3>
+          <p>{{ 'vocabulary.hub.quickDescription' | translate }}</p>
+          <span class="pill p-j cnt">{{ 'vocabulary.hub.duration' | translate }}</span>
         </a>
         <a class="panel dtile" routerLink="/review/flashcards" [queryParams]="{difficult: 1}">
           <div class="ghost kr">어</div>
           <div class="ic c-r">🔥</div>
-          <h3>Сложные слова</h3>
-          <p>SRS собрал слова, которые ты забываешь чаще всего. Разберём их прицельно.</p>
-          <span class="pill p-r cnt">{{ facade.summary()?.difficultCount ?? '…' }} слов буксуют</span>
+          <h3>{{ 'vocabulary.hub.hardTitle' | translate }}</h3>
+          <p>{{ 'vocabulary.hub.hardDescription' | translate }}</p>
+          <span class="pill p-r cnt">{{ 'vocabulary.hub.hardWaiting' | translate:{count: facade.summary()?.difficultCount ?? '…'} }}</span>
         </a>
       </div>
     </div>

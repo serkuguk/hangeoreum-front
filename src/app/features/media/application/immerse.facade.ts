@@ -12,6 +12,7 @@ export class ImmerseFacade {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly proRequired = signal(false);
+  readonly actionError = signal<string | null>(null);
 
   private cursor: string | null = null;
   private exhausted = false;
@@ -25,6 +26,9 @@ export class ImmerseFacade {
 
   loadMore(): void {
     if (this.loading() || this.exhausted) return;
+    this.error.set(null);
+    this.proRequired.set(false);
+    this.actionError.set(null);
     this.loading.set(true);
     this.repository.feed(this.cursor).subscribe({
       next: feed => {
@@ -47,7 +51,7 @@ export class ImmerseFacade {
     this.repository.markViewed(clip.id).subscribe({
       error: () => {
         this.clips.update(list => list.map(c => c.id === clip.id ? {...c, watched: false} : c));
-        this.error.set(this.translate.instant('media.errors.view'));
+        this.actionError.set(this.translate.instant('media.errors.view'));
       },
     });
   }
@@ -59,7 +63,7 @@ export class ImmerseFacade {
       next: res => this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: res.liked} : c)),
       error: () => {
         this.clips.update(list => list.map(c => c.id === clip.id ? {...c, liked: clip.liked} : c));
-        this.error.set(this.translate.instant('media.errors.like'));
+        this.actionError.set(this.translate.instant('media.errors.like'));
       },
     });
   }

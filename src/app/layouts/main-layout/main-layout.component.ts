@@ -5,6 +5,7 @@ import {PaywallDialogComponent} from '@features/billing/presentation/paywall-dia
 import {ButtonComponent} from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {UserRole} from '@core/auth/auth.service';
 import {HgSidebarComponent} from '@shared/components/sidebar/hg-sidebar.component';
 
 @Component({
@@ -18,7 +19,10 @@ export class MainLayoutComponent {
   readonly facade = inject(AuthFacade);
 
   readonly menuOpen = signal(false);
-  readonly canAccessAdmin = computed(() => ['ADMIN', 'EDITOR'].includes(this.facade.user()?.role ?? ''));
+  readonly canAccessAdmin = computed(() => {
+    const role = this.facade.user()?.role;
+    return role === UserRole.Admin || role === UserRole.Editor;
+  });
   readonly initial = computed(() => this.facade.user()?.name?.charAt(0)?.toUpperCase() ?? '?');
 
   readonly nav = [

@@ -93,6 +93,9 @@ export class AdminMediaPageComponent {
 
   // сигнал: наполняется асинхронно из getSubtitles, иначе zoneless CD не перерисует textarea
   readonly subsDraft = signal('');
+  readonly subtitlesReady = signal(false);
+  readonly subtitlesSaving = signal(false);
+  private subtitlesRequest = 0;
   readonly subsField = form(this.subsDraft);
 
   readonly newSpeakerName = signal('');
@@ -293,26 +296,34 @@ export class AdminMediaPageComponent {
   }
 
   openSubtitles(clip: AdminClip): void {
+    if (this.subtitlesSaving()) return;
+    const request = ++this.subtitlesRequest;
+    this.subtitlesReady.set(false);
     if (this.subtitlesFor() === clip.id) {
       this.subtitlesFor.set(null);
       return;
     }
     this.subtitlesFor.set(clip.id);
-    // шаблон-заглушка; заменяется реальными сабами, когда они есть
-    this.subsDraft.set(JSON.stringify([
-      {lang: 'ko', position: 1, text: '오늘 날씨가 진짜 좋아요!', startMs: 0, endMs: 3000},
-      {lang: 'ru', position: 1, text: 'Сегодня погода правда отличная!', startMs: 0, endMs: 3000},
-    ], null, 2));
-    this.api.getSubtitles(clip.id).subscribe(subtitles => {
-      if (subtitles.length && this.subtitlesFor() === clip.id) {
+    this.error.set(null);
+    this.subsDraft.set('');
+    this.api.getSubtitles(clip.id).subscribe({
+      next: subtitles => {
+        if (request !== this.subtitlesRequest || this.subtitlesFor() !== clip.id) return;
         this.subsDraft.set(JSON.stringify(
           subtitles.map(({lang, position, text, startMs, endMs}) => ({lang, position, text, startMs, endMs})),
           null, 2));
-      }
+        this.subtitlesReady.set(true);
+      },
+      error: err => {
+        if (request === this.subtitlesRequest && this.subtitlesFor() === clip.id) {
+          this.fail('admin.media.errors.loadSubtitles', err);
+        }
+      },
     });
   }
 
   saveSubtitles(clip: AdminClip): void {
+    if (!this.subtitlesReady() || this.subtitlesSaving() || this.subtitlesFor() !== clip.id) return;
     let subtitles: {lang: string; position: number; text: string; startMs: number; endMs: number}[];
     try {
       subtitles = JSON.parse(this.subsDraft());
@@ -320,12 +331,18 @@ export class AdminMediaPageComponent {
       this.error.set(this.translate.instant('admin.media.errors.subtitlesJson'));
       return;
     }
+    this.subtitlesSaving.set(true);
     this.api.putSubtitles(clip.id, subtitles).subscribe({
       next: () => {
+        this.subtitlesSaving.set(false);
+        this.subtitlesReady.set(false);
         this.showFlash(this.translate.instant('admin.media.flash.subtitlesSaved'));
         this.subtitlesFor.set(null);
       },
-      error: err => this.fail('admin.media.errors.saveSubtitles', err),
+      error: err => {
+        this.subtitlesSaving.set(false);
+        this.fail('admin.media.errors.saveSubtitles', err);
+      },
     });
   }
 

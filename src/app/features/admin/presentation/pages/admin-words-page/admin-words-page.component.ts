@@ -1,3 +1,4 @@
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {FormField, form, required, disabled} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -22,6 +23,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 @Component({
   selector: 'hg-admin-words-page',
   imports: [
+    TranslatePipe,
     FormField,
     ButtonComponent,
     DialogComponent,
@@ -31,14 +33,14 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     BasicSelectComponent,
   ],
   template: `
-    <h2 class="pagettl">Слова</h2>
-    <p class="pagesub">{{ total() }} слов в базе.</p>
+    <h2 class="pagettl">{{ 'admin.words.title' | translate }}</h2>
+    <p class="pagesub">{{ 'admin.words.count' | translate: {count: total()} }}</p>
 
     <div class="toolbar">
-      <app-basic-input class="search" type="search" label="Поиск слов"
-                placeholder="Хангыль или перевод…" [value]="search()"
+      <app-basic-input class="search" type="search" [label]="'admin.words.search' | translate"
+                [placeholder]="'admin.words.searchPlaceholder' | translate" [value]="search()"
                 (valueChange)="onSearch($event)" />
-      <app-button label="Новое слово" (click)="openCreate()" styleClass="hg-button"><span aria-hidden="true">+</span></app-button>
+      <app-button [label]="'admin.words.create' | translate" (click)="openCreate()" styleClass="hg-button"><span aria-hidden="true">+</span></app-button>
     </div>
 
     @if (error()) {
@@ -48,7 +50,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     <div class="panel">
       <table class="atable">
         <thead>
-          <tr><th>Хангыль</th><th>Транскрипция</th><th>Перевод</th><th>Медиа</th><th></th></tr>
+          <tr><th>{{ 'admin.words.hangul' | translate }}</th><th>{{ 'admin.words.romanization' | translate }}</th><th>{{ 'admin.words.translation' | translate }}</th><th>{{ 'admin.words.media' | translate }}</th><th></th></tr>
         </thead>
         <tbody>
           @for (word of words(); track word.id) {
@@ -60,55 +62,55 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
                 <div class="word-media">
                   <img class="word-thumbnail" [src]="imageUrl(word.imageUrl)" (error)="onImageError($event)"
                        alt="" width="48" height="48" loading="lazy" decoding="async" />
-                <app-file-picker #picker1 label="🔊" ariaLabel="Загрузить аудио слова"
+                <app-file-picker #picker1 label="🔊" [ariaLabel]="'admin.words.uploadAudio' | translate"
                                 accept="audio/*" (changed)="$event[0] && upload(word, $event[0], 'audio'); picker1.value.set([])" />
                 </div>
               </td>
               <td>
-                <app-button label="Изменить" (click)="openEdit(word)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
-                <app-button label="Удалить" (click)="remove(word)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                <app-button [label]="'admin.words.edit' | translate" (click)="openEdit(word)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
+                <app-button [label]="'admin.words.delete' | translate" (click)="remove(word)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" class="empty">Слов пока нет — добавь первое.</td></tr>
+            <tr><td colspan="5" class="empty">{{ 'admin.words.empty' | translate }}</td></tr>
           }
         </tbody>
       </table>
       @if (totalPages() > 1) {
         <app-pagination [rows]="20" [first]="page() * 20" [totalRecords]="total()"
-                       aria-label="Страницы слов" (pageChange)="goToPage($event.page ?? 0)" />
+                       [attr.aria-label]="'admin.words.pagination' | translate" (pageChange)="goToPage($event.page ?? 0)" />
       }
     </div>
 
     @if (dialogOpen()) {
-    <app-dialog closeAriaLabel="Закрыть" [visible]="true" (visibleChange)="!$event && closeDialog()"
+    <app-dialog [closeAriaLabel]="'admin.words.close' | translate" [visible]="true" (visibleChange)="!$event && closeDialog()"
                [closable]="!saving()" [closeOnEscape]="!saving()" [dismissableMask]="false"
-               [header]="editing() ? 'Изменить слово' : 'Новое слово'">
+               [header]="(editing() ? 'admin.words.editTitle' : 'admin.words.create') | translate">
       <div class="word-image-field">
         <img class="word-preview" [src]="previewImage()" (error)="onImageError($event)"
              alt="" width="96" height="96" decoding="async" />
         <div>
-          <app-file-picker #picker2 label="Выбрать изображение" ariaLabel="Изображение слова"
+          <app-file-picker #picker2 [label]="'admin.words.chooseImage' | translate" [ariaLabel]="'admin.words.image' | translate"
                           accept="image/png,image/jpeg,image/webp" ariaDescribedBy="image-picker-hint"
                           [disabled]="saving()" (changed)="$event[0] && onImageSelected($event[0]); picker2.value.set([])" />
-          <p id="image-picker-hint">PNG, JPEG или WebP, до 5 МиБ.</p>
+          <p id="image-picker-hint">{{ 'admin.words.imageHint' | translate }}</p>
           @if (imageError()) { <p class="image-error" role="alert">{{ imageError() }}</p> }
         </div>
       </div>
       @if (saveError()) { <div class="errbar" role="alert">{{ saveError() }}</div> }
-      <app-basic-input label="Хангыль" [formField]="fields.hangul" lang="ko" />
-      <app-basic-input label="Транскрипция (латиницей)" placeholder="Например, keopi" [formField]="fields.romanization" />
-      <app-basic-input label="Перевод" [formField]="fields.translation" />
-      <app-basic-input label="Часть речи" [formField]="fields.partOfSpeech" placeholder="существительное" />
-      <app-basic-select ariaLabel="Тема" placeholder="Тема" [items]="topicOptions()" [formField]="fields.topicId" optionLabel="label" optionValue="value" />
-      <app-basic-input label="Пример (ko)" [formField]="fields.exampleKo" lang="ko" />
-      <app-basic-input label="Перевод примера" [formField]="fields.exampleTranslation" />
-      <app-basic-input label="Грамматическая пометка" [formField]="fields.grammarNote" />
+      <app-basic-input [label]="'admin.words.hangul' | translate" [formField]="fields.hangul" lang="ko" />
+      <app-basic-input [label]="'admin.words.romanizationLabel' | translate" [placeholder]="'admin.words.romanizationPlaceholder' | translate" [formField]="fields.romanization" />
+      <app-basic-input [label]="'admin.words.translation' | translate" [formField]="fields.translation" />
+      <app-basic-input [label]="'admin.words.partOfSpeech' | translate" [formField]="fields.partOfSpeech" [placeholder]="'admin.words.partOfSpeechPlaceholder' | translate" />
+      <app-basic-select [ariaLabel]="'admin.words.topic' | translate" [placeholder]="'admin.words.topic' | translate" [items]="topicOptions()" [formField]="fields.topicId" optionLabel="label" optionValue="value" />
+      <app-basic-input [label]="'admin.words.exampleKo' | translate" [formField]="fields.exampleKo" lang="ko" />
+      <app-basic-input [label]="'admin.words.exampleTranslation' | translate" [formField]="fields.exampleTranslation" />
+      <app-basic-input [label]="'admin.words.grammarNote' | translate" [formField]="fields.grammarNote" />
       <div dialogActions class="btns">
-        <app-button [label]="saving() ? 'Сохранение…' : 'Сохранить'"
+        <app-button [label]="(saving() ? 'admin.words.saving' : 'admin.words.save') | translate"
                    [disabled]="saving() || !draft().hangul.trim() || !draft().romanization.trim() || !draft().translation.trim()"
                    (click)="save()" styleClass="hg-button"></app-button>
-        <app-button label="Отмена" [disabled]="saving()" (click)="closeDialog()" styleClass="hg-button hg-button--ghost"></app-button>
+        <app-button [label]="'admin.words.cancel' | translate" [disabled]="saving()" (click)="closeDialog()" styleClass="hg-button hg-button--ghost"></app-button>
       </div>
     </app-dialog>
     }
@@ -127,6 +129,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 })
 export class AdminWordsPageComponent {
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly words = signal<AdminWord[]>([]);
@@ -136,7 +139,7 @@ export class AdminWordsPageComponent {
   readonly error = signal<string | null>(null);
   readonly topics = signal<Topic[]>([]);
   readonly topicOptions = computed<{label: string; value: string | null}[]>(() => [
-    {label: '— без темы —', value: null},
+    {label: this.translate.instant('admin.words.noTopic'), value: null},
     ...this.topics().map(topic => ({label: topic.title, value: topic.id})),
   ]);
 
@@ -168,7 +171,7 @@ export class AdminWordsPageComponent {
       distinctUntilChanged(),
       switchMap(search => this.api.words(search, 0).pipe(
         catchError(() => {
-          this.error.set('Не получилось загрузить слова.');
+          this.error.set(this.translate.instant('admin.words.loadError'));
           return EMPTY;
         }),
       )),
@@ -181,7 +184,7 @@ export class AdminWordsPageComponent {
     this.load();
     this.api.topics().pipe(takeUntilDestroyed()).subscribe({
       next: topics => this.topics.set(topics),
-      error: () => this.error.set('Не получилось загрузить темы.'),
+      error: () => this.error.set(this.translate.instant('admin.words.topicsError')),
     });
   }
 
@@ -191,7 +194,7 @@ export class AdminWordsPageComponent {
         this.words.set(result.content);
         this.total.set(result.totalElements);
       },
-      error: () => this.error.set('Не получилось загрузить слова.'),
+      error: () => this.error.set(this.translate.instant('admin.words.loadError')),
     });
   }
 
@@ -256,8 +259,8 @@ export class AdminWordsPageComponent {
       },
       error: () => {
         this.saveError.set(wordSaved
-          ? 'Слово сохранено, изображение не загружено. Попробуйте ещё раз.'
-          : 'Не получилось сохранить слово. Попробуйте ещё раз.');
+          ? this.translate.instant('admin.words.imageSaveError')
+          : this.translate.instant('admin.words.saveError'));
         if (wordSaved) this.load();
       },
     });
@@ -267,7 +270,7 @@ export class AdminWordsPageComponent {
     if (this.saving()) return;
     this.clearImage();
     if (!IMAGE_TYPES.includes(file.type) || file.size === 0 || file.size > MAX_IMAGE_SIZE) {
-      this.imageError.set('Выберите непустой PNG, JPEG или WebP размером до 5 МиБ.');
+      this.imageError.set(this.translate.instant('admin.words.invalidImage'));
       return;
     }
     this.imageError.set(null);
@@ -305,17 +308,17 @@ export class AdminWordsPageComponent {
   }
 
   remove(word: AdminWord): void {
-    if (!confirm(`Удалить «${word.hangul}»?`)) return;
+    if (!confirm(this.translate.instant('admin.words.deleteConfirm', {hangul: word.hangul}))) return;
     this.api.deleteWord(word.id).subscribe({
       next: () => this.load(),
-      error: () => this.error.set('Не получилось удалить (слово может использоваться в уроках).'),
+      error: () => this.error.set(this.translate.instant('admin.words.deleteError')),
     });
   }
 
   upload(word: AdminWord, file: File, kind: 'audio' | 'image'): void {
     this.api.uploadWordMedia(word.id, file, kind).subscribe({
       next: () => this.load(),
-      error: () => this.error.set('Не получилось загрузить файл.'),
+      error: () => this.error.set(this.translate.instant('admin.words.uploadError')),
     });
   }
 }

@@ -123,7 +123,7 @@ export class AdminCoursePageComponent {
     const course = this.course();
     const title = this.newUnitTitle().trim();
     if (!course || !title) return;
-    this.api.createUnit({courseId: course.id, position: this.units().length + 1, title})
+    this.api.createUnit({courseId: course.id, position: Math.max(0, ...this.units().map(unit => unit.position)) + 1, title})
       .subscribe(() => {
         this.newUnitTitle.set('');
         this.loadUnits(course.id);
@@ -148,6 +148,7 @@ export class AdminCoursePageComponent {
     const target = index + delta;
     if (target < 0 || target >= list.length) return;
     [list[index], list[target]] = [list[target], list[index]];
+    list.forEach((item, i) => list[i] = {...item, position: i + 1});
     this.units.set(list);
     this.api.reorderUnits(list.map((u, i) => ({id: u.id, position: i + 1}))).subscribe({
       error: () => {
@@ -163,7 +164,7 @@ export class AdminCoursePageComponent {
     const lessons = this.lessonsByUnit()[unit.id] ?? [];
     this.api.createLesson({
       unitId: unit.id,
-      position: lessons.length + 1,
+      position: Math.max(0, ...lessons.map(lesson => lesson.position)) + 1,
       type: this.lessonDrafts()[unit.id].type,
       title,
       xpReward: 10,
@@ -202,6 +203,7 @@ export class AdminCoursePageComponent {
     const target = index + delta;
     if (target < 0 || target >= list.length) return;
     [list[index], list[target]] = [list[target], list[index]];
+    list.forEach((item, i) => list[i] = {...item, position: i + 1});
     this.lessonsByUnit.update(map => ({...map, [unit.id]: list}));
     this.api.reorderLessons(list.map((l, i) => ({id: l.id, position: i + 1}))).subscribe({
       error: () => {

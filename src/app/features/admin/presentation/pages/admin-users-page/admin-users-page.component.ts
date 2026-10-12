@@ -1,12 +1,12 @@
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {EMPTY, Observable, Subject, catchError, debounceTime, distinctUntilChanged, switchMap} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
-import {AuthService} from '@core/auth/auth.service';
+import {AuthService, UserRole} from '@core/auth/auth.service';
 import {ButtonComponent, DialogComponent, BasicInputComponent, PaginationComponent, BasicSelectComponent} from 'springest';
 import {AdminApi, AdminUser} from '@features/admin/infrastructure/admin.api';
 
-enum UserRole { Admin = 'ADMIN', User = 'USER', Editor = 'EDITOR' }
 enum UserActionKind { Role = 'role', Status = 'status', Delete = 'delete' }
 
 type EditableRole = 'USER' | 'EDITOR';
@@ -14,14 +14,14 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
 
 @Component({
   selector: 'hg-admin-users-page',
-  imports: [ButtonComponent, DialogComponent, BasicInputComponent, PaginationComponent, BasicSelectComponent],
+  imports: [TranslatePipe, ButtonComponent, DialogComponent, BasicInputComponent, PaginationComponent, BasicSelectComponent],
   template: `
-    <h2 class="pagettl">Пользователи</h2>
-    <p class="pagesub">{{ total() }} зарегистрировано.</p>
+    <h2 class="pagettl">{{ 'admin.users.title' | translate }}</h2>
+    <p class="pagesub">{{ 'admin.users.count' | translate: {count: total()} }}</p>
 
     <div class="toolbar">
-      <app-basic-input class="search" type="search" label="Поиск пользователей"
-                placeholder="Имя или email…" [value]="search()"
+      <app-basic-input class="search" type="search" [label]="'admin.users.search' | translate"
+                [placeholder]="'admin.users.searchPlaceholder' | translate" [value]="search()"
                 (valueChange)="onSearch($event)" />
     </div>
 
@@ -31,7 +31,7 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
 
     <div class="panel">
       <table class="atable">
-        <thead><tr><th>Имя</th><th>Email</th><th>Роль</th><th>Регистрация</th><th></th></tr></thead>
+        <thead><tr><th>{{ 'admin.users.name' | translate }}</th><th>Email</th><th>{{ 'admin.users.role' | translate }}</th><th>{{ 'admin.users.registered' | translate }}</th><th></th></tr></thead>
         <tbody>
           @for (user of users(); track user.id) {
             <tr>
@@ -39,7 +39,7 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
               <td>{{ user.email }}</td>
               <td>
                 @if (canEditRole(user)) {
-                  <app-basic-select class="role-select" [ariaLabel]="'Роль ' + user.email"
+                  <app-basic-select class="role-select" [ariaLabel]="'admin.users.roleAria' | translate: {email: user.email}"
                              [items]="roleOptions" placeholder=""
                              [value]="selectedRoles()[user.id] || user.role"
                              (valueChange)="openRoleAction(user, $event)" optionLabel="label" optionValue="value" />
@@ -54,36 +54,36 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
                 @if (isAdmin() && user.id !== auth.currentUser()?.id && user.role !== roles.Admin) {
                   <div class="user-actions__buttons">
                   <app-button
-                             [label]="user.isActive ? 'Заблокировать' : 'Разблокировать'"
+                             [label]="(user.isActive ? 'admin.users.block' : 'admin.users.unblock') | translate"
                              (click)="openAction(user, actionKinds.Status)" [styleClass]="'hg-button hg-button--sm hg-button--' + (user.isActive ? 'danger' : 'secondary')"></app-button>
-                  <app-button label="Удалить"
+                  <app-button [label]="'admin.users.delete' | translate"
                              (click)="openAction(user, actionKinds.Delete)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
                   </div>
                 }
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" class="empty">Никого не нашли.</td></tr>
+            <tr><td colspan="5" class="empty">{{ 'admin.users.empty' | translate }}</td></tr>
           }
         </tbody>
       </table>
       @if (totalPages() > 1) {
         <app-pagination [rows]="20" [first]="page() * 20" [totalRecords]="total()"
-                       aria-label="Страницы пользователей" (pageChange)="goToPage($event.page ?? 0)" />
+                       [attr.aria-label]="'admin.users.pagination' | translate" (pageChange)="goToPage($event.page ?? 0)" />
       }
     </div>
 
-    <app-dialog closeAriaLabel="Закрыть" [visible]="action() !== null" (visibleChange)="onDialogVisibleChange($event)"
+    <app-dialog [closeAriaLabel]="'admin.users.close' | translate" [visible]="action() !== null" (visibleChange)="onDialogVisibleChange($event)"
                [header]="actionTitle()" [closable]="!saving()" [closeOnEscape]="!saving()">
       <p>{{ actionMessage() }}</p>
       @if (actionError()) {
         <div class="errbar" role="alert">{{ actionError() }}</div>
       }
       <div dialogActions>
-        <app-button [label]="isDeleteAction() ? 'Удалить' : 'Подтвердить'"
+        <app-button [label]="(isDeleteAction() ? 'admin.users.delete' : 'admin.users.confirm') | translate"
 
                    [loading]="saving()" (click)="confirmAction()" [styleClass]="'hg-button hg-button--' + (isDeleteAction() ? 'danger' : 'primary')"></app-button>
-        <app-button label="Отмена" [disabled]="saving()"
+        <app-button [label]="'admin.users.cancel' | translate" [disabled]="saving()"
                    (click)="closeAction()" styleClass="hg-button hg-button--ghost"></app-button>
       </div>
     </app-dialog>
@@ -99,6 +99,7 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
 })
 export class AdminUsersPageComponent {
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
   readonly auth = inject(AuthService);
   readonly roles = UserRole;
   readonly actionKinds = UserActionKind;
@@ -119,18 +120,18 @@ export class AdminUsersPageComponent {
   readonly actionTitle = computed(() => {
     const action = this.action();
     if (!action) return '';
-    if (action.kind === UserActionKind.Delete) return 'Удалить пользователя';
-    if (action.kind === UserActionKind.Role) return 'Сменить роль';
-    return action.user.isActive ? 'Заблокировать пользователя' : 'Разблокировать пользователя';
+    if (action.kind === UserActionKind.Delete) return this.translate.instant('admin.users.deleteTitle');
+    if (action.kind === UserActionKind.Role) return this.translate.instant('admin.users.roleTitle');
+    return action.user.isActive ? this.translate.instant('admin.users.blockTitle') : this.translate.instant('admin.users.unblockTitle');
   });
   readonly actionMessage = computed(() => {
     const action = this.action();
     if (!action) return '';
-    if (action.kind === UserActionKind.Delete) return `Безвозвратно удалить ${action.user.email} и связанные данные?`;
+    if (action.kind === UserActionKind.Delete) return this.translate.instant('admin.users.deleteMessage', {email: action.user.email});
     if (action.kind === UserActionKind.Role) {
-      return `Сменить роль ${action.user.email} на ${action.role}?`;
+      return this.translate.instant('admin.users.roleMessage', {email: action.user.email, role: action.role});
     }
-    return `${action.user.isActive ? 'Заблокировать' : 'Разблокировать'} ${action.user.email}?`;
+    return this.translate.instant(action.user.isActive ? 'admin.users.blockMessage' : 'admin.users.unblockMessage', {email: action.user.email});
   });
 
   readonly totalPages = computed(() => Math.ceil(this.total() / 20));
@@ -143,7 +144,7 @@ export class AdminUsersPageComponent {
       distinctUntilChanged(),
       switchMap(search => this.api.users(search, 0).pipe(
         catchError(() => {
-          this.error.set('Не получилось загрузить пользователей.');
+          this.error.set(this.translate.instant('admin.users.loadError'));
           return EMPTY;
         }),
       )),
@@ -162,7 +163,7 @@ export class AdminUsersPageComponent {
         this.users.set(result.content);
         this.total.set(result.totalElements);
       },
-      error: () => this.error.set('Не получилось загрузить пользователей.'),
+      error: () => this.error.set(this.translate.instant('admin.users.loadError')),
     });
   }
 
@@ -238,8 +239,8 @@ export class AdminUsersPageComponent {
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
         this.actionError.set(error.status === 409 && action.kind === UserActionKind.Delete
-          ? 'У пользователя есть действующая платная подписка. Сначала отмените её.'
-          : `Не получилось ${action.kind === UserActionKind.Delete ? 'удалить пользователя' : action.kind === UserActionKind.Role ? 'сменить роль' : action.user.isActive ? 'заблокировать' : 'разблокировать'}. Попробуйте ещё раз.`);
+          ? this.translate.instant('admin.users.activeSubscription')
+          : this.translate.instant(action.kind === UserActionKind.Delete ? 'admin.users.deleteError' : action.kind === UserActionKind.Role ? 'admin.users.roleError' : action.user.isActive ? 'admin.users.blockError' : 'admin.users.unblockError'));
       },
     });
   }

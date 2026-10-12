@@ -7,6 +7,9 @@ import {ReviewFacade} from './review.facade';
 
 export type GameMode = Extract<ReviewMode, 'MATCH' | 'LISTEN' | 'SPELL'>;
 
+export const GamePhase = {PICK: 'pick', PLAYING: 'playing', DONE: 'done'} as const;
+type GamePhase = typeof GamePhase[keyof typeof GamePhase];
+
 const ROUND_SECONDS = 90;
 const MATCH_BATCH = 6;
 
@@ -35,7 +38,7 @@ export class GamesFacade {
   private pool: UserWord[] = [];
 
   readonly mode = signal<GameMode | null>(null);
-  readonly phase = signal<'pick' | 'playing' | 'done'>('pick');
+  readonly phase = signal<GamePhase>(GamePhase.PICK);
   readonly timeLeft = signal(ROUND_SECONDS);
   readonly score = signal(0);
   readonly combo = signal(0);
@@ -55,6 +58,8 @@ export class GamesFacade {
   readonly lastAnswer = signal<AnswerResult | null>(null);
   private wordQueue: UserWord[] = [];
 
+  readonly saving = this.review.saving;
+  readonly saveError = this.review.saveError;
   readonly result = this.review.result;
   readonly loadError = this.review.error;
   readonly loading = this.review.loading;
@@ -84,7 +89,7 @@ export class GamesFacade {
   }
 
   start(mode: GameMode): void {
-    if (this.phase() !== 'pick' || this.pendingMode()) return;
+    if (this.phase() !== GamePhase.PICK || this.pendingMode()) return;
     this.mode.set(mode);
     this.pendingMode.set(mode);
     this.review.start(mode, {limit: 20});
@@ -97,10 +102,10 @@ export class GamesFacade {
     this.score.set(0);
     this.combo.set(0);
     this.currentWord.set(null);
-    this.phase.set('playing');
+    this.phase.set(GamePhase.PLAYING);
     this.timeLeft.set(ROUND_SECONDS);
     this.startTimer();
-    if (mode === 'MATCH') {
+    if (mode === ReviewMode.MATCH) {
       this.matchQueue = [...cards];
       this.dealMatch();
     } else {
@@ -165,7 +170,7 @@ export class GamesFacade {
       this.finish();
       return;
     }
-    if (this.mode() === 'LISTEN') {
+    if (this.mode() === ReviewMode.LISTEN) {
       const distractors = shuffle(this.pool.filter(w => w.id !== word.id))
         .slice(0, 3).map(w => w.word.translation);
       this.options.set(shuffle([word.word.translation, ...distractors]));
@@ -247,18 +252,23 @@ export class GamesFacade {
   }
 
   private finish(): void {
-    if (this.phase() !== 'playing') return;
+    if (this.phase() !== GamePhase.PLAYING) return;
     this.stopTimer();
     this.clearScheduled();
-    this.phase.set('done');
+    this.phase.set(GamePhase.DONE);
     this.review.finishWithAnswers(this.engine.answers);
   }
 
+  retryFinish(): void {
+    this.review.retryFinish();
+  }
+
   backToPick(): void {
+    if (this.saving() || this.saveError()) return;
     this.stopTimer();
     this.clearScheduled();
     this.pendingMode.set(null);
-    this.phase.set('pick');
+    this.phase.set(GamePhase.PICK);
     this.mode.set(null);
   }
 }

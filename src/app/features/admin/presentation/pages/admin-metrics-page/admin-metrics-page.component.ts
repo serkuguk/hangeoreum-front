@@ -1,23 +1,25 @@
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {AdminApi, AdminMetrics} from '@features/admin/infrastructure/admin.api';
 
 @Component({
   selector: 'hg-admin-metrics-page',
+  imports: [TranslatePipe],
   template: `
-    <h2 class="pagettl">Админ · Дашборд</h2>
-    <p class="pagesub">Ключевые метрики продукта.</p>
+    <h2 class="pagettl">{{ 'admin.metrics.title' | translate }}</h2>
+    <p class="pagesub">{{ 'admin.metrics.subtitle' | translate }}</p>
     @if (error()) {
-      <div class="errbar">Не получилось загрузить метрики.</div>
+      <div class="errbar">{{ 'admin.metrics.loadError' | translate }}</div>
     } @else if (metrics(); as m) {
       <div class="grid">
-        <div class="panel stat"><b>{{ m.totalUsers }}</b><span>пользователей</span></div>
+        <div class="panel stat"><b>{{ m.totalUsers }}</b><span>{{ 'admin.metrics.users' | translate }}</span></div>
         <div class="panel stat"><b class="j">{{ m.dau }}</b><span>DAU</span></div>
-        <div class="panel stat"><b class="bl">{{ m.lessonsCompletedToday }}</b><span>уроков сегодня</span></div>
-        <div class="panel stat"><b class="y">{{ m.activeSubscriptions }}</b><span>активных Pro</span></div>
-        <div class="panel stat"><b class="r">{{ (m.conversion * 100).toFixed(1) }}%</b><span>конверсия в Pro</span></div>
+        <div class="panel stat"><b class="bl">{{ m.lessonsCompletedToday }}</b><span>{{ 'admin.metrics.lessonsToday' | translate }}</span></div>
+        <div class="panel stat"><b class="y">{{ m.activeSubscriptions }}</b><span>{{ 'admin.metrics.pro' | translate }}</span></div>
+        <div class="panel stat"><b class="r">{{ (m.conversion * 100).toFixed(1) }}%</b><span>{{ 'admin.metrics.conversion' | translate }}</span></div>
       </div>
     } @else {
-      <div class="empty">Загружаем…</div>
+      <div class="empty">{{ 'admin.metrics.loading' | translate }}</div>
     }
   `,
   styleUrl: '../_admin.scss',
@@ -41,6 +43,7 @@ import {AdminApi, AdminMetrics} from '@features/admin/infrastructure/admin.api';
 })
 export class AdminMetricsPageComponent {
   private api = inject(AdminApi);
+  private translate = inject(TranslateService);
 
   readonly metrics = signal<AdminMetrics | null>(null);
   readonly error = signal(false);

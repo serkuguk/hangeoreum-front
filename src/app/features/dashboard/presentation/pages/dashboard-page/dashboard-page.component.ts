@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/cor
 import {Router, RouterLink} from '@angular/router';
 import {HgAudioButtonComponent, HgProgressRingComponent, MascotComponent} from '@shared/components/hg';
 import {ButtonComponent} from 'springest';
-import {CoursePathComponent, toCoursePath} from '@features/learning/course-path';
+import {CoursePathComponent, CourseNodeState, lessonRoute, toCoursePath} from '@features/learning/course-path';
 import {DashboardFacade} from '@features/dashboard/application/dashboard.facade';
 import {DASHBOARD_REPOSITORY} from '@features/dashboard/application/dashboard-repository.token';
 import {DashboardHttpRepository} from '@features/dashboard/infrastructure/dashboard.http-repository';
@@ -56,10 +56,10 @@ export class DashboardPageComponent {
   readonly courseTitle = computed(() => this.facade.courseMap()?.title || null);
 
   readonly path = computed(() => toCoursePath(
-    this.facade.courseMap(), PATH_WINDOW));
+    this.facade.courseMap(), (key, params) => this.translate.instant(key, params), PATH_WINDOW));
 
   /** Узел, на который ведёт главный CTA героя. */
-  readonly currentNode = computed(() => this.path().nodes.find(node => node.state === 'current'));
+  readonly currentNode = computed(() => this.path().nodes.find(node => node.state === CourseNodeState.CURRENT));
 
   private readonly lessons = computed(() =>
     new Map((this.facade.courseMap()?.units ?? []).flatMap(unit => unit.lessons).map(l => [l.id, l])));
@@ -86,13 +86,7 @@ export class DashboardPageComponent {
   openLesson(node: {id: string}): void {
     const lesson = this.lessons().get(node.id);
     if (!lesson || lesson.status === 'LOCKED') return;
-    if (!lesson.hasAccess) {
-      void this.router.navigate(['/billing']);
-      return;
-    }
-    void this.router.navigate(lesson.type === 'STORY'
-      ? ['/learn', lesson.id, 'story']
-      : lesson.status === 'COMPLETED' ? ['/learn', lesson.id] : ['/learn', lesson.id, 'tip']);
+    void this.router.navigate(lessonRoute(lesson));
   }
 
   retry(): void {

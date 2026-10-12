@@ -7,23 +7,23 @@ export interface ThemeChoice {
 }
 
 export const THEME_ACCENTS = [
-  {name: 'Синий (основной)', value: '#3B6BFF'},
-  {name: 'Красный', value: '#FF4D5E'},
-  {name: 'Жёлтый', value: '#FFC23C'},
-  {name: 'Нефрит', value: '#1FC79B'},
+  {name: 'identity.settings.themeOptions.accentBlue', value: '#3B6BFF'},
+  {name: 'identity.settings.themeOptions.accentRed', value: '#FF4D5E'},
+  {name: 'identity.settings.themeOptions.accentYellow', value: '#FFC23C'},
+  {name: 'identity.settings.themeOptions.accentJade', value: '#1FC79B'},
 ];
 
 export const THEME_FONT_SCALES = [
-  {name: 'Компактно', value: 0.9},
-  {name: 'Обычно', value: 1.0},
-  {name: 'Крупно', value: 1.15},
-  {name: 'Очень крупно', value: 1.3},
+  {name: 'identity.settings.themeOptions.fontCompact', value: 0.9},
+  {name: 'identity.settings.themeOptions.fontNormal', value: 1.0},
+  {name: 'identity.settings.themeOptions.fontLarge', value: 1.15},
+  {name: 'identity.settings.themeOptions.fontExtraLarge', value: 1.3},
 ];
 
 export const THEME_RADII = [
-  {name: 'Острые', value: '10px'},
-  {name: 'Обычные', value: '22px'},
-  {name: 'Мягкие', value: '30px'},
+  {name: 'identity.settings.themeOptions.radiusSharp', value: '10px'},
+  {name: 'identity.settings.themeOptions.radiusNormal', value: '22px'},
+  {name: 'identity.settings.themeOptions.radiusSoft', value: '30px'},
 ];
 
 export const DEFAULT_THEME: ThemeChoice = {accent: '#3B6BFF', fontScale: 1.0, radius: '22px'};

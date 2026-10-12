@@ -1,6 +1,6 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Subscription, filter, switchMap, take, timer} from 'rxjs';
+import {Subscription, filter, exhaustMap, take, timer} from 'rxjs';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {Story, StoryLine} from '@features/learning/domain/entities/story.entity';
 import {LearnMapFacade} from './learn-map.facade';
@@ -88,7 +88,7 @@ export class StoryFacade {
 
   private pollCompletion(attemptId: string): void {
     this.completionPolling = timer(0, 500).pipe(
-      switchMap(() => this.repository.getCompletionStatus(attemptId)),
+      exhaustMap(() => this.repository.getCompletionStatus(attemptId)),
       filter(response => response.status === 'COMPLETED'),
       take(1),
       takeUntilDestroyed(this.destroyRef),

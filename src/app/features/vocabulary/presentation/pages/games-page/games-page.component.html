@@ -1,6 +1,6 @@
 <div class="wrap gamebox">
   @switch (facade.phase()) {
-    @case ('pick') {
+    @case (gamePhase.PICK) {
       <h2 class="pagettl">{{ 'vocabulary.games.title' | translate }}</h2>
       <p class="pagesub">{{ 'vocabulary.games.subtitle' | translate }}</p>
       @if (facade.loadError(); as error) {
@@ -20,7 +20,7 @@
         <p class="pagesub loadhint">{{ 'vocabulary.games.loading' | translate }}</p>
       }
     }
-    @case ('playing') {
+    @case (gamePhase.PLAYING) {
       <div class="g-top">
         <div class="timer" [class.low]="isTimeLow()">{{ clock() }}</div>
         <div class="combo">{{ 'vocabulary.games.combo' | translate:{combo: facade.combo(), score: facade.score()} }}</div>
@@ -28,7 +28,7 @@
       </div>
 
       @switch (facade.mode()) {
-        @case ('MATCH') {
+        @case (reviewMode.MATCH) {
           <div class="match">
             @for (cell of facade.matchCells(); track cell.wordId + cell.side) {
               <app-button class="hg-native-host" [styleClass]="cellClass(cell)" type="button"
@@ -38,7 +38,7 @@
             }
           </div>
         }
-        @case ('LISTEN') {
+        @case (reviewMode.LISTEN) {
           @if (facade.currentWord(); as word) {
             <div class="listenbox">
               <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl" size="lg"/>
@@ -53,7 +53,7 @@
             </div>
           }
         }
-        @case ('SPELL') {
+        @case (reviewMode.SPELL) {
           @if (facade.currentWord(); as word) {
             <div class="spellbox">
               <div class="task">«{{ word.word.translation }}»</div>
@@ -75,12 +75,21 @@
         }
       }
     }
-    @case ('done') {
+    @case (gamePhase.DONE) {
+      @if (facade.saving()) {
+        <div class="panel loadpanel" aria-live="polite">{{ 'vocabulary.flashcards.saving' | translate }}</div>
+      } @else if (facade.saveError(); as error) {
+        <div class="panel loadpanel" role="alert">
+          <p>{{ error }}</p>
+          <app-button styleClass="hg-button" [label]="'common.retry' | translate" (click)="facade.retryFinish()"/>
+        </div>
+      } @else {
       <hg-session-result-card [eyebrow]="'vocabulary.games.koreanEyebrow' | translate" [koreanTitle]="'vocabulary.games.koreanTitle' | translate" [title]="'vocabulary.games.roundComplete' | translate"
                               [stats]="resultStats(facade.result())">
         <app-button styleClass="hg-button" result-actions [label]="'vocabulary.games.anotherRound' | translate" (click)="facade.backToPick()"/>
         <a result-actions class="ghostbtn" routerLink="/review">{{ 'vocabulary.toModes' | translate }}</a>
       </hg-session-result-card>
+      }
     }
   }
 </div>

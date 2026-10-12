@@ -6,12 +6,15 @@ import {AuthTokenStorageService} from "@core/services/auth-token-storage.service
 import {EnvironmentInterface} from "@core/interfaces/environment.interface";
 import {ENV} from "@core/tokens/environment.token";
 
+export const UserRole = {User: 'USER', Editor: 'EDITOR', Admin: 'ADMIN'} as const;
+export type UserRole = typeof UserRole[keyof typeof UserRole];
+
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   avatarUrl: string | null;
-  role: 'USER' | 'EDITOR' | 'ADMIN';
+  role: UserRole;
   startLevel: string;
   createdAt: string;
 }

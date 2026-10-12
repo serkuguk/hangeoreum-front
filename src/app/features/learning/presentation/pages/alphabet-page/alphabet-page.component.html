@@ -38,7 +38,7 @@
       @for (group of facade.groups(); track group.group) {
         <section class="lgroup">
           <h3>
-            {{ group.title }}
+            {{ group.titleKey | translate }}
             <span class="cnt">{{ group.letters.length }}</span>
           </h3>
           <div class="tiles">

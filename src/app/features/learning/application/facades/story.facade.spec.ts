@@ -1,6 +1,6 @@
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
-import {of, throwError} from 'rxjs';
+import {delay, of, throwError} from 'rxjs';
 import {Story} from '@features/learning/domain/entities/story.entity';
 import {CompletionAccepted, CompleteResult, LearningRepository} from '@features/learning/domain/repositories/learning.repository';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
@@ -45,6 +45,15 @@ describe('StoryFacade', () => {
     });
     facade = TestBed.inject(StoryFacade);
     facade.load(story.id);
+  });
+
+  it('waits for completion responses slower than the polling interval', () => {
+    repository.complete.mockReturnValue(of(accepted));
+    repository.getCompletionStatus.mockReturnValue(of({status: 'COMPLETED' as const, result}).pipe(delay(600)));
+    facade.complete(story.id);
+    jest.advanceTimersByTime(600);
+    expect(facade.completed()).toBe(true);
+    expect(repository.getCompletionStatus).toHaveBeenCalledTimes(1);
   });
 
   afterEach(() => {

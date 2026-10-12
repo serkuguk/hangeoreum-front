@@ -49,7 +49,6 @@ export class VocabularyFacade {
   }
 
   search(query: VocabularyQuery): void {
-    this.loading.set(true);
     this.query$.next(query);
   }
 

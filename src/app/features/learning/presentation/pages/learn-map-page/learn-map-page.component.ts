@@ -10,10 +10,9 @@ import {LearnMapFacade} from '@features/learning/application/facades/learn-map.f
 import {LessonNode, UnitNode} from '@features/learning/domain/entities/course-map.entity';
 import {CoursePathComponent} from '@features/learning/presentation/components/course-path/course-path.component';
 import {chapterSceneUrl} from '@features/learning/presentation/components/course-path/course-path.mapper';
-import {CourseChapter, CourseNode, CourseNodeState} from '@features/learning/presentation/components/course-path/course-path.model';
+import {ChapterState, CourseChapter, CourseNode, CourseNodeState} from '@features/learning/presentation/components/course-path/course-path.model';
 import {lessonRoute} from '@features/learning/presentation/lesson-route';
 
-type UnitState = 'done' | 'current' | 'locked';
 
 /** Первый слог хангыля из названия урока — глиф на кнопке; иначе номер шага. */
 const HANGUL = /[가-힣]/;
@@ -99,7 +98,7 @@ export class LearnMapPageComponent {
         icon: this.sceneUrl(index),
         state,
         counter: this.unitProgress(unit.lessons),
-        hint: state === 'locked' ? this.lockedReason(unit, all[index - 1]) : undefined,
+        hint: state === ChapterState.LOCKED ? this.lockedReason(unit, all[index - 1]) : undefined,
         // TEST OUT ждёт эндпоинт проверки главы — плашку включит одна строка здесь
         testOut: false,
       };
@@ -135,7 +134,7 @@ export class LearnMapPageComponent {
         glyph: '完',
         title: this.translate.instant('learning.map.finishTitle'),
         subtitle: this.facade.map()?.title ?? this.translate.instant('learning.map.finishDone'),
-        state: 'final',
+        state: CourseNodeState.FINAL,
         chapterId: last.id,
       });
     }
@@ -183,10 +182,10 @@ export class LearnMapPageComponent {
   }
 
   /** Состояние юнита целиком — какую главу свернуть, какую блокировать. */
-  unitState(unit: UnitNode): UnitState {
-    if (unit.lessons.every(lesson => lesson.status === 'COMPLETED')) return 'done';
-    if (unit.lessons.some(lesson => lesson.status === 'AVAILABLE' || lesson.status === 'COMPLETED')) return 'current';
-    return 'locked';
+  unitState(unit: UnitNode): CourseChapter['state'] {
+    if (unit.lessons.every(lesson => lesson.status === 'COMPLETED')) return ChapterState.DONE;
+    if (unit.lessons.some(lesson => lesson.status === 'AVAILABLE' || lesson.status === 'COMPLETED')) return ChapterState.CURRENT;
+    return ChapterState.LOCKED;
   }
 
   unitProgress(lessons: LessonNode[]): string {
@@ -220,11 +219,11 @@ export class LearnMapPageComponent {
   }
 
   private nodeState(lesson: LessonNode, isNow: boolean): CourseNodeState {
-    if (lesson.status === 'COMPLETED') return 'done';
-    if (!lesson.hasAccess) return 'pro';
-    if (lesson.status === 'LOCKED') return 'locked';
-    if (lesson.type === 'STORY') return 'bonus';
-    return isNow ? 'current' : 'open';
+    if (lesson.status === 'COMPLETED') return CourseNodeState.DONE;
+    if (lesson.status === 'LOCKED') return CourseNodeState.LOCKED;
+    if (!lesson.hasAccess) return CourseNodeState.PRO;
+    if (lesson.type === 'STORY') return CourseNodeState.BONUS;
+    return isNow ? CourseNodeState.CURRENT : CourseNodeState.OPEN;
   }
 
   private glyph(lesson: LessonNode): string {

@@ -1,6 +1,6 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Subscription, filter, map, switchMap, take, timer} from 'rxjs';
+import {Subscription, filter, map, exhaustMap, take, timer} from 'rxjs';
 import {Exercise, Lesson, Tip} from '@features/learning/domain/entities/exercise.entity';
 import {LessonSession} from '@features/learning/domain/services/lesson-session';
 import {
@@ -198,7 +198,7 @@ export class LessonFacade {
 
   private pollCompletion(attemptId: string): void {
     this.completionPolling = timer(0, 500).pipe(
-      switchMap(() => this.repository.getCompletionStatus(attemptId)),
+      exhaustMap(() => this.repository.getCompletionStatus(attemptId)),
       filter(response => response.status === 'COMPLETED'),
       take(1),
       map(response => response.result!),

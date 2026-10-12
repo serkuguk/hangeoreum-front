@@ -1,6 +1,6 @@
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
-import {Subject, of, throwError} from 'rxjs';
+import {Subject, delay, of, throwError} from 'rxjs';
 import {Lesson} from '@features/learning/domain/entities/exercise.entity';
 import {CompletionAccepted, CompletionStatus, CompleteResult, LearningRepository} from '@features/learning/domain/repositories/learning.repository';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
@@ -60,6 +60,15 @@ describe('LessonFacade', () => {
     facade = TestBed.inject(LessonFacade);
   });
 
+  it('waits for completion responses slower than the polling interval', () => {
+    repository.complete.mockReturnValue(of(accepted));
+    repository.getCompletionStatus.mockReturnValue(of({status: 'COMPLETED' as const, result}).pipe(delay(600)));
+    finishLesson();
+    jest.advanceTimersByTime(600);
+    expect(facade.result()).toEqual(result);
+    expect(repository.getCompletionStatus).toHaveBeenCalledTimes(1);
+  });
+
   afterEach(() => {
     TestBed.resetTestingModule();
     jest.useRealTimers();
@@ -109,6 +118,8 @@ describe('LessonFacade', () => {
     finishLesson();
     jest.advanceTimersByTime(0);
     status.next({status: 'PENDING', result: null});
+    status.complete();
+    repository.getCompletionStatus.mockReturnValue(of({status: 'COMPLETED', result}));
 
     expect(facade.result()).toBeNull();
     expect(facade.finishing()).toBe(true);

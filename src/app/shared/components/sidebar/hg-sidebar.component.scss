@@ -31,7 +31,7 @@
 nav { display: flex; flex-direction: column; gap: var(--hg-space-1); flex: 1; overflow-y: auto; min-height: 0; }
 a {
   display: flex; align-items: center; gap: var(--hg-space-3); min-height: 44px;
-  padding: var(--hg-space-2) var(--hg-space-3); border-radius: 0;
+  padding: var(--hg-space-2) var(--hg-space-3); border-radius: 6px;
   font-size: var(--hg-fs-sm); color: var(--sidebar-muted, var(--hg-text-muted));
   text-decoration: none; flex-shrink: 0;
   transition: background var(--hg-motion-nav), color var(--hg-motion-nav), gap var(--hg-motion-route) ease, padding var(--hg-motion-route) ease;

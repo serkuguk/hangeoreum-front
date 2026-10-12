@@ -3,8 +3,8 @@ import {ChangeDetectionStrategy, Component, computed, effect, inject} from '@ang
 import {RouterLink} from '@angular/router';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
-import {FinishResult} from '@features/vocabulary/domain/repositories/vocabulary.repository';
-import {AnswerResult, GameMode, GamesFacade, MatchCell, MatchSide} from '@features/vocabulary/application/facades/games.facade';
+import {FinishResult, ReviewMode} from '@features/vocabulary/domain/repositories/vocabulary.repository';
+import {AnswerResult, GamePhase, GameMode, GamesFacade, MatchCell, MatchSide} from '@features/vocabulary/application/facades/games.facade';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
@@ -16,6 +16,8 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 })
 export class GamesPageComponent {
   readonly facade = inject(GamesFacade);
+  readonly gamePhase = GamePhase;
+  readonly reviewMode = ReviewMode;
   private tts = inject(KoreanTtsService);
   private translate = inject(TranslateService);
   private lastAutoplayWordId: string | null = null;
@@ -25,9 +27,9 @@ export class GamesPageComponent {
   }
 
   readonly games: {mode: GameMode; icon: string; title: string; hint: string}[] = [
-    {mode: 'MATCH', icon: '🧩', title: this.translate.instant('vocabulary.games.match.title'), hint: this.translate.instant('vocabulary.games.match.hint')},
-    {mode: 'LISTEN', icon: '🎧', title: this.translate.instant('vocabulary.games.listen.title'), hint: this.translate.instant('vocabulary.games.listen.hint')},
-    {mode: 'SPELL', icon: '⌨️', title: this.translate.instant('vocabulary.games.spell.title'), hint: this.translate.instant('vocabulary.games.spell.hint')},
+    {mode: ReviewMode.MATCH, icon: '🧩', title: this.translate.instant('vocabulary.games.match.title'), hint: this.translate.instant('vocabulary.games.match.hint')},
+    {mode: ReviewMode.LISTEN, icon: '🎧', title: this.translate.instant('vocabulary.games.listen.title'), hint: this.translate.instant('vocabulary.games.listen.hint')},
+    {mode: ReviewMode.SPELL, icon: '⌨️', title: this.translate.instant('vocabulary.games.spell.title'), hint: this.translate.instant('vocabulary.games.spell.hint')},
   ];
 
   readonly clock = computed(() => {
@@ -62,7 +64,7 @@ export class GamesPageComponent {
   constructor() {
     effect(() => {
       const word = this.facade.currentWord();
-      if (this.facade.mode() !== 'LISTEN' || this.facade.phase() !== 'playing' || !word) {
+      if (this.facade.mode() !== ReviewMode.LISTEN || this.facade.phase() !== GamePhase.PLAYING || !word) {
         this.lastAutoplayWordId = null;
         return;
       }

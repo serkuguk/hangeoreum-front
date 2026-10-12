@@ -13,6 +13,7 @@ import {
   catchError,
   debounceTime,
   distinctUntilChanged,
+  finalize,
   of,
   switchMap,
 } from 'rxjs';
@@ -184,6 +185,7 @@ export class AdminLessonBuilderPageComponent {
   readonly data = signal<AdminLessonFull | null>(null);
   readonly error = signal<string | null>(null);
   readonly savedFlash = signal<string | null>(null);
+  readonly wordsSaving = signal(false);
 
   readonly kindOptions = KIND_OPTIONS;
   readonly newKind = signal('CHOICE');
@@ -265,7 +267,7 @@ export class AdminLessonBuilderPageComponent {
     if (!data) return;
     this.api
       .createExercise(this.id(), {
-        position: data.exercises.length + 1,
+        position: Math.max(0, ...data.exercises.map(exercise => exercise.position)) + 1,
         kind: this.newKind(),
         payload: PAYLOAD_TEMPLATES[this.newKind()],
       })
@@ -342,13 +344,16 @@ export class AdminLessonBuilderPageComponent {
 
   toggleWord(word: AdminWord): void {
     const data = this.data();
-    if (!data) return;
+    if (!data || this.wordsSaving()) return;
     const ids = this.isLinked(word)
       ? data.words.filter((w) => w.id !== word.id).map((w) => w.id)
       : [...data.words.map((w) => w.id), word.id];
-    this.api.putLessonWords(this.id(), ids).subscribe({
+    this.wordsSaving.set(true);
+    this.api.putLessonWords(this.id(), ids).pipe(
+      finalize(() => this.wordsSaving.set(false)),
+    ).subscribe({
       next: (words) => {
-        this.data.set({ ...data, words });
+        this.data.update(current => current ? { ...current, words } : current);
         this.flash(this.translate.instant('admin.builder.flash.wordsSaved'));
       },
       error: () =>

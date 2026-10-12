@@ -118,7 +118,7 @@ export class CoursePathComponent {
 
   private readonly doneIndex = computed(() => {
     let index = -1;
-    this.placed().forEach((node, i) => { if (node.state === 'done') index = i; });
+    this.placed().forEach((node, i) => { if (node.state === CourseNodeState.DONE) index = i; });
     return index;
   });
 

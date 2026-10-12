@@ -18,7 +18,7 @@ interface MatchCell {
     <div class="q-kind">{{ 'learning.exercise.matchPairs' | translate }}</div>
     <div class="match">
       @for (cell of cells(); track cell.side + cell.pairIndex) {
-        <app-button class="hg-native-host" [styleClass]="'hg-native-button mcell' + (cell.side === 'left' ? ' kr' : '') + (isHit(cell) ? ' hit' : '') + (selected() === cell ? ' sel' : '') + (missCell() === cell ? ' miss' : '')" type="button"
+        <app-button class="hg-native-host" [styleClass]="'hg-native-button mcell' + (isLeft(cell) ? ' kr' : '') + (isHit(cell) ? ' hit' : '') + (selected() === cell ? ' sel' : '') + (missCell() === cell ? ' miss' : '')" type="button"
 
 
                 [disabled]="isHit(cell)"
@@ -74,6 +74,10 @@ export class ExerciseMatchComponent {
   readonly missCell = signal<MatchCell | null>(null);
   private hits = signal<Set<number>>(new Set());
   private mistakes = 0;
+
+  isLeft(cell: MatchCell): boolean {
+    return cell.side === 'left';
+  }
 
   isHit(cell: MatchCell): boolean {
     return this.hits().has(cell.pairIndex);

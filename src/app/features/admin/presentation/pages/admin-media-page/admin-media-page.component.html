@@ -197,11 +197,13 @@
           <app-textarea
             [label]="'admin.media.subtitlesLabel' | translate"
             [rows]="7"
+            [placeholder]="'admin.media.subtitlesPlaceholder' | translate"
             [formField]="subsField"
           />
           <app-button
             [label]="'admin.media.saveSubtitles' | translate"
             (click)="saveSubtitles(clip)"
+            [disabled]="!subtitlesReady() || subtitlesSaving()"
             styleClass="hg-button hg-button--ghost hg-button--sm"
           ></app-button>
         </div>

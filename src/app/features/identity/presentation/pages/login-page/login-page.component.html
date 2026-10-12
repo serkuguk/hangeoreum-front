@@ -15,7 +15,6 @@
       [field]="form.email"
       [isInline]="false"
       [submitted]="submitted()"
-      [label]="'common.email' | translate"
       [showLabel]="true"
       [errorMessages]="{
         required: ('identity.validation.email' | translate),
@@ -36,7 +35,6 @@
       [field]="form.password"
       [isInline]="false"
       [submitted]="submitted()"
-      [label]="'common.password' | translate"
       [showLabel]="true"
       [errorMessages]="{
         required: ('identity.validation.passwordRequired' | translate),
@@ -45,7 +43,7 @@
       <app-password-input
         [toggleMask]="false"
         [formField]="form.password"
-        placeholder="••••••••"
+        placeholder="{{ 'identity.login.password' | translate }}"
         autocomplete="current-password"
       />
     </app-form-field>

@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { AuthFacade } from '@features/identity/application/facades/auth.facade';
-import { StartLevel } from '@features/identity/domain/user.entity';
+import { DAILY_GOAL_XP, REMINDER_TIMES, StartLevel } from '@features/identity/domain/user.entity';
 import {
   ButtonComponent,
   SegmentedControlComponent,
@@ -79,14 +79,14 @@ export class OnboardingPageComponent {
 
   readonly goals: GoalOption[] = [
     {
-      xp: 10,
+      xp: DAILY_GOAL_XP.Calm,
       icon: '🌱',
       color: 'jade',
       title: this.translate.instant('identity.onboarding.goals.calm.title'),
       hint: this.translate.instant('identity.onboarding.goals.calm.hint'),
     },
     {
-      xp: 20,
+      xp: DAILY_GOAL_XP.Confident,
       icon: '🎯',
       color: 'blue',
       title: this.translate.instant(
@@ -95,7 +95,7 @@ export class OnboardingPageComponent {
       hint: this.translate.instant('identity.onboarding.goals.confident.hint'),
     },
     {
-      xp: 50,
+      xp: DAILY_GOAL_XP.Serious,
       icon: '🔥',
       color: 'yellow',
       title: this.translate.instant('identity.onboarding.goals.serious.title'),
@@ -103,7 +103,7 @@ export class OnboardingPageComponent {
     },
   ];
 
-  readonly times = ['09:00', '12:00', '19:00', '21:00'];
+  readonly times = REMINDER_TIMES;
   readonly levelOptions = this.levels.map((option) => ({
     value: option.value,
     label: `${option.han} ${option.title}`,
@@ -119,7 +119,7 @@ export class OnboardingPageComponent {
   readonly step = signal(1);
   readonly model = signal({
     level: 'BEGINNER' as StartLevel,
-    goal: 20,
+    goal: DAILY_GOAL_XP.Confident as number,
     remindersEnabled: true,
     time: '19:00',
   });
