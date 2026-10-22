@@ -33,18 +33,12 @@
 
 .searchbox {
   width: 100%;
-  background: var(--hg-surface);
-  border: 1px solid var(--hg-border);
-  border-radius: var(--hg-radius-block);
-  padding: 13px var(--hg-space-4);
-  color: var(--hg-text);
-  font-size: 15px;
   margin-bottom: var(--hg-space-4);
 
-  &:focus-visible {
-    outline: none;
-    border-color: var(--hg-focus);
-    box-shadow: 0 0 0 3px var(--hg-route-soft);
+  input.app-input {
+    min-height: 2.5rem;
+    height: 2.5rem;
+    padding: var(--hg-space-2) var(--hg-space-3);
   }
 }
 
@@ -54,6 +48,11 @@
   flex-wrap: wrap;
   margin-bottom: var(--hg-space-5);
   align-items: center;
+
+  app-basic-select {
+    .p-select { min-height: 2.5rem; height: 2.5rem; padding: 0; }
+    .p-select-label { padding: .375rem var(--hg-space-3); }
+  }
 
   hg-segmented-control { max-width: 100%; min-width: 0; }
 
@@ -178,6 +177,7 @@
 
 .newdeck {
   display: flex;
+  align-items: flex-end;
   gap: var(--hg-space-3);
   margin-bottom: var(--hg-space-5);
 

@@ -7,6 +7,9 @@
   </svg>
 }
 
+@if (imageSrc()) {
+  <img class="hg-mascot__body" [src]="imageSrc()" [width]="size()" [height]="size()" [alt]="'mascot.ariaLabel' | translate" />
+} @else {
 <svg class="hg-mascot__body" viewBox="0 0 220 220" [attr.width]="size()" [attr.height]="size()" role="img" [attr.aria-label]="'mascot.ariaLabel' | translate">
   <ellipse cx="88" cy="190" rx="22" ry="12" fill="#FFF0D2"/>
   <ellipse cx="134" cy="190" rx="22" ry="12" fill="#FFF0D2"/>
@@ -35,6 +38,7 @@
   <path d="M110 112q-7 7.5 -14 2" stroke="#2C2136" stroke-width="3" fill="none" stroke-linecap="round"/>
   <path d="M110 112q7 7.5 14 2" stroke="#2C2136" stroke-width="3" fill="none" stroke-linecap="round"/>
 </svg>
+}
 
 @if (speech()) {
   <div class="hg-mascot__speech">{{ speech() }}</div>

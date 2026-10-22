@@ -180,6 +180,16 @@ app-file-picker {
   &:has(> input:focus-visible) > label { outline: 3px solid color-mix(in srgb, var(--hg-blue) 30%, transparent); outline-offset: 2px; }
   &:has(> input:disabled) > label { opacity: .58; cursor: not-allowed; }
 }
+.admin-words-table app-file-picker.audio-picker > label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+}
 app-dialog {
   .p-dialog { width: min(42rem, calc(100vw - 2rem)); max-height: 90vh; background: var(--hg-card); color: var(--hg-text); border-color: var(--hg-border); }
   :is(.p-dialog-header, .p-dialog-content, .p-dialog-footer) { background: var(--hg-card); color: var(--hg-text); }
@@ -235,15 +245,15 @@ hg-dashboard-page .hg-btn.hg-btn.hg-btn.hg-btn.hg-btn {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
-  transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+  transition: background-color var(--hg-motion-feedback), filter var(--hg-motion-feedback);
 
   &--light {
     padding: var(--hg-space-4) 26px;
     background: oklch(98% 0.02 90);
     color: var(--hg-route);
-    box-shadow: 0 6px 0 oklch(82% 0.03 88);
+    box-shadow: none;
 
-    &:hover { transform: translateY(3px); box-shadow: 0 3px 0 oklch(82% 0.03 88); }
+    &:hover { transform: none; box-shadow: none; filter: brightness(.96); }
   }
 
   &--ghost {

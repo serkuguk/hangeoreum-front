@@ -2,7 +2,7 @@ import {signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {ThemeService} from '@core/services/theme.service';
+import {THEME_RADII, ThemeService} from '@core/services/theme.service';
 import {Subject, of} from 'rxjs';
 import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {ME_REPOSITORY} from '@features/identity/application/me-repository.token';
@@ -38,7 +38,7 @@ describe('SettingsPage pending changes', () => {
         {
           provide: ThemeService,
           useValue: {
-            stored: () => ({accent: '#00a67d', fontScale: 1, radius: 12}),
+            stored: () => ({accent: '#00a67d', fontScale: 1, radius: '22px'}),
             storedMode: () => 'system',
             apply: jest.fn(),
             setMode: jest.fn(),
@@ -91,6 +91,24 @@ describe('SettingsPage pending changes', () => {
     component.changePassword();
     expect(repository.changePassword).toHaveBeenCalledTimes(2);
     expect(component.passwordModel()).toEqual({current: '', next: ''});
+  });
+
+  it.each(THEME_RADII)('applies radius $value immediately and saves it after debounce', ({value}) => {
+    const theme = {accent: '#00a67d', fontScale: 1, radius: value};
+    repository.updateSettings.mockReturnValue(of(initialSettings));
+
+    component.updateRadius(value);
+
+    expect(TestBed.inject(ThemeService).apply).toHaveBeenCalledWith(theme);
+    expect(component.theme()).toEqual(theme);
+    expect(repository.updateSettings).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(600);
+    expect(repository.updateSettings).toHaveBeenCalledTimes(1);
+    expect(repository.updateSettings).toHaveBeenCalledWith({
+      ...initialSettings,
+      theme: {...theme, mode: 'system'},
+    });
+    expect(component.dirty()).toBe(false);
   });
 
   it('leaves a clean page immediately', () => {
