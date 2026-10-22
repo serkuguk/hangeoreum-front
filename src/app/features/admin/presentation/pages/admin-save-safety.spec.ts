@@ -7,7 +7,7 @@ import {AdminMediaPageComponent} from './admin-media-page/admin-media-page.compo
 import {AdminCoursePageComponent} from './admin-course-page/admin-course-page.component';
 import {AdminLessonBuilderPageComponent} from './admin-lesson-builder-page/admin-lesson-builder-page.component';
 
-const clip: AdminClip = {id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: null, published: false, videoUrl: null, audioUrl: null, thumbnailUrl: null};
+const clip: AdminClip = {id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null, published: false, videoUrl: null, audioUrl: null, thumbnailUrl: null};
 const unit: AdminUnit = {id: 'unit', courseId: 'course', position: 1, title: 'Unit', description: null, color: null, published: false};
 const lesson: AdminLesson = {id: 'lesson', unitId: unit.id, position: 1, title: 'Lesson', type: 'LESSON', xpReward: 10, free: false, published: false};
 const word: AdminWord = {id: 'word', hangul: '가', romanization: 'ga', translation: 'a', imageUrl: null, audioUrl: null, partOfSpeech: null, topicId: null, exampleKo: null, exampleTranslation: null, grammarNote: null};

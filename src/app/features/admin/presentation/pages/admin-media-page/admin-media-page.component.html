@@ -86,6 +86,9 @@
   @for (clip of clips(); track clip.id) {
     <div class="cliprow">
       <span class="pill p-b">{{ clip.kind }}</span>
+      @if (unitName(clip.unitId); as unit) {
+        <span class="pill">{{ unit }}</span>
+      }
       <span class="grow muted">{{ mediaSummary(clip) }}</span>
       <app-file-picker
         #picker1
@@ -161,6 +164,14 @@
             placeholder=""
             [items]="speakerOptions()"
             [formField]="clipFields.speakerId"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <app-basic-select
+            [ariaLabel]="'admin.media.clipUnitAria' | translate"
+            placeholder=""
+            [items]="unitOptions()"
+            [formField]="clipFields.unitId"
             optionLabel="label"
             optionValue="value"
           />

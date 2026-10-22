@@ -1,7 +1,7 @@
 import {FormField, form, min} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
+import {Subject, catchError, debounceTime, distinctUntilChanged, forkJoin, map, of, switchMap} from 'rxjs';
 import {
   ButtonComponent,
   DialogComponent,
@@ -11,7 +11,7 @@ import {
   TextareaComponent,
 } from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {AdminApi, AdminClip, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
+import {AdminApi, AdminClip, AdminUnit, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
 
 const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY', 'WORD']
   .map(value => ({label: value, value}));
@@ -117,6 +117,11 @@ export class AdminMediaPageComponent {
     {label: this.translate.instant('admin.media.noSpeaker'), value: null},
     ...this.speakers().map(speaker => ({label: speaker.name, value: speaker.id})),
   ]);
+  readonly units = signal<AdminUnit[]>([]);
+  readonly unitOptions = computed<{label: string; value: string | null}[]>(() => [
+    {label: this.translate.instant('admin.media.noUnit'), value: null},
+    ...this.units().map(unit => ({label: unit.title, value: unit.id})),
+  ]);
 
   // сигнал: наполняется асинхронно из getSubtitles, иначе zoneless CD не перерисует textarea
   readonly subsDraft = signal('');
@@ -131,8 +136,8 @@ export class AdminMediaPageComponent {
   readonly newClipKindField = form(this.newClipKind);
   readonly speakerDraft = signal('');
   readonly speakerDraftField = form(this.speakerDraft);
-  readonly clipDraft = signal<{kind: string; speakerId: string | null; wordId: string | null; durationMs: number | null}>(
-    {kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: null});
+  readonly clipDraft = signal<{kind: string; speakerId: string | null; wordId: string | null; unitId: string | null; durationMs: number | null}>(
+    {kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null});
   readonly clipFields = form(this.clipDraft, path => min(path.durationMs, 0));
   clipWordLabel = '';
   wordSearch = '';
@@ -152,6 +157,7 @@ export class AdminMediaPageComponent {
         : of(null)),
       takeUntilDestroyed(),
     ).subscribe(result => this.foundWords.set(result?.content ?? []));
+    this.loadUnits();
     this.load();
   }
 
@@ -163,6 +169,17 @@ export class AdminMediaPageComponent {
     this.api.clips().subscribe({
       next: clips => this.clips.set(clips),
       error: () => this.error.set(this.translate.instant('admin.media.errors.loadClips')),
+    });
+  }
+
+  // юниты не меняются на этой странице — грузим один раз, не в load()
+  private loadUnits(): void {
+    this.api.courses().pipe(
+      switchMap(courses => courses.length ? forkJoin(courses.map(course => this.api.units(course.id))) : of([])),
+      map(unitsByCourse => unitsByCourse.flat()),
+    ).subscribe({
+      next: units => this.units.set(units),
+      error: () => this.error.set(this.translate.instant('admin.media.errors.loadUnits')),
     });
   }
 
@@ -201,6 +218,10 @@ export class AdminMediaPageComponent {
       },
       error: err => this.fail('admin.media.errors.updateSpeaker', err),
     });
+  }
+
+  unitName(id: string | null): string | null {
+    return this.units().find(u => u.id === id)?.title ?? null;
   }
 
   speakerName(id: string | null): string {
@@ -269,7 +290,7 @@ export class AdminMediaPageComponent {
       return;
     }
     this.editingClip.set(clip.id);
-    this.clipFields().reset({kind: clip.kind, speakerId: clip.speakerId, wordId: clip.wordId, durationMs: clip.durationMs});
+    this.clipFields().reset({kind: clip.kind, speakerId: clip.speakerId, wordId: clip.wordId, unitId: clip.unitId ?? null, durationMs: clip.durationMs});
     this.clipWordLabel = clip.wordId
       ? this.translate.instant('admin.media.wordIdLabel', {id: clip.wordId.slice(0, 8)})
       : '';

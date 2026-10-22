@@ -107,6 +107,7 @@
   button.hg-native-button.hg-native-button.hg-native-button.rowmain {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--hg-space-3);
     flex: 1;
     background: none;
@@ -125,7 +126,7 @@
     }
   }
 
-  .word-image { width: 80px; height: 80px; flex-shrink: 0; object-fit: contain; }
+  .word-image { width: 80px; height: 80px; flex: 0 0 80px; object-fit: contain; margin-left: -4px; margin-right: 64px; transform: scale(1.8); transform-origin: left center; }
   .word-copy { display: flex; flex-direction: column; gap: var(--hg-space-1); min-width: 0; overflow-wrap: anywhere; }
   .wh { font-family: var(--hg-font-display); font-size: 24px; line-height: 1.25; }
   .rom { color: var(--hg-text-muted); font-size: 12.5px; }
@@ -161,6 +162,16 @@
 
     small { display: block; color: var(--hg-text-muted); font-family: var(--hg-font-ui); }
   }
+}
+
+.vocabulary-audio button.hg-native-button.hg-native-button.hg-native-button.snd {
+  background: var(--hg-surface-muted);
+  border: 1px solid var(--hg-border);
+  color: var(--hg-text);
+}
+
+.vocabulary-audio button.hg-native-button.hg-native-button.hg-native-button.snd:hover {
+  background: var(--hg-surface);
 }
 
 .pager {

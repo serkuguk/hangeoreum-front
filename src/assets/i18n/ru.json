@@ -228,6 +228,7 @@
       "speakerNamePlaceholder": "지민…",
       "addSpeaker": "Спикер",
       "noSpeaker": "без спикера",
+      "noUnit": "без юнита",
       "clips": "Клипы",
       "uploadVideoAria": "Загрузить видео клипа",
       "uploadAudioAria": "Загрузить аудио клипа",
@@ -240,6 +241,7 @@
       "deleteSpeakerTitle": "Удалить спикера",
       "clipKindAria": "Тип клипа",
       "clipSpeakerAria": "Спикер клипа",
+      "clipUnitAria": "Юнит клипа (видео показывается ученикам этого юнита)",
       "durationLabel": "Длительность, мс",
       "wordIdLabel": "ID {{id}}…",
       "wordLabel": "{{hangul}} — {{translation}}",
@@ -272,6 +274,7 @@
       "errors": {
         "findWords": "Не получилось найти слова.",
         "loadSpeakers": "Не получилось загрузить спикеров.",
+        "loadUnits": "Не получилось загрузить юниты.",
         "loadClips": "Не получилось загрузить клипы.",
         "addSpeaker": "Не получилось добавить спикера",
         "deleteSpeaker": "Не получилось удалить спикера",

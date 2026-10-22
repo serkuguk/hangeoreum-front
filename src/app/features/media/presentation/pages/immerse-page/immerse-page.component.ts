@@ -1,6 +1,5 @@
 import {ButtonComponent, SegmentedControlComponent} from 'springest';
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -28,7 +27,7 @@ type SubMode = typeof SubMode[keyof typeof SubMode];
   styleUrl: './immerse-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ImmersePageComponent implements AfterViewInit, OnDestroy {
+export class ImmersePageComponent implements OnDestroy {
   readonly facade = inject(ImmerseFacade);
   readonly vocabulary = inject(WordAdditionFacade);
   private host = inject(ElementRef<HTMLElement>);
@@ -44,42 +43,46 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   readonly currentClipIndex = signal(0);
 
   private observer: IntersectionObserver | null = null;
+  private observerRoot: Element | null = null;
+  private wheelLockedUntil = 0;
 
   constructor() {
     this.facade.load();
-    // после каждого дозаполнения ленты навешиваем observer на новые видео
+    // после каждого дозаполнения ленты навешиваем observer на новые карточки
     effect(() => {
       this.facade.clips();
-      afterNextRender(() => this.observeVideos(), {injector: this.injector});
+      afterNextRender(() => this.observeClips(), {injector: this.injector});
     });
   }
 
-  ngAfterViewInit(): void {
-    // play/pause по видимости; не держим >2 играющих
-    this.observer = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        const video = entry.target as HTMLVideoElement;
-        if (entry.intersectionRatio > 0.6) {
-          video.play().catch(() => {});
-          const clip = this.facade.clips().find(c => c.id === video.dataset['clipId']);
-          if (clip) {
-            this.currentClipIndex.set(this.facade.clips().indexOf(clip));
-            this.facade.markViewed(clip);
+  // активна карточка, пересекающая центральную полосу ленты: она играет, остальные на паузе
+  private observeClips(): void {
+    const feed = this.host.nativeElement.querySelector('.feed');
+    if (!feed) return;
+    if (this.observerRoot !== feed) {
+      this.observer?.disconnect();
+      this.observerRoot = feed;
+      this.observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          const section = entry.target as HTMLElement;
+          const video = section.querySelector('video');
+          if (!entry.isIntersecting) {
+            video?.pause();
+            continue;
           }
-          // подгрузка следующей страницы у хвоста
+          video?.play().catch(() => {});
+          const index = Number(section.dataset['index']);
           const clips = this.facade.clips();
-          if (clip && clips.indexOf(clip) >= clips.length - 2) this.facade.loadMore();
-        } else {
-          video.pause();
+          const clip = clips[index];
+          if (!clip) continue;
+          this.currentClipIndex.set(index);
+          this.facade.markViewed(clip);
+          // подгрузка следующей страницы у хвоста
+          if (index >= clips.length - 2) this.facade.loadMore();
         }
-      }
-    }, {threshold: [0, .6]});
-    this.observeVideos();
-  }
-
-  private observeVideos(): void {
-    this.host.nativeElement.querySelectorAll('video[data-clip-id]')
-      .forEach((v: Element) => this.observer?.observe(v));
+      }, {root: feed, rootMargin: '0px -45% 0px -45%'});
+    }
+    feed.querySelectorAll('section.clip').forEach((section: Element) => this.observer?.observe(section));
   }
 
   ngOnDestroy(): void {
@@ -138,15 +141,37 @@ export class ImmersePageComponent implements AfterViewInit, OnDestroy {
   }
 
   scrollClip(direction: 'prev' | 'next'): void {
-    const nextIndex = this.currentClipIndex() + (direction === 'next' ? 1 : -1);
-    if (nextIndex < 0 || nextIndex >= this.facade.clips().length) return;
-    this.currentClipIndex.set(nextIndex);
-    const feed = this.host.nativeElement.querySelector('.feed') as HTMLElement | null;
-    const clips = this.host.nativeElement.querySelectorAll('.clip') as NodeListOf<HTMLElement>;
-    const clip = clips[nextIndex];
-    if (!feed || !clip) return;
-    const top = clip.getBoundingClientRect().top - feed.getBoundingClientRect().top + feed.scrollTop;
-    feed.scrollTo({top, behavior: 'smooth'});
+    this.focusClip(this.currentClipIndex() + (direction === 'next' ? 1 : -1));
+  }
+
+  focusClip(index: number): void {
+    // клики по кнопкам активной карточки всплывают сюда — её не трогаем
+    if (index === this.currentClipIndex() || index < 0 || index >= this.facade.clips().length) return;
+    this.currentClipIndex.set(index);
+    this.host.nativeElement.querySelectorAll('section.clip')[index]
+      ?.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'});
+  }
+
+  // вертикальное колесо листает карусель по одной карточке; тачпад шлёт пачку событий — гасим её
+  onWheel(event: WheelEvent): void {
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+    event.preventDefault();
+    if (Date.now() < this.wheelLockedUntil) return;
+    this.wheelLockedUntil = Date.now() + 450;
+    this.scrollClip(event.deltaY > 0 ? 'next' : 'prev');
+  }
+
+  isActive(index: number): boolean {
+    return index === this.currentClipIndex();
+  }
+
+  // визуальный вариант карточки по удалённости от центральной
+  clipClass(index: number): string {
+    const offset = index - this.currentClipIndex();
+    const distance = Math.abs(offset);
+    if (distance === 0) return 'is-active';
+    if (distance === 1) return 'is-near';
+    return offset < 0 ? 'is-far is-before' : 'is-far';
   }
 
   togglePlay(event: Event): void {

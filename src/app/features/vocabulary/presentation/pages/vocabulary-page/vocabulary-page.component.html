@@ -39,7 +39,7 @@
                   <span class="tr">{{ word.word.translation }}</span>
                 </span>
               </app-button>
-              <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl"/>
+              <hg-audio-button class="vocabulary-audio" icon="speaker" [text]="word.word.hangul" [audioUrl]="word.word.audioUrl"/>
             </div>
             <div class="card-footer">
               <span class="stars" [title]="'vocabulary.level' | translate:{level: word.level}">{{ stars(word) }}</span>

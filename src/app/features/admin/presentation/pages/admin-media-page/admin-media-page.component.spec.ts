@@ -6,13 +6,13 @@ import {AdminMediaPageComponent} from './admin-media-page.component';
 
 const speaker: Speaker = {id: 'speaker', name: 'test', avatarUrl: null, bio: null};
 const clip: AdminClip = {
-  id: 'clip1234-5678', kind: 'IMMERSE', speakerId: speaker.id, wordId: null,
+  id: 'clip1234-5678', kind: 'IMMERSE', speakerId: speaker.id, wordId: null, unitId: null,
   videoUrl: null, audioUrl: null, thumbnailUrl: null, durationMs: null, published: false,
 };
 
 describe.each(['speaker', 'clip'] as const)('AdminMediaPageComponent deleting %s', kind => {
   let component: AdminMediaPageComponent;
-  let api: {speakers: jest.Mock; clips: jest.Mock; deleteSpeaker: jest.Mock; deleteClip: jest.Mock};
+  let api: {speakers: jest.Mock; clips: jest.Mock; courses: jest.Mock; deleteSpeaker: jest.Mock; deleteClip: jest.Mock};
   const open = () => kind === 'speaker' ? component.removeSpeaker(speaker) : component.removeClip(clip);
   const selectedApi = () => kind === 'speaker' ? api.deleteSpeaker : api.deleteClip;
   const expectOriginal = () => {
@@ -33,6 +33,7 @@ describe.each(['speaker', 'clip'] as const)('AdminMediaPageComponent deleting %s
   beforeEach(() => {
     api = {
       speakers: jest.fn().mockReturnValue(of([speaker])), clips: jest.fn().mockReturnValue(of([clip])),
+      courses: jest.fn().mockReturnValue(of([])),
       deleteSpeaker: jest.fn(), deleteClip: jest.fn(),
     };
     TestBed.configureTestingModule({providers: [{provide: AdminApi, useValue: api}]});
