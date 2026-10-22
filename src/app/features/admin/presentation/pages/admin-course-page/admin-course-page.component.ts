@@ -50,6 +50,8 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
       }
     }
 
+    .unit--lesson { overflow: visible; z-index: 1; }
+
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

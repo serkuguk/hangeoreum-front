@@ -39,6 +39,14 @@ app-button {
   }
 }
 
+:is(hg-admin-words-page, hg-admin-topics-page) .toolbar app-button .hg-button.p-button,
+hg-admin-course-page .addrow app-button .hg-button.p-button {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  padding-block: .5rem;
+}
+
 // Preserve native grid/flex placement through the library's projection containers.
 app-button.hg-native-host {
   display: contents;
@@ -57,14 +65,20 @@ app-button.hg-native-host {
     color: var(--hg-text);
     border: 1px solid var(--hg-border);
     border-radius: var(--hg-radius-control, .75rem);
-    padding: .65rem .8rem;
     font: inherit;
     &:focus-visible { border-color: var(--hg-blue); outline: 3px solid color-mix(in srgb, var(--hg-blue) 22%, transparent); }
     &:disabled { opacity: .62; }
   }
+  :is(input:not([type=checkbox]):not([type=file]), textarea) { padding: .65rem .8rem; }
+  :is(input:not([type=checkbox]):not([type=file]), .p-select) {
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+  }
+  input:not([type=checkbox]):not([type=file]) { padding-block: .5rem; }
   .p-password { display: flex; width: 100%; }
   .p-select { padding: 0; }
-  .p-select-label { color: var(--hg-text); padding: .65rem .8rem; }
+  .p-select-label { display: flex; align-items: center; color: var(--hg-text); padding: 0 .8rem; }
   label { color: var(--hg-text); }
 }
 app-form-field {
@@ -78,8 +92,10 @@ app-password-input .password-input input.p-inputtext.p-inputtext {
   color: var(--hg-text);
   border-color: var(--hg-border);
   border-radius: var(--hg-radius-control, .75rem);
-  min-height: 2.75rem;
-  padding: .65rem .8rem;
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  padding: .5rem .8rem;
   font: inherit;
 }
 

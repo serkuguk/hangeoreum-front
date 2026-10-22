@@ -5,20 +5,12 @@
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
 
   .search {
     flex: 1;
     min-width: 200px;
-    background: var(--hg-card);
-    border: 1px solid var(--hg-line);
-    border-radius: 12px;
-    padding: 11px 14px;
-    color: var(--hg-txt);
-    font-size: 14px;
-
-    &:focus { outline: none; border-color: var(--hg-blue); }
   }
 }
 
@@ -27,8 +19,10 @@
   gap: 8px;
   margin-top: 12px;
   flex-wrap: wrap;
+  align-items: flex-end;
 
   app-basic-input { flex: 1; min-width: 160px; }
+  app-basic-select { flex: 0 1 12rem; min-width: 160px; }
 }
 
 .atable {
