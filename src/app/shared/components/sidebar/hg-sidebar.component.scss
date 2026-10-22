@@ -10,9 +10,10 @@
 }
 :host.expanded { width: 230px; }
 .sidebar-panel {
-  position: relative;
-  height: 100%;
-  width: 100%;
+  position: fixed;
+  inset-block: var(--sidebar-top, 0px) 0;
+  height: auto;
+  width: inherit;
   display: flex;
   flex-direction: column;
   padding: var(--hg-space-3);

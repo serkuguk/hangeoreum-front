@@ -3,16 +3,17 @@ import {Injectable, inject} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ENV} from '@core/tokens/environment.token';
 import {EnvironmentInterface} from '@core/interfaces/environment.interface';
-import {Clip, ClipRepository, Feed} from '../domain/clip.entity';
+import {ClipRepository, Feed} from '../domain/clip.entity';
 
 @Injectable()
 export class ClipHttpRepository implements ClipRepository {
   private http = inject(HttpClient);
   private base = `${inject<EnvironmentInterface>(ENV).server_url}/immerse`;
 
-  feed(cursor?: string | null): Observable<Feed> {
+  feed(cursor?: string | null, unitId?: string | null): Observable<Feed> {
     let params = new HttpParams().set('size', 10);
     if (cursor) params = params.set('cursor', cursor);
+    if (unitId) params = params.set('unitId', unitId);
     return this.http.get<Feed>(`${this.base}/feed`, {params});
   }
 

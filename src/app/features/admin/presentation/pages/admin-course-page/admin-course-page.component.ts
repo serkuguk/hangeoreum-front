@@ -1,8 +1,8 @@
 import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '@features/admin/infrastructure/admin.api';
-import {ButtonComponent, BasicInputComponent, BasicSelectComponent, DialogComponent} from 'springest';
+import {AdminApi, AdminClipKind, AdminCourse, AdminLesson, AdminUnit} from '@features/admin/infrastructure/admin.api';
+import {ButtonComponent, BasicInputComponent, BasicSelectComponent, TextareaComponent, DialogComponent} from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 enum DeletionKind { Unit = 'unit', Lesson = 'lesson' }
@@ -11,7 +11,7 @@ type PendingDeletion = {kind: DeletionKind.Unit; unit: AdminUnit}
 
 @Component({
   selector: 'hg-admin-course-page',
-  imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent, DialogComponent, TranslatePipe],
+  imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent, TextareaComponent, DialogComponent, TranslatePipe],
   templateUrl: './admin-course-page.component.html',
   styleUrl: '../_admin.scss',
   styles: `
@@ -65,6 +65,10 @@ export class AdminCoursePageComponent {
 
   readonly course = signal<AdminCourse | null>(null);
   readonly units = signal<AdminUnit[]>([]);
+  readonly publishedVideos = signal<Partial<Record<string, number>>>({});
+  readonly practiceDrafts = signal<Record<string, string>>({});
+  readonly practiceFields = form(this.practiceDrafts);
+  readonly practiceSaving = signal<Partial<Record<string, boolean>>>({});
 
   readonly publishLabel = computed(() => this.course()?.published
     ? this.translate.instant('admin.course.published')
@@ -108,6 +112,18 @@ export class AdminCoursePageComponent {
   }
 
   load(): void {
+    this.api.clips().subscribe({
+      next: clips => {
+        const counts: Record<string, number> = {};
+        for (const clip of clips) {
+          if (clip.kind === AdminClipKind.Immerse && clip.published && clip.unitId) {
+            counts[clip.unitId] = (counts[clip.unitId] ?? 0) + 1;
+          }
+        }
+        this.publishedVideos.set(counts);
+      },
+      error: () => this.error.set(this.translate.instant('admin.course.errors.loadVideos')),
+    });
     this.api.courses().subscribe({
       next: courses => {
         const course = courses[0] ?? null; // единственный курс корейского
@@ -121,11 +137,31 @@ export class AdminCoursePageComponent {
   private loadUnits(courseId: string): void {
     this.api.units(courseId).subscribe(units => {
       this.units.set(units);
+      this.practiceDrafts.set(Object.fromEntries(units.map(unit => [unit.id, unit.description ?? ''])));
       this.lessonDrafts.update(drafts => Object.fromEntries(units.map(unit => [unit.id, drafts[unit.id] ?? {title: '', type: 'LESSON'}])));
       for (const unit of units) {
         this.api.lessons(unit.id).subscribe(lessons =>
           this.lessonsByUnit.update(map => ({...map, [unit.id]: lessons})));
       }
+    });
+  }
+
+  savePractice(unit: AdminUnit): void {
+    if (this.practiceSaving()[unit.id]) return;
+    this.practiceSaving.update(state => ({...state, [unit.id]: true}));
+    this.error.set(null);
+    this.api.updateUnit(unit.id, {
+      courseId: unit.courseId, position: unit.position, title: unit.title,
+      color: unit.color, description: this.practiceDrafts()[unit.id].trim() || null,
+    }).subscribe({
+      next: updated => {
+        this.units.update(units => units.map(item => item.id === updated.id ? updated : item));
+        this.practiceSaving.update(state => ({...state, [unit.id]: false}));
+      },
+      error: () => {
+        this.practiceSaving.update(state => ({...state, [unit.id]: false}));
+        this.error.set(this.translate.instant('admin.course.errors.savePractice'));
+      },
     });
   }
 

@@ -16,14 +16,14 @@ const otherLesson = {...lesson, id: 'other'};
 
 describe.each(['unit', 'lesson'] as const)('AdminCoursePageComponent deleting %s', kind => {
   let component: AdminCoursePageComponent;
-  let api: {courses: jest.Mock; deleteUnit: jest.Mock; deleteLesson: jest.Mock};
+  let api: {clips: jest.Mock; courses: jest.Mock; deleteUnit: jest.Mock; deleteLesson: jest.Mock};
   const open = () => kind === 'unit' ? component.removeUnit(unit) : component.removeLesson(unit, lesson);
   const remaining = () => kind === 'unit' ? component.units() : component.lessonsByUnit()[unit.id];
   const expectedRemaining = () => kind === 'unit' ? [] : [otherLesson];
   const original = () => kind === 'unit' ? [unit] : [lesson, otherLesson];
 
   beforeEach(() => {
-    api = {courses: jest.fn().mockReturnValue(of([])), deleteUnit: jest.fn(), deleteLesson: jest.fn()};
+    api = {clips: jest.fn().mockReturnValue(of([])), courses: jest.fn().mockReturnValue(of([])), deleteUnit: jest.fn(), deleteLesson: jest.fn()};
     TestBed.configureTestingModule({providers: [{provide: AdminApi, useValue: api}]});
     component = TestBed.runInInjectionContext(() => new AdminCoursePageComponent());
     component.units.set([unit]);
@@ -96,5 +96,43 @@ describe.each(['unit', 'lesson'] as const)('AdminCoursePageComponent deleting %s
     expect(remaining()).toEqual(expectedRemaining());
     expect(component.pendingDeletion()).toBeNull();
     expect(component.deletionError()).toBeNull();
+  });
+});
+
+
+describe('admin unit practice', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('counts only published immerse clips and preserves unit metadata across failed save and retry', () => {
+    const save = new Subject<AdminUnit>();
+    const api = {
+      clips: jest.fn().mockReturnValue(of([
+        {kind: 'IMMERSE', published: true, unitId: unit.id},
+        {kind: 'IMMERSE', published: false, unitId: unit.id},
+        {kind: 'STORY', published: true, unitId: unit.id},
+        {kind: 'IMMERSE', published: true, unitId: null},
+      ])),
+      courses: jest.fn().mockReturnValue(of([{id: unit.courseId}])),
+      units: jest.fn().mockReturnValue(of([unit])), lessons: jest.fn().mockReturnValue(of([])),
+      updateUnit: jest.fn().mockReturnValue(save),
+    };
+    TestBed.configureTestingModule({providers: [{provide: AdminApi, useValue: api}]});
+    const component = TestBed.runInInjectionContext(() => new AdminCoursePageComponent());
+    expect(component.publishedVideos()).toEqual({unit: 1});
+    component.practiceDrafts.set({unit: '  Представиться  '});
+    component.savePractice(unit);
+    component.savePractice(unit);
+    expect(api.updateUnit).toHaveBeenCalledTimes(1);
+    expect(api.updateUnit).toHaveBeenCalledWith(unit.id, {
+      courseId: unit.courseId, position: unit.position, title: unit.title, color: unit.color,
+      description: 'Представиться',
+    });
+    save.error(new Error('failed'));
+    expect(component.units()[0].description).toBeNull();
+    expect(component.practiceDrafts().unit).toBe('  Представиться  ');
+    expect(component.practiceSaving().unit).toBe(false);
+    api.updateUnit.mockReturnValue(of({...unit, description: 'Представиться'}));
+    component.savePractice(unit);
+    expect(component.units()[0].description).toBe('Представиться');
   });
 });

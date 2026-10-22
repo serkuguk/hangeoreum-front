@@ -83,9 +83,14 @@
 
 <section class="panel panel--select">
   <div class="eyebrow">{{ 'admin.media.clips' | translate }}</div>
-  @for (clip of clips(); track clip.id) {
+  <p>{{ 'admin.media.publishRequirements' | translate }}</p>
+  <app-basic-select [ariaLabel]="'admin.media.unitFilter' | translate" [items]="filterOptions()"
+                    [value]="selectedUnitId()" (valueChange)="filterUnit($event)" optionLabel="label" optionValue="value" />
+  @for (clip of filteredClips(); track clip.id) {
     <div class="cliprow">
       <span class="pill p-b">{{ clip.kind }}</span>
+      <strong>{{ clip.title }}</strong>
+      @if (isUnboundImmerse(clip)) { <span class="pill">{{ 'admin.media.unbound' | translate }}</span> }
       @if (unitName(clip.unitId); as unit) {
         <span class="pill">{{ unit }}</span>
       }
@@ -180,6 +185,8 @@
             [label]="'admin.media.durationLabel' | translate"
             [formField]="clipFields.durationMs"
           />
+          <app-basic-input [label]="'admin.media.clipTitle' | translate" [formField]="clipFields.title" />
+          <app-basic-input type="number" [label]="'admin.media.clipPosition' | translate" [formField]="clipFields.position" />
           <div class="wordpick">
             @if (clipDraft().wordId) {
               <span class="pill p-b">{{ clipWordLabel }}</span>

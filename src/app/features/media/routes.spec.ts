@@ -7,27 +7,10 @@ import {ENV} from '@core/tokens/environment.token';
 import {ImmersePageComponent} from './presentation/pages/immerse-page/immerse-page.component';
 import {mediaRoutes} from './routes';
 
-class IntersectionObserverMock {
-  readonly root = null;
-  readonly rootMargin = '';
-  readonly thresholds: readonly number[] = [];
-  observe(): void {}
-  unobserve(): void {}
-  disconnect(): void {}
-  takeRecords(): IntersectionObserverEntry[] { return []; }
-}
-
 describe('Immerse route composition', () => {
   let http: HttpTestingController;
-  let originalIntersectionObserver: typeof IntersectionObserver;
 
   beforeEach(() => {
-    originalIntersectionObserver = globalThis.IntersectionObserver;
-    Object.defineProperty(globalThis, 'IntersectionObserver', {
-      configurable: true,
-      writable: true,
-      value: IntersectionObserverMock,
-    });
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{path: 'immerse', children: mediaRoutes}]),
@@ -41,11 +24,6 @@ describe('Immerse route composition', () => {
 
   afterEach(() => {
     http.verify();
-    Object.defineProperty(globalThis, 'IntersectionObserver', {
-      configurable: true,
-      writable: true,
-      value: originalIntersectionObserver,
-    });
     TestBed.resetTestingModule();
   });
 
@@ -55,21 +33,40 @@ describe('Immerse route composition', () => {
     http.expectOne(request => request.url === '/api/immerse/feed' && request.params.get('size') === '10').flush({
       content: [{
         id: 'clip-1',
-        kind: 'WORD',
+        kind: 'WORD', title: 'Приветствие', position: 0,
         speakerId: null,
         wordId: 'word-2',
         videoUrl: null,
         audioUrl: null,
         thumbnailUrl: null,
         durationMs: null,
-        subtitles: [{lang: 'ko', text: '안녕하세요'}],
+        subtitles: [
+          {lang: 'ko', text: '안녕하세요', position: 0, startMs: 0, endMs: 1000},
+          {lang: 'ko', text: '반갑습니다', position: 1, startMs: 1000, endMs: 2000},
+        ],
         watched: false,
         liked: false,
       }],
-      nextCursor: null,
+      nextCursor: null, selectedUnit: {id: 'u', title: 'Unit', description: null, position: 0}, units: [],
     });
     harness.detectChanges();
     expect(harness.routeNativeElement!.textContent).toContain('안녕하세요');
+    const video = harness.routeNativeElement!.querySelector('video')!;
+    expect(video.autoplay).toBe(false);
+    expect(video.loop).toBe(false);
+    http.expectNone('/api/immerse/clip-1/view');
+    video.currentTime = 1;
+    video.dispatchEvent(new Event('timeupdate'));
+    harness.detectChanges();
+    expect(harness.routeNativeElement!.textContent).toContain('반갑습니다');
+    expect(harness.routeNativeElement!.textContent).not.toContain('안녕하세요');
+    video.currentTime = 0.5;
+    video.dispatchEvent(new Event('seeked'));
+    harness.detectChanges();
+    expect(harness.routeNativeElement!.textContent).toContain('안녕하세요');
+    video.dispatchEvent(new Event('ended'));
+    http.expectOne('/api/immerse/clip-1/view').flush(null);
+    expect(component.ended()).toBe(true);
 
     const addButton = harness.routeNativeElement!.querySelector('[aria-label="Слово в словарь"]') as HTMLButtonElement;
     addButton.click();

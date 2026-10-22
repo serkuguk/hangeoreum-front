@@ -77,6 +77,14 @@
         ></app-button>
       </div>
 
+      <div class="addrow">
+        <app-textarea [label]="'admin.course.practiceGoal' | translate" [formField]="practiceFields[unit.id]" />
+        <app-button [label]="'common.save' | translate" [disabled]="practiceSaving()[unit.id] ?? false"
+                    (click)="savePractice(unit)" styleClass="hg-button hg-button--ghost hg-button--sm" />
+        <a routerLink="/admin/media" [queryParams]="{unitId: unit.id}">
+          {{ 'admin.course.publishedVideos' | translate: {count: publishedVideos()[unit.id] ?? 0} }} · {{ 'admin.course.editPractice' | translate }}
+        </a>
+      </div>
       <div class="lessons">
         @for (lesson of lessonsByUnit()[unit.id] ?? []; track lesson.id) {
           <div class="lrow">

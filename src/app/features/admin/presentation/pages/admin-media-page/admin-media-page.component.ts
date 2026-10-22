@@ -1,5 +1,6 @@
 import {FormField, form, min} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Subject, catchError, debounceTime, distinctUntilChanged, forkJoin, map, of, switchMap} from 'rxjs';
 import {
@@ -11,9 +12,9 @@ import {
   TextareaComponent,
 } from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {AdminApi, AdminClip, AdminUnit, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
+import {AdminApi, AdminClip, AdminClipKind, AdminUnit, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
 
-const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY', 'WORD']
+const CLIP_KIND_OPTIONS: {label: string; value: string}[] = Object.values(AdminClipKind)
   .map(value => ({label: value, value}));
 
 enum DeletionKind { Speaker = 'speaker', Clip = 'clip' }
@@ -84,10 +85,18 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
 })
 export class AdminMediaPageComponent {
   private api = inject(AdminApi);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private translate = inject(TranslateService);
 
   readonly speakers = signal<Speaker[]>([]);
   readonly clips = signal<AdminClip[]>([]);
+  readonly selectedUnitId = signal<string | null>(null);
+  readonly filteredClips = computed(() => this.clips().filter(clip => !this.selectedUnitId() || clip.unitId === this.selectedUnitId()));
+  readonly filterOptions = computed(() => [
+    {label: this.translate.instant('admin.media.allUnits'), value: null},
+    ...this.units().map(unit => ({label: unit.title, value: unit.id})),
+  ]);
   readonly error = signal<string | null>(null);
   readonly pendingDeletion = signal<PendingDeletion | null>(null);
   readonly deletionSaving = signal(false);
@@ -132,18 +141,19 @@ export class AdminMediaPageComponent {
 
   readonly newSpeakerName = signal('');
   readonly newSpeakerNameField = form(this.newSpeakerName);
-  readonly newClipKind = signal('IMMERSE');
+  readonly newClipKind = signal<string>(AdminClipKind.Immerse);
   readonly newClipKindField = form(this.newClipKind);
   readonly speakerDraft = signal('');
   readonly speakerDraftField = form(this.speakerDraft);
-  readonly clipDraft = signal<{kind: string; speakerId: string | null; wordId: string | null; unitId: string | null; durationMs: number | null}>(
-    {kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null});
+  readonly clipDraft = signal<{kind: string; title: string; position: number | null; speakerId: string | null; wordId: string | null; unitId: string | null; durationMs: number | null}>(
+    {kind: AdminClipKind.Immerse, title: '', position: null, speakerId: null, wordId: null, unitId: null, durationMs: null});
   readonly clipFields = form(this.clipDraft, path => min(path.durationMs, 0));
   clipWordLabel = '';
   wordSearch = '';
   private readonly wordSearch$ = new Subject<string>();
 
   constructor() {
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(params => this.selectedUnitId.set(params.get('unitId')));
     this.wordSearch$.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -220,6 +230,15 @@ export class AdminMediaPageComponent {
     });
   }
 
+  filterUnit(unitId: unknown): void {
+    if (unitId !== null && (typeof unitId !== 'string' || !this.units().some(unit => unit.id === unitId))) return;
+    void this.router.navigate([], {relativeTo: this.route, queryParams: {unitId}, queryParamsHandling: 'merge'});
+  }
+
+  isUnboundImmerse(clip: AdminClip): boolean {
+    return clip.kind === AdminClipKind.Immerse && !clip.unitId;
+  }
+
   unitName(id: string | null): string | null {
     return this.units().find(u => u.id === id)?.title ?? null;
   }
@@ -229,7 +248,7 @@ export class AdminMediaPageComponent {
   }
 
   addClip(): void {
-    this.api.createClip({kind: this.newClipKind()}).subscribe({
+    this.api.createClip({kind: this.newClipKind(), unitId: this.selectedUnitId()}).subscribe({
       next: () => this.load(),
       error: err => this.fail('admin.media.errors.addClip', err),
     });
@@ -290,7 +309,7 @@ export class AdminMediaPageComponent {
       return;
     }
     this.editingClip.set(clip.id);
-    this.clipFields().reset({kind: clip.kind, speakerId: clip.speakerId, wordId: clip.wordId, unitId: clip.unitId ?? null, durationMs: clip.durationMs});
+    this.clipFields().reset({kind: clip.kind, title: clip.title ?? '', position: clip.position ?? null, speakerId: clip.speakerId, wordId: clip.wordId, unitId: clip.unitId ?? null, durationMs: clip.durationMs});
     this.clipWordLabel = clip.wordId
       ? this.translate.instant('admin.media.wordIdLabel', {id: clip.wordId.slice(0, 8)})
       : '';
@@ -318,6 +337,11 @@ export class AdminMediaPageComponent {
   saveClip(clip: AdminClip): void {
     if (this.clipFields().invalid()) {
       this.error.set(this.translate.instant('admin.media.errors.durationNegative'));
+      return;
+    }
+    const position = this.clipDraft().position;
+    if (position !== null && (!Number.isInteger(position) || position < 0)) {
+      this.error.set(this.translate.instant('admin.media.errors.invalidNumbers'));
       return;
     }
     this.error.set(null);
