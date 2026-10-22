@@ -126,7 +126,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     .admin-words-table { min-width: 42rem; }
     .word-media { flex-wrap: nowrap; gap: .5rem; }
     .word-media app-file-picker.audio-picker { width: auto; flex: 0 0 auto; }
-    .word-actions { display: flex; align-items: center; gap: .5rem; white-space: nowrap; }
+    .word-actions { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; white-space: nowrap; }
     .word-thumbnail, .word-preview { object-fit: contain; flex-shrink: 0; border-radius: var(--hg-radius-control); }
     .word-thumbnail { width: 48px; height: 48px; }
     .word-preview { width: 96px; height: 96px; }

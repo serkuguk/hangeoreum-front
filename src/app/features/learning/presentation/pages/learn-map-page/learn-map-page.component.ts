@@ -7,6 +7,8 @@ import {Router, RouterLink} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MascotComponent} from '@shared/components/hg/mascot/mascot.component';
 import {LearnMapFacade} from '@features/learning/application/facades/learn-map.facade';
+import {AlphabetFacade} from '@features/learning/application/facades/alphabet.facade';
+import {AlphabetPart} from '@features/learning/domain/entities/alphabet.entity';
 import {LessonNode, UnitNode} from '@features/learning/domain/entities/course-map.entity';
 import {CoursePathComponent} from '@features/learning/presentation/components/course-path/course-path.component';
 import {chapterSceneUrl} from '@features/learning/presentation/components/course-path/course-path.mapper';
@@ -18,6 +20,17 @@ import {lessonRoute} from '@features/learning/presentation/lesson-route';
 const HANGUL = /[가-힣]/;
 const FINISH_ID = 'course-finish';
 
+interface AlphabetNode {
+  id: string;
+  glyph: string;
+  titleKey: string;
+  subtitle: string;
+  link: string;
+  query: Record<string, string> | null;
+  cssClass: string;
+  mark: string;
+}
+
 @Component({
   selector: 'hg-learn-map-page',
   imports: [RouterLink, ButtonComponent, CoursePathComponent, MascotComponent, TranslatePipe],
@@ -27,6 +40,7 @@ const FINISH_ID = 'course-finish';
 })
 export class LearnMapPageComponent {
   readonly facade = inject(LearnMapFacade);
+  private readonly alphabet = inject(AlphabetFacade);
   private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly injector = inject(Injector);
@@ -41,6 +55,7 @@ export class LearnMapPageComponent {
 
   constructor() {
     this.facade.load();
+    this.alphabet.load();
     // Центрируем текущий узел, когда карта реально пришла и отрисовалась,
     // а не по фиксированной задержке под сетевую задержку загрузки.
     effect(() => {
@@ -151,6 +166,28 @@ export class LearnMapPageComponent {
     };
   });
 
+  /** Узлы юнита «Алфавит»: гласные и согласные — та же страница алфавита с фильтром, патчим — своя страница. */
+  readonly alphabetNodes = computed<AlphabetNode[]>(() => [
+    this.letterNode(AlphabetPart.VOWELS, 'ㅏ'),
+    this.letterNode(AlphabetPart.CONSONANTS, 'ㄱ'),
+    {
+      id: 'batchim',
+      glyph: '받',
+      titleKey: 'learning.map.alphabetUnit.batchim',
+      subtitle: this.translate.instant('learning.map.alphabetUnit.batchimSubtitle'),
+      link: '/learn/batchim',
+      query: null,
+      cssClass: 'abc-node',
+      mark: '→',
+    },
+  ]);
+
+  readonly alphabetBadge = computed(() => {
+    const {learnedCount = 0, total = 0} = this.alphabet.alphabet() ?? {};
+    const percent = total ? Math.round((learnedCount / total) * 100) : 0;
+    return percent === 100 ? `✓ ${percent}%` : `${percent}%`;
+  });
+
   readonly mapTitle = computed(() => this.facade.map()?.title || this.translate.instant('learning.map.fallbackTitle'));
   readonly progressAria = computed(() =>
     this.translate.instant('learning.map.progressAria', {percent: this.progress().percent}));
@@ -208,6 +245,21 @@ export class LearnMapPageComponent {
 
   sceneUrl(index: number): string | null {
     return chapterSceneUrl(index);
+  }
+
+  private letterNode(part: AlphabetPart, glyph: string): AlphabetNode {
+    const {learned, total} = this.alphabet.progressFor(part);
+    const done = total > 0 && learned === total;
+    return {
+      id: part,
+      glyph,
+      titleKey: `learning.map.alphabetUnit.${part}`,
+      subtitle: this.translate.instant('learning.map.alphabetUnit.letters', {learned, total}),
+      link: '/learn/alphabet',
+      query: {part},
+      cssClass: done ? 'abc-node done' : 'abc-node',
+      mark: done ? '✓' : '→',
+    };
   }
 
   private nowLessonId(): string | null {

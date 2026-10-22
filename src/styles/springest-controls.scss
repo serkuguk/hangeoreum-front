@@ -42,6 +42,7 @@ app-button {
 :is(hg-admin-words-page, hg-admin-topics-page) .toolbar app-button .hg-button.p-button,
 hg-admin-course-page .addrow app-button .hg-button.p-button,
 hg-admin-media-page .addrow app-button .hg-button.p-button,
+hg-admin-media-page .editbox > app-button .hg-button.p-button,
 hg-admin-media-page .sprow:has(app-basic-input) app-button .hg-button.p-button,
 hg-admin-lesson-builder-page .addex app-button .hg-button.p-button {
   box-sizing: border-box;

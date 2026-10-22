@@ -1,3 +1,4 @@
+import {provideRouter} from '@angular/router';
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {of, Subject} from 'rxjs';
@@ -5,7 +6,7 @@ import {AdminApi, AdminClip, Speaker} from '@features/admin/infrastructure/admin
 import {AdminMediaPageComponent} from './admin-media-page.component';
 
 const speaker: Speaker = {id: 'speaker', name: 'test', avatarUrl: null, bio: null};
-const clip: AdminClip = {
+const clip: AdminClip = {title: null, position: null, 
   id: 'clip1234-5678', kind: 'IMMERSE', speakerId: speaker.id, wordId: null, unitId: null,
   videoUrl: null, audioUrl: null, thumbnailUrl: null, durationMs: null, published: false,
 };
@@ -36,7 +37,7 @@ describe.each(['speaker', 'clip'] as const)('AdminMediaPageComponent deleting %s
       courses: jest.fn().mockReturnValue(of([])),
       deleteSpeaker: jest.fn(), deleteClip: jest.fn(),
     };
-    TestBed.configureTestingModule({providers: [{provide: AdminApi, useValue: api}]});
+    TestBed.configureTestingModule({providers: [provideRouter([]), {provide: AdminApi, useValue: api}]});
     component = TestBed.runInInjectionContext(() => new AdminMediaPageComponent());
   });
 
@@ -116,5 +117,37 @@ describe.each(['speaker', 'clip'] as const)('AdminMediaPageComponent deleting %s
     expectRefreshed();
     expect(component.pendingDeletion()).toBeNull();
     expect(component.deletionError()).toBeNull();
+  });
+});
+
+
+describe('admin unit clip metadata', () => {
+  afterEach(() => { TestBed.resetTestingModule(); jest.useRealTimers(); });
+
+  it('filters clips, creates in the selected unit, and preserves title/order on editing', () => {
+    jest.useFakeTimers();
+    const bound = {...clip, id: 'bound', unitId: 'unit', title: 'Поздороваться', position: 2};
+    const api = {
+      speakers: jest.fn().mockReturnValue(of([])), courses: jest.fn().mockReturnValue(of([])),
+      clips: jest.fn().mockReturnValue(of([clip, bound])),
+      createClip: jest.fn().mockReturnValue(of(bound)), updateClip: jest.fn().mockReturnValue(of(bound)),
+    };
+    TestBed.configureTestingModule({providers: [provideRouter([]), {provide: AdminApi, useValue: api}]});
+    const component = TestBed.runInInjectionContext(() => new AdminMediaPageComponent());
+    component.selectedUnitId.set('unit');
+    expect(component.filteredClips()).toEqual([bound]);
+    expect(component.isUnboundImmerse(clip)).toBe(true);
+    expect(component.isUnboundImmerse({...clip, kind: 'STORY'})).toBe(false);
+    component.addClip();
+    expect(api.createClip).toHaveBeenCalledWith({kind: 'IMMERSE', unitId: 'unit'});
+    component.openEdit(bound);
+    component.clipDraft.update(draft => ({...draft, position: 1.5}));
+    component.saveClip(bound);
+    expect(api.updateClip).not.toHaveBeenCalled();
+    component.clipDraft.update(draft => ({...draft, position: 0}));
+    component.saveClip(bound);
+    expect(api.updateClip).toHaveBeenCalledWith('bound', expect.objectContaining({title: 'Поздороваться', position: 0, unitId: 'unit'}));
+    component.selectedUnitId.set(null);
+    expect(component.filteredClips()).toEqual([clip, bound]);
   });
 });

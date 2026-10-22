@@ -1,136 +1,89 @@
 <div class="imwrap">
-  @if (facade.proRequired()) {
-    <div class="panel centerpanel">
-      <div class="ghost kr">몰입</div>
-      <h2 class="pagettl">{{ "media.pro.title" | translate }}</h2>
-      <p class="pagesub">{{ "media.pro.description" | translate }}</p>
-      <a class="cta" routerLink="/billing">{{
-        "media.pro.open" | translate
-      }}</a>
-    </div>
-  } @else if (facade.error(); as error) {
-    <div class="panel centerpanel">
-      <p class="pagesub">{{ error }}</p>
-      <app-button
-        styleClass="hg-button hg-button--ghost"
-        [label]="'common.retry' | translate"
-        (click)="facade.load()"
-      />
-    </div>
-  } @else if (facade.clips().length === 0 && !facade.loading()) {
-    <div class="panel centerpanel">
-      <div class="ghost kr">서울</div>
-      <h2 class="pagettl">{{ "media.empty.title" | translate }}</h2>
-      <p class="pagesub">{{ "media.empty.description" | translate }}</p>
-      <a class="ghostbtn" routerLink="/dashboard">{{
-        "common.toDashboard" | translate
-      }}</a>
-    </div>
-  } @else {
-    <app-segmented-control
-      class="subtoggle"
-      [label]="'media.subtitles.label' | translate"
-      [items]="subModeOptions"
-      [value]="subMode()"
-      (valueChange)="setSubMode($event)"
-    />
-
-    @if (facade.actionError(); as actionError) {
-      <p role="alert">{{ actionError }}</p>
+  <header>
+    <a routerLink="/learn">{{ 'media.backToCourse' | translate }}</a>
+    <h1 class="pagettl">{{ facade.selectedUnit()?.title ?? ('media.practiceTitle' | translate) }}</h1>
+    @if (facade.selectedUnit()?.description; as goal) { <p class="pagesub">{{ goal }}</p> }
+    @if (facade.units().length) {
+      <app-basic-select [ariaLabel]="'media.unitLabel' | translate" [items]="facade.units()"
+        optionLabel="title" optionValue="id" [value]="facade.selectedUnit()?.id ?? null" (valueChange)="selectUnit($event)" />
     }
-    <div class="feednav">
-      @if (facade.clips().length > 1) {
-        <app-button
-          class="hg-native-host"
-          styleClass="hg-native-button navbtn prev"
-          type="button"
-          [disabled]="!canScrollClip('prev')"
-          (click)="scrollClip('prev')"
-          [aria]="{ 'aria-label': ('media.previousVideo' | translate) }"
-          >‹</app-button
-        >
-      }
-
-      <div class="feed" (wheel)="onWheel($event)">
-        @for (clip of facade.clips(); track clip.id) {
-          <section
-            class="clip"
-            [class]="clipClass($index)"
-            [attr.data-index]="$index"
-            (click)="focusClip($index)"
-          >
-            @if (clip.videoUrl) {
-              <video
-                [src]="clip.videoUrl"
-                [poster]="clip.thumbnailUrl ?? ''"
-                loop
-                playsinline
-                muted
-                [controls]="isActive($index)"
-                preload="none"
-                [attr.aria-label]="
-                  'media.videoAria' | translate: { title: clipTitle(clip) }
-                "
-                (click)="togglePlay($event)"
-              ></video>
-            } @else {
-              <div class="novid"><span class="ghost kr">말</span></div>
-            }
-
-            <div class="subs">
-              @if (koSubtitle(clip); as ko) {
-                <div class="kr kotext">{{ ko }}</div>
-              }
-              @if (ruSubtitle(clip); as ru) {
-                <div class="rutext">{{ ru }}</div>
-              }
-            </div>
-
-            <div class="actions">
-              <app-button
-                class="hg-native-host"
-                [styleClass]="likeClass(clip)"
-                type="button"
-                (click)="facade.toggleLike(clip)"
-                [aria]="{
-                  'aria-pressed': clip.liked,
-                  'aria-label':
-                    (likeLabel(clip) | translate),
-                }"
-              >
-                {{ likeIcon(clip) }}
-              </app-button>
-              @if (clip.wordId) {
-                <app-button
-                  class="hg-native-host"
-                  styleClass="hg-native-button"
-                  type="button"
-                  (click)="addWord(clip)"
-                  [disabled]="vocabulary.isAddBlocked(clip.wordId)"
-                  [aria]="{ 'aria-label': ('media.addWordAria' | translate) }"
-                >
-                  {{ saveIcon(clip) }}
-                </app-button>
-              }
-            </div>
-          </section>
+  </header>
+  @if (facade.proRequired()) {
+    <section class="panel notice">
+      <h2>{{ 'media.pro.title' | translate }}</h2>
+      <p>{{ 'media.pro.description' | translate }}</p>
+      <a routerLink="/billing">{{ 'media.pro.open' | translate }}</a>
+    </section>
+  } @else {
+    @if (facade.error(); as error) {
+      <div class="notice" role="alert">
+        <p>{{ error }}</p>
+        <app-button [label]="'common.retry' | translate" (click)="facade.loadMore()" />
+      </div>
+    }
+    @if (facade.actionError(); as actionError) { <p role="alert">{{ actionError }}</p> }
+    @if (initialLoading()) { <p role="status">{{ 'common.loading' | translate }}</p> }
+    @if (!facade.loading() && !facade.error() && !facade.clips().length) {
+      <section class="panel notice">
+        <h2>{{ (facade.selectedUnit() ? 'media.empty.title' : 'media.noCourse') | translate }}</h2>
+        <p>{{ 'media.empty.description' | translate }}</p>
+      </section>
+    }
+    @if (currentClip(); as clip) {
+      <div class="feednav">
+        @if (facade.clips().length > 1) {
+          <app-button class="hg-native-host" styleClass="hg-native-button navbtn prev" type="button"
+            [disabled]="!canScrollClip('prev')" (click)="scrollClip('prev')"
+            [aria]="{'aria-label': ('media.previousVideo' | translate)}">‹</app-button>
         }
-        @if (facade.loading()) {
-          <div class="feedload">{{ "common.loading" | translate }}</div>
+        <div class="feed" (wheel)="onWheel($event)">
+          @for (item of facade.clips(); track item.id) {
+            <section class="clip" [class]="clipClass($index)" [attr.data-index]="$index" (click)="focusClip($index)">
+              @if (isActive($index)) {
+                <video #player [src]="item.videoUrl ?? ''" [poster]="item.thumbnailUrl ?? ''" controls playsinline preload="metadata"
+                  [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"
+                  (timeupdate)="updateTime($event)" (seeked)="updateTime($event)" (ended)="onEnded(item)" (error)="playbackError.set(true)"></video>
+              } @else {
+                <video [src]="item.videoUrl ?? ''" [poster]="item.thumbnailUrl ?? ''" playsinline muted preload="metadata"
+                  [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"></video>
+              }
+            </section>
+          }
+        </div>
+        @if (facade.clips().length > 1) {
+          <app-button class="hg-native-host" styleClass="hg-native-button navbtn next" type="button"
+            [disabled]="!canScrollClip('next')" (click)="scrollClip('next')"
+            [aria]="{'aria-label': ('media.nextVideo' | translate)}">›</app-button>
         }
       </div>
-
-      @if (facade.clips().length > 1) {
-        <app-button
-          class="hg-native-host"
-          styleClass="hg-native-button navbtn next"
-          type="button"
-          [disabled]="!canScrollClip('next')"
-          (click)="scrollClip('next')"
-          [aria]="{ 'aria-label': ('media.nextVideo' | translate) }"
-          >›</app-button
-        >
-      }
-    </div>
+      <section class="player-panel">
+        <h2>{{ clipTitle(clip) }}</h2>
+        <app-segmented-control [label]="'media.subtitles.label' | translate" [items]="subModeOptions"
+          [value]="subMode()" (valueChange)="setSubMode($event)" />
+        <div class="subs">
+          @if (koSubtitle(); as ko) { <p class="kr" lang="ko">{{ ko }}</p> }
+          @if (ruSubtitle(); as ru) { <p lang="ru">{{ ru }}</p> }
+        </div>
+        @if (playbackError()) { <p role="alert">{{ 'media.errors.playback' | translate }}</p> }
+        @if (clip.wordId) {
+          <div class="actions">
+            <app-button [aria]="{'aria-label': ('media.addWordAria' | translate)}" [disabled]="vocabulary.isAddBlocked(clip.wordId)" (click)="addWord(clip)">
+              {{ vocabulary.isSaved(clip.wordId) ? '✓' : ('media.addWordAria' | translate) }}
+            </app-button>
+            @if (vocabulary.isFailed(clip.wordId)) { <p role="alert">{{ 'media.errors.addWord' | translate }}</p> }
+          </div>
+        }
+        @if (ended()) {
+          <div class="actions">
+            <app-button [label]="'media.repeat' | translate" (click)="repeat()" />
+            @if (hasNext()) {
+              <app-button [label]="'media.nextVideo' | translate" (click)="scrollClip('next')" />
+            } @else if (!facade.hasMore()) {
+              <a routerLink="/learn">{{ 'media.backToCourse' | translate }}</a>
+            }
+          </div>
+        }
+      </section>
+    }
   }
 </div>

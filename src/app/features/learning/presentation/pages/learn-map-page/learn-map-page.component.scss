@@ -104,20 +104,20 @@
 }
 
 // ---------- Алфавит ----------
-.foundation {
-  display: flex;
-  align-items: center;
-  gap: var(--hg-space-4);
-  padding: 18px 22px;
+.abc-unit {
   border-radius: var(--hg-radius-scene);
   background: var(--hg-surface);
   border: 1px solid var(--hg-border);
   box-shadow: 0 4px 0 var(--hg-border);
+  padding: 18px 22px;
+}
+
+.abc-head {
+  display: flex;
+  align-items: center;
+  gap: var(--hg-space-4);
   color: var(--hg-text);
   text-decoration: none;
-  transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
-
-  &:hover { transform: translateY(2px); box-shadow: 0 2px 0 var(--hg-border); }
 
   .fglyph {
     width: 54px;
@@ -136,6 +136,83 @@
   b { display: block; font-size: var(--hg-fs-md); margin-bottom: 3px; }
   small { display: block; font-size: 12.5px; color: var(--hg-text-muted); }
   .han { font-family: var(--hg-font-kr); }
+}
+
+// Вертикальная трасса с точками, как в прототипе «Дерево уроков»
+.abc-path {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hg-space-3);
+  margin: var(--hg-space-4) 0 0 26px;
+  padding-left: 30px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-left: 2px dashed var(--hg-border);
+  }
+}
+
+.abc-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  border-radius: var(--hg-radius-block);
+  background: var(--hg-surface-muted);
+  border: 1px solid var(--hg-border);
+  color: var(--hg-text);
+  text-decoration: none;
+  transition: transform var(--hg-motion-feedback), border-color var(--hg-motion-feedback);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -37px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border-radius: 50%;
+    background: var(--hg-border);
+  }
+
+  &:hover { transform: translateX(3px); border-color: var(--hg-route); }
+
+  .nic {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-family: var(--hg-font-kr);
+    font-size: 20px;
+    background: var(--hg-card-2);
+    color: var(--hg-text-muted);
+  }
+
+  .nbody { flex: 1; min-width: 0; }
+  b { display: block; font-size: 15px; }
+  small { display: block; font-size: 12.5px; color: var(--hg-text-muted); }
+  .st { color: var(--hg-text-muted); font-weight: 700; }
+
+  &.done {
+    &::before { background: var(--hg-success); }
+    .nic { background: var(--hg-success-soft); color: var(--hg-success-deep); }
+    .st { color: var(--hg-success); }
+  }
+}
+
+@media (max-width: 520px) {
+  .abc-unit { padding: 14px; }
+  .abc-path { margin-left: 8px; padding-left: 20px; }
+  .abc-node { padding: 10px 12px; &::before { left: -27px; } }
 }
 
 // ---------- Свёрнутая пройденная глава ----------

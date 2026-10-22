@@ -1,5 +1,6 @@
 <div class="wrap abox">
-  <h2 class="pagettl">{{ 'learning.alphabet.title' | translate }}</h2>
+  <a class="ghostbtn backlink" routerLink="/learn">{{ 'learning.alphabet.back' | translate }}</a>
+  <h2 class="pagettl">{{ titleKey() | translate }}</h2>
   <p class="pagesub">
     {{ 'learning.alphabet.subtitle' | translate }}
   </p>
@@ -23,7 +24,7 @@
     } @else {
       <div class="panel proghead">
         <div class="progtxt">
-          <b>{{ alphabet.learnedCount }} / {{ alphabet.total }}</b>
+          <b>{{ progress().learned }} / {{ progress().total }}</b>
           <span>{{ 'learning.alphabet.learned' | translate }}</span>
         </div>
         <div class="progbar"><i [style.width.%]="percent()"></i></div>
@@ -35,7 +36,7 @@
         }
       </div>
 
-      @for (group of facade.groups(); track group.group) {
+      @for (group of visibleGroups(); track group.group) {
         <section class="lgroup">
           <h3>
             {{ group.titleKey | translate }}

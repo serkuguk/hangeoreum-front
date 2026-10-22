@@ -1,0 +1,254 @@
+:host { display: block; }
+
+:host ::ng-deep {
+.bbox { max-width: 1080px; }
+
+// Display-шрифт (Black Han Sans) сливает сложные патчимы вроде ㄼ/ㄾ в кляксу —
+// для учебного хангыля берём читаемый Gowun Batang, как в цитате на экране входа.
+.bbox .han { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700; }
+
+.backlink { display: inline-block; margin-bottom: 16px; text-decoration: none; }
+
+.ghost {
+  position: absolute;
+  font-family: var(--hg-font-display);
+  color: rgba(255, 255, 255, .04);
+  line-height: .8;
+  pointer-events: none;
+  user-select: none;
+}
+
+// ---------- Hero ----------
+.hero {
+  padding: 40px 36px;
+  margin-bottom: 24px;
+
+  .ghost { right: -30px; top: -50px; font-size: 240px; }
+  .eyebrow { color: var(--hg-yellow); margin-bottom: 12px; }
+
+  h1 {
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 600;
+    line-height: 1.2;
+    max-width: 660px;
+
+    .accent { font-family: var(--hg-font-display); color: var(--hg-red); font-weight: 400; }
+  }
+
+  p { color: var(--hg-muted); font-size: 15px; max-width: 600px; margin-top: 14px; line-height: 1.6; }
+}
+
+.rule-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  max-width: 600px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--hg-card-2);
+  border: 1px solid var(--hg-line);
+  font-size: 13.5px;
+  color: var(--hg-muted);
+}
+
+// ---------- Tabs ----------
+.tabs {
+  position: sticky;
+  top: 14px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-bottom: 30px;
+  padding: 6px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--hg-card) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--hg-line);
+}
+
+button.hg-native-button.hg-native-button.hg-native-button.btab {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--hg-muted);
+  background: none;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 99px;
+  cursor: pointer;
+
+  &.on { background: var(--hg-red); color: #fff; }
+}
+
+// ---------- Sections ----------
+.sec h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.sec-sub { color: var(--hg-muted); font-size: 14px; margin-bottom: 22px; max-width: 680px; line-height: 1.6; }
+.center { text-align: center; margin-left: auto; margin-right: auto; }
+
+// ---------- Простые: семьи ----------
+.famgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.fam {
+  padding: 22px;
+
+  .ghost { right: -16px; bottom: -30px; font-size: 110px; }
+
+  .letters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    span {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      background: var(--hg-card-2);
+      color: var(--acc);
+    }
+  }
+
+  .sound {
+    margin-top: 6px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--acc);
+
+    small { font-size: 12px; color: var(--hg-muted); font-weight: 400; margin-left: 6px; }
+  }
+
+  .exwrap { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+}
+
+button.hg-native-button.hg-native-button.hg-native-button.exbtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--hg-card-2);
+  border: 1px solid var(--hg-line);
+  color: var(--hg-txt);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s;
+
+  &:hover, &:focus-visible { border-color: var(--acc); }
+
+  .w { font-size: 19px; }
+  .mid { flex: 1; margin-left: 10px; }
+  .ipa, .tr { font-size: 12px; color: var(--hg-muted); }
+}
+
+// ---------- Сложные ----------
+.cxgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.cx {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+
+  .combo { width: 56px; flex-shrink: 0; text-align: center; font-size: 30px; color: var(--hg-red); }
+  .body { flex: 1; }
+  .word { display: flex; align-items: baseline; gap: 8px; .han { font-size: 20px; } }
+  .ipa { font-size: 13px; color: var(--hg-jade); }
+  .mean { font-size: 12px; color: var(--hg-muted); margin-top: 2px; }
+}
+
+button.hg-native-button.hg-native-button.hg-native-button.sp {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: none;
+  background: var(--hg-card-2);
+  color: var(--hg-txt);
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover { background: var(--hg-red); color: #fff; }
+}
+
+// ---------- 연음 ----------
+.linkbox {
+  padding: 28px;
+
+  .ghost { right: -10px; bottom: -50px; font-size: 180px; }
+}
+
+.linkrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hg-line);
+
+  &:last-child { border-bottom: none; }
+
+  .before { display: flex; gap: 4px; font-size: 26px; .a { color: var(--hg-blue); } .b { color: var(--hg-muted); } }
+  .eq { color: var(--hg-muted); font-size: 18px; }
+  .after { font-size: 26px; color: var(--hg-jade); }
+  .desc { flex: 1; min-width: 180px; font-size: 13px; color: var(--hg-muted); line-height: 1.5; }
+}
+
+// ---------- Квиз ----------
+.quiz {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px;
+  text-align: center;
+
+  .ghost { right: -30px; bottom: -60px; font-size: 200px; }
+  .qtop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+  .streak { color: var(--hg-yellow); font-weight: 700; font-size: 14px; }
+  .score { color: var(--hg-muted); font-size: 14px; }
+  .qletter { font-size: 96px; color: var(--hg-red); margin: 10px 0 4px; }
+  .qhint { color: var(--hg-muted); font-size: 13.5px; margin-bottom: 26px; }
+  .qopts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .fb { margin-top: 20px; min-height: 20px; font-size: 13.5px; color: var(--hg-muted); }
+  .next { display: inline-flex; margin-top: 16px; }
+}
+
+button.hg-native-button.hg-native-button.hg-native-button.qopt {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--hg-card-2);
+  border: 2px solid var(--hg-line);
+  color: var(--hg-txt);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .15s;
+
+  &:hover:not(:disabled) { border-color: rgba(255, 255, 255, .25); }
+  &:disabled { opacity: 1; cursor: default; }
+  &.correct { border-color: var(--hg-jade); background: rgba(31, 199, 155, .15); color: var(--hg-jade); }
+  &.wrong { border-color: var(--hg-red); background: rgba(255, 77, 94, .15); color: var(--hg-red); }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 28px 22px; }
+  .quiz .qopts { grid-template-columns: 1fr; }
+  .cx { flex-wrap: wrap; }
+}
+}

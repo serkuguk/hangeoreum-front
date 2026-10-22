@@ -125,7 +125,11 @@ export interface AdminClip {
   thumbnailUrl: string | null;
   durationMs: number | null;
   published: boolean;
+  title: string | null;
+  position: number | null;
 }
+
+export const AdminClipKind = {Immerse: 'IMMERSE', Story: 'STORY', Word: 'WORD'} as const;
 
 export interface AdminUser {
   id: string;
@@ -217,6 +221,10 @@ export class AdminApi {
 
   deleteUnit(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/units/${id}`);
+  }
+
+  updateUnit(id: string, request: Omit<AdminUnit, 'id' | 'published'>): Observable<AdminUnit> {
+    return this.http.put<AdminUnit>(`${this.base}/units/${id}`, request);
   }
 
   publishUnit(id: string, isPublished: boolean): Observable<AdminUnit> {
@@ -312,11 +320,11 @@ export class AdminApi {
     return this.http.get<AdminClip[]>(`${this.base}/clips`);
   }
 
-  createClip(request: {kind: string; speakerId?: string | null; wordId?: string | null; unitId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
+  createClip(request: {kind: string; title?: string | null; position?: number | null; speakerId?: string | null; wordId?: string | null; unitId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
     return this.http.post<AdminClip>(`${this.base}/clips`, request);
   }
 
-  updateClip(id: string, request: {kind: string; speakerId?: string | null; wordId?: string | null; unitId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
+  updateClip(id: string, request: {kind: string; title?: string | null; position?: number | null; speakerId?: string | null; wordId?: string | null; unitId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
     return this.http.put<AdminClip>(`${this.base}/clips/${id}`, request);
   }
 

@@ -5,6 +5,8 @@ export type {ClipSubtitle} from '@shared/models/clip-subtitle';
 
 export interface Clip {
   id: string;
+  title: string | null;
+  position: number;
   kind: string;
   speakerId: string | null;
   wordId: string | null;
@@ -17,13 +19,22 @@ export interface Clip {
   liked: boolean;
 }
 
+export interface ImmerseUnit {
+  id: string;
+  title: string;
+  description: string | null;
+  position: number;
+}
+
 export interface Feed {
   content: Clip[];
   nextCursor: string | null;
+  selectedUnit: ImmerseUnit | null;
+  units: ImmerseUnit[];
 }
 
 export interface ClipRepository {
-  feed(cursor?: string | null): Observable<Feed>;
+  feed(cursor?: string | null, unitId?: string | null): Observable<Feed>;
   markViewed(clipId: string): Observable<void>;
   toggleLike(clipId: string): Observable<{liked: boolean}>;
 }

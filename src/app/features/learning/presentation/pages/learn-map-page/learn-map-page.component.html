@@ -41,15 +41,29 @@
     </div>
   </header>
 
-  <!-- Алфавит — фундамент, из него выходит трасса пути -->
-  <a class="foundation" routerLink="/learn/alphabet">
-    <span class="fglyph">가</span>
-    <span class="fbody">
-      <b>{{ 'learning.map.foundationTitle' | translate }}</b>
-      <small>{{ 'learning.map.foundationPrefix' | translate }} <span class="han">자모</span> · {{ 'learning.map.foundationLetters' | translate }}</small>
-    </span>
-    <span class="pill p-j">{{ 'learning.map.open' | translate }}</span>
-  </a>
+  <!-- Алфавит — фундамент: гласные, согласные, патчим; из него выходит трасса пути -->
+  <section class="abc-unit">
+    <a class="abc-head" routerLink="/learn/alphabet">
+      <span class="fglyph">가</span>
+      <span class="fbody">
+        <b>{{ 'learning.map.foundationTitle' | translate }}</b>
+        <small>{{ 'learning.map.foundationPrefix' | translate }} <span class="han">자모</span> · {{ 'learning.map.foundationLetters' | translate }}</small>
+      </span>
+      <span class="pill p-j">{{ alphabetBadge() }}</span>
+    </a>
+    <div class="abc-path">
+      @for (node of alphabetNodes(); track node.id) {
+        <a [class]="node.cssClass" [routerLink]="node.link" [queryParams]="node.query">
+          <span class="nic">{{ node.glyph }}</span>
+          <span class="nbody">
+            <b>{{ node.titleKey | translate }}</b>
+            <small>{{ node.subtitle }}</small>
+          </span>
+          <span class="st" aria-hidden="true">{{ node.mark }}</span>
+        </a>
+      }
+    </div>
+  </section>
 
   @if (facade.loading()) {
     <div class="skeleton" aria-busy="true">

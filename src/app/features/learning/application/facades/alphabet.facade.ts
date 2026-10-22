@@ -1,5 +1,5 @@
 import {Injectable, computed, inject, signal} from '@angular/core';
-import {Alphabet, AlphabetLetter, LETTER_GROUPS} from '@features/learning/domain/entities/alphabet.entity';
+import {ALPHABET_PART_GROUPS, Alphabet, AlphabetLetter, AlphabetPart, LETTER_GROUPS} from '@features/learning/domain/entities/alphabet.entity';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 
 @Injectable()
@@ -17,6 +17,13 @@ export class AlphabetFacade {
       .map(g => ({...g, letters: letters.filter(l => l.group === g.group)}))
       .filter(g => g.letters.length > 0);
   });
+
+  /** Прогресс одной части алфавита — общий для карты и страницы алфавита. */
+  progressFor(part: AlphabetPart): {learned: number; total: number} {
+    const groups = ALPHABET_PART_GROUPS[part];
+    const letters = (this.alphabet()?.letters ?? []).filter(l => groups.includes(l.group));
+    return {learned: letters.filter(l => l.learned).length, total: letters.length};
+  }
 
   load(): void {
     this.loading.set(true);
