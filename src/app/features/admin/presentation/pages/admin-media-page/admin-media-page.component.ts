@@ -4,6 +4,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap} from 'rxjs';
 import {
   ButtonComponent,
+  DialogComponent,
   FilePickerComponent,
   BasicInputComponent,
   BasicSelectComponent,
@@ -15,11 +16,16 @@ import {AdminApi, AdminClip, AdminWord, MediaUploadKind, Speaker} from '@feature
 const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY', 'WORD']
   .map(value => ({label: value, value}));
 
+enum DeletionKind { Speaker = 'speaker', Clip = 'clip' }
+type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
+  | {kind: DeletionKind.Clip; clip: AdminClip};
+
 @Component({
   selector: 'hg-admin-media-page',
   imports: [
     FormField,
     ButtonComponent,
+    DialogComponent,
     FilePickerComponent,
     BasicInputComponent,
     BasicSelectComponent,
@@ -30,6 +36,7 @@ const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY',
   styleUrl: '../_admin.scss',
   styles: `
     section.panel { margin-bottom: 16px; }
+    section.panel--select { overflow: visible; z-index: 1; }
 
     .sprow, .cliprow {
       display: flex;
@@ -45,6 +52,8 @@ const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY',
       .grow { flex: 1; }
       .muted { color: var(--hg-muted); font-size: 12px; }
     }
+
+    .sprow:has(app-basic-input) { align-items: flex-end; }
 
     .editbox {
       flex-basis: 100%;
@@ -69,7 +78,7 @@ const CLIP_KIND_OPTIONS: {label: string; value: string}[] = ['IMMERSE', 'STORY',
       app-textarea { width: 100%; }
     }
 
-    .media-picker { max-width: 5rem; }
+    .media-picker { width: 2.75rem; max-width: 2.75rem; height: 2.75rem; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -80,6 +89,24 @@ export class AdminMediaPageComponent {
   readonly speakers = signal<Speaker[]>([]);
   readonly clips = signal<AdminClip[]>([]);
   readonly error = signal<string | null>(null);
+  readonly pendingDeletion = signal<PendingDeletion | null>(null);
+  readonly deletionSaving = signal(false);
+  readonly deletionError = signal<string | null>(null);
+  readonly deletionTitle = computed(() => {
+    const action = this.pendingDeletion();
+    if (!action) return '';
+    return this.translate.instant(action.kind === DeletionKind.Speaker
+      ? 'admin.media.deleteSpeakerTitle' : 'admin.media.deleteClipAria');
+  });
+  readonly deletionMessage = computed(() => {
+    const action = this.pendingDeletion();
+    if (!action) return '';
+    if (action.kind === DeletionKind.Speaker) {
+      return this.translate.instant('admin.media.confirm.deleteSpeaker', {name: action.speaker.name});
+    }
+    const clip = action.clip;
+    return `${this.translate.instant('admin.media.confirm.deleteClip')} ${clip.kind} · ${this.mediaSummary(clip)} · ${clip.id.slice(0, 8)}`;
+  });
   readonly flash = signal<string | null>(null);
   readonly subtitlesFor = signal<string | null>(null); // clipId с открытым редактором сабов
   readonly editingClip = signal<string | null>(null); // clipId с открытым редактором полей
@@ -152,11 +179,9 @@ export class AdminMediaPageComponent {
   }
 
   removeSpeaker(speaker: Speaker): void {
-    if (!confirm(this.translate.instant('admin.media.confirm.deleteSpeaker', {name: speaker.name}))) return;
-    this.api.deleteSpeaker(speaker.id).subscribe({
-      next: () => this.load(),
-      error: err => this.fail('admin.media.errors.deleteSpeaker', err),
-    });
+    if (this.deletionSaving()) return;
+    this.deletionError.set(null);
+    this.pendingDeletion.set({kind: DeletionKind.Speaker, speaker});
   }
 
   startEditSpeaker(speaker: Speaker): void {
@@ -190,10 +215,43 @@ export class AdminMediaPageComponent {
   }
 
   removeClip(clip: AdminClip): void {
-    if (!confirm(this.translate.instant('admin.media.confirm.deleteClip'))) return;
-    this.api.deleteClip(clip.id).subscribe({
-      next: () => this.load(),
-      error: err => this.fail('admin.media.errors.deleteClip', err),
+    if (this.deletionSaving()) return;
+    this.deletionError.set(null);
+    this.pendingDeletion.set({kind: DeletionKind.Clip, clip});
+  }
+
+  onDeletionVisibleChange(visible: boolean): void {
+    if (!visible) this.closeDeletion();
+  }
+
+  closeDeletion(): void {
+    if (this.deletionSaving()) return;
+    this.pendingDeletion.set(null);
+    this.deletionError.set(null);
+  }
+
+  confirmDeletion(): void {
+    const action = this.pendingDeletion();
+    if (!action || this.deletionSaving()) return;
+    this.deletionSaving.set(true);
+    this.deletionError.set(null);
+    const request$ = action.kind === DeletionKind.Speaker
+      ? this.api.deleteSpeaker(action.speaker.id)
+      : this.api.deleteClip(action.clip.id);
+    request$.subscribe({
+      next: () => {
+        this.load();
+        this.deletionSaving.set(false);
+        this.closeDeletion();
+      },
+      error: err => {
+        this.deletionSaving.set(false);
+        this.deletionError.set(this.translate.instant('admin.media.errors.errorWithDetail', {
+          prefix: this.translate.instant(action.kind === DeletionKind.Speaker
+            ? 'admin.media.errors.deleteSpeaker' : 'admin.media.errors.deleteClip'),
+          detail: err?.error?.message ?? err?.status ?? this.translate.instant('admin.media.errors.unknownDetail'),
+        }));
+      },
     });
   }
 

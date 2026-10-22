@@ -40,11 +40,26 @@ app-button {
 }
 
 :is(hg-admin-words-page, hg-admin-topics-page) .toolbar app-button .hg-button.p-button,
-hg-admin-course-page .addrow app-button .hg-button.p-button {
+hg-admin-course-page .addrow app-button .hg-button.p-button,
+hg-admin-media-page .addrow app-button .hg-button.p-button,
+hg-admin-media-page .sprow:has(app-basic-input) app-button .hg-button.p-button,
+hg-admin-lesson-builder-page .addex app-button .hg-button.p-button {
   box-sizing: border-box;
   height: 40px;
   min-height: 40px;
   padding-block: .5rem;
+}
+
+hg-admin-lesson-builder-page .addex app-button .hg-button.p-button {
+  white-space: nowrap;
+}
+
+hg-admin-users-page app-basic-select.role-select p-floatlabel.p-floatlabel.p-floatlabel {
+  gap: 0;
+}
+
+hg-admin-users-page app-basic-select.role-select p-floatlabel.p-floatlabel.p-floatlabel > label {
+  display: none;
 }
 
 // Preserve native grid/flex placement through the library's projection containers.
@@ -196,7 +211,8 @@ app-file-picker {
   &:has(> input:focus-visible) > label { outline: 3px solid color-mix(in srgb, var(--hg-blue) 30%, transparent); outline-offset: 2px; }
   &:has(> input:disabled) > label { opacity: .58; cursor: not-allowed; }
 }
-.admin-words-table app-file-picker.audio-picker > label {
+.admin-words-table app-file-picker.audio-picker > label,
+hg-admin-media-page app-file-picker.media-picker > label {
   display: flex;
   align-items: center;
   justify-content: center;

@@ -2,12 +2,16 @@ import {FormField, form, required} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {AdminApi, AdminCourse, AdminLesson, AdminUnit} from '@features/admin/infrastructure/admin.api';
-import {ButtonComponent, BasicInputComponent, BasicSelectComponent} from 'springest';
+import {ButtonComponent, BasicInputComponent, BasicSelectComponent, DialogComponent} from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+
+enum DeletionKind { Unit = 'unit', Lesson = 'lesson' }
+type PendingDeletion = {kind: DeletionKind.Unit; unit: AdminUnit}
+  | {kind: DeletionKind.Lesson; unit: AdminUnit; lesson: AdminLesson};
 
 @Component({
   selector: 'hg-admin-course-page',
-  imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent, TranslatePipe],
+  imports: [FormField, RouterLink, ButtonComponent, BasicInputComponent, BasicSelectComponent, DialogComponent, TranslatePipe],
   templateUrl: './admin-course-page.component.html',
   styleUrl: '../_admin.scss',
   styles: `
@@ -75,6 +79,21 @@ export class AdminCoursePageComponent {
   }
   readonly lessonsByUnit = signal<Partial<Record<string, AdminLesson[]>>>({});
   readonly error = signal<string | null>(null);
+  readonly pendingDeletion = signal<PendingDeletion | null>(null);
+  readonly saving = signal(false);
+  readonly deletionError = signal<string | null>(null);
+  readonly deletionTitle = computed(() => {
+    const action = this.pendingDeletion();
+    if (!action) return '';
+    return this.translate.instant(action.kind === DeletionKind.Unit ? 'admin.course.deleteUnit' : 'admin.course.deleteLesson');
+  });
+  readonly deletionMessage = computed(() => {
+    const action = this.pendingDeletion();
+    if (!action) return '';
+    return action.kind === DeletionKind.Unit
+      ? this.translate.instant('admin.course.confirm.deleteUnit', {title: action.unit.title})
+      : this.translate.instant('admin.course.confirm.deleteLesson', {title: action.lesson.title});
+  });
 
   readonly newCourseTitle = signal('');
   readonly newCourseTitleField = form(this.newCourseTitle, path => required(path));
@@ -138,9 +157,9 @@ export class AdminCoursePageComponent {
   }
 
   removeUnit(unit: AdminUnit): void {
-    if (!confirm(this.translate.instant('admin.course.confirm.deleteUnit', {title: unit.title}))) return;
-    this.api.deleteUnit(unit.id).subscribe(() =>
-      this.units.update(list => list.filter(u => u.id !== unit.id)));
+    if (this.saving()) return;
+    this.deletionError.set(null);
+    this.pendingDeletion.set({kind: DeletionKind.Unit, unit});
   }
 
   moveUnit(unit: AdminUnit, delta: -1 | 1): void {
@@ -190,12 +209,48 @@ export class AdminCoursePageComponent {
   }
 
   removeLesson(unit: AdminUnit, lesson: AdminLesson): void {
-    if (!confirm(this.translate.instant('admin.course.confirm.deleteLesson', {title: lesson.title}))) return;
-    this.api.deleteLesson(lesson.id).subscribe(() =>
-      this.lessonsByUnit.update(map => ({
-        ...map,
-        [unit.id]: (map[unit.id] ?? []).filter(l => l.id !== lesson.id),
-      })));
+    if (this.saving()) return;
+    this.deletionError.set(null);
+    this.pendingDeletion.set({kind: DeletionKind.Lesson, unit, lesson});
+  }
+
+  onDeletionVisibleChange(visible: boolean): void {
+    if (!visible) this.closeDeletion();
+  }
+
+  closeDeletion(): void {
+    if (this.saving()) return;
+    this.pendingDeletion.set(null);
+    this.deletionError.set(null);
+  }
+
+  confirmDeletion(): void {
+    const action = this.pendingDeletion();
+    if (!action || this.saving()) return;
+    this.saving.set(true);
+    this.deletionError.set(null);
+    const request$ = action.kind === DeletionKind.Unit
+      ? this.api.deleteUnit(action.unit.id)
+      : this.api.deleteLesson(action.lesson.id);
+    request$.subscribe({
+      next: () => {
+        if (action.kind === DeletionKind.Unit) {
+          this.units.update(list => list.filter(unit => unit.id !== action.unit.id));
+        } else {
+          this.lessonsByUnit.update(map => ({
+            ...map,
+            [action.unit.id]: (map[action.unit.id] ?? []).filter(lesson => lesson.id !== action.lesson.id),
+          }));
+        }
+        this.saving.set(false);
+        this.closeDeletion();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.deletionError.set(this.translate.instant(action.kind === DeletionKind.Unit
+          ? 'admin.course.errors.deleteUnit' : 'admin.course.errors.deleteLesson'));
+      },
+    });
   }
 
   moveLesson(unit: AdminUnit, lesson: AdminLesson, delta: -1 | 1): void {
