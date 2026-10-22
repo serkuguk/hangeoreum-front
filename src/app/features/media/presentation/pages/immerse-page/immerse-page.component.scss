@@ -4,12 +4,84 @@ header { display: grid; gap: 12px; margin-bottom: 24px; }
 h1, h2, p { margin: 0; }
 a { color: var(--hg-route); }
 .notice { padding: 24px; display: grid; gap: 16px; }
-.practice { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 24px; }
-.player-panel { display: grid; gap: 16px; min-width: 0; align-content: start; }
-video { display: block; width: 100%; max-height: 58dvh; background: #000; border-radius: var(--hg-radius-scene); }
+.player-panel { display: grid; gap: 16px; max-width: 640px; margin: 16px auto 0; align-content: start; }
 .subs { min-height: 76px; padding: 16px; border-radius: var(--hg-radius-scene); background: var(--hg-surface-muted); white-space: pre-line; }
 .subs p + p { margin-top: 8px; color: var(--hg-text-muted); }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-ol { margin: 0 0 16px; padding-left: 24px; }
-li { padding: 6px 0; }
-@media (max-width: 700px) { .practice { grid-template-columns: 1fr; } }
+
+.feednav {
+  --card-w: min(72vw, 320px, calc((100dvh - 240px) * 9 / 16));
+  // соседи уменьшены scale(.82) — съедаем пустое место вокруг них, оставляя щель в 4px
+  --overlap: calc(var(--card-w) * .09 - 4px);
+  position: relative;
+}
+
+// coverflow: центральная карточка крупно, соседи меньше, дальние ещё меньше
+.feed {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  // крайние карточки тоже могут встать по центру
+  padding-inline: calc(50% - var(--card-w) / 2 + var(--overlap) / 2);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.clip {
+  position: relative;
+  flex: 0 0 var(--card-w);
+  margin-inline: calc(var(--overlap) / -2);
+  aspect-ratio: 9 / 16;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  border-radius: var(--hg-radius-scene);
+  overflow: hidden;
+  background: var(--hg-surface-muted);
+  border: 1px solid var(--hg-border);
+  transition: transform var(--hg-motion-route) ease, opacity var(--hg-motion-route) ease;
+
+  &.is-active { z-index: 2; box-shadow: 0 18px 50px rgba(0, 0, 0, .35); }
+  &.is-near { z-index: 1; transform: scale(.82); opacity: .75; }
+  // дальние подтягиваем к центру на разницу масштабов (.82 → .66), чтобы щель была как у соседей
+  &.is-far { transform: translateX(calc(var(--card-w) * -.17)) scale(.66); opacity: .45; }
+  &.is-far.is-before { transform: translateX(calc(var(--card-w) * .17)) scale(.66); }
+
+  // неактивные — превью: клик центрирует карточку, а не управляет видео
+  &:not(.is-active) {
+    cursor: pointer;
+
+    video { pointer-events: none; }
+  }
+
+  video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+  }
+}
+
+:host ::ng-deep button.hg-native-button.hg-native-button.hg-native-button.navbtn {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: var(--hg-touch-min);
+  height: var(--hg-touch-min);
+  border: 0;
+  background: transparent;
+  color: var(--hg-danger);
+  font-size: 56px;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+  // сразу за соседними карточками: половина активной + щель + сосед (.82) + отступ
+  --navbtn-offset: max(0px, calc(50% - var(--card-w) * 1.32 - var(--hg-touch-min) - 16px));
+
+  &.prev { left: var(--navbtn-offset); }
+  &.next { right: var(--navbtn-offset); }
+  &:disabled { opacity: .25; cursor: default; }
+}

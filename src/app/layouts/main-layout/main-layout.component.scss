@@ -108,7 +108,7 @@
     &:hover { background: var(--hg-surface-muted); }
   }
 
-  .exit { color: var(--hg-danger); }
+  .exit { color: var(--hg-danger); margin-inline-start: var(--hg-space-3); }
 }
 
 .content { grid-area: content; min-width: 0; padding: var(--hg-space-6) var(--hg-space-5) 0; }

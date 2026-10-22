@@ -38,6 +38,7 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
   styles: `
     section.panel { margin-bottom: 16px; }
     section.panel--select { overflow: visible; z-index: 1; }
+    section.panel--select > app-basic-select { margin-top: 12px; }
 
     .sprow, .cliprow {
       display: flex;
@@ -60,9 +61,9 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
       flex-basis: 100%;
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-      margin-top: 8px;
+      align-items: flex-end;
+      gap: 16px 12px;
+      margin-top: 12px;
 
       .wordpick {
         display: flex;

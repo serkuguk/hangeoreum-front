@@ -840,16 +840,12 @@
     "nextVideo": "Следующее видео",
     "videoAria": "Видео: {{title}}",
     "clipFallback": "клип",
-    "like": "Нравится",
-    "unlike": "Убрать лайк",
     "addWordAria": "Слово в словарь",
     "backToCourse": "Вернуться к курсу",
     "practiceTitle": "Практика юнита",
     "unitLabel": "Юнит для практики",
     "noCourse": "Пока нет доступных юнитов",
-    "repeat": "Повторить видео",
-    "videoList": "Видео юнита",
-    "loadMore": "Показать ещё видео"
+    "repeat": "Повторить видео"
   },
   "vocabulary": {
     "title": "Мой словарь",
