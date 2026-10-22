@@ -119,6 +119,7 @@ export interface AdminClip {
   kind: 'WORD' | 'STORY' | 'IMMERSE';
   speakerId: string | null;
   wordId: string | null;
+  unitId: string | null;
   videoUrl: string | null;
   audioUrl: string | null;
   thumbnailUrl: string | null;
@@ -311,11 +312,11 @@ export class AdminApi {
     return this.http.get<AdminClip[]>(`${this.base}/clips`);
   }
 
-  createClip(request: {kind: string; speakerId?: string | null; wordId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
+  createClip(request: {kind: string; speakerId?: string | null; wordId?: string | null; unitId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
     return this.http.post<AdminClip>(`${this.base}/clips`, request);
   }
 
-  updateClip(id: string, request: {kind: string; speakerId?: string | null; wordId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
+  updateClip(id: string, request: {kind: string; speakerId?: string | null; wordId?: string | null; unitId?: string | null; durationMs?: number | null}): Observable<AdminClip> {
     return this.http.put<AdminClip>(`${this.base}/clips/${id}`, request);
   }
 

@@ -13,8 +13,12 @@
 
 form {
   display: grid;
-  gap: var(--hg-space-4);
+  gap: var(--hg-space-5);
 }
+
+.hg-auth-consent { margin-top: calc(0.2rem - var(--hg-space-5) + 0.5rem); }
+
+:host ::ng-deep app-checkbox .checkbox-wrapper { display: flex;}
 
 // Сабмит отделяем от последнего поля сильнее, чем поля друг от друга.
 .btn { margin-top: var(--hg-space-2); }
@@ -46,9 +50,10 @@ form {
 }
 
 .alt {
-  margin-top: var(--hg-space-6);
+  margin-top: var(--hg-space-2);
   font-size: var(--hg-fs-sm);
   color: var(--hg-text-muted);
 
   a { color: var(--hg-route-text); font-weight: 600; }
 }
+

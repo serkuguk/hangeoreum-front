@@ -228,6 +228,7 @@
       "speakerNamePlaceholder": "지민…",
       "addSpeaker": "Спикер",
       "noSpeaker": "без спикера",
+      "noUnit": "без юнита",
       "clips": "Клипы",
       "uploadVideoAria": "Загрузить видео клипа",
       "uploadAudioAria": "Загрузить аудио клипа",
@@ -237,8 +238,10 @@
       "publishClip": "Опубликовать клип",
       "unpublishClip": "Снять клип с публикации",
       "deleteClipAria": "Удалить клип",
+      "deleteSpeakerTitle": "Удалить спикера",
       "clipKindAria": "Тип клипа",
       "clipSpeakerAria": "Спикер клипа",
+      "clipUnitAria": "Юнит клипа (видео показывается ученикам этого юнита)",
       "durationLabel": "Длительность, мс",
       "wordIdLabel": "ID {{id}}…",
       "wordLabel": "{{hangul}} — {{translation}}",
@@ -271,6 +274,7 @@
       "errors": {
         "findWords": "Не получилось найти слова.",
         "loadSpeakers": "Не получилось загрузить спикеров.",
+        "loadUnits": "Не получилось загрузить юниты.",
         "loadClips": "Не получилось загрузить клипы.",
         "addSpeaker": "Не получилось добавить спикера",
         "deleteSpeaker": "Не получилось удалить спикера",
@@ -300,6 +304,7 @@
       "moveUnitUp": "Переместить юнит выше",
       "moveUnitDown": "Переместить юнит ниже",
       "toggleUnitPublish": "Изменить публикацию юнита",
+      "unitLabel": "Юнит",
       "unitTitleLabel": "Название нового юнита",
       "addUnit": "+ Юнит",
       "noLessons": "Уроков нет.",
@@ -308,6 +313,7 @@
       "toggleLessonAccess": "Изменить доступность урока",
       "toggleLessonPublish": "Изменить публикацию урока",
       "deleteLesson": "Удалить урок",
+      "deleteUnit": "Удалить юнит",
       "openConstructor": "Конструктор →",
       "lessonTitleLabel": "Название нового урока",
       "lessonTypeLabel": "Тип урока",
@@ -315,7 +321,9 @@
       "errors": {
         "loadCourse": "Не получилось загрузить курс.",
         "reorderUnits": "Не получилось изменить порядок юнитов.",
-        "reorderLessons": "Не получилось изменить порядок уроков."
+        "reorderLessons": "Не получилось изменить порядок уроков.",
+        "deleteUnit": "Не получилось удалить юнит. Попробуйте ещё раз.",
+        "deleteLesson": "Не получилось удалить урок. Попробуйте ещё раз."
       },
       "confirm": {
         "deleteUnit": "Удалить юнит «{{title}}» со всеми уроками?",

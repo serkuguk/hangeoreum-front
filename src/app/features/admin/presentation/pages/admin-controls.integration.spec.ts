@@ -12,7 +12,7 @@ import {AdminTopicsPageComponent} from './admin-topics-page/admin-topics-page.co
 import {AdminWordsPageComponent} from './admin-words-page/admin-words-page.component';
 
 const letter = {id: 'letter', jamo: '가', romanization: 'ga', letterGroup: 'VOWEL', position: 1, audioUrl: null};
-const clip: AdminClip = {id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: null, published: false, videoUrl: null, audioUrl: null, thumbnailUrl: null};
+const clip: AdminClip = {id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null, published: false, videoUrl: null, audioUrl: null, thumbnailUrl: null};
 
 describe('admin springest controls', () => {
   let api: Record<string, jest.Mock>;
@@ -50,7 +50,7 @@ describe('admin springest controls', () => {
     media.detectChanges();
     expect(media.componentInstance.clipDraft().durationMs).toBe(0);
     media.componentInstance.saveClip(clip);
-    expect(api['updateClip']).toHaveBeenCalledWith('clip', {kind: 'IMMERSE', speakerId: null, wordId: null, durationMs: 0});
+    expect(api['updateClip']).toHaveBeenCalledWith('clip', {kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: 0});
   });
 
   it('explains invalid clip duration and keeps zero or empty duration valid', () => {

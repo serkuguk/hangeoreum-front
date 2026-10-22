@@ -33,18 +33,12 @@
 
 .searchbox {
   width: 100%;
-  background: var(--hg-surface);
-  border: 1px solid var(--hg-border);
-  border-radius: var(--hg-radius-block);
-  padding: 13px var(--hg-space-4);
-  color: var(--hg-text);
-  font-size: 15px;
   margin-bottom: var(--hg-space-4);
 
-  &:focus-visible {
-    outline: none;
-    border-color: var(--hg-focus);
-    box-shadow: 0 0 0 3px var(--hg-route-soft);
+  input.app-input {
+    min-height: 2.5rem;
+    height: 2.5rem;
+    padding: var(--hg-space-2) var(--hg-space-3);
   }
 }
 
@@ -54,6 +48,11 @@
   flex-wrap: wrap;
   margin-bottom: var(--hg-space-5);
   align-items: center;
+
+  app-basic-select {
+    .p-select { min-height: 2.5rem; height: 2.5rem; padding: 0; }
+    .p-select-label { padding: .375rem var(--hg-space-3); }
+  }
 
   hg-segmented-control { max-width: 100%; min-width: 0; }
 
@@ -108,6 +107,7 @@
   button.hg-native-button.hg-native-button.hg-native-button.rowmain {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--hg-space-3);
     flex: 1;
     background: none;
@@ -126,7 +126,7 @@
     }
   }
 
-  .word-image { width: 80px; height: 80px; flex-shrink: 0; object-fit: contain; }
+  .word-image { width: 80px; height: 80px; flex: 0 0 80px; object-fit: contain; margin-left: -4px; margin-right: 64px; transform: scale(1.8); transform-origin: left center; }
   .word-copy { display: flex; flex-direction: column; gap: var(--hg-space-1); min-width: 0; overflow-wrap: anywhere; }
   .wh { font-family: var(--hg-font-display); font-size: 24px; line-height: 1.25; }
   .rom { color: var(--hg-text-muted); font-size: 12.5px; }
@@ -164,6 +164,16 @@
   }
 }
 
+.vocabulary-audio button.hg-native-button.hg-native-button.hg-native-button.snd {
+  background: var(--hg-surface-muted);
+  border: 1px solid var(--hg-border);
+  color: var(--hg-text);
+}
+
+.vocabulary-audio button.hg-native-button.hg-native-button.hg-native-button.snd:hover {
+  background: var(--hg-surface);
+}
+
 .pager {
   display: flex;
   align-items: center;
@@ -178,6 +188,7 @@
 
 .newdeck {
   display: flex;
+  align-items: flex-end;
   gap: var(--hg-space-3);
   margin-bottom: var(--hg-space-5);
 

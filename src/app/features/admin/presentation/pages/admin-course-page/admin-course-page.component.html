@@ -3,6 +3,21 @@
   {{ 'admin.course.subtitle' | translate }}
 </p>
 
+<app-dialog [closeAriaLabel]="'common.closeDialog' | translate"
+            [visible]="pendingDeletion() !== null" (visibleChange)="onDeletionVisibleChange($event)"
+            [header]="deletionTitle()" [closable]="!saving()" [closeOnEscape]="!saving()">
+  <p>{{ deletionMessage() }}</p>
+  @if (deletionError()) {
+    <div class="errbar" role="alert">{{ deletionError() }}</div>
+  }
+  <div dialogActions>
+    <app-button [label]="'common.delete' | translate" [loading]="saving()" [disabled]="saving()"
+                (click)="confirmDeletion()" styleClass="hg-button hg-button--danger"></app-button>
+    <app-button [label]="'common.cancel' | translate" [disabled]="saving()"
+                (click)="closeDeletion()" styleClass="hg-button hg-button--ghost"></app-button>
+  </div>
+</app-dialog>
+
 @if (error()) {
   <div class="errbar">{{ error() }}</div>
 }
@@ -32,9 +47,9 @@
   </div>
 
   @for (unit of units(); track unit.id) {
-    <div class="panel unit">
+    <div class="panel unit unit--lesson">
       <div class="uhead">
-        <b>{{ unit.position }} · {{ unit.title }}</b>
+        <b>{{ 'admin.course.unitLabel' | translate }} {{ unit.position }} · {{ unit.title }}</b>
         <app-button
           (click)="moveUnit(unit, -1)"
           [aria]="{ 'aria-label': ('admin.course.moveUnitUp' | translate) }"

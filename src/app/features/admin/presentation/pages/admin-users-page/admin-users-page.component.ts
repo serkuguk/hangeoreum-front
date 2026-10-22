@@ -44,12 +44,18 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
                              [value]="selectedRoles()[user.id] || user.role"
                              (valueChange)="openRoleAction(user, $event)" optionLabel="label" optionValue="value" />
                 } @else {
-                  <span class="pill" [class.p-r]="user.role === roles.Admin" [class.p-b]="user.role === roles.User">
-                    {{ user.role }}
-                  </span>
+                  <div class="role-static">
+                    <span class="pill" [class.p-r]="user.role === roles.Admin" [class.p-b]="user.role === roles.User">
+                      {{ user.role }}
+                    </span>
+                  </div>
                 }
               </td>
-              <td>{{ user.createdAt.slice(0, 10) }}</td>
+              <td>
+                <div class="registered-date">
+                  {{ formatRegistrationDate(user.createdAt) }}
+                </div>
+              </td>
               <td class="user-actions">
                 @if (isAdmin() && user.id !== auth.currentUser()?.id && user.role !== roles.Admin) {
                   <div class="user-actions__buttons">
@@ -92,6 +98,17 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
   styles: `
     .user-actions { min-width: 15rem; }
     .role-select { display: inline-block; min-width: 9rem; }
+    .role-static {
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      width: 100%;
+      height: 40px;
+      padding: 0 .8rem;
+      border-radius: var(--hg-radius-control, .75rem);
+      background: var(--hg-card);
+    }
+    .registered-date { display: flex; align-items: center; height: 40px; }
     .user-actions__buttons { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
     :host .panel { overflow-x: auto; }
   `,
@@ -176,6 +193,11 @@ export class AdminUsersPageComponent {
   goToPage(page: number): void {
     this.page.set(page);
     this.load();
+  }
+
+  formatRegistrationDate(createdAt: string): string {
+    const [year, month, day] = createdAt.slice(0, 10).split('-');
+    return `${day}-${month}-${year}`;
   }
 
   canEditRole(user: AdminUser): boolean {

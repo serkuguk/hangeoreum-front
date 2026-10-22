@@ -10,7 +10,7 @@
       [isInline]="false"
       [submitted]="submitted()"
       [label]="'common.name' | translate"
-      [showLabel]="true"
+      [showLabel]="false"
       [errorMessages]="{
         required: ('identity.validation.name' | translate),
         maxLength: ('identity.validation.name' | translate),
@@ -19,7 +19,7 @@
       <app-basic-input
         type="text"
         [formField]="form.name"
-        [placeholder]="'identity.register.namePlaceholder' | translate"
+        [placeholder]="'common.name' | translate"
         autocomplete="name"
       />
     </app-form-field>
@@ -30,7 +30,7 @@
       [isInline]="false"
       [submitted]="submitted()"
       [label]="'common.email' | translate"
-      [showLabel]="true"
+      [showLabel]="false"
       [errorMessages]="{
         required: ('identity.validation.email' | translate),
         email: ('identity.validation.email' | translate),
@@ -39,8 +39,8 @@
       <app-basic-input
         type="email"
         [formField]="form.email"
-        placeholder="you@email.com"
-        autocomplete="email"
+        [placeholder]="'common.email' | translate"
+        autocomplete="common.email' | translate"
         autocapitalize="off"
       />
     </app-form-field>
@@ -51,7 +51,7 @@
       [isInline]="false"
       [submitted]="submitted()"
       [label]="'common.password' | translate"
-      [showLabel]="true"
+      [showLabel]="false"
       [errorMessages]="{
         required: ('identity.validation.passwordRequired' | translate),
         minLength: ('identity.validation.passwordMin' | translate),
@@ -60,13 +60,13 @@
       <app-password-input
         [toggleMask]="false"
         [formField]="form.password"
-        [placeholder]="'identity.register.passwordPlaceholder' | translate"
+        [placeholder]="'common.password' | translate"
         autocomplete="new-password"
       />
     </app-form-field>
 
     <app-form-field
-      class="hg-auth-field"
+      class="hg-auth-field hg-auth-consent"
       [field]="form.consent"
       [isInline]="false"
       [submitted]="submitted()"

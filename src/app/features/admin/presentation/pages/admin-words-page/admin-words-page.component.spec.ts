@@ -246,6 +246,19 @@ describe('AdminWords image saving', () => {
     expect(api.uploadWordMedia).toHaveBeenCalledWith(word.id, audio, 'audio');
   });
 
+  it('keeps the table media and actions in their dedicated layout wrappers', () => {
+    fixture.detectChanges();
+
+    const media = fixture.nativeElement.querySelector('.admin-words-table .word-media');
+    const audioPicker = media.querySelector('app-file-picker.audio-picker');
+    const actions = fixture.nativeElement.querySelector('.admin-words-table .word-actions');
+
+    expect(media.querySelector('.word-thumbnail')).toBeTruthy();
+    expect(audioPicker).toBeTruthy();
+    expect(audioPicker.parentElement).toBe(media);
+    expect(actions.querySelectorAll('app-button')).toHaveLength(2);
+  });
+
   it('shows the image preview and blocks dialog controls until upload succeeds or fails', async () => {
     const pending = new Subject<AdminWord>();
     api.uploadWordMedia.mockReturnValue(pending);

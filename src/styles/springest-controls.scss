@@ -39,6 +39,29 @@ app-button {
   }
 }
 
+:is(hg-admin-words-page, hg-admin-topics-page) .toolbar app-button .hg-button.p-button,
+hg-admin-course-page .addrow app-button .hg-button.p-button,
+hg-admin-media-page .addrow app-button .hg-button.p-button,
+hg-admin-media-page .sprow:has(app-basic-input) app-button .hg-button.p-button,
+hg-admin-lesson-builder-page .addex app-button .hg-button.p-button {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  padding-block: .5rem;
+}
+
+hg-admin-lesson-builder-page .addex app-button .hg-button.p-button {
+  white-space: nowrap;
+}
+
+hg-admin-users-page app-basic-select.role-select p-floatlabel.p-floatlabel.p-floatlabel {
+  gap: 0;
+}
+
+hg-admin-users-page app-basic-select.role-select p-floatlabel.p-floatlabel.p-floatlabel > label {
+  display: none;
+}
+
 // Preserve native grid/flex placement through the library's projection containers.
 app-button.hg-native-host {
   display: contents;
@@ -57,14 +80,20 @@ app-button.hg-native-host {
     color: var(--hg-text);
     border: 1px solid var(--hg-border);
     border-radius: var(--hg-radius-control, .75rem);
-    padding: .65rem .8rem;
     font: inherit;
     &:focus-visible { border-color: var(--hg-blue); outline: 3px solid color-mix(in srgb, var(--hg-blue) 22%, transparent); }
     &:disabled { opacity: .62; }
   }
+  :is(input:not([type=checkbox]):not([type=file]), textarea) { padding: .65rem .8rem; }
+  :is(input:not([type=checkbox]):not([type=file]), .p-select) {
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+  }
+  input:not([type=checkbox]):not([type=file]) { padding-block: .5rem; }
   .p-password { display: flex; width: 100%; }
   .p-select { padding: 0; }
-  .p-select-label { color: var(--hg-text); padding: .65rem .8rem; }
+  .p-select-label { display: flex; align-items: center; color: var(--hg-text); padding: 0 .8rem; }
   label { color: var(--hg-text); }
 }
 app-form-field {
@@ -78,8 +107,10 @@ app-password-input .password-input input.p-inputtext.p-inputtext {
   color: var(--hg-text);
   border-color: var(--hg-border);
   border-radius: var(--hg-radius-control, .75rem);
-  min-height: 2.75rem;
-  padding: .65rem .8rem;
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  padding: .5rem .8rem;
   font: inherit;
 }
 
@@ -180,6 +211,17 @@ app-file-picker {
   &:has(> input:focus-visible) > label { outline: 3px solid color-mix(in srgb, var(--hg-blue) 30%, transparent); outline-offset: 2px; }
   &:has(> input:disabled) > label { opacity: .58; cursor: not-allowed; }
 }
+.admin-words-table app-file-picker.audio-picker > label,
+hg-admin-media-page app-file-picker.media-picker > label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+}
 app-dialog {
   .p-dialog { width: min(42rem, calc(100vw - 2rem)); max-height: 90vh; background: var(--hg-card); color: var(--hg-text); border-color: var(--hg-border); }
   :is(.p-dialog-header, .p-dialog-content, .p-dialog-footer) { background: var(--hg-card); color: var(--hg-text); }
@@ -235,15 +277,15 @@ hg-dashboard-page .hg-btn.hg-btn.hg-btn.hg-btn.hg-btn {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
-  transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+  transition: background-color var(--hg-motion-feedback), filter var(--hg-motion-feedback);
 
   &--light {
     padding: var(--hg-space-4) 26px;
     background: oklch(98% 0.02 90);
     color: var(--hg-route);
-    box-shadow: 0 6px 0 oklch(82% 0.03 88);
+    box-shadow: none;
 
-    &:hover { transform: translateY(3px); box-shadow: 0 3px 0 oklch(82% 0.03 88); }
+    &:hover { transform: none; box-shadow: none; filter: brightness(.96); }
   }
 
   &--ghost {

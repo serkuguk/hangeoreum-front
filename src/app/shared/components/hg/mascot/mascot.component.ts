@@ -13,6 +13,7 @@ export class MascotComponent {
   /** Реплика в облачке; пустая строка прячет облачко */
   readonly speech = input('화이팅! 🔥');
   readonly size = input(216);
+  readonly imageSrc = input('');
   /** Показывать подиум-плиту под маскотом */
   readonly pedestal = input(true, {transform: booleanAttribute});
 }

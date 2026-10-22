@@ -51,18 +51,22 @@
         >
       }
 
-      <div class="feed">
+      <div class="feed" (wheel)="onWheel($event)">
         @for (clip of facade.clips(); track clip.id) {
-          <section class="clip">
+          <section
+            class="clip"
+            [class]="clipClass($index)"
+            [attr.data-index]="$index"
+            (click)="focusClip($index)"
+          >
             @if (clip.videoUrl) {
               <video
-                [attr.data-clip-id]="clip.id"
                 [src]="clip.videoUrl"
                 [poster]="clip.thumbnailUrl ?? ''"
                 loop
                 playsinline
                 muted
-                controls
+                [controls]="isActive($index)"
                 preload="none"
                 [attr.aria-label]="
                   'media.videoAria' | translate: { title: clipTitle(clip) }

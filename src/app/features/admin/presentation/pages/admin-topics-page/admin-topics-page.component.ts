@@ -32,8 +32,10 @@ import {ButtonComponent, BasicInputComponent} from 'springest';
               <td>{{ topic.code }}</td>
               <td>{{ topic.title }}</td>
               <td>
-                <app-button [label]="'admin.topics.rename' | translate" (click)="rename(topic)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
-                <app-button [label]="'admin.topics.delete' | translate" (click)="remove(topic)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                <div class="topic-actions">
+                  <app-button [label]="'admin.topics.rename' | translate" (click)="rename(topic)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
+                  <app-button [label]="'admin.topics.delete' | translate" (click)="remove(topic)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                </div>
               </td>
             </tr>
           } @empty {
@@ -47,6 +49,7 @@ import {ButtonComponent, BasicInputComponent} from 'springest';
   styles: `
     .icon { max-width: 90px; flex: 0; }
     .cta { padding: 11px 20px; font-size: 14px; }
+    .topic-actions { display: flex; align-items: center; gap: .5rem; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

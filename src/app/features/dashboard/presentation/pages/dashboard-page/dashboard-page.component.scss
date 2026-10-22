@@ -23,7 +23,7 @@
   position: sticky;
   top: 88px;
 
-  .hg-card { border-radius: 22px; padding: var(--hg-space-5); }
+  .hg-card { border-radius: var(--hg-radius-lg); padding: var(--hg-space-5); }
 }
 
 .hg-fullspan { grid-column: 1 / -1; }
@@ -48,7 +48,7 @@
 .hg-card {
   background: var(--hg-surface);
   border: 1px solid var(--hg-border);
-  border-radius: 24px;
+  border-radius: calc(var(--hg-radius-lg) * 24 / 22);
   padding: 26px 28px 34px;
 }
 
@@ -86,13 +86,14 @@
 .hg-hero {
   position: relative;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: calc(var(--hg-radius-lg) * 28 / 22);
   padding: 36px 40px;
   background: linear-gradient(140deg, var(--hg-route) 0%, var(--hg-violet) 100%);
   color: var(--hg-on-route);
   box-shadow: 0 22px 50px -22px color-mix(in oklab, var(--hg-route) 70%, transparent);
 
   .hg-eyebrow { color: inherit; opacity: 0.75; margin-bottom: 12px; }
+  hg-mascot { max-width: 100%; }
 
   &__watermark {
     right: -40px;
@@ -120,7 +121,7 @@
 
   &__copy {
     flex: 1;
-    min-width: 320px;
+    min-width: min(320px, 100%);
 
     h1 {
       font-size: 38px;
@@ -379,16 +380,15 @@
     display: block;
     text-align: center;
     padding: 14px;
-    border-radius: 14px;
+    border-radius: calc(var(--hg-radius-control) * 14 / 8);
     background: var(--hg-route);
     color: var(--hg-on-route);
     font-weight: 700;
     font-size: 14px;
     text-decoration: none;
-    box-shadow: 0 5px 0 var(--hg-route-deep);
-    transition: transform var(--hg-motion-feedback), box-shadow var(--hg-motion-feedback);
+    transition: filter var(--hg-motion-feedback);
 
-    &:hover { transform: translateY(3px); box-shadow: 0 2px 0 var(--hg-route-deep); }
+    &:hover { filter: brightness(.96); }
   }
 }
 

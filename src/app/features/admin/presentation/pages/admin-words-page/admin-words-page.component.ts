@@ -48,7 +48,8 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     }
 
     <div class="panel">
-      <table class="atable">
+      <div class="words-table-scroll">
+      <table class="atable admin-words-table">
         <thead>
           <tr><th>{{ 'admin.words.hangul' | translate }}</th><th>{{ 'admin.words.romanization' | translate }}</th><th>{{ 'admin.words.translation' | translate }}</th><th>{{ 'admin.words.media' | translate }}</th><th></th></tr>
         </thead>
@@ -62,13 +63,15 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
                 <div class="word-media">
                   <img class="word-thumbnail" [src]="imageUrl(word.imageUrl)" (error)="onImageError($event)"
                        alt="" width="48" height="48" loading="lazy" decoding="async" />
-                <app-file-picker #picker1 label="🔊" [ariaLabel]="'admin.words.uploadAudio' | translate"
+                <app-file-picker class="audio-picker" #picker1 label="🔊" [ariaLabel]="'admin.words.uploadAudio' | translate"
                                 accept="audio/*" (changed)="$event[0] && upload(word, $event[0], 'audio'); picker1.value.set([])" />
                 </div>
               </td>
               <td>
-                <app-button [label]="'admin.words.edit' | translate" (click)="openEdit(word)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
-                <app-button [label]="'admin.words.delete' | translate" (click)="remove(word)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                <div class="word-actions">
+                  <app-button [label]="'admin.words.edit' | translate" (click)="openEdit(word)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
+                  <app-button [label]="'admin.words.delete' | translate" (click)="remove(word)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                </div>
               </td>
             </tr>
           } @empty {
@@ -76,6 +79,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
           }
         </tbody>
       </table>
+      </div>
       @if (totalPages() > 1) {
         <app-pagination [rows]="20" [first]="page() * 20" [totalRecords]="total()"
                        [attr.aria-label]="'admin.words.pagination' | translate" (pageChange)="goToPage($event.page ?? 0)" />
@@ -118,7 +122,11 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
   styleUrl: '../_admin.scss',
   styles: `
     .word-media, .word-image-field { display: flex; align-items: center; gap: 1rem; }
-    .word-media { flex-wrap: wrap; gap: .5rem; }
+    .words-table-scroll { overflow-x: auto; }
+    .admin-words-table { min-width: 42rem; }
+    .word-media { flex-wrap: nowrap; gap: .5rem; }
+    .word-media app-file-picker.audio-picker { width: auto; flex: 0 0 auto; }
+    .word-actions { display: flex; align-items: center; gap: .5rem; white-space: nowrap; }
     .word-thumbnail, .word-preview { object-fit: contain; flex-shrink: 0; border-radius: var(--hg-radius-control); }
     .word-thumbnail { width: 48px; height: 48px; }
     .word-preview { width: 96px; height: 96px; }

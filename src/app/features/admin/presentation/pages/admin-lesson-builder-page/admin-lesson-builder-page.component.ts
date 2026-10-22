@@ -124,8 +124,11 @@ const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
 
     .addex {
       display: flex;
+      align-items: flex-end;
       gap: 8px;
       margin-top: 14px;
+
+      app-basic-select { flex: 0 1 18rem; min-width: 12rem; }
     }
 
     .tipform {
@@ -152,6 +155,10 @@ const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
     }
     section.panel {
       margin-bottom: 16px;
+    }
+    section.panel--select {
+      overflow: visible;
+      z-index: 1;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
