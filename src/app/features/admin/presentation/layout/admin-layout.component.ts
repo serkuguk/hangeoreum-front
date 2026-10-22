@@ -27,7 +27,7 @@ import {HgSidebarComponent} from '@shared/components/sidebar/hg-sidebar.componen
       --sidebar-muted: var(--hg-muted);
       --sidebar-hover: var(--hg-card);
     }
-    .logo { font-size: 22px; color: var(--hg-yellow); text-decoration: none; white-space: nowrap; }
+    .logo { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700; font-size: 22px; color: var(--hg-yellow); text-decoration: none; white-space: nowrap; }
     .logo span { font-family: var(--hg-font-ui); font-size: 11px; color: var(--hg-muted); letter-spacing: 2px; text-transform: uppercase; }
     .content { padding: 30px; min-width: 0; }
     @media (max-width: 767px) { .content { padding: 20px 12px; } }
