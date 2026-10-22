@@ -3,6 +3,8 @@
 :host ::ng-deep {
 .abox { max-width: 860px; }
 
+.backlink { display: inline-block; margin-bottom: 16px; text-decoration: none; }
+
 .loadpanel {
   text-align: center;
   padding: 40px;

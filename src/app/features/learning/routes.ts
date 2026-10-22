@@ -13,6 +13,7 @@ export const learningRoutes: Routes = [
     providers: [
       {provide: LEARNING_REPOSITORY, useClass: LearningHttpRepository},
       LearnMapFacade,
+      AlphabetFacade,
     ],
     children: [
       {
@@ -22,9 +23,13 @@ export const learningRoutes: Routes = [
       },
       {
         path: 'alphabet',
-        providers: [AlphabetFacade],
         loadComponent: () => import('./presentation/pages/alphabet-page/alphabet-page.component')
           .then(c => c.AlphabetPageComponent),
+      },
+      {
+        path: 'batchim',
+        loadComponent: () => import('./presentation/pages/batchim-page/batchim-page.component')
+          .then(c => c.BatchimPageComponent),
       },
       {
         path: ':id/tip',

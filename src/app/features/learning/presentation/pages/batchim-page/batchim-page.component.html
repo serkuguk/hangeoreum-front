@@ -1,0 +1,146 @@
+<div class="wrap bbox">
+  <a class="ghostbtn backlink" routerLink="/learn">{{ 'learning.alphabet.back' | translate }}</a>
+
+  <div class="panel hero">
+    <div class="ghost kr" aria-hidden="true">받침</div>
+    <div class="eyebrow">{{ 'learning.batchim.eyebrow' | translate }}</div>
+    <h1>
+      {{ 'learning.batchim.titleLead' | translate }}<br />
+      {{ 'learning.batchim.titleSound' | translate }} <span class="kr accent">{{ 'learning.batchim.titleAccent' | translate }}</span>.
+    </h1>
+    <p>{{ 'learning.batchim.intro' | translate }}</p>
+    <div class="rule-badge">💡 <span>{{ 'learning.batchim.rule' | translate }}</span></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    @for (item of tabs; track item) {
+      <app-button
+        class="hg-native-host"
+        [styleClass]="tabClass(item)"
+        type="button"
+        (click)="tab.set(item)"
+        [aria]="tabAria(item)"
+      >{{ 'learning.batchim.tabs.' + item | translate }}</app-button>
+    }
+  </div>
+
+  @if (isSimple()) {
+    <section class="sec">
+      <h2>{{ 'learning.batchim.simple.title' | translate }}</h2>
+      <p class="sec-sub">{{ 'learning.batchim.simple.subtitle' | translate }}</p>
+      <div class="famgrid">
+        @for (family of families; track family.ghost) {
+          <div class="panel fam" [style.--acc]="family.accent">
+            <div class="ghost kr" aria-hidden="true">{{ family.ghost }}</div>
+            @for (row of family.rows; track $index) {
+              <div class="letters">
+                @for (letter of row; track letter) {
+                  <span class="han">{{ letter }}</span>
+                }
+              </div>
+            }
+            <div class="sound">[{{ family.sound }}] <small>{{ family.soundNote }}</small></div>
+            <div class="exwrap">
+              @for (example of family.examples; track example.word) {
+                <app-button class="hg-native-host" styleClass="hg-native-button exbtn" type="button" (click)="speak(example.word)">
+                  <span class="w han">{{ example.word }}</span>
+                  <span class="mid"><span class="ipa">[{{ example.ipa }}]</span><span class="tr"> · {{ example.meaning }}</span></span>
+                  <span class="sp" aria-hidden="true">🔊</span>
+                </app-button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  @if (isComplex()) {
+    <section class="sec">
+      <h2>{{ 'learning.batchim.complex.title' | translate }}</h2>
+      <p class="sec-sub">{{ 'learning.batchim.complex.subtitle' | translate }}</p>
+      <div class="cxgrid">
+        @for (item of complex; track item.combo) {
+          <div class="panel cx">
+            <div class="combo han">{{ item.combo }}</div>
+            <div class="body">
+              <div class="word"><span class="han">{{ item.word }}</span><span class="ipa">[{{ item.ipa }}]</span></div>
+              <div class="mean">{{ item.meaning }}</div>
+            </div>
+            <app-button
+              class="hg-native-host"
+              styleClass="hg-native-button sp"
+              type="button"
+              (click)="speak(item.word)"
+              [aria]="{ 'aria-label': 'learning.batchim.listen' | translate }"
+            >🔊</app-button>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  @if (isLink()) {
+    <section class="sec">
+      <h2>{{ 'learning.batchim.link.title' | translate }}</h2>
+      <p class="sec-sub">{{ 'learning.batchim.link.subtitle' | translate }}</p>
+      <div class="panel linkbox">
+        <div class="ghost kr" aria-hidden="true">연음</div>
+        @for (item of linking; track item.spoken) {
+          <div class="linkrow">
+            <div class="before han"><span class="a">{{ item.first }}</span><span class="b">{{ item.second }}</span></div>
+            <div class="eq" aria-hidden="true">→</div>
+            <div class="after han">{{ item.result }}</div>
+            <div class="desc">{{ item.description }}</div>
+            <app-button
+              class="hg-native-host"
+              styleClass="hg-native-button sp"
+              type="button"
+              (click)="speak(item.spoken)"
+              [aria]="{ 'aria-label': 'learning.batchim.listen' | translate }"
+            >🔊</app-button>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  @if (isQuiz()) {
+    <section class="sec">
+      <h2 class="center">{{ 'learning.batchim.quiz.title' | translate }}</h2>
+      <p class="sec-sub center">{{ 'learning.batchim.quiz.subtitle' | translate }}</p>
+      <div class="panel quiz">
+        <div class="ghost kr" aria-hidden="true">퀴즈</div>
+        <div class="qtop">
+          <span class="streak">{{ 'learning.batchim.quiz.streak' | translate: { n: streak() } }}</span>
+          <span class="score">{{ 'learning.batchim.quiz.score' | translate: { correct: correct(), total: total() } }}</span>
+        </div>
+        <div class="qletter han">{{ question().letter }}</div>
+        <div class="qhint">{{ 'learning.batchim.quiz.hint' | translate }}</div>
+        <div class="qopts">
+          @for (option of question().options; track option) {
+            <app-button
+              class="hg-native-host"
+              [styleClass]="optionClass(option)"
+              type="button"
+              [disabled]="answered()"
+              (click)="answer(option)"
+            >{{ option }}</app-button>
+          }
+        </div>
+        <div class="fb" aria-live="polite">
+          @if (answered()) {
+            @if (isRight()) {
+              {{ 'learning.batchim.quiz.right' | translate: { family: question().family, sound: question().answer } }}
+            } @else {
+              {{ 'learning.batchim.quiz.wrong' | translate: { family: question().family, sound: question().answer } }}
+            }
+          }
+        </div>
+        @if (answered()) {
+          <app-button styleClass="hg-button" class="next" [label]="'learning.batchim.quiz.next' | translate" (click)="next()" />
+        }
+      </div>
+    </section>
+  }
+</div>
