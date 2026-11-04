@@ -37,13 +37,15 @@ const accepted: CompletionAccepted = {
 
 describe('LessonFacade', () => {
   let facade: LessonFacade;
-  let repository: jest.Mocked<Pick<LearningRepository, 'lesson' | 'complete' | 'getCompletionStatus'>>;
+  let repository: jest.Mocked<Pick<LearningRepository, 'lesson' | 'complete' | 'getCompletionStatus' | 'startSession' | 'recordExerciseResult'>>;
   let map: {invalidate: jest.Mock};
 
   beforeEach(() => {
     sessionStorage.clear();
     jest.useFakeTimers();
     repository = {
+      startSession: jest.fn<LearningRepository['startSession']>().mockReturnValue(of(undefined)),
+      recordExerciseResult: jest.fn<LearningRepository['recordExerciseResult']>().mockReturnValue(of(undefined)),
       lesson: jest.fn<LearningRepository['lesson']>().mockReturnValue(of(lesson)),
       complete: jest.fn<LearningRepository['complete']>().mockReturnValue(of(accepted)),
       getCompletionStatus: jest.fn<LearningRepository['getCompletionStatus']>().mockReturnValue(of({status: 'COMPLETED', result})),
@@ -152,6 +154,108 @@ describe('LessonFacade', () => {
     expect(repository.complete).not.toHaveBeenCalled();
     expect(facade.phase()).toBe('load-error');
     expect(facade.error()).toContain('нет упражнений');
+  });
+
+  it.each(['CHOICE', 'LISTEN_CHOICE', 'WORD_ORDER', 'FILL_BLANK', 'MATCH_PAIRS', 'TYPE_WORD'] as const)(
+    'captures only first feedback per presentation for %s', kind => {
+      repository.lesson.mockReturnValue(of({...lesson, exercises: [{...lesson.exercises[0], kind}]}));
+      facade.start(lesson.id);
+      const sessionId = repository.startSession.mock.calls[0][1].sessionId;
+      facade.answered({correct: false, expected: 'expected', mistakes: 2});
+      facade.answered({correct: true});
+      expect(facade.feedback()?.correct).toBe(false);
+      expect(repository.recordExerciseResult.mock.calls).toEqual([[lesson.id, sessionId, {
+        sequence: 1, exerciseId: 'exercise-1', correct: false, expected: 'expected',
+        ...(kind === 'MATCH_PAIRS' ? {mistakes: 2} : {}),
+      }]]);
+      facade.next();
+      facade.answered({correct: true});
+      jest.advanceTimersByTime(0);
+      facade.answered({correct: true});
+      facade.next();
+      expect(repository.recordExerciseResult.mock.calls[1][2].sequence).toBe(2);
+      expect(repository.complete.mock.calls[0][1]).toEqual({lessonId: lesson.id, attemptId: sessionId, score: 0, accuracy: 50});
+    });
+
+  it('restores legacy completion without a fabricated start', () => {
+    sessionStorage.setItem('hangeoreum.pending-lesson-completion', JSON.stringify({lessonId: lesson.id, attemptId: 'legacy', score: 75, accuracy: 80}));
+    facade.start(lesson.id);
+    facade.retryFinish();
+    expect(repository.startSession).not.toHaveBeenCalled();
+    expect(repository.complete.mock.calls[0][1].attemptId).toBe('legacy');
+  });
+
+  it('serializes start before results and retries results with stable sequences', () => {
+    const start = new Subject<void>();
+    repository.startSession.mockReturnValue(start);
+    repository.recordExerciseResult.mockReturnValueOnce(throwError(() => ({status: 0})))
+      .mockReturnValueOnce(throwError(() => ({status: 500}))).mockReturnValue(of(undefined));
+    facade.start(lesson.id);
+    facade.answered({correct: false});
+    facade.next();
+    jest.advanceTimersByTime(0);
+    facade.answered({correct: true});
+    expect(repository.recordExerciseResult).not.toHaveBeenCalled();
+    start.complete();
+    expect(repository.recordExerciseResult).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(500);
+    expect(repository.recordExerciseResult.mock.calls.map(call => call[2].sequence)).toEqual([1, 1, 1, 2]);
+  });
+
+  it('limits transient start retries to three without blocking completion', () => {
+    repository.startSession.mockReturnValue(throwError(() => ({status: 503})));
+    finishLesson();
+    expect(repository.complete).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(500);
+    expect(repository.startSession).toHaveBeenCalledTimes(3);
+    expect(repository.recordExerciseResult).not.toHaveBeenCalled();
+    expect(facade.result()).toEqual(result);
+  });
+
+  it('caps pending events at 100 and cancels retained events on reset', () => {
+    const start = new Subject<void>();
+    repository.startSession.mockReturnValueOnce(start);
+    facade.start(lesson.id);
+    for (let i = 0; i < 101; i++) {
+      facade.answered({correct: false});
+      facade.next();
+      jest.advanceTimersByTime(0);
+    }
+    start.complete();
+    expect(repository.recordExerciseResult).toHaveBeenCalledTimes(100);
+    const held = new Subject<void>();
+    repository.recordExerciseResult.mockReturnValueOnce(held);
+    facade.answered({correct: false});
+    facade.next();
+    jest.advanceTimersByTime(0);
+    facade.answered({correct: false});
+    facade.start('next-lesson');
+    expect(held.observed).toBe(false);
+    held.complete();
+    expect(repository.recordExerciseResult).toHaveBeenCalledTimes(101);
+  });
+
+  it.each([400, 401, 403, 404, 409])('never retries %s and cancels tracking retries on teardown', status => {
+    repository.startSession.mockReturnValue(throwError(() => ({status})));
+    finishLesson();
+    jest.advanceTimersByTime(1000);
+    expect(repository.startSession).toHaveBeenCalledTimes(1);
+    repository.startSession.mockReturnValue(throwError(() => ({status: 0})));
+    facade.start(lesson.id);
+    TestBed.resetTestingModule();
+    jest.advanceTimersByTime(1000);
+    expect(repository.startSession).toHaveBeenCalledTimes(2);
+    expect(repository.recordExerciseResult).not.toHaveBeenCalled();
+  });
+
+  it('cancels a superseded load before starting tracking', () => {
+    const old = new Subject<Lesson>();
+    repository.lesson.mockReturnValueOnce(old);
+    facade.start('old');
+    facade.start(lesson.id);
+    old.next(lesson);
+    expect(old.observed).toBe(false);
+    expect(repository.startSession).toHaveBeenCalledTimes(1);
   });
 
   function finishLesson(): void {

@@ -1,6 +1,6 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Subscription, filter, map, exhaustMap, take, timer} from 'rxjs';
+import {Subject, Subscription, filter, map, exhaustMap, take, takeUntil, timer} from 'rxjs';
 import {Exercise, Lesson, Tip} from '@features/learning/domain/entities/exercise.entity';
 import {LessonSession} from '@features/learning/domain/services/lesson-session';
 import {
@@ -9,6 +9,7 @@ import {
 } from '@features/learning/domain/repositories/learning.repository';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
+import {LessonTracking} from '../lesson-tracking';
 
 import {Feedback} from '@features/learning/domain/services/exercise-grading';
 
@@ -25,6 +26,10 @@ export class LessonFacade {
   private readonly repository = inject(LEARNING_REPOSITORY);
   private readonly map = inject(LearnMapFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tracking = new LessonTracking(this.repository);
+  private readonly resetRequests = new Subject<void>();
+  private attemptId: string | null = null;
+  private sequence = 0;
   private session: LessonSession | null = null;
   private pendingCompletion: PendingCompletion | null = null;
   private nextTimer: ReturnType<typeof setTimeout> | null = null;
@@ -51,6 +56,7 @@ export class LessonFacade {
     this.destroyRef.onDestroy(() => {
       if (this.nextTimer) clearTimeout(this.nextTimer);
       this.cancelCompletionPolling();
+      this.tracking.reset();
     });
   }
 
@@ -63,7 +69,7 @@ export class LessonFacade {
     this.resetForStart();
     this.loading.set(true);
     this.phase.set('loading');
-    this.repository.lesson(lessonId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.repository.lesson(lessonId).pipe(take(1), takeUntil(this.resetRequests), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: lesson => this.beginLesson(lesson, lessonId),
       error: () => {
         this.error.set('Не получилось загрузить урок.');
@@ -77,7 +83,7 @@ export class LessonFacade {
     this.loading.set(true);
     this.error.set(null);
     this.phase.set('loading');
-    this.repository.tip(lessonId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.repository.tip(lessonId).pipe(takeUntil(this.resetRequests), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: tip => {
         this.tip.set(tip);
         this.loading.set(false);
@@ -93,8 +99,15 @@ export class LessonFacade {
 
   /** Компонент упражнения сообщил результат — показываем фидбек, очередь двигается по next(). */
   answered(feedback: Feedback): void {
-    if (this.phase() !== 'active') return;
-    this.feedback.set(feedback);
+    const exercise = this.current();
+    if (this.phase() !== 'active' || !exercise || this.feedback()) return;
+    const first = {...feedback};
+    this.feedback.set(first);
+    if (this.attemptId) this.tracking.record(this.lesson()!.id, this.attemptId, {
+      sequence: ++this.sequence, exerciseId: exercise.id, correct: first.correct,
+      ...(first.expected !== undefined ? {expected: first.expected} : {}),
+      ...(exercise.kind === 'MATCH_PAIRS' && first.mistakes !== undefined ? {mistakes: first.mistakes} : {}),
+    });
   }
 
   next(): void {
@@ -139,6 +152,8 @@ export class LessonFacade {
       return;
     }
 
+    this.attemptId = crypto.randomUUID();
+    this.tracking.start(lesson.id, this.attemptId);
     this.session = new LessonSession(lesson.exercises);
     this.total.set(this.session.total);
     this.solved.set(0);
@@ -154,7 +169,7 @@ export class LessonFacade {
     this.current.set(null);
     this.pendingCompletion = {
       lessonId: lesson.id,
-      attemptId: crypto.randomUUID(),
+      attemptId: this.attemptId!,
       score: session.score,
       accuracy: session.accuracy,
     };
@@ -166,7 +181,7 @@ export class LessonFacade {
     this.finishing.set(true);
     this.saveError.set(false);
     this.phase.set('saving');
-    this.repository.complete(pending.lessonId, pending).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.repository.complete(pending.lessonId, pending).pipe(takeUntil(this.resetRequests), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: accepted => {
         this.persistPendingCompletion(pending);
         this.pollCompletion(accepted.attemptId);
@@ -181,6 +196,10 @@ export class LessonFacade {
   }
 
   private resetForStart(): void {
+    this.resetRequests.next();
+    this.tracking.reset();
+    this.attemptId = null;
+    this.sequence = 0;
     if (this.nextTimer) clearTimeout(this.nextTimer);
     this.cancelCompletionPolling();
     this.session = null;

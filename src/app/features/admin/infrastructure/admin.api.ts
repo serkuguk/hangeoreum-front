@@ -145,6 +145,63 @@ export interface AdminUser {
 export const MediaUploadKind = {VIDEO: 'video', AUDIO: 'audio', THUMBNAIL: 'thumbnail'} as const;
 export type MediaUploadKind = typeof MediaUploadKind[keyof typeof MediaUploadKind];
 
+export const MonitoringHistoryKind = {
+  Sessions: 'sessions', Completions: 'completions', Progress: 'progress',
+  Reviews: 'reviews', DifficultWords: 'difficult-words',
+} as const;
+export type MonitoringHistoryKind = typeof MonitoringHistoryKind[keyof typeof MonitoringHistoryKind];
+export const MONITORING_PAGE_SIZE = 20;
+export interface MonitoringSession {
+  id: string; lessonId: string; courseId: string | null; lessonTitle: string; lessonType: string;
+  startedAt: string; lastReceivedAt: string; plannedExercises: number; savedAnswers: number;
+  repeatedExercises: number; receiptStatus: string | null; receiptCreatedAt: string | null;
+  receiptSavedAt: string | null; inCurrentCourseMap: boolean;
+}
+export interface MonitoringCompletion {
+  id: string; lessonId: string; lessonTitle: string | null; score: number; accuracy: number;
+  status: string; createdAt: string; savedAt: string | null; inCurrentCourseMap: boolean; source: string;
+}
+export interface MonitoringProgress {
+  lessonId: string; lessonTitle: string | null; status: string; score: number | null; accuracy: number | null;
+  attempts: number; completedAt: string | null; updatedAt: string; inCurrentCourseMap: boolean; source: string;
+}
+export interface MonitoringReview {
+  id: string; mode: string; startedAt: string; finishedAt: string | null; issuedCount: number;
+  answeredCount: number; correctCount: number; total: number; correct: number; xpEarned: number; streakAfter: number | null;
+}
+export interface MonitoringDifficultWord {
+  id: string; wordId: string; hangul: string; translation: string; easeFactor: number;
+  repetitions: number; dueDate: string; isDifficult: boolean;
+}
+export interface MonitoringReviewAnswer {
+  id: string; wordId: string; hangul: string; translation: string; quality: number;
+  isCorrect: boolean; answeredAt: string; source: string;
+}
+export interface MonitoringHistoryRows {
+  sessions: MonitoringSession; completions: MonitoringCompletion; progress: MonitoringProgress;
+  reviews: MonitoringReview; 'difficult-words': MonitoringDifficultWord;
+}
+export interface UserMonitoring {
+  user: AdminUser; generatedAt: string;
+  course: {id: string | null; title: string | null; completed: number; total: number; percent: number | null;
+    units: {id: string; title: string; completed: boolean;
+      lessons: {id: string; title: string; type: string; completed: boolean}[]}[]};
+  alphabet: {learned: number; total: number}; lastLessonSession: MonitoringSession | null;
+  counts: {sessions: number; completions: number; progress: number; reviews: number; difficultWords: number};
+  difficultWords: {content: MonitoringDifficultWord[]; totalElements: number; hasMore: boolean};
+  activity: {serverDate: string; currentStreak: number; longestStreak: number; lastActiveDate: string | null;
+    days: {date: string; xpEarned: number; lessonsCompleted: number; reviewsDone: number; goalXp: number | null}[]};
+  firstTrackedAt: string | null; coverage: string;
+}
+export interface MonitoringSessionDetail {
+  session: MonitoringSession;
+  exercises: {exerciseId: string; kind: string; position: number; context: string | null}[];
+  results: Page<{id: string; sequence: number; exerciseId: string; kind: string; context: string | null;
+    correct: boolean; expected: string | null; mistakes: number | null; receivedAt: string; source: string}>;
+  observedIncorrectCount: number; observedIncorrectRatio: number | null;
+  exercisesWithoutSavedCorrect: string[]; sequenceGaps: {firstSequence: number; lastSequence: number}[]; coverage: string;
+}
+
 @Injectable()
 export class AdminApi {
   private http = inject(HttpClient);
@@ -352,6 +409,25 @@ export class AdminApi {
   }
 
   // ---- пользователи / уведомления ----
+  monitoring(id: string): Observable<UserMonitoring> {
+    return this.http.get<UserMonitoring>(`${this.base}/users/${id}/monitoring`);
+  }
+
+  monitoringHistory<K extends MonitoringHistoryKind>(id: string, kind: K, page = 0, size = MONITORING_PAGE_SIZE): Observable<Page<MonitoringHistoryRows[K]>> {
+    const params = new HttpParams().set('kind', kind).set('page', page).set('size', size);
+    return this.http.get<Page<MonitoringHistoryRows[K]>>(`${this.base}/users/${id}/monitoring/history`, {params});
+  }
+
+  monitoringSession(id: string, sessionId: string, page = 0, size = MONITORING_PAGE_SIZE): Observable<MonitoringSessionDetail> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<MonitoringSessionDetail>(`${this.base}/users/${id}/monitoring/sessions/${sessionId}`, {params});
+  }
+
+  monitoringReviewAnswers(id: string, sessionId: string, page = 0, size = MONITORING_PAGE_SIZE): Observable<Page<MonitoringReviewAnswer>> {
+    const params = new HttpParams().set('kind', MonitoringHistoryKind.Reviews).set('sessionId', sessionId).set('page', page).set('size', size);
+    return this.http.get<Page<MonitoringReviewAnswer>>(`${this.base}/users/${id}/monitoring/history`, {params});
+  }
+
   users(search: string, page: number): Observable<Page<AdminUser>> {
     let params = new HttpParams().set('page', page).set('size', 20);
     if (search) params = params.set('search', search);

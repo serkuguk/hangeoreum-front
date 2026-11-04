@@ -84,6 +84,7 @@ export class ExerciseMatchComponent {
   }
 
   pick(cell: MatchCell): void {
+    if (this.isHit(cell)) return;
     const selected = this.selected();
     if (!selected) {
       this.selected.set(cell);
@@ -97,7 +98,7 @@ export class ExerciseMatchComponent {
       this.hits.update(set => new Set(set).add(cell.pairIndex));
       this.selected.set(null);
       if (this.hits().size === this.payload().pairs.length) {
-        this.result.emit(gradeMatch(this.mistakes));
+        this.result.emit({...gradeMatch(this.mistakes), mistakes: this.mistakes});
       }
     } else {
       this.mistakes++;

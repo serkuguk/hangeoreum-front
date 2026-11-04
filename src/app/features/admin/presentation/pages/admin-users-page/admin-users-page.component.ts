@@ -1,3 +1,4 @@
+import {Router} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -57,15 +58,16 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
                 </div>
               </td>
               <td class="user-actions">
-                @if (isAdmin() && user.id !== auth.currentUser()?.id && user.role !== roles.Admin) {
-                  <div class="user-actions__buttons">
-                  <app-button
-                             [label]="(user.isActive ? 'admin.users.block' : 'admin.users.unblock') | translate"
-                             (click)="openAction(user, actionKinds.Status)" [styleClass]="'hg-button hg-button--sm hg-button--' + (user.isActive ? 'danger' : 'secondary')"></app-button>
-                  <app-button [label]="'admin.users.delete' | translate"
-                             (click)="openAction(user, actionKinds.Delete)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
-                  </div>
-                }
+                <div class="user-actions__buttons">
+                  <app-button label="Мониторинг" (click)="openMonitoring(user)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                  @if (isAdmin() && user.id !== auth.currentUser()?.id && user.role !== roles.Admin) {
+                    <app-button
+                               [label]="(user.isActive ? 'admin.users.block' : 'admin.users.unblock') | translate"
+                               (click)="openAction(user, actionKinds.Status)" [styleClass]="'hg-button hg-button--sm hg-button--' + (user.isActive ? 'danger' : 'secondary')"></app-button>
+                    <app-button [label]="'admin.users.delete' | translate"
+                               (click)="openAction(user, actionKinds.Delete)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+                  }
+                </div>
               </td>
             </tr>
           } @empty {
@@ -116,6 +118,7 @@ type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: A
 })
 export class AdminUsersPageComponent {
   private api = inject(AdminApi);
+  private readonly router = inject(Router);
   private translate = inject(TranslateService);
   readonly auth = inject(AuthService);
   readonly roles = UserRole;
@@ -172,6 +175,10 @@ export class AdminUsersPageComponent {
       this.error.set(null);
     });
     this.load();
+  }
+
+  openMonitoring(user: AdminUser): void {
+    void this.router.navigate(['/admin/users', user.id, 'monitoring']);
   }
 
   load(): void {

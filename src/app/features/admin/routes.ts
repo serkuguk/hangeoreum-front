@@ -52,6 +52,12 @@ export const adminRoutes: Routes = [
           .then(c => c.AdminMediaPageComponent),
       },
       {
+        path: 'users/:id/monitoring',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./presentation/pages/admin-user-monitoring-page/admin-user-monitoring-page.component')
+          .then(c => c.AdminUserMonitoringPageComponent),
+      },
+      {
         path: 'users',
         canActivate: [adminOnlyGuard],
         loadComponent: () => import('./presentation/pages/admin-users-page/admin-users-page.component')

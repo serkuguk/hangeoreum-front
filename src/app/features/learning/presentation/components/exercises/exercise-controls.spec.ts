@@ -3,9 +3,39 @@ import {jest} from '@jest/globals';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
 import {ExerciseChoiceComponent} from './exercise-choice.component';
 import {ExerciseTypeComponent} from './exercise-type.component';
+import {ExerciseMatchComponent} from './exercise-match.component';
 
 describe('springest exercise controls', () => {
   afterEach(() => TestBed.resetTestingModule());
+
+  it('reports actual match mistakes once after all pairs are solved', () => {
+    jest.useFakeTimers();
+    try {
+      TestBed.configureTestingModule({imports: [ExerciseMatchComponent]});
+      const fixture = TestBed.createComponent(ExerciseMatchComponent);
+      fixture.componentRef.setInput('payload', {pairs: [{left: 'a', right: 'A'}, {left: 'b', right: 'B'}]});
+      const component = fixture.componentInstance;
+      const result = jest.fn();
+      component.result.subscribe(result);
+      const cells = component.cells();
+      const a = cells.find(cell => cell.pairIndex === 0 && cell.side === 'left')!;
+      const b = cells.find(cell => cell.pairIndex === 1 && cell.side === 'right')!;
+      component.pick(a);
+      component.pick(b);
+      expect(result).not.toHaveBeenCalled();
+      for (const index of [0, 1]) {
+        component.pick(cells.find(cell => cell.pairIndex === index && cell.side === 'left')!);
+        component.pick(cells.find(cell => cell.pairIndex === index && cell.side === 'right')!);
+      }
+      component.pick(a);
+      component.pick(b);
+      expect(result).toHaveBeenCalledTimes(1);
+      expect(result).toHaveBeenCalledWith({correct: false, mistakes: 1});
+      jest.runOnlyPendingTimers();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 
   it('submits Korean input once and locks the actual input and submit button', () => {
     TestBed.configureTestingModule({imports: [ExerciseTypeComponent]});
