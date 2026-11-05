@@ -1,0 +1,119 @@
+.mon-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: .5rem 0 .25rem;
+  }
+}
+
+:host .panel {
+  overflow-x: auto;
+  margin-block: 1.25rem;
+  padding: 1.25rem 1.5rem;
+}
+
+section > * + * {
+  margin-top: .75rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+h3 {
+  margin: 1.25rem 0 .5rem;
+  font-size: 1rem;
+}
+
+p {
+  margin: .4rem 0;
+  line-height: 1.5;
+}
+
+ul,
+ol {
+  margin: .5rem 0;
+  padding-left: 1.25rem;
+}
+
+li + li {
+  margin-top: .35rem;
+}
+
+.note {
+  color: var(--hg-muted);
+  font-size: 13px;
+}
+
+.big {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+app-button {
+  display: inline-block;
+  margin-top: .5rem;
+}
+
+.toolbar {
+  margin-top: 1rem;
+
+  app-button {
+    margin-top: 0;
+  }
+}
+
+.atable {
+  margin-top: 1rem;
+
+  caption {
+    padding-bottom: .5rem;
+    text-align: left;
+    color: var(--hg-muted);
+    font-size: 12px;
+  }
+
+  td p {
+    margin: .25rem 0 0;
+    color: var(--hg-muted);
+    font-size: 12.5px;
+  }
+
+  td app-button {
+    margin-top: 0;
+  }
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card {
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: var(--hg-card-2);
+
+  h3 {
+    margin-top: 0;
+  }
+}
+
+app-charts {
+  display: block;
+  max-width: 14rem;
+  margin: 1rem auto 0;
+}
+
+app-pagination {
+  display: block;
+  margin-top: 1rem;
+}

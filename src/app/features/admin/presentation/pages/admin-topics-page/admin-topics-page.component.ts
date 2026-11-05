@@ -1,56 +1,14 @@
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {FormField, form, required} from '@angular/forms/signals';
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {AdminApi, Topic} from '@features/admin/infrastructure/admin.api';
 import {ButtonComponent, BasicInputComponent} from 'springest';
 
 @Component({
   selector: 'hg-admin-topics-page',
   imports: [TranslatePipe, FormField, ButtonComponent, BasicInputComponent],
-  template: `
-    <h2 class="pagettl">{{ 'admin.topics.title' | translate }}</h2>
-    <p class="pagesub">{{ 'admin.topics.subtitle' | translate }}</p>
-
-    <div class="toolbar">
-      <app-basic-input class="search" label="Code" [placeholder]="'admin.topics.codePlaceholder' | translate" [formField]="draftCodeField"/>
-      <app-basic-input class="search" [label]="'admin.topics.name' | translate" [formField]="draftTitleField"/>
-      <app-basic-input class="search icon" [label]="'admin.topics.icon' | translate" placeholder="🍜" [formField]="draftIconField"/>
-      <app-button [label]="'admin.topics.add' | translate" [disabled]="!draftCode() || !draftTitle()" (click)="create()" styleClass="hg-button"></app-button>
-    </div>
-
-    @if (error()) {
-      <div class="errbar">{{ error() }}</div>
-    }
-
-    <div class="panel">
-      <table class="atable">
-        <thead><tr><th></th><th>Code</th><th>{{ 'admin.topics.name' | translate }}</th><th></th></tr></thead>
-        <tbody>
-          @for (topic of topics(); track topic.id) {
-            <tr>
-              <td>{{ topic.icon }}</td>
-              <td>{{ topic.code }}</td>
-              <td>{{ topic.title }}</td>
-              <td>
-                <div class="topic-actions">
-                  <app-button [label]="'admin.topics.rename' | translate" (click)="rename(topic)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
-                  <app-button [label]="'admin.topics.delete' | translate" (click)="remove(topic)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr><td colspan="4" class="empty">{{ 'admin.topics.empty' | translate }}</td></tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  `,
-  styleUrl: '../_admin.scss',
-  styles: `
-    .icon { max-width: 90px; flex: 0; }
-    .cta { padding: 11px 20px; font-size: 14px; }
-    .topic-actions { display: flex; align-items: center; gap: .5rem; }
-  `,
+  templateUrl: './admin-topics-page.component.html',
+  styleUrls: ['../_admin.scss', './admin-topics-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminTopicsPageComponent {
@@ -66,6 +24,7 @@ export class AdminTopicsPageComponent {
   readonly draftTitleField = form(this.draftTitle, path => required(path));
   readonly draftIcon = signal('');
   readonly draftIconField = form(this.draftIcon);
+  readonly createDisabled = computed(() => !this.draftCode() || !this.draftTitle());
 
   constructor() {
     this.load();

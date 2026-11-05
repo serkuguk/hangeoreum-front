@@ -87,7 +87,7 @@ describe('AdminUserMonitoringPageComponent read state', () => {
     fixture.detectChanges();
     text = fixture.nativeElement.textContent;
     expect(text).toContain('Завершён');
-    expect(page.receiptLabel(null, null)).toBe('Завершение не зарегистрировано');
+    expect(page.receiptKey(null, null)).toBe('admin.monitoring.receipt.notRegistered');
   });
 
   it('loads only the summary initially and timestamps only successful responses', () => {

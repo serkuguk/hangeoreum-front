@@ -142,6 +142,11 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export const ADMIN_PAGE_SIZE = 20;
+
+export const WordMediaKind = {Audio: 'audio', Image: 'image'} as const;
+export type WordMediaKind = typeof WordMediaKind[keyof typeof WordMediaKind];
+
 export const MediaUploadKind = {VIDEO: 'video', AUDIO: 'audio', THUMBNAIL: 'thumbnail'} as const;
 export type MediaUploadKind = typeof MediaUploadKind[keyof typeof MediaUploadKind];
 
@@ -150,7 +155,7 @@ export const MonitoringHistoryKind = {
   Reviews: 'reviews', DifficultWords: 'difficult-words',
 } as const;
 export type MonitoringHistoryKind = typeof MonitoringHistoryKind[keyof typeof MonitoringHistoryKind];
-export const MONITORING_PAGE_SIZE = 20;
+export const MONITORING_PAGE_SIZE = ADMIN_PAGE_SIZE;
 export interface MonitoringSession {
   id: string; lessonId: string; courseId: string | null; lessonTitle: string; lessonType: string;
   startedAt: string; lastReceivedAt: string; plannedExercises: number; savedAnswers: number;
@@ -214,7 +219,7 @@ export class AdminApi {
 
   // ---- слова ----
   words(search: string, page: number): Observable<Page<AdminWord>> {
-    let params = new HttpParams().set('page', page).set('size', 20);
+    let params = new HttpParams().set('page', page).set('size', ADMIN_PAGE_SIZE);
     if (search) params = params.set('search', search);
     return this.http.get<Page<AdminWord>>(`${this.base}/words`, {params});
   }
@@ -231,7 +236,7 @@ export class AdminApi {
     return this.http.delete<void>(`${this.base}/words/${id}`);
   }
 
-  uploadWordMedia(id: string, file: File, kind: 'audio' | 'image'): Observable<AdminWord> {
+  uploadWordMedia(id: string, file: File, kind: WordMediaKind): Observable<AdminWord> {
     const form = new FormData();
     form.append('file', file);
     form.append('type', kind);
@@ -429,7 +434,7 @@ export class AdminApi {
   }
 
   users(search: string, page: number): Observable<Page<AdminUser>> {
-    let params = new HttpParams().set('page', page).set('size', 20);
+    let params = new HttpParams().set('page', page).set('size', ADMIN_PAGE_SIZE);
     if (search) params = params.set('search', search);
     return this.http.get<Page<AdminUser>>(`${this.base}/users`, {params});
   }

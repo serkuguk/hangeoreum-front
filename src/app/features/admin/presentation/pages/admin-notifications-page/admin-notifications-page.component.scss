@@ -1,0 +1,20 @@
+.form {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  app-button {
+    align-self: flex-start;
+  }
+}
+
+.okbar {
+  background: rgba(31, 199, 155, .12);
+  border: 1px solid rgba(31, 199, 155, .4);
+  color: var(--hg-jade);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}

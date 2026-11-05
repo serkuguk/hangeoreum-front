@@ -1,0 +1,36 @@
+.user-actions {
+  min-width: 15rem;
+}
+
+.role-select {
+  display: inline-block;
+  min-width: 9rem;
+}
+
+.role-static {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  padding: 0 .8rem;
+  border-radius: var(--hg-radius-control, .75rem);
+  background: var(--hg-card);
+}
+
+.registered-date {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.user-actions__buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .5rem;
+}
+
+:host .panel {
+  overflow-x: auto;
+}

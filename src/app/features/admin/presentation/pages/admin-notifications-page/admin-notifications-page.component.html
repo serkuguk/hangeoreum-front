@@ -1,0 +1,27 @@
+<h2 class="pagettl">{{ 'admin.notifications.title' | translate }}</h2>
+<p class="pagesub">{{ 'admin.notifications.subtitle' | translate }}</p>
+
+@if (sent()) {
+  <div class="okbar">{{ 'admin.notifications.sent' | translate }}</div>
+}
+
+<app-dialog [closeAriaLabel]="'common.closeDialog' | translate"
+            [visible]="dialogOpen()" (visibleChange)="onDialogVisibleChange($event)"
+            [header]="'admin.notifications.title' | translate" [closable]="!sending()" [closeOnEscape]="!sending()">
+  <p>{{ confirmationMessage() }}</p>
+  @if (error()) {
+    <div class="errbar" role="alert">{{ error() }}</div>
+  }
+  <div dialogActions>
+    <app-button [label]="'admin.notifications.send' | translate" [loading]="sending()" [disabled]="sending()"
+                (click)="confirmSend()" styleClass="hg-button"></app-button>
+    <app-button [label]="'common.cancel' | translate" [disabled]="sending()"
+                (click)="closeDialog()" styleClass="hg-button hg-button--ghost"></app-button>
+  </div>
+</app-dialog>
+
+<div class="panel form">
+  <app-basic-input [label]="'admin.notifications.subject' | translate" [formField]="titleField" [placeholder]="'admin.notifications.subjectPlaceholder' | translate"/>
+  <app-textarea [label]="'admin.notifications.body' | translate" [formField]="bodyField" [placeholder]="'admin.notifications.bodyPlaceholder' | translate"/>
+  <app-button [label]="'admin.notifications.send' | translate" [loading]="sending()" [disabled]="sendDisabled()" (click)="send()" styleClass="hg-button"></app-button>
+</div>

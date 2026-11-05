@@ -1,0 +1,15 @@
+<h2 class="pagettl">{{ 'admin.metrics.title' | translate }}</h2>
+<p class="pagesub">{{ 'admin.metrics.subtitle' | translate }}</p>
+@if (error()) {
+  <div class="errbar">{{ 'admin.metrics.loadError' | translate }}</div>
+} @else if (metrics(); as m) {
+  <div class="grid">
+    <div class="panel stat"><b>{{ m.totalUsers }}</b><span>{{ 'admin.metrics.users' | translate }}</span></div>
+    <div class="panel stat"><b class="j">{{ m.dau }}</b><span>{{ 'admin.metrics.dau' | translate }}</span></div>
+    <div class="panel stat"><b class="bl">{{ m.lessonsCompletedToday }}</b><span>{{ 'admin.metrics.lessonsToday' | translate }}</span></div>
+    <div class="panel stat"><b class="y">{{ m.activeSubscriptions }}</b><span>{{ 'admin.metrics.pro' | translate }}</span></div>
+    <div class="panel stat"><b class="r">{{ m.conversion | percent: '1.1-1' }}</b><span>{{ 'admin.metrics.conversion' | translate }}</span></div>
+  </div>
+} @else {
+  <div class="empty">{{ 'admin.metrics.loading' | translate }}</div>
+}

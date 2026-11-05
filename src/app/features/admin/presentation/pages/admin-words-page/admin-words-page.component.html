@@ -1,0 +1,85 @@
+<h2 class="pagettl">{{ 'admin.words.title' | translate }}</h2>
+<p class="pagesub">{{ 'admin.words.count' | translate: {count: total()} }}</p>
+
+<div class="toolbar">
+  <app-basic-input class="search" type="search" [label]="'admin.words.search' | translate"
+            [placeholder]="'admin.words.searchPlaceholder' | translate" [value]="search()"
+            (valueChange)="onSearch($event)" />
+  <app-button [label]="'admin.words.create' | translate" (click)="openCreate()" styleClass="hg-button"><span aria-hidden="true">+</span></app-button>
+</div>
+
+@if (error()) {
+  <div class="errbar">{{ error() }}</div>
+}
+
+<div class="panel">
+  <div class="words-table-scroll">
+  <table class="atable admin-words-table">
+    <thead>
+      <tr><th>{{ 'admin.words.hangul' | translate }}</th><th>{{ 'admin.words.romanization' | translate }}</th><th>{{ 'admin.words.translation' | translate }}</th><th>{{ 'admin.words.media' | translate }}</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (word of words(); track word.id) {
+        <tr>
+          <td class="kr">{{ word.hangul }}</td>
+          <td>{{ word.romanization }}</td>
+          <td>{{ word.translation }}</td>
+          <td>
+            <div class="word-media">
+              <img class="word-thumbnail" [src]="imageUrl(word.imageUrl)" (error)="onImageError($event)"
+                   alt="" width="48" height="48" loading="lazy" decoding="async" />
+            <app-file-picker class="audio-picker" #picker1 label="🔊" [ariaLabel]="'admin.words.uploadAudio' | translate"
+                            accept="audio/*" (changed)="onAudioPicked(word, $event); picker1.value.set([])" />
+            </div>
+          </td>
+          <td>
+            <div class="word-actions">
+              <app-button [label]="'admin.words.edit' | translate" (click)="openEdit(word)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
+              <app-button [label]="'admin.words.delete' | translate" (click)="remove(word)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="empty">{{ 'admin.words.empty' | translate }}</td></tr>
+      }
+    </tbody>
+  </table>
+  </div>
+  @if (totalPages() > 1) {
+    <app-pagination [rows]="pageSize" [first]="page() * pageSize" [totalRecords]="total()"
+                   [attr.aria-label]="'admin.words.pagination' | translate" (pageChange)="goToPage($event.page ?? 0)" />
+  }
+</div>
+
+@if (dialogOpen()) {
+<app-dialog [closeAriaLabel]="'admin.words.close' | translate" [visible]="true" (visibleChange)="onDialogVisibleChange($event)"
+           [closable]="!saving()" [closeOnEscape]="!saving()" [dismissableMask]="false"
+           [header]="dialogTitleKey() | translate">
+  <div class="word-image-field">
+    <img class="word-preview" [src]="previewImage()" (error)="onImageError($event)"
+         alt="" width="96" height="96" decoding="async" />
+    <div>
+      <app-file-picker #picker2 [label]="'admin.words.chooseImage' | translate" [ariaLabel]="'admin.words.image' | translate"
+                      accept="image/png,image/jpeg,image/webp" ariaDescribedBy="image-picker-hint"
+                      [disabled]="saving()" (changed)="onImagePicked($event); picker2.value.set([])" />
+      <p id="image-picker-hint">{{ 'admin.words.imageHint' | translate }}</p>
+      @if (imageError()) { <p class="image-error" role="alert">{{ imageError() }}</p> }
+    </div>
+  </div>
+  @if (saveError()) { <div class="errbar" role="alert">{{ saveError() }}</div> }
+  <app-basic-input [label]="'admin.words.hangul' | translate" [formField]="fields.hangul" lang="ko" />
+  <app-basic-input [label]="'admin.words.romanizationLabel' | translate" [placeholder]="'admin.words.romanizationPlaceholder' | translate" [formField]="fields.romanization" />
+  <app-basic-input [label]="'admin.words.translation' | translate" [formField]="fields.translation" />
+  <app-basic-input [label]="'admin.words.partOfSpeech' | translate" [formField]="fields.partOfSpeech" [placeholder]="'admin.words.partOfSpeechPlaceholder' | translate" />
+  <app-basic-select [ariaLabel]="'admin.words.topic' | translate" [placeholder]="'admin.words.topic' | translate" [items]="topicOptions()" [formField]="fields.topicId" optionLabel="label" optionValue="value" />
+  <app-basic-input [label]="'admin.words.exampleKo' | translate" [formField]="fields.exampleKo" lang="ko" />
+  <app-basic-input [label]="'admin.words.exampleTranslation' | translate" [formField]="fields.exampleTranslation" />
+  <app-basic-input [label]="'admin.words.grammarNote' | translate" [formField]="fields.grammarNote" />
+  <div dialogActions class="btns">
+    <app-button [label]="saveLabelKey() | translate"
+               [disabled]="!canSave()"
+               (click)="save()" styleClass="hg-button"></app-button>
+    <app-button [label]="'admin.words.cancel' | translate" [disabled]="saving()" (click)="closeDialog()" styleClass="hg-button hg-button--ghost"></app-button>
+  </div>
+</app-dialog>
+}
