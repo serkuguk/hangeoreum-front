@@ -41,7 +41,7 @@ import {TranslatePipe} from '@ngx-translate/core';
     .gapcard { padding: var(--hg-space-6) var(--hg-space-7); }
 
     .gapline {
-      font-family: var(--hg-font-display);
+      font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700;
       font-size: 36px;
       line-height: 1.5;
       text-align: center;
@@ -79,7 +79,7 @@ import {TranslatePipe} from '@ngx-translate/core';
     .gapopts { display: flex; gap: var(--hg-space-3); justify-content: center; flex-wrap: wrap; }
 
     button.hg-native-button.hg-native-button.hg-native-button.gapopt {
-      font-family: var(--hg-font-display);
+      font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700;
       font-size: 26px;
       min-width: 84px;
       min-height: var(--hg-touch-min);

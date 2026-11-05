@@ -959,6 +959,8 @@
       "loading": "Готовим слова…",
       "combo": "🔥 Комбо ×{{combo}} · {{score}} очков",
       "addSyllable": "Добавить слог {{syllable}}",
+      "returnSyllable": "Вернуть слог {{syllable}}",
+      "check": "Проверить",
       "roundComplete": "Раунд завершён",
       "anotherRound": "Ещё раунд",
       "koreanEyebrow": "놀이",

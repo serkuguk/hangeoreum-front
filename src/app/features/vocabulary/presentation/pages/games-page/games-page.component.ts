@@ -1,15 +1,16 @@
 import {ButtonComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, effect, inject} from '@angular/core';
+import {CdkDragDrop, DragDropModule} from '@angular/cdk/drag-drop';
 import {RouterLink} from '@angular/router';
 import {KoreanTtsService} from '@core/services/korean-tts.service';
-import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
+import {HgAudioButtonComponent, HgSessionResultCardComponent, HgSessionStat, MascotComponent} from '@shared/components/hg';
 import {FinishResult, ReviewMode} from '@features/vocabulary/domain/repositories/vocabulary.repository';
 import {AnswerResult, GamePhase, GameMode, GamesFacade, MatchCell, MatchSide} from '@features/vocabulary/application/facades/games.facade';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'hg-games-page',
-  imports: [RouterLink, HgAudioButtonComponent, ButtonComponent, HgSessionResultCardComponent, TranslatePipe],
+  imports: [RouterLink, DragDropModule, HgAudioButtonComponent, MascotComponent, ButtonComponent, HgSessionResultCardComponent, TranslatePipe],
   templateUrl: './games-page.component.html',
   styleUrl: './games-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +22,7 @@ export class GamesPageComponent {
   private tts = inject(KoreanTtsService);
   private translate = inject(TranslateService);
   private lastAutoplayWordId: string | null = null;
+  private dragging = false;
 
   gameAria(game: {title: string; hint: string}): Record<string, string> {
     return {'aria-label': `${game.title}: ${game.hint}`};
@@ -40,6 +42,24 @@ export class GamesPageComponent {
   readonly isTimeLow = computed(() => this.facade.timeLeft() < 15);
   readonly isAnswerOk = computed(() => this.facade.lastAnswer() === AnswerResult.OK);
   readonly isAnswerBad = computed(() => this.facade.lastAnswer() === AnswerResult.BAD);
+  readonly isAnswered = computed(() => this.facade.lastAnswer() !== null);
+
+  onDragStarted(): void {
+    this.dragging = true;
+  }
+
+  onDragEnded(): void {
+    // the click that closes the drag gesture fires right after dragEnded; clear the flag afterwards
+    setTimeout(() => (this.dragging = false));
+  }
+
+  onDrop(event: CdkDragDrop<string[]>): void {
+    this.facade.moveSyllable(event.previousIndex, event.currentIndex);
+  }
+
+  returnSyllable(index: number): void {
+    if (!this.dragging) this.facade.returnSyllable(index);
+  }
 
   cellClass(cell: MatchCell): string {
     const f = this.facade;

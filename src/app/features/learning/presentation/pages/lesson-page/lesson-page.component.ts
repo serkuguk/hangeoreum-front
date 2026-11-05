@@ -1,5 +1,5 @@
-import {ButtonComponent} from 'springest';
-import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input} from '@angular/core';
+import {ButtonComponent, DialogComponent} from 'springest';
+import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
 import {LessonFacade} from '@features/learning/application/facades/lesson.facade';
@@ -23,6 +23,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 @Component({
   selector: 'hg-lesson-page',
   imports: [
+    DialogComponent,
     ExerciseChoiceComponent,
     ExerciseListenComponent,
     ExerciseWordOrderComponent,
@@ -63,10 +64,18 @@ export class LessonPageComponent implements OnInit {
     this.facade.start(this.id());
   }
 
+  readonly exitConfirmOpen = signal(false);
+
   exit(): void {
-    if (this.facade.inProgress && !confirm(this.translate.instant('learning.lesson.exitConfirmation'))) {
+    if (this.facade.inProgress) {
+      this.exitConfirmOpen.set(true);
       return;
     }
+    this.router.navigate(['/learn']);
+  }
+
+  confirmExit(): void {
+    this.exitConfirmOpen.set(false);
     this.router.navigate(['/learn']);
   }
 

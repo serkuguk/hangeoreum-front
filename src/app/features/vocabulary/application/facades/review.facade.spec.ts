@@ -61,8 +61,9 @@ describe('ReviewFacade', () => {
 
     facade.retryFinish();
 
-    expect(repository.submitAnswers).toHaveBeenCalledTimes(2);
-    expect(repository.submitAnswers).toHaveBeenLastCalledWith('review-1', [{wordId: word.word.id, quality: 4}]);
+    expect(repository.submitAnswers).toHaveBeenCalledTimes(1);
+    expect(repository.submitAnswers).toHaveBeenCalledWith('review-1', [{wordId: word.word.id, quality: 4}]);
+    expect(repository.finishSession).toHaveBeenCalledTimes(2);
     expect(facade.result()).toEqual({total: 1, correct: 1, xp: 5, streak: 2});
     expect(facade.saveError()).toBeNull();
   });

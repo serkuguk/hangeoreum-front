@@ -46,7 +46,7 @@ interface MatchCell {
       font-size: var(--hg-fs-md);
       color: var(--hg-text);
 
-      &.kr { font-family: var(--hg-font-display); font-size: 26px; }
+      &.kr { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700; font-size: 26px; }
       &:hover:not(:disabled) { border-color: var(--hg-route); }
       // matched — permanently correct
       &.hit { border-color: var(--hg-success); background: var(--hg-success-soft); opacity: .55; cursor: default; }

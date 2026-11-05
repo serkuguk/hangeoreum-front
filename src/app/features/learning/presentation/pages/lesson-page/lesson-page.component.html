@@ -142,4 +142,17 @@
       {{ "learning.lesson.saving" | translate }}
     </div>
   }
+
+  <app-dialog
+    [closeAriaLabel]="'common.closeDialog' | translate"
+    [header]="'learning.lesson.exit' | translate"
+    [visible]="exitConfirmOpen()"
+    (visibleChange)="exitConfirmOpen.set($event)"
+  >
+    <p>{{ "learning.lesson.exitConfirmation" | translate }}</p>
+    <div dialogActions>
+      <app-button styleClass="hg-button hg-button--danger" [label]="'common.exit' | translate" (click)="confirmExit()" />
+      <app-button styleClass="hg-button hg-button--ghost" [label]="'common.cancel' | translate" (click)="exitConfirmOpen.set(false)" />
+    </div>
+  </app-dialog>
 </div>
