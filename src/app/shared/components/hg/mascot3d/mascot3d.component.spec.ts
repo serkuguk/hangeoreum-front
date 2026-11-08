@@ -77,13 +77,18 @@ describe('Mascot3dComponent', () => {
     fixture.componentInstance.rotateTo(0.5);
     await show();
     expect((fixture.componentInstance as any).createScene).toHaveBeenCalledTimes(1);
-    expect(scene.play).toHaveBeenCalledWith('Wave');
+    expect(scene.play).toHaveBeenCalledWith('Wave', undefined);
     expect(scene.rotateTo).toHaveBeenCalledWith(0.5);
     expect(fixture.nativeElement.querySelector('img')).toBeNull();
     for (const animation of Object.keys(MASCOT_CLIPS) as (keyof typeof MASCOT_CLIPS)[]) {
       fixture.componentInstance.play(animation);
-      expect(scene.play).toHaveBeenLastCalledWith(MASCOT_CLIPS[animation]);
+      expect((scene.play as jest.Mock).mock.lastCall?.[0]).toBe(MASCOT_CLIPS[animation]);
     }
+    // Эмоции — замершие позы, а не цикл
+    fixture.componentInstance.play('sad');
+    expect(scene.play).toHaveBeenLastCalledWith('Sad', 23 / 47);
+    fixture.componentInstance.play('celebrate');
+    expect(scene.play).toHaveBeenLastCalledWith('Celebrate', undefined);
     (scene.play as jest.Mock).mockReturnValue(false);
     expect(fixture.componentInstance.play('sad')).toBe(false);
     expect(fixture.componentInstance.loaded()).toBe(true);

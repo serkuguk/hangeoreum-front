@@ -66,11 +66,11 @@ describe('Mascot3d scene lifecycle', () => {
     scene.dispose();
   });
 
-  it('plays Sad once and holds the drooped mid-pose instead of looping back (no "nodding")', async () => {
+  it('with holdAt plays once and holds the mid-pose instead of looping back (no "nodding")', async () => {
     const droop = new Three.NumberKeyframeTrack('.rotation[x]', [0, 1, 2], [0, 1, 0]);
     loadAsync.mockResolvedValue({scene: model, animations: [new Three.AnimationClip('Sad', 2, [droop])]});
     const scene = await createMascotScene(document.createElement('canvas'), '/loopy.glb');
-    scene.play('Sad');
+    scene.play('Sad', 0.5);
     expect(model.rotation.x).toBeCloseTo(1); // reduced motion: static frame is already the drooped pose
     scene.setMotion(true);
     for (let time = 1000; time <= 4000; time += 100) frames.get(frameId)!(time);

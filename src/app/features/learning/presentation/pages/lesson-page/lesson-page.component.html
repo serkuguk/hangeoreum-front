@@ -67,7 +67,7 @@
     </div>
 
     <!-- Один экземпляр на все упражнения: ветка не пересоздаётся при смене упражнения -->
-    <div class="loopy loopy--exercise">
+    <div class="loopy loopy--exercise" [class.loopy--above]="!loopyBesideTask()">
       <hg-mascot3d [size]="110" [animation]="loopyAnimation()" />
     </div>
 
@@ -99,6 +99,7 @@
       @case ("MATCH_PAIRS") {
         <hg-exercise-match
           [payload]="asMatch(exercise.payload)"
+          (pairChecked)="reactToPair($event)"
           (result)="facade.answered($event)"
         />
       }

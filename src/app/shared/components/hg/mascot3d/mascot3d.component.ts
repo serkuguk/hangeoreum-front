@@ -7,12 +7,25 @@ import type {MascotScene} from './mascot3d.scene';
 
 export const MASCOT_CLIPS = {
   idle: 'Idle', wave: 'Wave', walk: 'Walk', point: 'Point', celebrate: 'Celebrate', sad: 'Sad',
+  think: 'Wave', happy: 'Celebrate',
 } as const;
 export type MascotAnimation = keyof typeof MASCOT_CLIPS;
+
+/**
+ * Эмоции-позы: клип играется один раз и замирает на кадре (build_loopy.py, 48 кадров,
+ * кадр f = (f-1)/47): think = Wave 24 — лапка у лица (в Point рука уходит в сторону),
+ * happy = Celebrate 24 — лапки у щёк, sad = Sad 24 — голова опущена.
+ * Sad в цикле читался бы как кивок «да».
+ */
+const frame = (f: number): number => (f - 1) / 47;
+const MASCOT_HOLDS: Partial<Record<MascotAnimation, number>> = {
+  think: frame(24), happy: frame(24), sad: frame(24),
+};
 
 /** 2D-кадр с той же эмоцией, пока грузится 3D (или если WebGL недоступен). */
 const MASCOT_FALLBACKS: Record<MascotAnimation, string> = {
   idle: 'neutral', wave: 'hello', walk: 'neutral', point: 'pointing', celebrate: 'happy', sad: 'sad',
+  think: 'thinking', happy: 'happy',
 };
 
 @Component({
@@ -100,7 +113,7 @@ export class Mascot3dComponent implements OnDestroy {
   /** Returns false when the loaded model has no matching clip. Calls before load are queued. */
   play(animation: MascotAnimation): boolean {
     this.clip = animation;
-    return this.scene?.play(MASCOT_CLIPS[animation]) ?? false;
+    return this.scene?.play(MASCOT_CLIPS[animation], MASCOT_HOLDS[animation]) ?? false;
   }
 
   rotateTo(radians: number): void {
@@ -201,7 +214,7 @@ export class Mascot3dComponent implements OnDestroy {
       this.scene = scene;
       scene.resize(this.displaySize());
       scene.rotateTo(this.rotation);
-      scene.play(MASCOT_CLIPS[this.clip]);
+      scene.play(MASCOT_CLIPS[this.clip], MASCOT_HOLDS[this.clip]);
       scene.setMotion(this.visible() && !this.reducedMotion());
       this.loaded.set(true);
     } catch {

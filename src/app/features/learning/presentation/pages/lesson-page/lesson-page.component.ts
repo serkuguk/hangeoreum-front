@@ -64,6 +64,19 @@ export class LessonPageComponent implements OnInit {
   readonly inExercise = computed(() =>
     !this.facade.loading() && !this.facade.error() && !this.facade.result() && !!this.facade.current());
 
+  /** В «сопоставь пары» сетка на всю ширину — Лупи рядом не ставим, иначе карточки сужаются. */
+  readonly loopyBesideTask = computed(() => this.facade.current()?.kind !== 'MATCH_PAIRS');
+
+  /** Короткая реакция на пару в «сопоставь пары» — итог там приходит только в конце. */
+  private readonly pairReaction = signal<MascotAnimation | null>(null);
+  private pairReactionTimer?: ReturnType<typeof setTimeout>;
+
+  reactToPair(matched: boolean): void {
+    this.pairReaction.set(matched ? 'happy' : 'sad');
+    clearTimeout(this.pairReactionTimer);
+    this.pairReactionTimer = setTimeout(() => this.pairReaction.set(null), 1200);
+  }
+
   /** Лупи реагирует на состояние урока: здоровается, болеет за ответ, празднует финал. */
   readonly loopyAnimation = computed<MascotAnimation>(() => {
     const facade = this.facade;
@@ -72,8 +85,9 @@ export class LessonPageComponent implements OnInit {
     if (facade.result()) return 'celebrate';
     if (this.inExercise()) {
       const feedback = facade.feedback();
-      if (!feedback) return 'idle';
-      return feedback.correct ? 'celebrate' : 'sad';
+      // Думает, пока пользователь не ответил; радуется верному, грустит от ошибки.
+      if (!feedback) return this.pairReaction() ?? 'think';
+      return feedback.correct ? 'happy' : 'sad';
     }
     if (facade.saveError()) return 'sad';
     return facade.finishing() ? 'walk' : 'idle';

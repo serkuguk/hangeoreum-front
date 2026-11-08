@@ -1,18 +1,13 @@
 import type {AnimationAction, Material, Mesh, SkinnedMesh, Texture} from 'three';
 
 export interface MascotScene {
-  play(clip: string): boolean;
+  /** `holdAt` (0..1) — сыграть клип один раз и замереть на этой доле длительности; без него — цикл. */
+  play(clip: string, holdAt?: number): boolean;
   rotateTo(radians: number): void;
   resize(size: number): void;
   setMotion(enabled: boolean): void;
   dispose(): void;
 }
-
-/**
- * Клипы-реакции: играются один раз и замирают на этой доле длительности.
- * Sad опускает голову и поднимает обратно — в цикле это читается как кивок «да».
- */
-const HOLD_AT: Readonly<Record<string, number>> = {Sad: 0.5};
 
 /** Loaded only once the component is visible; no Three.js code enters the shared UI barrel. */
 export async function createMascotScene(
@@ -101,17 +96,20 @@ export async function createMascotScene(
     };
     render();
     return {
-      play(name) {
+      play(name, holdAt) {
         const clip = THREE.AnimationClip.findByName(gltf.animations, name);
         if (!clip || disposed) return false;
         const next = mixer.clipAction(clip);
-        if (next === current) return true;
-        next.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();
-        holdTime = name in HOLD_AT ? clip.duration * HOLD_AT[name] : undefined;
+        const nextHold = holdAt === undefined ? undefined : clip.duration * holdAt;
+        if (next === current && nextHold === holdTime) return true;
+        holdTime = nextHold;
+        // Эмоция-поза должна читаться сразу: доходим до удерживаемого кадра за ~0.4 с.
+        const speed = holdTime === undefined ? 1 : Math.max(1, holdTime / 0.4);
+        next.reset().setEffectiveTimeScale(speed).setEffectiveWeight(1).play();
         // Без анимации (reduced motion / вне экрана) сразу показываем удерживаемую позу.
         if (holdTime !== undefined && !motion) next.time = holdTime;
-        if (current && motion) current.crossFadeTo(next, 0.2, false);
-        else current?.stop();
+        if (current && current !== next && motion) current.crossFadeTo(next, 0.2, false);
+        else if (current !== next) current?.stop();
         current = next;
         mixer.update(0);
         render();
