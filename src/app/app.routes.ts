@@ -2,6 +2,7 @@ import {Routes} from '@angular/router';
 import {adminGuard, authGuard, redirectLoggedInGuard} from '@core/auth/auth.guard';
 import {MainLayoutComponent} from './layouts/main-layout/main-layout.component';
 import {identityRoutes} from '@features/identity/routes';
+import {LegalDoc} from '@features/legal/legal-doc';
 import {settingsPendingChangesGuard} from '@features/identity/presentation/pages/settings-page/settings-pending-changes.guard';
 
 export const routes: Routes = [
@@ -12,6 +13,17 @@ export const routes: Routes = [
     loadComponent: () => import('@features/landing/landing-page.component').then(c => c.LandingPageComponent),
   },
   ...identityRoutes,
+  // public pages must come before the guarded '' layout: its authGuard redirects to login instead of falling through
+  {
+    path: 'privacy',
+    data: {doc: LegalDoc.Privacy},
+    loadComponent: () => import('@features/legal/legal-page.component').then(c => c.LegalPageComponent),
+  },
+  {
+    path: 'terms',
+    data: {doc: LegalDoc.Terms},
+    loadComponent: () => import('@features/legal/legal-page.component').then(c => c.LegalPageComponent),
+  },
   {
     path: '',
     component: MainLayoutComponent,

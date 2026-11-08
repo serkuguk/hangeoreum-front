@@ -417,6 +417,22 @@
   .hg-card { padding: 22px 20px 28px; }
 }
 
+// Phone: next to the side rail the hero is ~220px wide, «С возвращением,» at 30px ran past the card edge.
+@media (max-width: 480px) {
+  .hg-hero {
+    padding: 24px 18px;
+  }
+
+  .hg-hero__copy {
+    min-width: 0;
+
+    h1 {
+      font-size: 24px;
+      overflow-wrap: break-word;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :host * { animation: none !important; transition: none !important; }
 }

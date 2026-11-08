@@ -25,7 +25,8 @@ pipeline {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
-                    corepack prepare pnpm@10.12.3 --activate
+                    corepack enable
+                    corepack install
                     pnpm install --frozen-lockfile
                 '''
             }

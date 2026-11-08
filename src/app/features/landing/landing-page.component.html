@@ -76,6 +76,9 @@
 
   <div class="land-foot">
     <span>© {{ year }} {{ "landing.brandName" | translate }}</span
-    ><span>{{ "landing.footerLinks" | translate }}</span>
+    ><span class="land-foot__links">
+      <a routerLink="/terms">{{ "landing.footer.terms" | translate }}</a>
+      <a routerLink="/privacy">{{ "landing.footer.privacy" | translate }}</a>
+    </span>
   </div>
 </div>

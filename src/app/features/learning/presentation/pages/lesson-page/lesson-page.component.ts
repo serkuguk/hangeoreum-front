@@ -64,6 +64,12 @@ export class LessonPageComponent implements OnInit {
   readonly inExercise = computed(() =>
     !this.facade.loading() && !this.facade.error() && !this.facade.result() && !!this.facade.current());
 
+  /** Server refused the lesson start for a paywall reason → explain why instead of the exercise. */
+  readonly paywallMessageKey = computed(() => {
+    const reason = this.facade.blockedBy();
+    return reason ? `learning.lesson.paywallBlocked.${reason}` : null;
+  });
+
   /** В «сопоставь пары» сетка на всю ширину — Лупи рядом не ставим, иначе карточки сужаются. */
   readonly loopyBesideTask = computed(() => this.facade.current()?.kind !== 'MATCH_PAIRS');
 

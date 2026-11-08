@@ -1,16 +1,14 @@
 import {ChangeDetectionStrategy, Component, computed, input, model} from '@angular/core';
 import {FormField, form} from '@angular/forms/signals';
 import {TranslatePipe} from '@ngx-translate/core';
-import {BasicInputComponent, ButtonComponent} from 'springest';
-import {ExerciseKind} from '@features/learning/domain/entities/exercise.entity';
+import {BasicInputComponent, ButtonComponent, CheckboxComponent} from 'springest';
+import {ExerciseKind} from '@features/learning/public-api';
 import {ExerciseDraft, OPTION_KINDS, emptyOption, emptyPair} from './exercise-payload.mapper';
-
-let nextId = 0;
 
 /** Форма payload упражнения по его kind — вместо ручного JSON. */
 @Component({
   selector: 'hg-exercise-editor',
-  imports: [FormField, TranslatePipe, BasicInputComponent, ButtonComponent],
+  imports: [FormField, TranslatePipe, BasicInputComponent, ButtonComponent, CheckboxComponent],
   templateUrl: './exercise-editor.component.html',
   styleUrl: './exercise-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,7 +18,6 @@ export class ExerciseEditorComponent {
   readonly draft = model.required<ExerciseDraft>();
 
   readonly f = form(this.draft);
-  readonly radioName = `hg-correct-${nextId++}`;
 
   readonly hasOptions = computed(() =>
     OPTION_KINDS.includes(this.kind()),

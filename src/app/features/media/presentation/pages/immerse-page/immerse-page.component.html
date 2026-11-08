@@ -4,7 +4,7 @@
     <h1 class="pagettl">{{ facade.selectedUnit()?.title ?? ('media.practiceTitle' | translate) }}</h1>
     @if (facade.selectedUnit()?.description; as goal) { <p class="pagesub">{{ goal }}</p> }
     @if (facade.units().length) {
-      <app-basic-select [ariaLabel]="'media.unitLabel' | translate" [items]="facade.units()"
+      <app-basic-select [ariaLabel]="'media.unitLabel' | translate" [placeholder]="'media.unitLabel' | translate" [items]="facade.units()"
         optionLabel="title" optionValue="id" [value]="facade.selectedUnit()?.id ?? null" (valueChange)="selectUnit($event)" />
     }
   </header>

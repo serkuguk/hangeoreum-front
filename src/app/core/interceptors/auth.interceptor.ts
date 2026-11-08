@@ -4,7 +4,7 @@ import {Router} from '@angular/router';
 import {catchError, switchMap, throwError} from 'rxjs';
 import {AuthTokenStorageService} from '../services/auth-token-storage.service';
 import {AuthService} from '@core/auth/auth.service';
-import {PaywallService} from '@core/services/paywall.service';
+import {PaywallService, paywallReasonOf} from '@core/services/paywall.service';
 
 const isAuthEndpoint = (url: string): boolean => url.includes('/auth/');
 
@@ -34,9 +34,9 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       return throwError(() => err);
     }),
     catchError((err: HttpErrorResponse) => {
-      const code = (err.error as { code?: string } | null)?.code;
-      if (err.status === 403 && (code === 'PRO_REQUIRED' || code === 'LIMIT_REACHED')) {
-        paywall.open(code);
+      const reason = paywallReasonOf(err);
+      if (reason) {
+        paywall.open(reason);
       }
 
       return throwError(() => err);

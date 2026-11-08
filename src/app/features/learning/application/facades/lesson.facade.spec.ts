@@ -76,6 +76,21 @@ describe('LessonFacade', () => {
     jest.useRealTimers();
   });
 
+  it('stops the lesson when the server refuses the session for the daily free limit', () => {
+    repository.startSession.mockReturnValue(throwError(() => ({status: 403, error: {code: 'LIMIT_REACHED'}})));
+    facade.start('lesson-1');
+    expect(facade.blockedBy()).toBe('LIMIT_REACHED');
+    expect(facade.phase()).toBe('load-error');
+    expect(facade.current()).toBeNull();
+  });
+
+  it('keeps the lesson going when session tracking fails for other reasons', () => {
+    repository.startSession.mockReturnValue(throwError(() => ({status: 400, error: {code: 'VALIDATION'}})));
+    facade.start('lesson-1');
+    expect(facade.blockedBy()).toBeNull();
+    expect(facade.phase()).toBe('active');
+  });
+
   it('сохраняет результат только после успешного ответа сервера', () => {
     finishLesson();
 

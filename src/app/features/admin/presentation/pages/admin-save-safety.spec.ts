@@ -151,7 +151,7 @@ describe('admin save safety', () => {
     jest.runOnlyPendingTimers();
     fixture.detectChanges();
     const component = fixture.componentInstance;
-    expect(fixture.nativeElement.querySelectorAll('hg-exercise-editor input[type=radio]').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('hg-exercise-editor .grid__correct app-checkbox').length).toBe(2);
 
     component.setDraft(exercise.id, {...component.drafts()[exercise.id], correctIndex: 1});
     component.saveExercise(exercise);

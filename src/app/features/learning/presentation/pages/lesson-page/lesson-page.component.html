@@ -9,6 +9,15 @@
     <div class="panel loadpanel">
       {{ "learning.lesson.loading" | translate }}
     </div>
+  } @else if (paywallMessageKey(); as messageKey) {
+    <div class="panel loadpanel">
+      <p>{{ messageKey | translate }}</p>
+      <app-button
+        styleClass="hg-button hg-button--ghost"
+        [label]="'learning.lesson.backToMap' | translate"
+        (click)="exit()"
+      />
+    </div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
       <p>{{ error }}</p>

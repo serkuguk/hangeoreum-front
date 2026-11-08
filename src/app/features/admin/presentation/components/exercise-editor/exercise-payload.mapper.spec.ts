@@ -1,4 +1,4 @@
-import {ExerciseKind} from '@features/learning/domain/entities/exercise.entity';
+import {ExerciseKind} from '@features/learning/public-api';
 import {emptyDraft, toDraft, toPayload, validateDraft} from './exercise-payload.mapper';
 
 const samples: Record<ExerciseKind, unknown> = {

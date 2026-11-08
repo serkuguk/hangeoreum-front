@@ -33,7 +33,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   ExerciseKind,
   TipExample,
-} from '@features/learning/domain/entities/exercise.entity';
+} from '@features/learning/public-api';
 import { ExerciseEditorComponent } from '../../components/exercise-editor/exercise-editor.component';
 import {
   ExerciseDraft,

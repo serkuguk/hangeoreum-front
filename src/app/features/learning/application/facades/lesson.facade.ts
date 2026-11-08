@@ -10,6 +10,7 @@ import {
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {LearnMapFacade} from './learn-map.facade';
 import {LessonTracking} from '../lesson-tracking';
+import {PaywallReason, paywallReasonOf} from '@core/services/paywall.service';
 
 import {Feedback} from '@features/learning/domain/services/exercise-grading';
 
@@ -26,7 +27,7 @@ export class LessonFacade {
   private readonly repository = inject(LEARNING_REPOSITORY);
   private readonly map = inject(LearnMapFacade);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly tracking = new LessonTracking(this.repository);
+  private readonly tracking = new LessonTracking(this.repository, error => this.onSessionRejected(error));
   private readonly resetRequests = new Subject<void>();
   private attemptId: string | null = null;
   private sequence = 0;
@@ -48,6 +49,8 @@ export class LessonFacade {
   readonly result = signal<CompleteResult | null>(null);
   readonly finishing = signal(false);
   readonly saveError = signal(false);
+  /** Server refused to start the lesson for a paywall reason (daily free limit / Pro only); the paywall dialog is already open. */
+  readonly blockedBy = signal<PaywallReason | null>(null);
 
   readonly progressSegments = computed(() =>
     Array.from({length: this.total()}, (_, i) => i < this.solved()));
@@ -153,13 +156,14 @@ export class LessonFacade {
     }
 
     this.attemptId = crypto.randomUUID();
-    this.tracking.start(lesson.id, this.attemptId);
     this.session = new LessonSession(lesson.exercises);
     this.total.set(this.session.total);
     this.solved.set(0);
     this.current.set(this.session.current);
     this.loading.set(false);
     this.phase.set('active');
+    // after 'active': a paywall refusal of the session must be able to stop the lesson it belongs to
+    this.tracking.start(lesson.id, this.attemptId);
   }
 
   private finish(): void {
@@ -213,6 +217,18 @@ export class LessonFacade {
     this.error.set(null);
     this.saveError.set(false);
     this.finishing.set(false);
+    this.blockedBy.set(null);
+  }
+
+  /** Stop before the learner does exercises that could never be saved; other tracking failures stay best-effort. */
+  private onSessionRejected(error: unknown): void {
+    const reason = paywallReasonOf(error);
+    if (!reason || this.phase() !== 'active') return;
+    this.session = null;
+    this.current.set(null);
+    this.feedback.set(null);
+    this.blockedBy.set(reason);
+    this.phase.set('load-error');
   }
 
   private pollCompletion(attemptId: string): void {

@@ -84,7 +84,7 @@
 <section class="panel panel--select">
   <div class="eyebrow">{{ 'admin.media.clips' | translate }}</div>
   <p>{{ 'admin.media.publishRequirements' | translate }}</p>
-  <app-basic-select [ariaLabel]="'admin.media.unitFilter' | translate" [items]="filterOptions()"
+  <app-basic-select [ariaLabel]="'admin.media.unitFilter' | translate" [placeholder]="'admin.media.unitFilter' | translate" [items]="filterOptions()"
                     [value]="selectedUnitId()" (valueChange)="filterUnit($event)" optionLabel="label" optionValue="value" />
   @for (clip of filteredClips(); track clip.id) {
     <div class="cliprow">

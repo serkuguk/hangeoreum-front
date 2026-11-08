@@ -8,7 +8,7 @@ import {
   TypeWordPayload,
   WordOrderPayload,
   ChoicePayload,
-} from '@features/learning/domain/entities/exercise.entity';
+} from '@features/learning/public-api';
 
 export interface DraftOption {
   text: string;

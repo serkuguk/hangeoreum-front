@@ -151,6 +151,19 @@
   gap: 10px;
 }
 
+.land-foot__links {
+  display: flex;
+  gap: 16px;
+
+  a {
+    color: inherit;
+  }
+
+  a:hover {
+    color: var(--hg-text);
+  }
+}
+
 @media (max-width: 880px) {
   .feat3, .plans { grid-template-columns: 1fr; }
 }

@@ -8,7 +8,11 @@ export class LessonTracking {
   private active = false;
   private enabled = false;
 
-  constructor(private readonly repository: LearningRepository) {}
+  /** onStartRejected: the server refused the session itself (e.g. paywall); the caller decides whether that stops the lesson. */
+  constructor(
+    private readonly repository: LearningRepository,
+    private readonly onStartRejected: (error: unknown) => void = () => undefined,
+  ) {}
 
   start(lessonId: string, sessionId: string): void {
     this.reset();
@@ -49,10 +53,14 @@ export class LessonTracking {
         this.active = false;
         this.drain();
       },
-      error: () => {
+      error: error => {
         this.active = false;
-        if (start) this.reset();
-        else this.drain();
+        if (start) {
+          this.reset();
+          this.onStartRejected(error);
+        } else {
+          this.drain();
+        }
       },
     }));
   }
