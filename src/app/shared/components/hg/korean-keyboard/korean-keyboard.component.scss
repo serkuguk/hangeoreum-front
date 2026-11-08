@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.kbd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hg-space-2);
+  padding: var(--hg-space-3);
+  border: 1px solid var(--hg-border);
+  border-radius: var(--hg-radius-block);
+  background: var(--hg-surface-muted);
+  user-select: none;
+}
+
+.kbd-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--hg-space-2);
+}
+
+// Кнопка рендерится внутри springest app-button (hg-native-host) — нужен ng-deep и усиленный селектор.
+:host ::ng-deep button.hg-native-button.hg-native-button.hg-native-button.kbd-key {
+  flex: 0 1 44px;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--hg-border);
+  border-radius: var(--hg-radius-control);
+  background: var(--hg-surface);
+  color: var(--hg-text);
+  font-size: var(--hg-fs-md);
+  cursor: pointer;
+  transition: border-color var(--hg-motion-feedback), background var(--hg-motion-feedback);
+
+  &:hover {
+    border-color: var(--hg-route);
+  }
+
+  &:active {
+    background: var(--hg-surface-muted);
+  }
+
+  &.is-on {
+    border-color: var(--hg-route);
+    color: var(--hg-route);
+  }
+
+  &.kbd-key--wide {
+    flex-basis: 64px;
+  }
+
+  &.kbd-key--space {
+    flex-basis: 260px;
+  }
+}
+
+@media (max-width: 880px) {
+  .kbd {
+    padding: var(--hg-space-2);
+  }
+
+  .kbd-row {
+    gap: 4px;
+  }
+
+  :host ::ng-deep button.hg-native-button.hg-native-button.hg-native-button.kbd-key {
+    height: 40px;
+    font-size: var(--hg-fs-base);
+  }
+}

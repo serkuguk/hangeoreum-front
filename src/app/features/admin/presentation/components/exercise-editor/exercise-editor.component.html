@@ -1,0 +1,189 @@
+<div class="fields">
+  @switch (kind()) {
+    @case ('CHOICE') {
+      <app-basic-input
+        lang="ko"
+        [label]="'admin.builder.fields.question' | translate"
+        [formField]="f.question"
+      />
+      <app-basic-input
+        [label]="'admin.builder.fields.romanization' | translate"
+        [formField]="f.romanization"
+      />
+    }
+
+    @case ('LISTEN_CHOICE') {
+      <app-basic-input
+        [label]="'admin.builder.fields.audioUrl' | translate"
+        [formField]="f.audioUrl"
+      />
+      <app-basic-input
+        lang="ko"
+        [label]="'admin.builder.fields.text' | translate"
+        [formField]="f.text"
+      />
+    }
+
+    @case ('WORD_ORDER') {
+      <app-basic-input
+        class="fields__wide"
+        [label]="'admin.builder.fields.translation' | translate"
+        [formField]="f.translation"
+      />
+      <app-basic-input
+        lang="ko"
+        [label]="'admin.builder.fields.tokens' | translate"
+        [formField]="f.tokens"
+      />
+      <app-basic-input
+        lang="ko"
+        [label]="'admin.builder.fields.extra' | translate"
+        [formField]="f.extra"
+      />
+    }
+
+    @case ('FILL_BLANK') {
+      <app-basic-input
+        class="fields__wide"
+        lang="ko"
+        [label]="'admin.builder.fields.sentence' | translate"
+        [formField]="f.sentence"
+      />
+      <app-basic-input
+        [label]="'admin.builder.fields.translation' | translate"
+        [formField]="f.translation"
+      />
+      <app-basic-input
+        [label]="'admin.builder.fields.hint' | translate"
+        [formField]="f.hint"
+      />
+    }
+
+    @case ('TYPE_WORD') {
+      <app-basic-input
+        [label]="'admin.builder.fields.translation' | translate"
+        [formField]="f.translation"
+      />
+      <app-basic-input
+        lang="ko"
+        [label]="'admin.builder.fields.answer' | translate"
+        [formField]="f.answer"
+      />
+      <app-basic-input
+        [label]="'admin.builder.fields.romanization' | translate"
+        [formField]="f.romanization"
+      />
+    }
+  }
+</div>
+
+@if (isPairs()) {
+  <div class="list">
+    <span class="list__title">{{ 'admin.builder.fields.pairs' | translate }}</span>
+
+    <div class="grid grid--pairs">
+      <span class="grid__head">{{ 'admin.builder.rowLabels.left' | translate }}</span>
+      <span></span>
+      <span class="grid__head">{{ 'admin.builder.rowLabels.right' | translate }}</span>
+      <span></span>
+
+      @for (pair of f.pairs; track $index; let i = $index) {
+        <app-basic-input
+          lang="ko"
+          placeholder=""
+          [ariaLabel]="'admin.builder.fields.pairLeft' | translate: { n: i + 1 }"
+          [formField]="pair.left"
+        />
+        <span class="grid__arrow" aria-hidden="true">↔</span>
+        <app-basic-input
+          placeholder=""
+          [ariaLabel]="'admin.builder.fields.pairRight' | translate: { n: i + 1 }"
+          [formField]="pair.right"
+        />
+        <app-button
+          (click)="removePair(i)"
+          [aria]="{ 'aria-label': ('admin.builder.removePair' | translate: { n: i + 1 }) }"
+          styleClass="hg-button hg-button--ghost hg-button--field"
+          ><span aria-hidden="true">✕</span></app-button
+        >
+      }
+    </div>
+
+    <app-button
+      [label]="'admin.builder.addPair' | translate"
+      (click)="addPair()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+      ><span aria-hidden="true">+</span></app-button
+    >
+  </div>
+}
+
+@if (hasOptions()) {
+  <div class="list" role="radiogroup" [attr.aria-label]="'admin.builder.fields.options' | translate">
+    <span class="list__title">{{ 'admin.builder.fields.options' | translate }}</span>
+
+    <div class="grid" [class.grid--hint]="optionsWithHint()">
+      <span class="grid__head">✓</span>
+
+      @if (optionsWithIcon()) {
+        <span class="grid__head">{{ 'admin.builder.rowLabels.icon' | translate }}</span>
+      }
+
+      <span class="grid__head">{{ 'admin.builder.rowLabels.text' | translate }}</span>
+
+      @if (optionsWithHint()) {
+        <span class="grid__head">{{ 'admin.builder.rowLabels.hint' | translate }}</span>
+      }
+
+      <span></span>
+
+      @for (option of f.options; track $index; let i = $index) {
+        <label class="grid__correct" [title]="'admin.builder.fields.correct' | translate">
+          <input
+            type="radio"
+            [name]="radioName"
+            [checked]="i === draft().correctIndex"
+            (change)="setCorrect(i)"
+            [attr.aria-label]="'admin.builder.fields.correctN' | translate: { n: i + 1 }"
+          />
+        </label>
+
+        @if (optionsWithIcon()) {
+          <app-basic-input
+            placeholder=""
+            [ariaLabel]="'admin.builder.fields.optionIcon' | translate: { n: i + 1 }"
+            [formField]="option.icon"
+          />
+        }
+
+        <app-basic-input
+          placeholder=""
+          [ariaLabel]="'admin.builder.fields.optionText' | translate: { n: i + 1 }"
+          [formField]="option.text"
+        />
+
+        @if (optionsWithHint()) {
+          <app-basic-input
+            placeholder=""
+            [ariaLabel]="'admin.builder.fields.optionHint' | translate: { n: i + 1 }"
+            [formField]="option.hint"
+          />
+        }
+
+        <app-button
+          (click)="removeOption(i)"
+          [aria]="{ 'aria-label': ('admin.builder.removeOption' | translate: { n: i + 1 }) }"
+          styleClass="hg-button hg-button--ghost hg-button--field"
+          ><span aria-hidden="true">✕</span></app-button
+        >
+      }
+    </div>
+
+    <app-button
+      [label]="'admin.builder.addOption' | translate"
+      (click)="addOption()"
+      styleClass="hg-button hg-button--ghost hg-button--sm"
+      ><span aria-hidden="true">+</span></app-button
+    >
+  </div>
+}

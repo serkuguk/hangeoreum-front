@@ -22,7 +22,7 @@ const word: UserWord = {
 
 describe('ReviewFacade', () => {
   let facade: ReviewFacade;
-  let repository: jest.Mocked<Pick<VocabularyRepository, 'startSession' | 'submitAnswers' | 'finishSession'>>;
+  let repository: jest.Mocked<Pick<VocabularyRepository, 'startSession' | 'submitAnswers' | 'finishSession' | 'decks'>>;
 
   beforeEach(() => {
     repository = {
@@ -31,6 +31,7 @@ describe('ReviewFacade', () => {
       finishSession: jest.fn<VocabularyRepository['finishSession']>()
         .mockReturnValueOnce(throwError(() => new Error('network')))
         .mockReturnValueOnce(of({total: 1, correct: 1, xp: 5, streak: 2})),
+      decks: jest.fn<VocabularyRepository['decks']>().mockReturnValue(of([{id: 'deck-1', title: 'Семья', wordCount: 2}])),
     };
     TestBed.configureTestingModule({
       providers: [
@@ -82,5 +83,13 @@ describe('ReviewFacade', () => {
 
     expect(repository.finishSession).toHaveBeenCalledWith('review-1');
     expect(facade.result()).toEqual({total: 1, correct: 1, xp: 5, streak: 2});
+  });
+
+  it('показывает название колоды только для сессии по колоде', () => {
+    facade.start('FLASHCARDS', {deckId: 'deck-1'});
+    expect(facade.deckTitle()).toBe('Семья');
+
+    facade.start('FLASHCARDS');
+    expect(facade.deckTitle()).toBeNull();
   });
 });

@@ -10,8 +10,7 @@
               [value]="search()" (valueChange)="search.set($event); page.set(0)"/>
 
     <div class="filters">
-      <app-basic-select [ariaLabel]="'vocabulary.levelLabel' | translate" [items]="levels()" optionLabel="label" optionValue="value"
-                            [value]="level()" (valueChange)="setLevel($event)"/>
+      <app-segmented-control [label]="'vocabulary.levelLabel' | translate" [items]="levels()" [value]="levelControl()" (valueChange)="setLevel($event)"/>
       <app-segmented-control [label]="'vocabulary.sortLabel' | translate" [items]="sorts()" [value]="sort()" (valueChange)="setSort($event)"/>
     </div>
 
@@ -81,6 +80,11 @@
           <b>{{ deck.title }}</b>
           <small>{{ 'vocabulary.wordCount' | translate:{count: deck.wordCount} }}</small>
         </div>
+
+        @if (canStudy(deck)) {
+          <app-button styleClass="hg-button hg-button--sm" [label]="'vocabulary.deck.study' | translate" (click)="studyDeck(deck)"/>
+        }
+
         <app-button styleClass="hg-button hg-button--ghost hg-button--sm" [label]="'common.rename' | translate" (click)="renameDeck(deck)"/>
         <app-button styleClass="hg-button hg-button--danger hg-button--sm" [label]="'common.delete' | translate" (click)="deleteDeck(deck)"/>
       </div>
@@ -98,6 +102,15 @@
         <app-button styleClass="hg-button hg-button--ghost hg-button--block" class="deckopt" [label]="deck.title" (click)="addToDeck(deck)"/>
       }
       <app-button styleClass="hg-button hg-button--ghost" dialogActions [label]="'common.cancel' | translate" (click)="closeDeckPicker()"/>
+    </app-dialog>
+  }
+
+  <!-- подтверждение удаления колоды -->
+  @if (pendingDeleteDeck()) {
+    <app-dialog [closeAriaLabel]="'common.closeDialog' | translate" [visible]="true" (visibleChange)="!$event && closeDeleteDialog()" [header]="'common.delete' | translate">
+      <p>{{ deleteConfirmMessage() }}</p>
+      <app-button styleClass="hg-button hg-button--danger" dialogActions [label]="'common.delete' | translate" (click)="confirmDeleteDeck()"/>
+      <app-button styleClass="hg-button hg-button--ghost" dialogActions [label]="'common.cancel' | translate" (click)="closeDeleteDialog()"/>
     </app-dialog>
   }
 </div>

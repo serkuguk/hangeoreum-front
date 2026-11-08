@@ -30,60 +30,37 @@ import {
   TextareaComponent,
 } from 'springest';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import {
+  ExerciseKind,
+  TipExample,
+} from '@features/learning/domain/entities/exercise.entity';
+import { ExerciseEditorComponent } from '../../components/exercise-editor/exercise-editor.component';
+import {
+  ExerciseDraft,
+  emptyDraft,
+  toDraft,
+  toPayload,
+  validateDraft,
+} from '../../components/exercise-editor/exercise-payload.mapper';
 
-/** Шаблоны payload по kind — подставляются в JSON-редактор при добавлении. */
-const PAYLOAD_TEMPLATES: Record<string, unknown> = {
-  CHOICE: {
-    question: '친구',
-    romanization: 'chingu',
-    options: [
-      { text: 'друг', icon: '🧑‍🤝‍🧑', correct: true },
-      { text: 'школа', icon: '🏫' },
-      { text: 'время', icon: '⏰' },
-      { text: 'любовь', icon: '❤️' },
-    ],
-  },
-  LISTEN_CHOICE: {
-    audioUrl: '',
-    text: '안녕하세요',
-    options: [
-      { text: 'здравствуйте', correct: true },
-      { text: 'до свидания' },
-      { text: 'спасибо' },
-      { text: 'извините' },
-    ],
-  },
-  WORD_ORDER: {
-    translation: 'Я — студент',
-    tokens: ['저는', '학생', '이에요'],
-    extra: ['친구는'],
-  },
-  FILL_BLANK: {
-    sentence: '저 ___ 학생이에요.',
-    translation: 'Я — студент',
-    hint: '저 кончается на гласную',
-    options: [
-      { text: '는', hint: 'после гласной' },
-      { text: '은', hint: 'после согласной' },
-    ],
-    correct: '는',
-  },
-  MATCH_PAIRS: {
-    pairs: [
-      { left: '친구', right: 'друг' },
-      { left: '학교', right: 'школа' },
-      { left: '사랑', right: 'любовь' },
-      { left: '시간', right: 'время' },
-    ],
-  },
-  TYPE_WORD: { translation: 'друг', answer: '친구', romanization: 'chingu' },
-};
+const KINDS: readonly ExerciseKind[] = [
+  'CHOICE',
+  'LISTEN_CHOICE',
+  'WORD_ORDER',
+  'FILL_BLANK',
+  'MATCH_PAIRS',
+  'TYPE_WORD',
+];
 
-const KINDS = Object.keys(PAYLOAD_TEMPLATES);
-const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
-  label: value,
-  value,
-}));
+/** Строка примера tip в форме; highlight — через запятую. */
+interface TipExampleDraft {
+  ko: string;
+  translation: string;
+  highlight: string;
+  note?: string;
+}
+
+const emptyTipExample = (): TipExampleDraft => ({ko: '', translation: '', highlight: ''});
 
 @Component({
   selector: 'hg-admin-lesson-builder-page',
@@ -95,72 +72,10 @@ const KIND_OPTIONS: { label: string; value: string }[] = KINDS.map((value) => ({
     BasicSelectComponent,
     TextareaComponent,
     TranslatePipe,
+    ExerciseEditorComponent,
   ],
   templateUrl: './admin-lesson-builder-page.component.html',
-  styleUrl: '../_admin.scss',
-  styles: `
-    .exrow {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--hg-line);
-
-      &:last-child {
-        border: none;
-      }
-
-      .kind {
-        font-weight: 700;
-        font-size: 13px;
-        min-width: 120px;
-        padding-top: 4px;
-      }
-
-      app-textarea {
-        flex: 1;
-      }
-    }
-
-    .addex {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      margin-top: 14px;
-
-      app-basic-select { flex: 0 1 18rem; min-width: 12rem; }
-    }
-
-    .tipform {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-
-      .mono {
-        font-family: monospace;
-        font-size: 12px;
-      }
-    }
-
-    .wordpick {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .savedmark {
-      color: var(--hg-jade);
-      font-size: 12.5px;
-      margin-left: 8px;
-    }
-    section.panel {
-      margin-bottom: 16px;
-    }
-    section.panel--select {
-      overflow: visible;
-      z-index: 1;
-    }
-  `,
+  styleUrls: ['../_admin.scss', './admin-lesson-builder-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLessonBuilderPageComponent {
@@ -168,12 +83,6 @@ export class AdminLessonBuilderPageComponent {
 
   private api = inject(AdminApi);
   private translate = inject(TranslateService);
-
-  payloadAria(exercise: { position: number }): string {
-    return this.translate.instant('admin.builder.payloadAria', {
-      position: exercise.position,
-    });
-  }
 
   removeWordAria(word: AdminWord): string {
     return this.translate.instant('admin.builder.removeWordAria', {
@@ -194,20 +103,22 @@ export class AdminLessonBuilderPageComponent {
   readonly savedFlash = signal<string | null>(null);
   readonly wordsSaving = signal(false);
 
-  readonly kindOptions = KIND_OPTIONS;
-  readonly newKind = signal('CHOICE');
+  readonly kindOptions = KINDS.map((value) => ({
+    label: this.translate.instant(`admin.builder.kinds.${value}`),
+    value,
+  }));
+  readonly newKind = signal<ExerciseKind>('CHOICE');
   readonly newKindField = form(this.newKind);
 
-  // черновики payload как JSON-строки по id упражнения
-  readonly payloadDrafts = signal<Record<string, string>>({});
-  readonly payloadFields = form(this.payloadDrafts);
-  badJson: Record<string, boolean> = {};
+  // черновики форм упражнений по id; JSON собирается только при сохранении
+  readonly drafts = signal<Record<string, ExerciseDraft>>({});
+  readonly draftErrors = signal<Record<string, string[]>>({});
 
   readonly tipTitle = signal('');
   readonly tipTitleField = form(this.tipTitle);
   readonly tipBody = signal('');
   readonly tipBodyField = form(this.tipBody);
-  readonly tipExamples = signal('');
+  readonly tipExamples = signal<TipExampleDraft[]>([]);
   readonly tipExamplesField = form(this.tipExamples);
 
   // поиск слов для привязки
@@ -238,30 +149,19 @@ export class AdminLessonBuilderPageComponent {
     this.api.lessonFull(this.id()).subscribe({
       next: (data) => {
         this.data.set(data);
-        this.payloadFields().reset(
+        this.drafts.set(
           Object.fromEntries(
-            data.exercises.map((e) => [
-              e.id,
-              JSON.stringify(e.payload, null, 2),
-            ]),
+            data.exercises.map((e) => [e.id, toDraft(this.kindOf(e), e.payload)]),
           ),
         );
+        this.draftErrors.set({});
         this.tipTitle.set(data.tip?.title ?? '');
         this.tipBody.set(data.tip?.bodyMd ?? '');
+        const examples = (data.tip?.examples ?? []) as TipExample[];
         this.tipExamples.set(
-          data.tip?.examples
-            ? JSON.stringify(data.tip.examples, null, 2)
-            : JSON.stringify(
-                [
-                  {
-                    ko: '저는 학생이에요.',
-                    translation: 'Я — студент',
-                    highlight: ['는'],
-                  },
-                ],
-                null,
-                2,
-              ),
+          examples.length
+            ? examples.map((e) => ({...e, highlight: (e.highlight ?? []).join(', ')}))
+            : [emptyTipExample()],
         );
       },
       error: () =>
@@ -276,7 +176,7 @@ export class AdminLessonBuilderPageComponent {
       .createExercise(this.id(), {
         position: Math.max(0, ...data.exercises.map(exercise => exercise.position)) + 1,
         kind: this.newKind(),
-        payload: PAYLOAD_TEMPLATES[this.newKind()],
+        payload: toPayload(this.newKind(), emptyDraft()),
       })
       .subscribe({
         next: () => this.load(),
@@ -285,15 +185,21 @@ export class AdminLessonBuilderPageComponent {
       });
   }
 
+  kindOf(exercise: AdminExercise): ExerciseKind {
+    return exercise.kind as ExerciseKind;
+  }
+
+  setDraft(id: string, draft: ExerciseDraft): void {
+    this.drafts.update((all) => ({...all, [id]: draft}));
+  }
+
   saveExercise(exercise: AdminExercise): void {
-    let payload: unknown;
-    try {
-      payload = JSON.parse(this.payloadDrafts()[exercise.id]);
-      this.badJson[exercise.id] = false;
-    } catch {
-      this.badJson[exercise.id] = true;
-      return;
-    }
+    const kind = this.kindOf(exercise);
+    const draft = this.drafts()[exercise.id];
+    const errors = validateDraft(kind, draft);
+    this.draftErrors.update((all) => ({...all, [exercise.id]: errors}));
+    if (errors.length) return;
+    const payload = toPayload(kind, draft);
     this.api
       .updateExercise(this.id(), exercise.id, {
         position: exercise.position,
@@ -317,16 +223,27 @@ export class AdminLessonBuilderPageComponent {
     });
   }
 
+  addTipExample(): void {
+    this.tipExamples.update((rows) => [...rows, emptyTipExample()]);
+  }
+
+  removeTipExample(index: number): void {
+    this.tipExamples.update((rows) => rows.filter((_, i) => i !== index));
+  }
+
   saveTip(): void {
-    let examples: unknown = null;
-    if (this.tipExamples().trim()) {
-      try {
-        examples = JSON.parse(this.tipExamples());
-      } catch {
-        this.error.set(this.translate.instant('admin.builder.errors.examplesJson'));
-        return;
-      }
-    }
+    const rows = this.tipExamples().filter((row) => row.ko.trim());
+    const examples: TipExample[] | null = rows.length
+      ? rows.map(({highlight, ...row}) => {
+          const parts = highlight.split(',').map((h) => h.trim()).filter(Boolean);
+          return {
+            ...row,
+            ko: row.ko.trim(),
+            translation: row.translation.trim(),
+            ...(parts.length ? {highlight: parts} : {}),
+          };
+        })
+      : null;
     this.api
       .putTip(this.id(), {
         title: this.tipTitle(),

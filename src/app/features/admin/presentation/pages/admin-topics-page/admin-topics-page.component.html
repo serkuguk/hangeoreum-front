@@ -34,3 +34,33 @@
     </tbody>
   </table>
 </div>
+
+<app-dialog [closeAriaLabel]="'admin.topics.close' | translate" [visible]="editVisible()" (visibleChange)="onDialogVisibleChange($event)"
+           [header]="'admin.topics.editTitle' | translate" [closable]="!saving()" [closeOnEscape]="!saving()">
+  <div class="dialog-fields">
+    <app-basic-input [label]="'admin.topics.code' | translate" [formField]="editCodeField"/>
+    <app-basic-input [label]="'admin.topics.name' | translate" [formField]="editTitleField"/>
+    <app-basic-input [label]="'admin.topics.icon' | translate" [formField]="editIconField"/>
+  </div>
+
+  @if (dialogError()) {
+    <div class="errbar" role="alert">{{ dialogError() }}</div>
+  }
+
+  <div dialogActions>
+    <app-button [label]="'admin.topics.save' | translate" [loading]="saving()" [disabled]="editDisabled()"
+               (click)="saveEdit()" styleClass="hg-button"></app-button>
+    <app-button [label]="'admin.topics.cancel' | translate" [disabled]="saving()"
+               (click)="closeDialogs()" styleClass="hg-button hg-button--ghost"></app-button>
+  </div>
+</app-dialog>
+
+<app-dialog [closeAriaLabel]="'admin.topics.close' | translate" [visible]="deleteVisible()" (visibleChange)="onDialogVisibleChange($event)"
+           [header]="'admin.topics.deleteTitle' | translate">
+  <p>{{ deleteMessage() }}</p>
+
+  <div dialogActions>
+    <app-button [label]="'admin.topics.delete' | translate" (click)="confirmDelete()" styleClass="hg-button hg-button--danger"></app-button>
+    <app-button [label]="'admin.topics.cancel' | translate" (click)="closeDialogs()" styleClass="hg-button hg-button--ghost"></app-button>
+  </div>
+</app-dialog>

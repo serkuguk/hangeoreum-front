@@ -8,3 +8,9 @@
   align-items: center;
   gap: .5rem;
 }
+
+.dialog-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hg-space-3);
+}

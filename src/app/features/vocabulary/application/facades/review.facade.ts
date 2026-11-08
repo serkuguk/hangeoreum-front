@@ -34,6 +34,8 @@ export class ReviewFacade {
   readonly result = signal<FinishResult | null>(null);
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
+  /** Название колоды, если сессия запущена по колоде. */
+  readonly deckTitle = signal<string | null>(null);
 
   loadSummary(): void {
     this.loading.set(true);
@@ -61,6 +63,8 @@ export class ReviewFacade {
     this.hardWords.set([]);
     this.index.set(0);
     this.queue.set([]);
+    this.deckTitle.set(null);
+    if (opts?.deckId) this.loadDeckTitle(opts.deckId);
     this.repository.startSession(mode, opts).subscribe({
       next: session => {
         this.sessionId = session.id;
@@ -73,6 +77,14 @@ export class ReviewFacade {
           : this.translate.instant('vocabulary.errors.startSession'));
         this.loading.set(false);
       },
+    });
+  }
+
+  // ponytail: тянем весь список колод ради одного названия — их у пользователя единицы; GET /decks/{id}, если станет много
+  private loadDeckTitle(deckId: string): void {
+    this.repository.decks().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: decks => this.deckTitle.set(decks.find(d => d.id === deckId)?.title ?? null),
+      error: () => this.deckTitle.set(null),
     });
   }
 

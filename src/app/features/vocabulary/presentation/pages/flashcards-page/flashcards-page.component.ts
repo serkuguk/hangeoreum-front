@@ -15,9 +15,10 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlashcardsPageComponent implements OnInit {
-  // query params: quick=1 → лимит 10, difficult=1 → только сложные
+  // query params: quick=1 → лимит 10, difficult=1 → только сложные, deck=<id> → только слова колоды
   readonly quick = input<string | undefined>();
   readonly difficult = input<string | undefined>();
+  readonly deck = input<string | undefined>();
 
   readonly facade = inject(ReviewFacade);
   private router = inject(Router);
@@ -51,6 +52,7 @@ export class FlashcardsPageComponent implements OnInit {
     this.facade.start('FLASHCARDS', {
       limit: this.quick() ? 10 : undefined,
       difficultOnly: !!this.difficult(),
+      deckId: this.deck(),
     });
   }
 

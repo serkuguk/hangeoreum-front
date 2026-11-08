@@ -22,8 +22,8 @@
   gap: var(--hg-space-3);
   transition: width var(--hg-motion-route) ease;
 }
-.header { display: flex; align-items: center; flex-wrap: wrap; gap: var(--hg-space-2); min-height: 44px; }
-.brand { min-width: 0; flex-basis: 100%; padding: 0 10px; }
+.header { display: flex; align-items: center; gap: var(--hg-space-2); min-height: 44px; }
+.brand { min-width: 0; flex: 1; overflow: hidden; padding: 0 10px; }
 :host ::ng-deep button.hg-native-button.hg-native-button.toggle {
   display: grid; place-items: center; width: 44px; min-height: 44px; flex-shrink: 0;
   background: transparent; color: var(--hg-text-muted); border: 0;

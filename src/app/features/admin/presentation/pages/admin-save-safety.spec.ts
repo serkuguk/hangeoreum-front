@@ -138,4 +138,30 @@ describe('admin save safety', () => {
     fixture.componentInstance.addExercise();
     expect(api['createExercise']).toHaveBeenCalledWith(lesson.id, expect.objectContaining({position: 4}));
   });
+
+  it('builds the exercise payload from the form and blocks saving an incomplete one', () => {
+    const payload = {question: '안녕하세요', options: [{text: 'здравствуйте', correct: true}, {text: 'спасибо'}]};
+    const exercise: AdminExercise = {id: 'exercise', position: 1, kind: 'CHOICE', payload};
+    api['lessonFull'].mockReturnValue(of({...data, exercises: [exercise]}));
+    api['updateExercise'] = jest.fn().mockReturnValue(of(exercise));
+    const fixture = TestBed.createComponent(AdminLessonBuilderPageComponent);
+    fixture.componentRef.setInput('id', lesson.id);
+    jest.runOnlyPendingTimers();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(fixture.nativeElement.querySelectorAll('hg-exercise-editor input[type=radio]').length).toBe(2);
+
+    component.setDraft(exercise.id, {...component.drafts()[exercise.id], correctIndex: 1});
+    component.saveExercise(exercise);
+    expect(api['updateExercise']).toHaveBeenCalledWith(lesson.id, exercise.id, {
+      position: 1,
+      kind: 'CHOICE',
+      payload: {question: '안녕하세요', options: [{text: 'здравствуйте'}, {text: 'спасибо', correct: true}]},
+    });
+
+    component.setDraft(exercise.id, {...component.drafts()[exercise.id], question: ' '});
+    component.saveExercise(exercise);
+    expect(api['updateExercise']).toHaveBeenCalledTimes(1);
+    expect(component.draftErrors()[exercise.id]).toEqual(['admin.builder.validation.question']);
+  });
 });

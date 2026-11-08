@@ -1,4 +1,8 @@
 <div class="wrap fcbox">
+  @if (facade.deckTitle(); as deckTitle) {
+    <p class="deck-label">{{ "vocabulary.flashcards.deckLabel" | translate: { title: deckTitle } }}</p>
+  }
+
   @if (facade.loading()) {
     <div class="panel loadpanel">
       {{ "vocabulary.flashcards.loading" | translate }}

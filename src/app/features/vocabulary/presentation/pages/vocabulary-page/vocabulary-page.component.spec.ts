@@ -218,10 +218,6 @@ describe('Vocabulary delayed translations', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    (fixture.nativeElement.querySelector('app-basic-select .p-select') as HTMLElement).click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-
     expect(labels()).toEqual(expect.arrayContaining([
       'Слова', 'Колоды', 'Все', 'Новые', 'Выученные', 'По сроку', 'По добавлению', 'По алфавиту',
     ]));

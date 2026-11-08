@@ -45,7 +45,7 @@ describe('springest exercise controls', () => {
     fixture.componentInstance.result.subscribe(result);
     fixture.detectChanges();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('app-basic-input input');
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector('app-button button');
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('app-button.checkbtn button');
     const form: HTMLFormElement = fixture.nativeElement.querySelector('form');
     expect(button.disabled).toBe(true);
     expect(input.lang).toBe('ko');
@@ -66,6 +66,23 @@ describe('springest exercise controls', () => {
     button.click();
     form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
     expect(result).toHaveBeenCalledTimes(1);
+  });
+
+  it('types Korean through the on-screen and physical keyboard', () => {
+    TestBed.configureTestingModule({imports: [ExerciseTypeComponent]});
+    const fixture = TestBed.createComponent(ExerciseTypeComponent);
+    fixture.componentRef.setInput('payload', {translation: 'Друг', answer: '친구'});
+    fixture.detectChanges();
+    const root: HTMLElement = fixture.nativeElement;
+    root.querySelector<HTMLButtonElement>('button.kbdtoggle')!.click();
+    fixture.detectChanges();
+    const keys = Array.from(root.querySelectorAll<HTMLButtonElement>('hg-korean-keyboard button.kbd-key'));
+    for (const jamo of 'ㅊㅣㄴ') keys.find(key => key.textContent?.trim() === jamo)!.click();
+    const input = root.querySelector<HTMLInputElement>('app-basic-input input')!;
+    for (const code of ['KeyR', 'KeyN']) input.dispatchEvent(new KeyboardEvent('keydown', {code, bubbles: true, cancelable: true}));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe('친구');
+    expect(input.value).toBe('친구');
   });
 
   it('keeps choice grading, state classes and ARIA on the library button', () => {
