@@ -33,6 +33,11 @@
                 "glob": "**/*",
                 "input": "src/assets/",
                 "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "assets/zanmang-loopy/exports",
+                "output": "/assets/zanmang-loopy"
               }
             ],
             "styles": [

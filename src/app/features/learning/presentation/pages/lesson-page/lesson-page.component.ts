@@ -19,6 +19,7 @@ import {ExerciseMatchComponent} from '@features/learning/presentation/components
 import {ExerciseTypeComponent} from '@features/learning/presentation/components/exercises/exercise-type.component';
 import {CompleteResult} from '@features/learning/domain/repositories/learning.repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {Mascot3dComponent, MascotAnimation} from '@shared/components/hg/mascot3d/mascot3d.component';
 
 @Component({
   selector: 'hg-lesson-page',
@@ -33,6 +34,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
     ButtonComponent,
     HgSessionResultCardComponent,
     TranslatePipe,
+    Mascot3dComponent,
   ],
   templateUrl: './lesson-page.component.html',
   styleUrl: './lesson-page.component.scss',
@@ -56,6 +58,25 @@ export class LessonPageComponent implements OnInit {
       showRetryOnly: !feedback.correct && !feedback.expected,
       expected: feedback.expected,
     };
+  });
+
+  /** Тот же порядок веток, что и в шаблоне: loading → error → result → упражнение. */
+  readonly inExercise = computed(() =>
+    !this.facade.loading() && !this.facade.error() && !this.facade.result() && !!this.facade.current());
+
+  /** Лупи реагирует на состояние урока: здоровается, болеет за ответ, празднует финал. */
+  readonly loopyAnimation = computed<MascotAnimation>(() => {
+    const facade = this.facade;
+    if (facade.loading()) return 'wave';
+    if (facade.error()) return 'sad';
+    if (facade.result()) return 'celebrate';
+    if (this.inExercise()) {
+      const feedback = facade.feedback();
+      if (!feedback) return 'idle';
+      return feedback.correct ? 'celebrate' : 'sad';
+    }
+    if (facade.saveError()) return 'sad';
+    return facade.finishing() ? 'walk' : 'idle';
   });
 
   readonly resultSubtitle = computed(() => `«${this.facade.lesson()?.title}»`);

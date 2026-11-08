@@ -1,4 +1,10 @@
 <div class="wrap lessonbox">
+  @if (!inExercise()) {
+    <div class="loopy">
+      <hg-mascot3d [size]="120" [animation]="loopyAnimation()" />
+    </div>
+  }
+
   @if (facade.loading()) {
     <div class="panel loadpanel">
       {{ "learning.lesson.loading" | translate }}
@@ -58,6 +64,11 @@
         }
       </div>
       <span class="pill p-b">{{ facade.solved() }} / {{ facade.total() }}</span>
+    </div>
+
+    <!-- Один экземпляр на все упражнения: ветка не пересоздаётся при смене упражнения -->
+    <div class="loopy loopy--exercise">
+      <hg-mascot3d [size]="110" [animation]="loopyAnimation()" />
     </div>
 
     @switch (exercise.kind) {

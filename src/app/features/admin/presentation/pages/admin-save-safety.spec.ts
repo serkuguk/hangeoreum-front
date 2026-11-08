@@ -35,10 +35,10 @@ describe('admin save safety', () => {
     component.openSubtitles(clip);
     component.clips.set([clip]);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.subsbox app-button button').disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('.subsactions app-button button').disabled).toBe(true);
     component.saveSubtitles(clip);
     expect(api['putSubtitles']).not.toHaveBeenCalled();
-    expect(component.subsDraft()).toBe('');
+    expect(component.koDraft()).toBe('');
     pending.error(new Error('failed'));
     component.saveSubtitles(clip);
     expect(api['putSubtitles']).not.toHaveBeenCalled();
@@ -68,14 +68,16 @@ describe('admin save safety', () => {
     const pending = new Subject<never[]>();
     api['putSubtitles'].mockReturnValue(pending);
     const component = TestBed.createComponent(AdminMediaPageComponent).componentInstance;
+    const draft = '1\n00:00:00,000 --> 00:00:01,000\n안녕';
     component.openSubtitles(clip);
+    component.koDraft.set(draft);
     component.saveSubtitles(clip);
     component.saveSubtitles(clip);
     expect(api['putSubtitles']).toHaveBeenCalledTimes(1);
     pending.error(new Error('failed'));
     expect(component.subtitlesReady()).toBe(true);
     expect(component.subtitlesSaving()).toBe(false);
-    expect(component.subsDraft()).toBe('[]');
+    expect(component.koDraft()).toBe(draft);
   });
 
   it('blocks overlapping word changes, uses the latest response, and unlocks after failure', () => {

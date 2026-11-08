@@ -14,6 +14,10 @@
       />
     </div>
   } @else if (facade.story(); as st) {
+    <div class="loopy">
+      <hg-mascot3d [size]="104" [animation]="loopyAnimation()" />
+    </div>
+
     <h2 class="pagettl">
       {{ "learning.story.title" | translate }} · {{ st.title }}
     </h2>

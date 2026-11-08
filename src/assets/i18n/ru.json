@@ -309,8 +309,12 @@
       "searchWordAria": "Поиск слова",
       "searchWordPlaceholder": "Поиск слова…",
       "saveClip": "Сохранить клип",
-      "subtitlesLabel": "Субтитры в JSON",
-      "subtitlesPlaceholder": "[{\"lang\":\"ko\",\"position\":1,\"text\":\"안녕하세요\",\"startMs\":0,\"endMs\":3000}]",
+      "subtitlesKo": "Корейские субтитры",
+      "subtitlesRu": "Русские субтитры",
+      "subtitlesUpload": "📄 Загрузить .srt / .vtt",
+      "subtitlesHint": "Загрузите файл субтитров или вставьте его текст. Файл .srt можно скачать в YouTube Studio (Субтитры → ⋮ → Скачать), CapCut или Subtitle Edit. Пустое поле — дорожки нет.",
+      "subtitlesPlaceholder": "1\n00:00:00,000 --> 00:00:02,500\n안녕하세요\n\n2\n00:00:02,500 --> 00:00:05,000\n반갑습니다",
+      "subtitlesCount": "Фраз: {{n}}",
       "saveSubtitles": "Сохранить субтитры",
       "noClips": "Клипов нет — создай первый.",
       "newClipKindAria": "Тип нового клипа",
@@ -346,7 +350,10 @@
         "uploadFile": "Не получилось загрузить файл.",
         "saveSubtitles": "Не получилось сохранить субтитры",
         "loadSubtitles": "Не получилось загрузить субтитры.",
-        "subtitlesJson": "Субтитры — некорректный JSON.",
+        "subtitlesBadTime": "Фраза {{n}}: не распознано время. Нужно так: 00:00:01,000 --> 00:00:03,500",
+        "subtitlesEndBeforeStart": "Фраза {{n}}: конец раньше начала.",
+        "subtitlesEmptyText": "Фраза {{n}}: нет текста.",
+        "readSubtitlesFile": "Не получилось прочитать файл субтитров.",
         "durationNegative": "Длительность должна быть не меньше 0 мс.",
         "errorWithDetail": "{{prefix}}: {{detail}}",
         "unknownDetail": "ошибка",
@@ -811,6 +818,10 @@
   },
   "mascot": {
     "ariaLabel": "Маскот 걸음이"
+  },
+  "mascot3d": {
+    "ariaLabel": "Маскот Занман Лупи",
+    "rotationLabel": "Маскот Занман Лупи. Перетаскивайте влево или вправо для поворота, используйте стрелки влево и вправо или Home для сброса."
   },
   "notFound": {
     "title": "Страница не найдена"

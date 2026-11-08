@@ -227,18 +227,41 @@
 
       @if (subtitlesFor() === clip.id) {
         <div class="subsbox">
-          <app-textarea
-            [label]="'admin.media.subtitlesLabel' | translate"
-            [rows]="7"
-            [placeholder]="'admin.media.subtitlesPlaceholder' | translate"
-            [formField]="subsField"
-          />
-          <app-button
-            [label]="'admin.media.saveSubtitles' | translate"
-            (click)="saveSubtitles(clip)"
-            [disabled]="!subtitlesReady() || subtitlesSaving()"
-            styleClass="hg-button hg-button--ghost hg-button--sm"
-          ></app-button>
+          <p class="subshint muted">{{ 'admin.media.subtitlesHint' | translate }}</p>
+
+          @for (track of subtitleTracks(); track track.lang) {
+            <div class="substrack">
+              <app-textarea
+                [label]="track.labelKey | translate"
+                [rows]="8"
+                [placeholder]="'admin.media.subtitlesPlaceholder' | translate"
+                [formField]="track.field"
+              />
+              <app-file-picker
+                #subsPicker
+                [label]="'admin.media.subtitlesUpload' | translate"
+                accept=".srt,.vtt"
+                (changed)="loadSubtitlesFile(track.lang, $event[0]); subsPicker.value.set([])"
+              />
+
+              @if (track.hasErrors) {
+                @for (item of track.errors; track item.cue) {
+                  <p class="subserr" role="alert">{{ item.error | translate: { n: item.cue } }}</p>
+                }
+              } @else {
+                <p class="muted">✓ {{ 'admin.media.subtitlesCount' | translate: { n: track.count } }}</p>
+              }
+            </div>
+          }
+
+          <div class="subsactions">
+            <app-button
+              [label]="'admin.media.saveSubtitles' | translate"
+              (click)="saveSubtitles(clip)"
+              [disabled]="!canSaveSubtitles()"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+            ></app-button>
+          </div>
         </div>
       }
     </div>

@@ -17,6 +17,16 @@
   .ghost { right: -20px; bottom: -50px; font-size: 200px; }
 }
 
+.loopy {
+  float: right;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: -12px -12px var(--hg-space-2) var(--hg-space-4);
+  pointer-events: none;
+  transform: scaleX(-1); // клип Point тянет руку вправо — отражаем, чтобы Лупи указывал на правило слева
+}
+
 .rule {
   background: var(--hg-card-2);
   border: 1px solid var(--hg-line);

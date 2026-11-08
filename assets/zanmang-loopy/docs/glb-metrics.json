@@ -1,0 +1,16 @@
+{
+  "bytes": 641860,
+  "triangles": 19576,
+  "meshes": 35,
+  "skins": 1,
+  "clips_seconds": {
+    "Idle": 1.95833333209157,
+    "Wave": 1.95833333209157,
+    "Walk": 1.291666705161333,
+    "Point": 1.95833333209157,
+    "Celebrate": 1.95833333209157,
+    "Sad": 1.95833333209157
+  },
+  "target_under_20000_triangles": true,
+  "target_under_3MiB": true
+}

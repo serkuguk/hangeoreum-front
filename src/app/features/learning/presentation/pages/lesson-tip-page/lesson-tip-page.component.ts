@@ -4,6 +4,7 @@ import {Location} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {TranslatePipe} from '@ngx-translate/core';
+import {Mascot3dComponent} from '@shared/components/hg/mascot3d/mascot3d.component';
 import {LessonFacade} from '@features/learning/application/facades/lesson.facade';
 import {TipExample} from '@features/learning/domain/entities/exercise.entity';
 
@@ -12,7 +13,7 @@ const escapeHtml = (s: string) =>
 
 @Component({
   selector: 'hg-lesson-tip-page',
-  imports: [RouterLink, ButtonComponent, TranslatePipe],
+  imports: [RouterLink, ButtonComponent, TranslatePipe, Mascot3dComponent],
   templateUrl: './lesson-tip-page.component.html',
   styleUrl: './lesson-tip-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

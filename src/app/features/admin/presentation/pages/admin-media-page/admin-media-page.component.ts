@@ -13,6 +13,11 @@ import {
 } from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AdminApi, AdminClip, AdminClipKind, AdminUnit, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
+import {ClipSubtitle, SubtitleLang} from '@shared/models/clip-subtitle';
+import {parseSrt, toSrt} from './subtitle-srt';
+
+// больше пары ошибок подряд обычно значит «вставили не тот файл» — длинный список не помогает
+const SUBTITLE_ERRORS_SHOWN = 3;
 
 const CLIP_KIND_OPTIONS: {label: string; value: string}[] = Object.values(AdminClipKind)
   .map(value => ({label: value, value}));
@@ -75,9 +80,31 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
 
     .subsbox {
       flex-basis: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+      gap: 12px 16px;
       margin-top: 8px;
 
-      app-textarea { width: 100%; }
+      .subshint,
+      .subsactions {
+        grid-column: 1 / -1;
+      }
+
+      .substrack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .subserr {
+        margin: 0;
+        color: var(--hg-red);
+        font-size: 12px;
+      }
+
+      app-textarea {
+        width: 100%;
+      }
     }
 
     .media-picker { width: 2.75rem; max-width: 2.75rem; height: 2.75rem; }
@@ -133,12 +160,29 @@ export class AdminMediaPageComponent {
     ...this.units().map(unit => ({label: unit.title, value: unit.id})),
   ]);
 
-  // сигнал: наполняется асинхронно из getSubtitles, иначе zoneless CD не перерисует textarea
-  readonly subsDraft = signal('');
+  // сигналы: наполняются асинхронно (getSubtitles, file.text()), иначе zoneless CD не перерисует textarea
+  readonly koDraft = signal('');
+  readonly ruDraft = signal('');
+  readonly koField = form(this.koDraft);
+  readonly ruField = form(this.ruDraft);
   readonly subtitlesReady = signal(false);
   readonly subtitlesSaving = signal(false);
   private subtitlesRequest = 0;
-  readonly subsField = form(this.subsDraft);
+  // дорожки других языков редактор не показывает, но PUT заменяет всё — возвращаем их как были
+  private otherSubtitles: ClipSubtitle[] = [];
+  private readonly koParsed = computed(() => parseSrt(this.koDraft(), SubtitleLang.Ko));
+  private readonly ruParsed = computed(() => parseSrt(this.ruDraft(), SubtitleLang.Ru));
+  readonly subtitleTracks = computed(() => [
+    {lang: SubtitleLang.Ko, labelKey: 'admin.media.subtitlesKo', field: this.koField, parsed: this.koParsed()},
+    {lang: SubtitleLang.Ru, labelKey: 'admin.media.subtitlesRu', field: this.ruField, parsed: this.ruParsed()},
+  ].map(track => ({
+    ...track,
+    count: track.parsed.subtitles.length,
+    errors: track.parsed.errors.slice(0, SUBTITLE_ERRORS_SHOWN),
+    hasErrors: track.parsed.errors.length > 0,
+  })));
+  readonly canSaveSubtitles = computed(() => this.subtitlesReady() && !this.subtitlesSaving()
+    && !this.subtitleTracks().some(track => track.hasErrors));
 
   readonly newSpeakerName = signal('');
   readonly newSpeakerNameField = form(this.newSpeakerName);
@@ -409,13 +453,18 @@ export class AdminMediaPageComponent {
     }
     this.subtitlesFor.set(clip.id);
     this.error.set(null);
-    this.subsDraft.set('');
+    this.koDraft.set('');
+    this.ruDraft.set('');
+    this.otherSubtitles = [];
     this.api.getSubtitles(clip.id).subscribe({
       next: subtitles => {
         if (request !== this.subtitlesRequest || this.subtitlesFor() !== clip.id) return;
-        this.subsDraft.set(JSON.stringify(
-          subtitles.map(({lang, position, text, startMs, endMs}) => ({lang, position, text, startMs, endMs})),
-          null, 2));
+        const byLang = (lang: SubtitleLang) => subtitles.filter(sub => sub.lang === lang);
+        this.koDraft.set(toSrt(byLang(SubtitleLang.Ko)));
+        this.ruDraft.set(toSrt(byLang(SubtitleLang.Ru)));
+        this.otherSubtitles = subtitles
+          .filter(sub => sub.lang !== SubtitleLang.Ko && sub.lang !== SubtitleLang.Ru)
+          .map(({lang, position, text, startMs, endMs}) => ({lang, position, text, startMs, endMs}));
         this.subtitlesReady.set(true);
       },
       error: err => {
@@ -427,14 +476,8 @@ export class AdminMediaPageComponent {
   }
 
   saveSubtitles(clip: AdminClip): void {
-    if (!this.subtitlesReady() || this.subtitlesSaving() || this.subtitlesFor() !== clip.id) return;
-    let subtitles: {lang: string; position: number; text: string; startMs: number; endMs: number}[];
-    try {
-      subtitles = JSON.parse(this.subsDraft());
-    } catch {
-      this.error.set(this.translate.instant('admin.media.errors.subtitlesJson'));
-      return;
-    }
+    if (!this.canSaveSubtitles() || this.subtitlesFor() !== clip.id) return;
+    const subtitles = [...this.koParsed().subtitles, ...this.ruParsed().subtitles, ...this.otherSubtitles];
     this.subtitlesSaving.set(true);
     this.api.putSubtitles(clip.id, subtitles).subscribe({
       next: () => {
@@ -448,6 +491,15 @@ export class AdminMediaPageComponent {
         this.fail('admin.media.errors.saveSubtitles', err);
       },
     });
+  }
+
+  loadSubtitlesFile(lang: SubtitleLang, file: File | undefined): void {
+    if (!file) return;
+    const draft = lang === SubtitleLang.Ko ? this.koDraft : this.ruDraft;
+    file.text().then(
+      text => draft.set(text),
+      () => this.error.set(this.translate.instant('admin.media.errors.readSubtitlesFile')),
+    );
   }
 
   private showFlash(text: string): void {

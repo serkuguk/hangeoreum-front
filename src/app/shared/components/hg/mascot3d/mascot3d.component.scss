@@ -1,0 +1,55 @@
+:host {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 350ms ease;
+}
+
+:host(.reduced-motion) {
+  transition: none;
+}
+
+.mascot3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+.mascot3d--interactive {
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.mascot3d--interactive:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.mascot3d__fallback,
+.mascot3d__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mascot3d__fallback {
+  object-fit: contain;
+}
+
+.mascot3d__canvas {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+
+.mascot3d__canvas--visible {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
+  }
+}

@@ -3,6 +3,15 @@
 :host ::ng-deep {
 .storybox { max-width: var(--hg-content-lesson); }
 
+.loopy {
+  float: right;
+  position: relative;
+  width: 104px;
+  height: 104px;
+  margin-left: var(--hg-space-4);
+  pointer-events: none;
+}
+
 .loadpanel {
   text-align: center;
   padding: 40px;

@@ -8,6 +8,9 @@
     </div>
   } @else if (facade.tip(); as tip) {
     <div class="panel tipcard">
+      <div class="loopy">
+        <hg-mascot3d [size]="120" animation="point" />
+      </div>
       <div class="ghost kr">{{ tip.title.charAt(0) }}</div>
       <div class="eyebrow">{{ 'learning.lessonTip.eyebrow' | translate }}</div>
       <h2 class="pagettl">{{ tip.title }}</h2>

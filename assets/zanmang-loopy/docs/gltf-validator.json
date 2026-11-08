@@ -1,0 +1,41 @@
+{
+  "uri": "zanmang_loopy.glb",
+  "mimeType": "model/gltf-binary",
+  "validatorVersion": "2.0.0-dev.3.10",
+  "validatedAt": "2026-11-08T18:16:27.189Z",
+  "issues": {
+    "numErrors": 0,
+    "numWarnings": 0,
+    "numInfos": 0,
+    "numHints": 0,
+    "messages": [],
+    "truncated": false
+  },
+  "info": {
+    "version": "2.0",
+    "generator": "Khronos glTF Blender I/O v5.2.40",
+    "extensionsUsed": [
+      "KHR_materials_specular"
+    ],
+    "resources": [
+      {
+        "pointer": "/buffers/0",
+        "mimeType": "application/gltf-buffer",
+        "storage": "glb",
+        "byteLength": 576380
+      }
+    ],
+    "animationCount": 6,
+    "materialCount": 6,
+    "hasMorphTargets": false,
+    "hasSkins": true,
+    "hasTextures": false,
+    "hasDefaultScene": true,
+    "drawCallCount": 35,
+    "totalVertexCount": 10489,
+    "totalTriangleCount": 19576,
+    "maxUVs": 0,
+    "maxInfluences": 4,
+    "maxAttributes": 4
+  }
+}
