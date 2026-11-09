@@ -1,6 +1,7 @@
 import {FormField, form, min} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {DomSanitizer} from '@angular/platform-browser';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {TooltipModule} from 'primeng/tooltip';
 import {Subject, catchError, debounceTime, distinctUntilChanged, forkJoin, map, of, switchMap} from 'rxjs';
@@ -15,6 +16,7 @@ import {
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AdminApi, AdminClip, AdminClipKind, AdminUnit, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
 import {ClipSubtitle, SubtitleLang} from '@shared/models/clip-subtitle';
+import {youtubeEmbedUrl, youtubeId} from '@shared/utils';
 import {parseSrt, toSrt} from './subtitle-srt';
 
 // больше пары ошибок подряд обычно значит «вставили не тот файл» — длинный список не помогает
@@ -159,9 +161,10 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
         word-break: break-all;
       }
 
-      video {
+      video, iframe {
         width: 12rem;
         max-height: 7rem;
+        border: 0;
         border-radius: 8px;
         background: #000;
       }
@@ -174,6 +177,7 @@ export class AdminMediaPageComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private translate = inject(TranslateService);
+  private sanitizer = inject(DomSanitizer);
 
   readonly speakers = signal<Speaker[]>([]);
   readonly clips = signal<AdminClip[]>([]);
@@ -206,6 +210,19 @@ export class AdminMediaPageComponent {
   readonly subtitlesFor = signal<string | null>(null); // clipId с открытым редактором сабов
   readonly editingClip = signal<string | null>(null); // clipId с открытым редактором полей
   readonly editingSpeaker = signal<string | null>(null);
+  readonly youtubeLink = signal('');
+  // computed, а не метод: новый SafeResourceUrl на каждой проверке перезагружал бы iframe
+  readonly editingYoutube = computed(() => {
+    const clip = this.clips().find(c => c.id === this.editingClip());
+    const id = youtubeId(clip?.videoUrl);
+    if (!id) return null;
+    return {
+      id,
+      watchUrl: clip!.videoUrl!,
+      // id прошёл проверку [A-Za-z0-9_-]{11}, URL собран из константы
+      embedUrl: this.sanitizer.bypassSecurityTrustResourceUrl(youtubeEmbedUrl(id)),
+    };
+  });
   readonly foundWords = signal<AdminWord[]>([]);
   readonly clipKindOptions = CLIP_KIND_OPTIONS;
   readonly speakerOptions = computed<{label: string; value: string | null}[]>(() => [
@@ -413,6 +430,7 @@ export class AdminMediaPageComponent {
       return;
     }
     this.editingClip.set(clip.id);
+    this.youtubeLink.set(youtubeId(clip.videoUrl) ? clip.videoUrl! : '');
     this.clipFields().reset({kind: clip.kind, title: clip.title ?? '', position: clip.position ?? null, speakerId: clip.speakerId, wordId: clip.wordId, unitId: clip.unitId ?? null, durationMs: clip.durationMs});
     this.clipWordLabel = clip.wordId
       ? this.translate.instant('admin.media.wordIdLabel', {id: clip.wordId.slice(0, 8)})
@@ -456,6 +474,22 @@ export class AdminMediaPageComponent {
         this.load();
       },
       error: err => this.fail('admin.media.errors.updateClip', err),
+    });
+  }
+
+  // YouTube только для IMMERSE: story-плеер и «Слушать» играют videoUrl через <audio>
+  canUseYoutube(clip: AdminClip): boolean {
+    return clip.kind === AdminClipKind.Immerse;
+  }
+
+  saveYoutubeLink(clip: AdminClip): void {
+    this.error.set(null);
+    this.api.setClipVideoLink(clip.id, this.youtubeLink().trim()).subscribe({
+      next: updated => {
+        this.clips.update(list => list.map(c => c.id === clip.id ? updated : c));
+        this.showFlash(this.translate.instant('admin.media.flash.youtubeLinkSaved'));
+      },
+      error: err => this.fail('admin.media.errors.saveYoutubeLink', err),
     });
   }
 

@@ -7,13 +7,15 @@ import {ImmerseFacade} from '@features/media/application/immerse.facade';
 import {Clip} from '@features/media/domain/clip.entity';
 import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {YoutubePlayerComponent} from '@features/media/presentation/components/youtube-player/youtube-player.component';
+import {youtubeId, youtubeThumbnail} from '@shared/utils';
 
 const SubMode = {KO: 'ko', RU: 'ru', BOTH: 'both'} as const;
 type SubMode = typeof SubMode[keyof typeof SubMode];
 
 @Component({
   selector: 'hg-immerse-page',
-  imports: [RouterLink, ButtonComponent, BasicSelectComponent, SegmentedControlComponent, TranslatePipe],
+  imports: [RouterLink, ButtonComponent, BasicSelectComponent, SegmentedControlComponent, TranslatePipe, YoutubePlayerComponent],
   templateUrl: './immerse-page.component.html',
   styleUrl: './immerse-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +27,7 @@ export class ImmersePageComponent implements OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
   readonly player = viewChild<ElementRef<HTMLVideoElement>>('player');
+  readonly youtubePlayer = viewChild(YoutubePlayerComponent);
   readonly subMode = signal<SubMode>(SubMode.BOTH);
   readonly subModeOptions = [
     {value: SubMode.KO, label: this.translate.instant('media.subtitles.korean')},
@@ -33,9 +36,12 @@ export class ImmersePageComponent implements OnDestroy {
   ];
   readonly currentClipIndex = signal(0);
   readonly currentClip = computed(() => this.facade.clips()[this.currentClipIndex()] ?? null);
+  readonly hasSubtitles = computed(() => !!this.currentClip()?.subtitles.length);
   readonly timeMs = signal(0);
   readonly ended = signal(false);
   readonly playbackError = signal(false);
+  readonly playbackErrorKey = computed(() => this.youtubeId(this.currentClip())
+    ? 'media.errors.youtubeUnavailable' : 'media.errors.playback');
   // подгрузка следующей страницы не должна вставлять статус над лентой и сдвигать её
   readonly initialLoading = computed(() => this.facade.loading() && !this.facade.clips().length);
   readonly hasNext =computed(() => this.currentClipIndex() + 1 < this.facade.clips().length);
@@ -133,6 +139,7 @@ export class ImmersePageComponent implements OnDestroy {
 
   private resetPlayback(): void {
     this.player()?.nativeElement.pause();
+    this.youtubePlayer()?.pause();
     this.timeMs.set(0);
     this.ended.set(false);
     this.playbackError.set(false);
@@ -152,13 +159,28 @@ export class ImmersePageComponent implements OnDestroy {
   }
 
   repeat(): void {
+    const youtube = this.youtubePlayer();
     const video = this.player()?.nativeElement;
-    if (!video) return;
-    video.currentTime = 0;
+    if (!youtube && !video) return;
     this.timeMs.set(0);
     this.ended.set(false);
     this.playbackError.set(false);
-    void video.play().catch(() => this.playbackError.set(true));
+    if (youtube) {
+      youtube.restart();
+      return;
+    }
+    video!.currentTime = 0;
+    void video!.play().catch(() => this.playbackError.set(true));
+  }
+
+  youtubeId(clip: Clip | null): string | null {
+    return youtubeId(clip?.videoUrl);
+  }
+
+  // своя обложка админа важнее; без неё YouTube отдаёт превью сам
+  poster(clip: Clip): string {
+    const id = this.youtubeId(clip);
+    return clip.thumbnailUrl ?? (id ? youtubeThumbnail(id) : '');
   }
 
   private subtitle(lang: string): string | null {

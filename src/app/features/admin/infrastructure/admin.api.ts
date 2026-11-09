@@ -402,6 +402,10 @@ export class AdminApi {
     return this.http.post<AdminClip>(`${this.base}/clips/${id}/media`, form);
   }
 
+  setClipVideoLink(id: string, url: string): Observable<AdminClip> {
+    return this.http.put<AdminClip>(`${this.base}/clips/${id}/video-link`, {url});
+  }
+
   publishClip(id: string, isPublished: boolean): Observable<AdminClip> {
     return this.http.patch<AdminClip>(`${this.base}/clips/${id}/publish`, {isPublished});
   }

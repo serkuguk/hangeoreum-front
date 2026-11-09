@@ -62,10 +62,14 @@ a { color: var(--hg-route); }
   &:not(.is-active) {
     cursor: pointer;
 
-    video { pointer-events: none; }
+    video,
+    img {
+      pointer-events: none;
+    }
   }
 
-  video {
+  video,
+  img {
     display: block;
     width: 100%;
     height: 100%;

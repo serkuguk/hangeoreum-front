@@ -39,7 +39,21 @@
         <div class="feed" (wheel)="onWheel($event)">
           @for (item of facade.clips(); track item.id) {
             <section class="clip" [class]="clipClass($index)" [attr.data-index]="$index" (click)="focusClip($index)">
-              @if (isActive($index)) {
+              @if (youtubeId(item); as videoId) {
+
+                @if (isActive($index)) {
+                  <hg-youtube-player
+                    [videoId]="videoId"
+                    [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"
+                    (timeChange)="timeMs.set($event)"
+                    (ended)="onEnded(item)"
+                    (failed)="playbackError.set(true)"
+                  />
+                } @else {
+                  <img [src]="poster(item)" alt="" loading="lazy" />
+                }
+
+              } @else if (isActive($index)) {
                 <video #player [src]="item.videoUrl ?? ''" [poster]="item.thumbnailUrl ?? ''" controls playsinline preload="metadata"
                   [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"
                   (timeupdate)="updateTime($event)" (seeked)="updateTime($event)" (ended)="onEnded(item)" (error)="playbackError.set(true)"></video>
@@ -58,13 +72,25 @@
       </div>
       <section class="player-panel">
         <h2>{{ clipTitle(clip) }}</h2>
-        <app-segmented-control [label]="'media.subtitles.label' | translate" [items]="subModeOptions"
-          [value]="subMode()" (valueChange)="setSubMode($event)" />
-        <div class="subs">
-          @if (koSubtitle(); as ko) { <p class="kr" lang="ko">{{ ko }}</p> }
-          @if (ruSubtitle(); as ru) { <p lang="ru">{{ ru }}</p> }
-        </div>
-        @if (playbackError()) { <p role="alert">{{ 'media.errors.playback' | translate }}</p> }
+
+        @if (hasSubtitles()) {
+          <app-segmented-control [label]="'media.subtitles.label' | translate" [items]="subModeOptions"
+            [value]="subMode()" (valueChange)="setSubMode($event)" />
+          <div class="subs">
+            @if (koSubtitle(); as ko) {
+              <p class="kr" lang="ko">{{ ko }}</p>
+            }
+
+            @if (ruSubtitle(); as ru) {
+              <p lang="ru">{{ ru }}</p>
+            }
+          </div>
+        }
+
+        @if (playbackError()) {
+          <p role="alert">{{ playbackErrorKey() | translate }}</p>
+        }
+
         @if (clip.wordId) {
           <div class="actions">
             @if (clip.wordHangul) {
