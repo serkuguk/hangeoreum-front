@@ -99,6 +99,10 @@
         #picker1
         class="media-picker"
         label="🎬"
+        [class.media-picker--done]="hasMedia(clip, uploadKind.VIDEO)"
+        [pTooltip]="mediaTooltip(clip, uploadKind.VIDEO)"
+        tooltipEvent="hover"
+        tooltipPosition="top"
         [ariaLabel]="'admin.media.uploadVideoAria' | translate"
         accept="video/*"
         (changed)="
@@ -109,6 +113,10 @@
         #picker2
         class="media-picker"
         label="🔊"
+        [class.media-picker--done]="hasMedia(clip, uploadKind.AUDIO)"
+        [pTooltip]="mediaTooltip(clip, uploadKind.AUDIO)"
+        tooltipEvent="hover"
+        tooltipPosition="top"
         [ariaLabel]="'admin.media.uploadAudioAria' | translate"
         accept="audio/*"
         (changed)="
@@ -119,6 +127,10 @@
         #picker3
         class="media-picker"
         label="🖼"
+        [class.media-picker--done]="hasMedia(clip, uploadKind.THUMBNAIL)"
+        [pTooltip]="mediaTooltip(clip, uploadKind.THUMBNAIL)"
+        tooltipEvent="hover"
+        tooltipPosition="top"
         [ariaLabel]="'admin.media.uploadThumbnailAria' | translate"
         accept="image/*"
         (changed)="
@@ -156,6 +168,15 @@
 
       @if (isEditing(clip)) {
         <div class="editbox">
+          @if (clip.videoUrl) {
+            <div class="videobox">
+              <p>{{ 'admin.media.currentVideo' | translate: { name: videoName(clip) } }}</p>
+              <video [src]="clip.videoUrl" controls preload="metadata"></video>
+            </div>
+          } @else {
+            <p class="videobox muted">{{ 'admin.media.noVideoYet' | translate }}</p>
+          }
+
           <app-basic-select
             [ariaLabel]="'admin.media.clipKindAria' | translate"
             placeholder=""
@@ -199,6 +220,7 @@
             } @else {
               <app-basic-input
                 type="search"
+                [label]="'admin.media.wordFieldLabel' | translate"
                 [ariaLabel]="'admin.media.searchWordAria' | translate"
                 [placeholder]="'admin.media.searchWordPlaceholder' | translate"
                 [value]="wordSearch"
@@ -216,10 +238,17 @@
                 >
               }
             }
+
+            <p class="wordhint muted">{{ wordHintKey() | translate }}</p>
           </div>
           <app-button
             [label]="'admin.media.saveClip' | translate"
             (click)="saveClip(clip)"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
+          <app-button
+            [label]="'common.cancel' | translate"
+            (click)="openEdit(clip)"
             styleClass="hg-button hg-button--ghost hg-button--sm"
           ></app-button>
         </div>
@@ -268,20 +297,23 @@
   } @empty {
     <div class="empty">{{ 'admin.media.noClips' | translate }}</div>
   }
-  <div class="addrow">
-    <app-basic-select
-      [ariaLabel]="'admin.media.newClipKindAria' | translate"
-      [placeholder]="'admin.media.newClipKindAria' | translate"
-      [items]="clipKindOptions"
-      [formField]="newClipKindField"
-      optionLabel="label"
-      optionValue="value"
-    />
-    <app-button
-      [label]="'admin.media.addClip' | translate"
-      (click)="addClip()"
-      styleClass="hg-button hg-button--ghost hg-button--sm"
-      ><span aria-hidden="true">+</span></app-button
-    >
-  </div>
+  <section class="clip-create">
+    <h3>{{ 'admin.media.newClip' | translate }}</h3>
+    <div class="addrow">
+      <app-basic-select
+        [ariaLabel]="'admin.media.newClipKindAria' | translate"
+        [placeholder]="'admin.media.newClipKindAria' | translate"
+        [items]="clipKindOptions"
+        [formField]="newClipKindField"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <app-button
+        [label]="'admin.media.addClip' | translate"
+        (click)="addClip()"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        ><span aria-hidden="true">+</span></app-button
+      >
+    </div>
+  </section>
 </section>

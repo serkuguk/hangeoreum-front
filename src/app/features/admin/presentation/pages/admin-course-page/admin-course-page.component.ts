@@ -56,6 +56,41 @@ type PendingDeletion = {kind: DeletionKind.Unit; unit: AdminUnit}
 
     .unit--lesson { overflow: visible; z-index: 1; }
 
+    .practice-label {
+      display: block;
+      margin-top: 12px;
+    }
+
+    .practice-editor {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      app-textarea {
+        flex: 1 1 320px;
+        min-width: 0;
+      }
+
+    }
+
+    .practice-link {
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .lesson-create {
+      border-top: 1px solid var(--hg-line);
+      margin-top: 20px;
+      padding-top: 16px;
+
+      h3 {
+        font-size: 14px;
+        margin: 0;
+      }
+    }
+
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

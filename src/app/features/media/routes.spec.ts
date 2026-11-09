@@ -35,7 +35,7 @@ describe('Immerse route composition', () => {
         id: 'clip-1',
         kind: 'WORD', title: 'Приветствие', position: 0,
         speakerId: null,
-        wordId: 'word-2',
+        wordId: 'word-2', wordHangul: '가족', wordTranslation: 'семья',
         videoUrl: null,
         audioUrl: null,
         thumbnailUrl: null,
@@ -68,7 +68,9 @@ describe('Immerse route composition', () => {
     http.expectOne('/api/immerse/clip-1/view').flush(null);
     expect(component.ended()).toBe(true);
 
-    const addButton = harness.routeNativeElement!.querySelector('[aria-label="Слово в словарь"]') as HTMLButtonElement;
+    expect(harness.routeNativeElement!.textContent).toContain('가족');
+    expect(harness.routeNativeElement!.textContent).toContain('семья');
+    const addButton = harness.routeNativeElement!.querySelector('[aria-label="Добавить в мой словарь"]') as HTMLButtonElement;
     addButton.click();
     expect(component.vocabulary.addState('word-2')).toBe('saving');
     http.expectOne('/api/vocabulary/words/word-2/add').flush(null, {status: 500, statusText: 'Server Error'});

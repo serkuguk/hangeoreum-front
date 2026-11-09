@@ -10,6 +10,8 @@ export interface Clip {
   kind: string;
   speakerId: string | null;
   wordId: string | null;
+  wordHangul: string | null; // слово, которое админ привязал к клипу; показываем рядом с кнопкой «в словарь»
+  wordTranslation: string | null;
   videoUrl: string | null;
   audioUrl: string | null;
   thumbnailUrl: string | null;

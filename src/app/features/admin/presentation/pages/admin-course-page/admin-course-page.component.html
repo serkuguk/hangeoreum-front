@@ -77,14 +77,15 @@
         ></app-button>
       </div>
 
-      <div class="addrow">
-        <app-textarea [label]="'admin.course.practiceGoal' | translate" [formField]="practiceFields[unit.id]" />
+      <label class="practice-label" [for]="'practice-' + unit.id">{{ 'admin.course.practiceGoal' | translate }}</label>
+      <div class="practice-editor">
+        <app-textarea [inputId]="'practice-' + unit.id" [formField]="practiceFields[unit.id]" />
         <app-button [label]="'common.save' | translate" [disabled]="practiceSaving()[unit.id] ?? false"
                     (click)="savePractice(unit)" styleClass="hg-button hg-button--ghost hg-button--sm" />
-        <a routerLink="/admin/media" [queryParams]="{unitId: unit.id}">
-          {{ 'admin.course.publishedVideos' | translate: {count: publishedVideos()[unit.id] ?? 0} }} · {{ 'admin.course.editPractice' | translate }}
-        </a>
       </div>
+      <a class="practice-link" routerLink="/admin/media" [queryParams]="{unitId: unit.id}">
+        {{ 'admin.course.publishedVideos' | translate: {count: publishedVideos()[unit.id] ?? 0} }} · {{ 'admin.course.editPractice' | translate }}
+      </a>
       <div class="lessons">
         @for (lesson of lessonsByUnit()[unit.id] ?? []; track lesson.id) {
           <div class="lrow">
@@ -133,26 +134,29 @@
         }
       </div>
 
-      <div class="addrow">
-        <app-basic-input
-          [label]="'admin.course.lessonTitleLabel' | translate"
-          [formField]="lessonFields[unit.id].title"
-          (keydown.enter)="addLesson(unit)"
-        />
-        <app-basic-select
-          [ariaLabel]="'admin.course.lessonTypeLabel' | translate"
-          [placeholder]="'admin.course.lessonTypeLabel' | translate"
-          [items]="lessonTypes"
-          [formField]="lessonFields[unit.id].type"
-          optionLabel="label"
-          optionValue="value"
-        />
-        <app-button
-          [label]="'admin.course.addLesson' | translate"
-          (click)="addLesson(unit)"
-          styleClass="hg-button hg-button--secondary hg-button--sm"
-        ></app-button>
-      </div>
+      <section class="lesson-create">
+        <h3>{{ 'admin.course.newLesson' | translate }}</h3>
+        <div class="addrow">
+          <app-basic-input
+            [label]="'admin.course.lessonTitleLabel' | translate"
+            [formField]="lessonFields[unit.id].title"
+            (keydown.enter)="addLesson(unit)"
+          />
+          <app-basic-select
+            [ariaLabel]="'admin.course.lessonTypeLabel' | translate"
+            [placeholder]="'admin.course.lessonTypeLabel' | translate"
+            [items]="lessonTypes"
+            [formField]="lessonFields[unit.id].type"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <app-button
+            [label]="'admin.course.addLesson' | translate"
+            (click)="addLesson(unit)"
+            styleClass="hg-button hg-button--secondary hg-button--sm"
+          ></app-button>
+        </div>
+      </section>
     </div>
   }
 

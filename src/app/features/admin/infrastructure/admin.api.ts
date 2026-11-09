@@ -121,6 +121,7 @@ export interface AdminClip {
   wordId: string | null;
   unitId: string | null;
   videoUrl: string | null;
+  videoName: string | null; // оригинальное имя файла; null у клипов, загруженных до V19
   audioUrl: string | null;
   thumbnailUrl: string | null;
   durationMs: number | null;

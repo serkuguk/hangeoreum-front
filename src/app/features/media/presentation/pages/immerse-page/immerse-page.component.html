@@ -67,8 +67,16 @@
         @if (playbackError()) { <p role="alert">{{ 'media.errors.playback' | translate }}</p> }
         @if (clip.wordId) {
           <div class="actions">
-            <app-button [aria]="{'aria-label': ('media.addWordAria' | translate)}" [disabled]="vocabulary.isAddBlocked(clip.wordId)" (click)="addWord(clip)">
-              {{ vocabulary.isSaved(clip.wordId) ? '✓' : ('media.addWordAria' | translate) }}
+            @if (clip.wordHangul) {
+              <p class="clipword">
+                {{ 'media.wordFromVideo' | translate }}
+                <strong class="kr" lang="ko">{{ clip.wordHangul }}</strong>
+                — {{ clip.wordTranslation }}
+              </p>
+            }
+
+            <app-button [aria]="{'aria-label': (addWordLabelKey(clip) | translate)}" [disabled]="vocabulary.isAddBlocked(clip.wordId)" (click)="addWord(clip)">
+              {{ addWordLabelKey(clip) | translate }}
             </app-button>
             @if (vocabulary.isFailed(clip.wordId)) { <p role="alert">{{ 'media.errors.addWord' | translate }}</p> }
           </div>

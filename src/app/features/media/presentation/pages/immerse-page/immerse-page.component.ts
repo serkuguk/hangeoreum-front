@@ -168,6 +168,10 @@ export class ImmersePageComponent implements OnDestroy {
   }
 
   clipTitle(clip: Clip): string { return clip.title || this.translate.instant('media.clipFallback'); }
+  addWordLabelKey(clip: Clip): string {
+    return clip.wordId && this.vocabulary.isSaved(clip.wordId) ? 'media.wordSaved' : 'media.addWordAria';
+  }
+
   addWord(clip: Clip): void {
     if (clip.wordId) this.vocabulary.addWordToVocabulary(clip.wordId);
   }

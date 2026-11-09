@@ -5,7 +5,7 @@ import {ImmerseFacade} from './immerse.facade';
 import {CLIP_REPOSITORY} from './clip-repository.token';
 import {Clip, ClipRepository, Feed} from '../domain/clip.entity';
 
-const clip: Clip = {id: 'clip', title: 'Greeting', position: 0, kind: 'IMMERSE', speakerId: null, wordId: null, videoUrl: null, audioUrl: null, thumbnailUrl: null, durationMs: null, subtitles: [], watched: false, liked: false};
+const clip: Clip = {id: 'clip', title: 'Greeting', position: 0, kind: 'IMMERSE', speakerId: null, wordId: null, wordHangul: null, wordTranslation: null, videoUrl: null, audioUrl: null, thumbnailUrl: null, durationMs: null, subtitles: [], watched: false, liked: false};
 const unit = {id: 'unit', title: 'Unit', description: null, position: 0};
 const page: Feed = {content: [clip], nextCursor: null, selectedUnit: unit, units: [unit]};
 function setup(repository: Partial<ClipRepository>): ImmerseFacade {
