@@ -2,6 +2,7 @@ import {FormField, form, min} from '@angular/forms/signals';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TooltipModule} from 'primeng/tooltip';
 import {Subject, catchError, debounceTime, distinctUntilChanged, forkJoin, map, of, switchMap} from 'rxjs';
 import {
   ButtonComponent,
@@ -13,6 +14,11 @@ import {
 } from 'springest';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {AdminApi, AdminClip, AdminClipKind, AdminUnit, AdminWord, MediaUploadKind, Speaker} from '@features/admin/infrastructure/admin.api';
+import {ClipSubtitle, SubtitleLang} from '@shared/models/clip-subtitle';
+import {parseSrt, toSrt} from './subtitle-srt';
+
+// больше пары ошибок подряд обычно значит «вставили не тот файл» — длинный список не помогает
+const SUBTITLE_ERRORS_SHOWN = 3;
 
 const CLIP_KIND_OPTIONS: {label: string; value: string}[] = Object.values(AdminClipKind)
   .map(value => ({label: value, value}));
@@ -31,6 +37,7 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
     BasicInputComponent,
     BasicSelectComponent,
     TextareaComponent,
+    TooltipModule,
     TranslatePipe,
   ],
   templateUrl: './admin-media-page.component.html',
@@ -39,6 +46,15 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
     section.panel { margin-bottom: 16px; }
     section.panel--select { overflow: visible; z-index: 1; }
     section.panel--select > app-basic-select { margin-top: 12px; }
+
+    .clip-create {
+      margin-top: 20px;
+
+      h3 {
+        font-size: 14px;
+        margin: 0;
+      }
+    }
 
     .sprow, .cliprow {
       display: flex;
@@ -70,17 +86,86 @@ type PendingDeletion = {kind: DeletionKind.Speaker; speaker: Speaker}
         flex-wrap: wrap;
         align-items: center;
         gap: 6px;
+        max-width: 32rem;
+      }
+
+      .wordhint {
+        flex-basis: 100%;
+        margin: 0;
       }
     }
 
     .subsbox {
       flex-basis: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+      gap: 12px 16px;
       margin-top: 8px;
 
-      app-textarea { width: 100%; }
+      .subshint,
+      .subsactions {
+        grid-column: 1 / -1;
+      }
+
+      .substrack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .subserr {
+        margin: 0;
+        color: var(--hg-red);
+        font-size: 12px;
+      }
+
+      app-textarea {
+        width: 100%;
+      }
     }
 
     .media-picker { width: 2.75rem; max-width: 2.75rem; height: 2.75rem; }
+
+    .media-picker--done {
+      position: relative;
+      border-radius: 8px;
+      box-shadow: 0 0 0 2px var(--hg-jade);
+
+      &::after {
+        content: '✓';
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--hg-jade);
+        color: #fff;
+        font-size: 11px;
+        line-height: 16px;
+        text-align: center;
+        pointer-events: none;
+      }
+    }
+
+    .videobox {
+      flex-basis: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      p {
+        margin: 0;
+        word-break: break-all;
+      }
+
+      video {
+        width: 12rem;
+        max-height: 7rem;
+        border-radius: 8px;
+        background: #000;
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -133,12 +218,29 @@ export class AdminMediaPageComponent {
     ...this.units().map(unit => ({label: unit.title, value: unit.id})),
   ]);
 
-  // сигнал: наполняется асинхронно из getSubtitles, иначе zoneless CD не перерисует textarea
-  readonly subsDraft = signal('');
+  // сигналы: наполняются асинхронно (getSubtitles, file.text()), иначе zoneless CD не перерисует textarea
+  readonly koDraft = signal('');
+  readonly ruDraft = signal('');
+  readonly koField = form(this.koDraft);
+  readonly ruField = form(this.ruDraft);
   readonly subtitlesReady = signal(false);
   readonly subtitlesSaving = signal(false);
   private subtitlesRequest = 0;
-  readonly subsField = form(this.subsDraft);
+  // дорожки других языков редактор не показывает, но PUT заменяет всё — возвращаем их как были
+  private otherSubtitles: ClipSubtitle[] = [];
+  private readonly koParsed = computed(() => parseSrt(this.koDraft(), SubtitleLang.Ko));
+  private readonly ruParsed = computed(() => parseSrt(this.ruDraft(), SubtitleLang.Ru));
+  readonly subtitleTracks = computed(() => [
+    {lang: SubtitleLang.Ko, labelKey: 'admin.media.subtitlesKo', field: this.koField, parsed: this.koParsed()},
+    {lang: SubtitleLang.Ru, labelKey: 'admin.media.subtitlesRu', field: this.ruField, parsed: this.ruParsed()},
+  ].map(track => ({
+    ...track,
+    count: track.parsed.subtitles.length,
+    errors: track.parsed.errors.slice(0, SUBTITLE_ERRORS_SHOWN),
+    hasErrors: track.parsed.errors.length > 0,
+  })));
+  readonly canSaveSubtitles = computed(() => this.subtitlesReady() && !this.subtitlesSaving()
+    && !this.subtitleTracks().some(track => track.hasErrors));
 
   readonly newSpeakerName = signal('');
   readonly newSpeakerNameField = form(this.newSpeakerName);
@@ -149,6 +251,7 @@ export class AdminMediaPageComponent {
   readonly clipDraft = signal<{kind: string; title: string; position: number | null; speakerId: string | null; wordId: string | null; unitId: string | null; durationMs: number | null}>(
     {kind: AdminClipKind.Immerse, title: '', position: null, speakerId: null, wordId: null, unitId: null, durationMs: null});
   readonly clipFields = form(this.clipDraft, path => min(path.durationMs, 0));
+  readonly wordHintKey = computed(() => this.clipDraft().wordId ? 'admin.media.wordLinkedHint' : 'admin.media.wordSearchHint');
   clipWordLabel = '';
   wordSearch = '';
   private readonly wordSearch$ = new Subject<string>();
@@ -384,6 +487,25 @@ export class AdminMediaPageComponent {
     return this.translate.instant('admin.media.summary', {speaker: this.speakerName(clip.speakerId), video, audio});
   }
 
+  // до V19 бэкенд не сохранял имя — UUID из URL ничего не говорит админу, показываем подсказку
+  videoName(clip: AdminClip): string {
+    return clip.videoName ?? this.translate.instant('admin.media.unknownVideoName');
+  }
+
+  hasMedia(clip: AdminClip, kind: MediaUploadKind): boolean {
+    const url = {[MediaUploadKind.VIDEO]: clip.videoUrl, [MediaUploadKind.AUDIO]: clip.audioUrl, [MediaUploadKind.THUMBNAIL]: clip.thumbnailUrl}[kind];
+    return !!url;
+  }
+
+  mediaTooltip(clip: AdminClip, kind: MediaUploadKind): string {
+    const keys = {
+      [MediaUploadKind.VIDEO]: ['admin.media.replaceVideoTooltip', 'admin.media.uploadVideoTooltip'],
+      [MediaUploadKind.AUDIO]: ['admin.media.replaceAudioTooltip', 'admin.media.uploadAudioTooltip'],
+      [MediaUploadKind.THUMBNAIL]: ['admin.media.replaceThumbnailTooltip', 'admin.media.uploadThumbnailTooltip'],
+    }[kind];
+    return this.translate.instant(this.hasMedia(clip, kind) ? keys[0] : keys[1], {name: this.videoName(clip)});
+  }
+
   wordAria(word: AdminWord): string {
     return this.translate.instant('admin.builder.bindWordAria', {hangul: word.hangul, translation: word.translation});
   }
@@ -409,13 +531,18 @@ export class AdminMediaPageComponent {
     }
     this.subtitlesFor.set(clip.id);
     this.error.set(null);
-    this.subsDraft.set('');
+    this.koDraft.set('');
+    this.ruDraft.set('');
+    this.otherSubtitles = [];
     this.api.getSubtitles(clip.id).subscribe({
       next: subtitles => {
         if (request !== this.subtitlesRequest || this.subtitlesFor() !== clip.id) return;
-        this.subsDraft.set(JSON.stringify(
-          subtitles.map(({lang, position, text, startMs, endMs}) => ({lang, position, text, startMs, endMs})),
-          null, 2));
+        const byLang = (lang: SubtitleLang) => subtitles.filter(sub => sub.lang === lang);
+        this.koDraft.set(toSrt(byLang(SubtitleLang.Ko)));
+        this.ruDraft.set(toSrt(byLang(SubtitleLang.Ru)));
+        this.otherSubtitles = subtitles
+          .filter(sub => sub.lang !== SubtitleLang.Ko && sub.lang !== SubtitleLang.Ru)
+          .map(({lang, position, text, startMs, endMs}) => ({lang, position, text, startMs, endMs}));
         this.subtitlesReady.set(true);
       },
       error: err => {
@@ -427,14 +554,8 @@ export class AdminMediaPageComponent {
   }
 
   saveSubtitles(clip: AdminClip): void {
-    if (!this.subtitlesReady() || this.subtitlesSaving() || this.subtitlesFor() !== clip.id) return;
-    let subtitles: {lang: string; position: number; text: string; startMs: number; endMs: number}[];
-    try {
-      subtitles = JSON.parse(this.subsDraft());
-    } catch {
-      this.error.set(this.translate.instant('admin.media.errors.subtitlesJson'));
-      return;
-    }
+    if (!this.canSaveSubtitles() || this.subtitlesFor() !== clip.id) return;
+    const subtitles = [...this.koParsed().subtitles, ...this.ruParsed().subtitles, ...this.otherSubtitles];
     this.subtitlesSaving.set(true);
     this.api.putSubtitles(clip.id, subtitles).subscribe({
       next: () => {
@@ -448,6 +569,15 @@ export class AdminMediaPageComponent {
         this.fail('admin.media.errors.saveSubtitles', err);
       },
     });
+  }
+
+  loadSubtitlesFile(lang: SubtitleLang, file: File | undefined): void {
+    if (!file) return;
+    const draft = lang === SubtitleLang.Ko ? this.koDraft : this.ruDraft;
+    file.text().then(
+      text => draft.set(text),
+      () => this.error.set(this.translate.instant('admin.media.errors.readSubtitlesFile')),
+    );
   }
 
   private showFlash(text: string): void {

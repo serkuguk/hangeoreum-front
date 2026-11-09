@@ -1,0 +1,37 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.stat {
+  text-align: center;
+  padding: 26px 14px;
+
+  b {
+    font-size: 30px;
+    font-weight: 700;
+    display: block;
+  }
+
+  span {
+    font-size: 12px;
+    color: var(--hg-muted);
+  }
+}
+
+.j {
+  color: var(--hg-jade);
+}
+
+.y {
+  color: var(--hg-yellow);
+}
+
+.r {
+  color: var(--hg-red);
+}
+
+.bl {
+  color: var(--hg-blue);
+}

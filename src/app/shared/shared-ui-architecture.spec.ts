@@ -71,6 +71,7 @@ const publicBoundaries: Record<string, readonly string[]> = {
   dashboard: ['learning/course-path.ts'],
   learning: ['vocabulary/public-api.ts'],
   media: ['vocabulary/public-api.ts'],
+  admin: ['learning/public-api.ts'],
 };
 
 function dependencies(source: ts.SourceFile, unresolved: ts.Node[] = []): ts.StringLiteralLike[] {

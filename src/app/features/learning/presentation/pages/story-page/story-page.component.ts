@@ -5,10 +5,11 @@ import {StoryFacade, StoryMode} from '@features/learning/application/facades/sto
 import {StoryLine} from '@features/learning/domain/entities/story.entity';
 import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {Mascot3dComponent, MascotAnimation} from '@shared/components/hg/mascot3d/mascot3d.component';
 
 @Component({
   selector: 'hg-story-page',
-  imports: [RouterLink, ButtonComponent, SegmentedControlComponent, TranslatePipe],
+  imports: [RouterLink, ButtonComponent, SegmentedControlComponent, TranslatePipe, Mascot3dComponent],
   templateUrl: './story-page.component.html',
   styleUrl: './story-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +33,11 @@ export class StoryPageComponent implements OnInit {
     ];
   });
 
+
+  readonly loopyAnimation = computed<MascotAnimation>(() => {
+    if (this.facade.completed()) return 'celebrate';
+    return this.facade.completionError() ? 'sad' : 'wave';
+  });
 
   readonly isWatchMode = computed(() => this.facade.mode() === StoryMode.WATCH);
   readonly isListenMode = computed(() => this.facade.mode() === StoryMode.LISTEN);

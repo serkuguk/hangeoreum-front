@@ -1,0 +1,26 @@
+<div class="q-kind">{{ 'learning.exercise.typeKorean' | translate }}</div>
+<div class="panel taskpanel">«{{ payload().translation }}»</div>
+<form novalidate (submit)="$event.preventDefault(); check()">
+  <app-basic-input class="krinput kr" type="text" [label]="'learning.exercise.answerKorean' | translate" [formField]="answerForm"
+                   lang="ko" autocomplete="off" autocapitalize="off"
+                   [spellcheck]="false" [placeholder]="'learning.exercise.koreanPlaceholder' | translate"
+                   (keydown)="onKeydown($event)"/>
+  <div class="kbdrow">
+    <app-button styleClass="hg-button" class="checkbtn" [label]="'common.check' | translate"
+                [disabled]="!value().trim() || answered()" type="submit"/>
+    <app-button class="hg-native-host" [styleClass]="toggleClass()" type="button"
+                [aria]="{'aria-label': ('learning.exercise.keyboardToggle' | translate), 'aria-pressed': keyboardOpen()}"
+                [attr.title]="'learning.exercise.keyboardToggle' | translate"
+                (click)="toggleKeyboard()">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" aria-hidden="true">
+        <rect x="2" y="5" width="20" height="14" rx="2.5"/>
+        <path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 15.5h8"/>
+      </svg>
+    </app-button>
+  </div>
+</form>
+
+@if (keyboardOpen()) {
+  <hg-korean-keyboard class="kbdpanel" (jamo)="type($event)" (backspace)="erase()"/>
+}

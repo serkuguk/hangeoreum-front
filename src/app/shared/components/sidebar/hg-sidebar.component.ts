@@ -33,8 +33,12 @@ export class HgSidebarComponent {
 
   constructor() {
     inject(Router).events.pipe(takeUntilDestroyed()).subscribe(event => {
-      if (event instanceof NavigationEnd) this.expanded.set(false);
+      if (event instanceof NavigationEnd && this.isMobile()) this.expanded.set(false);
     });
+  }
+
+  private isMobile(): boolean {
+    return (this.element.nativeElement.ownerDocument.defaultView?.innerWidth ?? 768) < 768;
   }
 
   private isPrimeIcon(item: HgSidebarItem): boolean {
@@ -50,9 +54,8 @@ export class HgSidebarComponent {
   }
 
   onOutsideClick(event: MouseEvent): void {
-    const host = this.element.nativeElement;
-    if (this.expanded() && (host.ownerDocument.defaultView?.innerWidth ?? 768) < 768
-        && event.target instanceof Node && !host.contains(event.target)) this.dismiss();
+    if (this.expanded() && this.isMobile()
+        && event.target instanceof Node && !this.element.nativeElement.contains(event.target)) this.dismiss();
   }
 
   dismiss(): void {

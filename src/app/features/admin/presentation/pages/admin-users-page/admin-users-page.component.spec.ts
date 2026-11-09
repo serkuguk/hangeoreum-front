@@ -1,3 +1,4 @@
+import {Router} from '@angular/router';
 import {signal} from '@angular/core';
 import {HttpErrorResponse} from '@angular/common/http';
 import {TestBed} from '@angular/core/testing';
@@ -13,11 +14,13 @@ const user: AdminUser = {
 };
 
 describe('AdminUsersPageComponent actions', () => {
+  const router = {navigate: jest.fn()};
   let component: AdminUsersPageComponent;
   let api: {users: jest.Mock; patchUser: jest.Mock; deleteUser: jest.Mock};
   let currentUser: ReturnType<typeof signal<{id: string; role: 'ADMIN' | 'EDITOR'} | null>>;
 
   beforeEach(() => {
+    router.navigate.mockClear();
     api = {
       users: jest.fn().mockReturnValue(of({content: [user], totalElements: 1, page: 0})),
       patchUser: jest.fn(),
@@ -25,6 +28,7 @@ describe('AdminUsersPageComponent actions', () => {
     };
     currentUser = signal({id: 'self', role: 'ADMIN' as const});
     TestBed.configureTestingModule({providers: [
+      {provide: Router, useValue: router},
       {provide: AdminApi, useValue: api},
       {provide: AuthService, useValue: {currentUser}},
     ]});
@@ -32,6 +36,14 @@ describe('AdminUsersPageComponent actions', () => {
   });
 
   afterEach(() => TestBed.resetTestingModule());
+
+  it('opens the exact monitoring ID for self, ADMIN and blocked users without write restrictions', () => {
+    const targets: AdminUser[] = [{...user, id: 'self'}, {...user, id: 'admin', role: 'ADMIN'}, {...user, id: 'blocked', isActive: false}];
+    for (const target of targets) component.openMonitoring(target);
+    expect(router.navigate.mock.calls).toEqual(targets.map(target => [['/admin/users', target.id, 'monitoring']]));
+    expect(api.patchUser).not.toHaveBeenCalled();
+    expect(api.deleteUser).not.toHaveBeenCalled();
+  });
 
   it('confirms blocking and then offers unblocking from the updated API state', () => {
     api.patchUser.mockReturnValueOnce(of({...user, isActive: false}));

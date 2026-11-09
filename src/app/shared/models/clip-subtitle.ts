@@ -5,3 +5,8 @@ export interface ClipSubtitle {
   startMs: number;
   endMs: number;
 }
+
+export enum SubtitleLang {
+  Ko = 'ko',
+  Ru = 'ru',
+}

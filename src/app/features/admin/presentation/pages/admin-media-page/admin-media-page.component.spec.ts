@@ -8,7 +8,7 @@ import {AdminMediaPageComponent} from './admin-media-page.component';
 const speaker: Speaker = {id: 'speaker', name: 'test', avatarUrl: null, bio: null};
 const clip: AdminClip = {title: null, position: null, 
   id: 'clip1234-5678', kind: 'IMMERSE', speakerId: speaker.id, wordId: null, unitId: null,
-  videoUrl: null, audioUrl: null, thumbnailUrl: null, durationMs: null, published: false,
+  videoUrl: null, videoName: null, audioUrl: null, thumbnailUrl: null, durationMs: null, published: false,
 };
 
 describe.each(['speaker', 'clip'] as const)('AdminMediaPageComponent deleting %s', kind => {
@@ -149,5 +149,57 @@ describe('admin unit clip metadata', () => {
     expect(api.updateClip).toHaveBeenCalledWith('bound', expect.objectContaining({title: 'Поздороваться', position: 0, unitId: 'unit'}));
     component.selectedUnitId.set(null);
     expect(component.filteredClips()).toEqual([clip, bound]);
+  });
+});
+
+describe('admin clip subtitles editor', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('splits tracks by language, keeps other languages and blocks saving broken SRT', () => {
+    const en = {lang: 'en', position: 0, text: 'Hi', startMs: 0, endMs: 900};
+    const api = {
+      speakers: jest.fn().mockReturnValue(of([])), clips: jest.fn().mockReturnValue(of([clip])), courses: jest.fn().mockReturnValue(of([])),
+      getSubtitles: jest.fn().mockReturnValue(of([
+        {lang: 'ru', position: 0, text: 'Привет', startMs: 0, endMs: 1000},
+        {lang: 'ko', position: 0, text: '안녕', startMs: 0, endMs: 1000},
+        en,
+      ])),
+      putSubtitles: jest.fn().mockReturnValue(of(undefined)),
+    };
+    TestBed.configureTestingModule({providers: [provideRouter([]), {provide: AdminApi, useValue: api}]});
+    const component = TestBed.runInInjectionContext(() => new AdminMediaPageComponent());
+    component.openSubtitles(clip);
+    expect(component.koDraft()).toBe('1\n00:00:00,000 --> 00:00:01,000\n안녕');
+    expect(component.ruDraft()).toBe('1\n00:00:00,000 --> 00:00:01,000\nПривет');
+
+    component.ruDraft.set('1\n00:00:02,000 --> 00:00:01,000\nПривет');
+    expect(component.canSaveSubtitles()).toBe(false);
+    component.saveSubtitles(clip);
+    expect(api.putSubtitles).not.toHaveBeenCalled();
+
+    component.ruDraft.set('');
+    component.saveSubtitles(clip);
+    expect(api.putSubtitles).toHaveBeenCalledWith(clip.id, [
+      {lang: 'ko', position: 0, text: '안녕', startMs: 0, endMs: 1000},
+      en,
+    ]);
+  });
+});
+
+describe('admin clip uploaded media', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('names the uploaded video and switches upload tooltips to "replace"', () => {
+    const api = {speakers: jest.fn().mockReturnValue(of([])), clips: jest.fn().mockReturnValue(of([])), courses: jest.fn().mockReturnValue(of([]))};
+    TestBed.configureTestingModule({providers: [provideRouter([]), {provide: AdminApi, useValue: api}]});
+    const component = TestBed.runInInjectionContext(() => new AdminMediaPageComponent());
+    const uploaded = {...clip, videoUrl: '/media/clips/x.mp4', videoName: 'урок1.mp4'};
+
+    expect(component.videoName(uploaded)).toBe('урок1.mp4');
+    expect(component.videoName({...uploaded, videoName: null})).toContain('загрузите видео заново');
+    expect(component.hasMedia(uploaded, 'video')).toBe(true);
+    expect(component.hasMedia(uploaded, 'audio')).toBe(false);
+    expect(component.mediaTooltip(uploaded, 'video')).toContain('урок1.mp4');
+    expect(component.mediaTooltip(clip, 'video')).toBe('Загрузить или заменить видео');
   });
 });

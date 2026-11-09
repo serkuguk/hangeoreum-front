@@ -72,7 +72,18 @@ describe('HgSidebarComponent', () => {
     expect(fixture.componentInstance.expanded()).toBe(true);
     await router.navigateByUrl('/admin/words');
     await fixture.whenStable(); fixture.detectChanges();
-    expect(fixture.componentInstance.expanded()).toBe(false);
+    expect(fixture.componentInstance.expanded()).toBe(true);
+    const originalWidth = window.innerWidth;
+    try {
+      Object.defineProperty(window, 'innerWidth', {value: 375, configurable: true});
+      await router.navigateByUrl('/admin');
+      await fixture.whenStable(); fixture.detectChanges();
+      expect(fixture.componentInstance.expanded()).toBe(false);
+      await router.navigateByUrl('/admin/words');
+      await fixture.whenStable(); fixture.detectChanges();
+    } finally {
+      Object.defineProperty(window, 'innerWidth', {value: originalWidth, configurable: true});
+    }
     const links = fixture.nativeElement.querySelectorAll('nav a');
     expect(links[0].getAttribute('aria-current')).toBeNull();
     expect(links[1].getAttribute('aria-current')).toBe('page');

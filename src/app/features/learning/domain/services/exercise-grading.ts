@@ -4,6 +4,7 @@ export interface Feedback {
   correct: boolean;
   expected?: string;
   note?: string;
+  mistakes?: number;
 }
 
 export function gradeChoice(option: ChoiceOption, options: ChoiceOption[]): Feedback {

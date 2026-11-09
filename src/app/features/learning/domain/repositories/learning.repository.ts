@@ -35,6 +35,18 @@ export interface CompleteRequest {
   accuracy: number;
 }
 
+export interface LessonSessionStartRequest {
+  sessionId: string;
+}
+
+export interface ExerciseResultRequest {
+  sequence: number;
+  exerciseId: string;
+  correct: boolean;
+  expected?: string;
+  mistakes?: number;
+}
+
 export interface LetterLearnedResult {
   learnedCount: number;
   total: number;
@@ -45,6 +57,8 @@ export interface LearningRepository {
   courseMap(): Observable<CourseMap>;
   lesson(id: string): Observable<Lesson>;
   tip(lessonId: string): Observable<Tip>;
+  startSession(lessonId: string, request: LessonSessionStartRequest): Observable<void>;
+  recordExerciseResult(lessonId: string, sessionId: string, request: ExerciseResultRequest): Observable<void>;
   complete(lessonId: string, request: CompleteRequest): Observable<CompletionAccepted>;
   getCompletionStatus(attemptId: string): Observable<CompletionStatus>;
   story(lessonId: string): Observable<Story>;

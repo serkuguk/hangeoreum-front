@@ -234,6 +234,16 @@
     .hg-path__label small { font-size: 11.5px; }
     .hg-path__progress { width: 110px; }
     .hg-path__chip { font-size: 10.5px; padding: 5px 10px; }
+
+    // long chapter titles wrap instead of pushing the page sideways on a phone
+    .hg-path__chapter {
+      flex-shrink: 1;
+      min-width: 0;
+    }
+
+    .hg-path__chip {
+      white-space: normal;
+    }
     .hg-path__divider img, .hg-path__glyph { width: 32px; height: 32px; }
   }
 }

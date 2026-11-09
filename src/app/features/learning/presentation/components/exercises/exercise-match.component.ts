@@ -18,7 +18,7 @@ interface MatchCell {
     <div class="q-kind">{{ 'learning.exercise.matchPairs' | translate }}</div>
     <div class="match">
       @for (cell of cells(); track cell.side + cell.pairIndex) {
-        <app-button class="hg-native-host" [styleClass]="'hg-native-button mcell' + (isLeft(cell) ? ' kr' : '') + (isHit(cell) ? ' hit' : '') + (selected() === cell ? ' sel' : '') + (missCell() === cell ? ' miss' : '')" type="button"
+        <app-button class="hg-native-host" [styleClass]="'hg-native-button mcell' + (isLeft(cell) ? ' kr' : '') + (isHit(cell) ? ' hit' : '') + (selected() === cell ? ' sel' : '') + (isMiss(cell) ? ' miss' : '')" type="button"
 
 
                 [disabled]="isHit(cell)"
@@ -46,14 +46,14 @@ interface MatchCell {
       font-size: var(--hg-fs-md);
       color: var(--hg-text);
 
-      &.kr { font-family: var(--hg-font-display); font-size: 26px; }
+      &.kr { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700; font-size: 26px; }
       &:hover:not(:disabled) { border-color: var(--hg-route); }
       // matched — permanently correct
       &.hit { border-color: var(--hg-success); background: var(--hg-success-soft); opacity: .55; cursor: default; }
       // selected — waiting for second pick
       &.sel { border-color: var(--hg-route); }
       // incorrect pair
-      &.miss { border-color: var(--hg-danger); animation: shake .3s; }
+      &.miss { border-color: var(--hg-danger); background: var(--hg-danger-soft); animation: shake .3s; }
     }
     }
   `,
@@ -62,6 +62,8 @@ interface MatchCell {
 export class ExerciseMatchComponent {
   readonly payload = input.required<MatchPairsPayload>();
   readonly result = output<Feedback>();
+  /** Каждая проверенная пара: true — совпала, false — ошибка (общий итог — в `result`). */
+  readonly pairChecked = output<boolean>();
 
   readonly cells = computed<MatchCell[]>(() => shuffle(
     this.payload().pairs.flatMap((pair, pairIndex): MatchCell[] => [
@@ -71,7 +73,7 @@ export class ExerciseMatchComponent {
   ));
 
   readonly selected = signal<MatchCell | null>(null);
-  readonly missCell = signal<MatchCell | null>(null);
+  readonly missCells = signal<MatchCell[]>([]);
   private hits = signal<Set<number>>(new Set());
   private mistakes = 0;
 
@@ -79,11 +81,16 @@ export class ExerciseMatchComponent {
     return cell.side === 'left';
   }
 
+  isMiss(cell: MatchCell): boolean {
+    return this.missCells().includes(cell);
+  }
+
   isHit(cell: MatchCell): boolean {
     return this.hits().has(cell.pairIndex);
   }
 
   pick(cell: MatchCell): void {
+    if (this.isHit(cell)) return;
     const selected = this.selected();
     if (!selected) {
       this.selected.set(cell);
@@ -96,14 +103,16 @@ export class ExerciseMatchComponent {
     if (isMatchingPair(selected, cell)) {
       this.hits.update(set => new Set(set).add(cell.pairIndex));
       this.selected.set(null);
+      this.pairChecked.emit(true);
       if (this.hits().size === this.payload().pairs.length) {
-        this.result.emit(gradeMatch(this.mistakes));
+        this.result.emit({...gradeMatch(this.mistakes), mistakes: this.mistakes});
       }
     } else {
       this.mistakes++;
-      this.missCell.set(cell);
+      this.missCells.set([selected, cell]);
+      this.pairChecked.emit(false);
       this.selected.set(null);
-      setTimeout(() => this.missCell.set(null), 350);
+      setTimeout(() => this.missCells.set([]), 600);
     }
   }
 }

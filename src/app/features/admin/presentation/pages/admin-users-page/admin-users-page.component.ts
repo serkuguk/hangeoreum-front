@@ -1,3 +1,4 @@
+import {Router} from '@angular/router';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -5,122 +6,31 @@ import {EMPTY, Observable, Subject, catchError, debounceTime, distinctUntilChang
 import {HttpErrorResponse} from '@angular/common/http';
 import {AuthService, UserRole} from '@core/auth/auth.service';
 import {ButtonComponent, DialogComponent, BasicInputComponent, PaginationComponent, BasicSelectComponent} from 'springest';
-import {AdminApi, AdminUser} from '@features/admin/infrastructure/admin.api';
+import {ADMIN_PAGE_SIZE, AdminApi, AdminUser} from '@features/admin/infrastructure/admin.api';
 
-enum UserActionKind { Role = 'role', Status = 'status', Delete = 'delete' }
+const UserActionKind = {Role: 'role', Status: 'status', Delete: 'delete'} as const;
+type DialogActionKind = typeof UserActionKind.Status | typeof UserActionKind.Delete;
 
-type EditableRole = 'USER' | 'EDITOR';
-type UserAction = {user: AdminUser; kind: 'role'; role: EditableRole} | {user: AdminUser; kind: 'status' | 'delete'};
+type EditableRole = typeof UserRole.User | typeof UserRole.Editor;
+type UserAction =
+  | {user: AdminUser; kind: typeof UserActionKind.Role; role: EditableRole}
+  | {user: AdminUser; kind: DialogActionKind};
 
 @Component({
   selector: 'hg-admin-users-page',
   imports: [TranslatePipe, ButtonComponent, DialogComponent, BasicInputComponent, PaginationComponent, BasicSelectComponent],
-  template: `
-    <h2 class="pagettl">{{ 'admin.users.title' | translate }}</h2>
-    <p class="pagesub">{{ 'admin.users.count' | translate: {count: total()} }}</p>
-
-    <div class="toolbar">
-      <app-basic-input class="search" type="search" [label]="'admin.users.search' | translate"
-                [placeholder]="'admin.users.searchPlaceholder' | translate" [value]="search()"
-                (valueChange)="onSearch($event)" />
-    </div>
-
-    @if (error()) {
-      <div class="errbar">{{ error() }}</div>
-    }
-
-    <div class="panel">
-      <table class="atable">
-        <thead><tr><th>{{ 'admin.users.name' | translate }}</th><th>Email</th><th>{{ 'admin.users.role' | translate }}</th><th>{{ 'admin.users.registered' | translate }}</th><th></th></tr></thead>
-        <tbody>
-          @for (user of users(); track user.id) {
-            <tr>
-              <td>{{ user.name }}</td>
-              <td>{{ user.email }}</td>
-              <td>
-                @if (canEditRole(user)) {
-                  <app-basic-select class="role-select" [ariaLabel]="'admin.users.roleAria' | translate: {email: user.email}"
-                             [items]="roleOptions" placeholder=""
-                             [value]="selectedRoles()[user.id] || user.role"
-                             (valueChange)="openRoleAction(user, $event)" optionLabel="label" optionValue="value" />
-                } @else {
-                  <div class="role-static">
-                    <span class="pill" [class.p-r]="user.role === roles.Admin" [class.p-b]="user.role === roles.User">
-                      {{ user.role }}
-                    </span>
-                  </div>
-                }
-              </td>
-              <td>
-                <div class="registered-date">
-                  {{ formatRegistrationDate(user.createdAt) }}
-                </div>
-              </td>
-              <td class="user-actions">
-                @if (isAdmin() && user.id !== auth.currentUser()?.id && user.role !== roles.Admin) {
-                  <div class="user-actions__buttons">
-                  <app-button
-                             [label]="(user.isActive ? 'admin.users.block' : 'admin.users.unblock') | translate"
-                             (click)="openAction(user, actionKinds.Status)" [styleClass]="'hg-button hg-button--sm hg-button--' + (user.isActive ? 'danger' : 'secondary')"></app-button>
-                  <app-button [label]="'admin.users.delete' | translate"
-                             (click)="openAction(user, actionKinds.Delete)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
-                  </div>
-                }
-              </td>
-            </tr>
-          } @empty {
-            <tr><td colspan="5" class="empty">{{ 'admin.users.empty' | translate }}</td></tr>
-          }
-        </tbody>
-      </table>
-      @if (totalPages() > 1) {
-        <app-pagination [rows]="20" [first]="page() * 20" [totalRecords]="total()"
-                       [attr.aria-label]="'admin.users.pagination' | translate" (pageChange)="goToPage($event.page ?? 0)" />
-      }
-    </div>
-
-    <app-dialog [closeAriaLabel]="'admin.users.close' | translate" [visible]="action() !== null" (visibleChange)="onDialogVisibleChange($event)"
-               [header]="actionTitle()" [closable]="!saving()" [closeOnEscape]="!saving()">
-      <p>{{ actionMessage() }}</p>
-      @if (actionError()) {
-        <div class="errbar" role="alert">{{ actionError() }}</div>
-      }
-      <div dialogActions>
-        <app-button [label]="(isDeleteAction() ? 'admin.users.delete' : 'admin.users.confirm') | translate"
-
-                   [loading]="saving()" (click)="confirmAction()" [styleClass]="'hg-button hg-button--' + (isDeleteAction() ? 'danger' : 'primary')"></app-button>
-        <app-button [label]="'admin.users.cancel' | translate" [disabled]="saving()"
-                   (click)="closeAction()" styleClass="hg-button hg-button--ghost"></app-button>
-      </div>
-    </app-dialog>
-  `,
-  styleUrl: '../_admin.scss',
-  styles: `
-    .user-actions { min-width: 15rem; }
-    .role-select { display: inline-block; min-width: 9rem; }
-    .role-static {
-      display: flex;
-      align-items: center;
-      box-sizing: border-box;
-      width: 100%;
-      height: 40px;
-      padding: 0 .8rem;
-      border-radius: var(--hg-radius-control, .75rem);
-      background: var(--hg-card);
-    }
-    .registered-date { display: flex; align-items: center; height: 40px; }
-    .user-actions__buttons { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
-    :host .panel { overflow-x: auto; }
-  `,
+  templateUrl: './admin-users-page.component.html',
+  styleUrls: ['../_admin.scss', './admin-users-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminUsersPageComponent {
   private api = inject(AdminApi);
+  private readonly router = inject(Router);
   private translate = inject(TranslateService);
   readonly auth = inject(AuthService);
   readonly roles = UserRole;
   readonly actionKinds = UserActionKind;
-  readonly isDeleteAction = computed(() => this.action()?.kind === UserActionKind.Delete);
+  readonly pageSize = ADMIN_PAGE_SIZE;
 
   readonly users = signal<AdminUser[]>([]);
   readonly total = signal(0);
@@ -132,7 +42,11 @@ export class AdminUsersPageComponent {
   readonly saving = signal(false);
   readonly selectedRoles = signal<Record<string, EditableRole>>({});
   readonly isAdmin = computed(() => this.auth.currentUser()?.role === UserRole.Admin);
-  readonly roleOptions = [{label: UserRole.User, value: UserRole.User}, {label: UserRole.Editor, value: UserRole.Editor}] ;
+  readonly roleOptions = [{label: UserRole.User, value: UserRole.User}, {label: UserRole.Editor, value: UserRole.Editor}];
+  readonly dialogOpen = computed(() => this.action() !== null);
+  readonly isDeleteAction = computed(() => this.action()?.kind === UserActionKind.Delete);
+  readonly confirmLabelKey = computed(() => this.isDeleteAction() ? 'admin.users.delete' : 'admin.users.confirm');
+  readonly confirmButtonClass = computed(() => `hg-button hg-button--${this.isDeleteAction() ? 'danger' : 'primary'}`);
 
   readonly actionTitle = computed(() => {
     const action = this.action();
@@ -151,7 +65,7 @@ export class AdminUsersPageComponent {
     return this.translate.instant(action.user.isActive ? 'admin.users.blockMessage' : 'admin.users.unblockMessage', {email: action.user.email});
   });
 
-  readonly totalPages = computed(() => Math.ceil(this.total() / 20));
+  readonly totalPages = computed(() => Math.ceil(this.total() / this.pageSize));
 
   private readonly search$ = new Subject<string>();
 
@@ -172,6 +86,10 @@ export class AdminUsersPageComponent {
       this.error.set(null);
     });
     this.load();
+  }
+
+  openMonitoring(user: AdminUser): void {
+    void this.router.navigate(['/admin/users', user.id, 'monitoring']);
   }
 
   load(): void {
@@ -200,19 +118,28 @@ export class AdminUsersPageComponent {
     return `${day}-${month}-${year}`;
   }
 
-  canEditRole(user: AdminUser): boolean {
+  /** Admins manage everyone except other admins and themselves. */
+  canManage(user: AdminUser): boolean {
     return this.isAdmin() && user.role !== UserRole.Admin && user.id !== this.auth.currentUser()?.id;
   }
 
+  statusLabelKey(user: AdminUser): string {
+    return user.isActive ? 'admin.users.block' : 'admin.users.unblock';
+  }
+
+  statusButtonClass(user: AdminUser): string {
+    return `hg-button hg-button--sm hg-button--${user.isActive ? 'danger' : 'secondary'}`;
+  }
+
   openRoleAction(user: AdminUser, role: unknown): void {
-    if (!this.canEditRole(user) || this.saving() || (role !== UserRole.User && role !== UserRole.Editor) || role === user.role) return;
+    if (!this.canManage(user) || this.saving() || (role !== UserRole.User && role !== UserRole.Editor) || role === user.role) return;
     this.selectedRoles.update(roles => ({...roles, [user.id]: role}));
     this.actionError.set(null);
     this.action.set({user, kind: UserActionKind.Role, role});
   }
 
-  openAction(user: AdminUser, kind: 'status' | 'delete'): void {
-    if (!this.isAdmin() || this.saving() || user.role === UserRole.Admin || user.id === this.auth.currentUser()?.id) return;
+  openAction(user: AdminUser, kind: DialogActionKind): void {
+    if (this.saving() || !this.canManage(user)) return;
     this.actionError.set(null);
     this.action.set({user, kind});
   }
@@ -237,7 +164,7 @@ export class AdminUsersPageComponent {
 
   confirmAction(): void {
     const action = this.action();
-    if (!action || !this.isAdmin() || this.saving() || action.user.role === UserRole.Admin || action.user.id === this.auth.currentUser()?.id) return;
+    if (!action || this.saving() || !this.canManage(action.user)) return;
     this.saving.set(true);
     const request$: Observable<AdminUser | void> = action.kind === UserActionKind.Delete
       ? this.api.deleteUser(action.user.id)
@@ -250,7 +177,7 @@ export class AdminUsersPageComponent {
           const newTotal = Math.max(0, this.total() - 1);
           this.users.update(users => users.filter(user => user.id !== action.user.id));
           this.total.set(newTotal);
-          this.page.set(Math.min(this.page(), Math.max(0, Math.ceil(newTotal / 20) - 1)));
+          this.page.set(Math.min(this.page(), Math.max(0, Math.ceil(newTotal / this.pageSize) - 1)));
           this.load();
         } else if (result) {
           this.users.update(users => users.map(user => user.id === action.user.id ? result : user));
@@ -260,10 +187,16 @@ export class AdminUsersPageComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.actionError.set(error.status === 409 && action.kind === UserActionKind.Delete
-          ? this.translate.instant('admin.users.activeSubscription')
-          : this.translate.instant(action.kind === UserActionKind.Delete ? 'admin.users.deleteError' : action.kind === UserActionKind.Role ? 'admin.users.roleError' : action.user.isActive ? 'admin.users.blockError' : 'admin.users.unblockError'));
+        this.actionError.set(this.translate.instant(this.actionErrorKey(action, error)));
       },
     });
+  }
+
+  private actionErrorKey(action: UserAction, error: HttpErrorResponse): string {
+    if (action.kind === UserActionKind.Delete) {
+      return error.status === 409 ? 'admin.users.activeSubscription' : 'admin.users.deleteError';
+    }
+    if (action.kind === UserActionKind.Role) return 'admin.users.roleError';
+    return action.user.isActive ? 'admin.users.blockError' : 'admin.users.unblockError';
   }
 }

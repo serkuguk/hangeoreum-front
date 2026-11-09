@@ -1,8 +1,8 @@
-<div class="hg-path" [class.is-compact]="compact()" [style.width.px]="width()" [style.height.px]="canvasHeight()">
+<div class="hg-path" [class.is-compact]="compact()" [style.width.px]="canvasWidth()" [style.height.px]="canvasHeight()">
   <span class="hg-path__watermark hg-path__watermark--start" aria-hidden="true">韓</span>
   <span class="hg-path__watermark hg-path__watermark--end" aria-hidden="true">歩</span>
 
-  <svg class="hg-path__track" [attr.width]="width()" [attr.height]="canvasHeight()"
+  <svg class="hg-path__track" [attr.width]="canvasWidth()" [attr.height]="canvasHeight()"
        [attr.viewBox]="viewBox()" aria-hidden="true">
     @if (startStub()) {
       <path class="hg-path__track-done" [attr.d]="stubPath()"></path>
@@ -51,7 +51,8 @@
          [class.is-now]="isNow(node)"
          [style.top.px]="node.labelTop"
          [style.left.px]="labelLeft(node)"
-         [style.right.px]="labelRight(node)">
+         [style.right.px]="labelRight(node)"
+         [style.max-width.px]="labelMaxWidth(node)">
       @if (isNow(node) && node.icon) {
         <img [src]="node.icon" alt="" width="56" height="56">
       }

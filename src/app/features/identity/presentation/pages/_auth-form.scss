@@ -11,12 +11,34 @@
   .sub { color: var(--hg-text-muted); font-size: var(--hg-fs-sm); margin-bottom: var(--hg-space-6); }
 }
 
+// Заголовок с маскотом справа (страница входа).
+.auth-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hg-space-4);
+}
+
+.auth-mascot {
+  flex-shrink: 0;
+  margin-top: calc(-1 * var(--hg-space-3));
+}
+
 form {
   display: grid;
   gap: var(--hg-space-5);
 }
 
 .hg-auth-consent { margin-top: calc(0.2rem - var(--hg-space-5) + 0.5rem); }
+
+.consent-docs {
+  margin: calc(-1 * var(--hg-space-4)) 0 0;
+  font-size: var(--hg-fs-sm);
+  color: var(--hg-text-muted);
+
+  a {
+    color: var(--hg-route);
+  }
+}
 
 :host ::ng-deep app-checkbox .checkbox-wrapper { display: flex;}
 

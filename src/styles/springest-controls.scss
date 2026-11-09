@@ -31,6 +31,14 @@ app-button {
     }
     &.hg-button--danger { &, &:hover:not(:disabled), &:disabled { background: var(--hg-danger); } }
     &.hg-button--sm { min-height: 2.25rem; padding: .4rem .7rem; font-size: .875rem; }
+
+    // высота как у app-basic-input (2.5rem) — для кнопок в одной строке с полем
+    &.hg-button--field {
+      min-height: 2.5rem;
+      min-width: 2.5rem;
+      padding: .4rem .8rem;
+      font-size: .875rem;
+    }
     &.hg-button--lg { min-height: 3.25rem; padding: .8rem 1.25rem; font-size: 1.05rem; }
   }
   &:has(.hg-button--block) {

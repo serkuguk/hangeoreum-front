@@ -84,7 +84,7 @@
 <section class="panel panel--select">
   <div class="eyebrow">{{ 'admin.media.clips' | translate }}</div>
   <p>{{ 'admin.media.publishRequirements' | translate }}</p>
-  <app-basic-select [ariaLabel]="'admin.media.unitFilter' | translate" [items]="filterOptions()"
+  <app-basic-select [ariaLabel]="'admin.media.unitFilter' | translate" [placeholder]="'admin.media.unitFilter' | translate" [items]="filterOptions()"
                     [value]="selectedUnitId()" (valueChange)="filterUnit($event)" optionLabel="label" optionValue="value" />
   @for (clip of filteredClips(); track clip.id) {
     <div class="cliprow">
@@ -99,6 +99,10 @@
         #picker1
         class="media-picker"
         label="🎬"
+        [class.media-picker--done]="hasMedia(clip, uploadKind.VIDEO)"
+        [pTooltip]="mediaTooltip(clip, uploadKind.VIDEO)"
+        tooltipEvent="hover"
+        tooltipPosition="top"
         [ariaLabel]="'admin.media.uploadVideoAria' | translate"
         accept="video/*"
         (changed)="
@@ -109,6 +113,10 @@
         #picker2
         class="media-picker"
         label="🔊"
+        [class.media-picker--done]="hasMedia(clip, uploadKind.AUDIO)"
+        [pTooltip]="mediaTooltip(clip, uploadKind.AUDIO)"
+        tooltipEvent="hover"
+        tooltipPosition="top"
         [ariaLabel]="'admin.media.uploadAudioAria' | translate"
         accept="audio/*"
         (changed)="
@@ -119,6 +127,10 @@
         #picker3
         class="media-picker"
         label="🖼"
+        [class.media-picker--done]="hasMedia(clip, uploadKind.THUMBNAIL)"
+        [pTooltip]="mediaTooltip(clip, uploadKind.THUMBNAIL)"
+        tooltipEvent="hover"
+        tooltipPosition="top"
         [ariaLabel]="'admin.media.uploadThumbnailAria' | translate"
         accept="image/*"
         (changed)="
@@ -156,6 +168,15 @@
 
       @if (isEditing(clip)) {
         <div class="editbox">
+          @if (clip.videoUrl) {
+            <div class="videobox">
+              <p>{{ 'admin.media.currentVideo' | translate: { name: videoName(clip) } }}</p>
+              <video [src]="clip.videoUrl" controls preload="metadata"></video>
+            </div>
+          } @else {
+            <p class="videobox muted">{{ 'admin.media.noVideoYet' | translate }}</p>
+          }
+
           <app-basic-select
             [ariaLabel]="'admin.media.clipKindAria' | translate"
             placeholder=""
@@ -199,6 +220,7 @@
             } @else {
               <app-basic-input
                 type="search"
+                [label]="'admin.media.wordFieldLabel' | translate"
                 [ariaLabel]="'admin.media.searchWordAria' | translate"
                 [placeholder]="'admin.media.searchWordPlaceholder' | translate"
                 [value]="wordSearch"
@@ -216,10 +238,17 @@
                 >
               }
             }
+
+            <p class="wordhint muted">{{ wordHintKey() | translate }}</p>
           </div>
           <app-button
             [label]="'admin.media.saveClip' | translate"
             (click)="saveClip(clip)"
+            styleClass="hg-button hg-button--ghost hg-button--sm"
+          ></app-button>
+          <app-button
+            [label]="'common.cancel' | translate"
+            (click)="openEdit(clip)"
             styleClass="hg-button hg-button--ghost hg-button--sm"
           ></app-button>
         </div>
@@ -227,38 +256,64 @@
 
       @if (subtitlesFor() === clip.id) {
         <div class="subsbox">
-          <app-textarea
-            [label]="'admin.media.subtitlesLabel' | translate"
-            [rows]="7"
-            [placeholder]="'admin.media.subtitlesPlaceholder' | translate"
-            [formField]="subsField"
-          />
-          <app-button
-            [label]="'admin.media.saveSubtitles' | translate"
-            (click)="saveSubtitles(clip)"
-            [disabled]="!subtitlesReady() || subtitlesSaving()"
-            styleClass="hg-button hg-button--ghost hg-button--sm"
-          ></app-button>
+          <p class="subshint muted">{{ 'admin.media.subtitlesHint' | translate }}</p>
+
+          @for (track of subtitleTracks(); track track.lang) {
+            <div class="substrack">
+              <app-textarea
+                [label]="track.labelKey | translate"
+                [rows]="8"
+                [placeholder]="'admin.media.subtitlesPlaceholder' | translate"
+                [formField]="track.field"
+              />
+              <app-file-picker
+                #subsPicker
+                [label]="'admin.media.subtitlesUpload' | translate"
+                accept=".srt,.vtt"
+                (changed)="loadSubtitlesFile(track.lang, $event[0]); subsPicker.value.set([])"
+              />
+
+              @if (track.hasErrors) {
+                @for (item of track.errors; track item.cue) {
+                  <p class="subserr" role="alert">{{ item.error | translate: { n: item.cue } }}</p>
+                }
+              } @else {
+                <p class="muted">✓ {{ 'admin.media.subtitlesCount' | translate: { n: track.count } }}</p>
+              }
+            </div>
+          }
+
+          <div class="subsactions">
+            <app-button
+              [label]="'admin.media.saveSubtitles' | translate"
+              (click)="saveSubtitles(clip)"
+              [disabled]="!canSaveSubtitles()"
+              styleClass="hg-button hg-button--ghost hg-button--sm"
+            ></app-button>
+          </div>
         </div>
       }
     </div>
   } @empty {
     <div class="empty">{{ 'admin.media.noClips' | translate }}</div>
   }
-  <div class="addrow">
-    <app-basic-select
-      [ariaLabel]="'admin.media.newClipKindAria' | translate"
-      [placeholder]="'admin.media.newClipKindAria' | translate"
-      [items]="clipKindOptions"
-      [formField]="newClipKindField"
-      optionLabel="label"
-      optionValue="value"
-    />
-    <app-button
-      [label]="'admin.media.addClip' | translate"
-      (click)="addClip()"
-      styleClass="hg-button hg-button--ghost hg-button--sm"
-      ><span aria-hidden="true">+</span></app-button
-    >
-  </div>
+  <section class="clip-create">
+    <h3>{{ 'admin.media.newClip' | translate }}</h3>
+    <div class="addrow">
+      <app-basic-select
+        [ariaLabel]="'admin.media.newClipKindAria' | translate"
+        [placeholder]="'admin.media.newClipKindAria' | translate"
+        [items]="clipKindOptions"
+        [formField]="newClipKindField"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <app-button
+        [label]="'admin.media.addClip' | translate"
+        (click)="addClip()"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        ><span aria-hidden="true">+</span></app-button
+      >
+    </div>
+  </section>
 </section>

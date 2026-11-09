@@ -13,7 +13,7 @@ import {AdminTopicsPageComponent} from './admin-topics-page/admin-topics-page.co
 import {AdminWordsPageComponent} from './admin-words-page/admin-words-page.component';
 
 const letter = {id: 'letter', jamo: '가', romanization: 'ga', letterGroup: 'VOWEL', position: 1, audioUrl: null};
-const clip: AdminClip = {title: null, position: null, id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null, published: false, videoUrl: null, audioUrl: null, thumbnailUrl: null};
+const clip: AdminClip = {title: null, position: null, id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null, published: false, videoUrl: null, videoName: null, audioUrl: null, thumbnailUrl: null};
 
 describe('admin springest controls', () => {
   let api: Record<string, jest.Mock>;

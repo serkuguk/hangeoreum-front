@@ -41,7 +41,10 @@
         @case (reviewMode.LISTEN) {
           @if (facade.currentWord(); as word) {
             <div class="listenbox">
-              <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl" size="lg"/>
+              <div class="listenhead">
+                <hg-mascot class="listenmascot" imageSrc="assets/images/mascot-headphones.svg" [size]="88" [pedestal]="false" speech=""/>
+                <hg-audio-button [text]="word.word.hangul" [audioUrl]="word.word.audioUrl" size="lg"/>
+              </div>
               <div class="opts">
                 @for (option of facade.options(); track option) {
                   <app-button class="hg-native-host" [styleClass]="optionClass(option, word.word.translation)" type="button"
@@ -57,11 +60,18 @@
           @if (facade.currentWord(); as word) {
             <div class="spellbox">
               <div class="task">«{{ word.word.translation }}»</div>
-              <div class="typed kr" [class.ok]="isAnswerOk()" [class.bad]="isAnswerBad()">
+              <div class="typed kr" [class.ok]="isAnswerOk()" [class.bad]="isAnswerBad()"
+                   cdkDropList cdkDropListOrientation="mixed" [cdkDropListDisabled]="isAnswered()"
+                   (cdkDropListDropped)="onDrop($event)">
                 @if (facade.typed().length === 0) {
                   <span class="ph">{{ 'vocabulary.games.spell.hint' | translate }}</span>
                 }
-                {{ facade.typed().join('') }}
+                @for (syllable of facade.typed(); track $index) {
+                  <div class="tile" cdkDrag cdkDragPreviewContainer="parent" (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()">
+                    <app-button class="hg-native-host" styleClass="hg-native-button mcell kr syl syl--sm" type="button"
+                            (click)="returnSyllable($index)" [aria]="{'aria-label': ('vocabulary.games.returnSyllable' | translate:{syllable})}">{{ syllable }}</app-button>
+                  </div>
+                }
               </div>
               <div class="bank">
                 @for (syllable of facade.bank(); track $index) {
@@ -69,7 +79,10 @@
                           (click)="facade.pickSyllable($index)" [aria]="{'aria-label': ('vocabulary.games.addSyllable' | translate:{syllable})}">{{ syllable }}</app-button>
                 }
               </div>
-              <app-button styleClass="hg-button hg-button--ghost" [label]="'common.reset' | translate" (click)="facade.resetTyped()"/>
+              <div class="actions">
+                <app-button styleClass="hg-button" [label]="'vocabulary.games.check' | translate" [disabled]="!facade.canCheck()" (click)="facade.checkAnswer()"/>
+                <app-button styleClass="hg-button hg-button--ghost" [label]="'common.reset' | translate" (click)="facade.resetTyped()"/>
+              </div>
             </div>
           }
         }

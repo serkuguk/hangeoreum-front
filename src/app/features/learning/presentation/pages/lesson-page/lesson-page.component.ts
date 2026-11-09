@@ -1,5 +1,5 @@
-import {ButtonComponent} from 'springest';
-import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input} from '@angular/core';
+import {ButtonComponent, DialogComponent} from 'springest';
+import {ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {HgSessionResultCardComponent, HgSessionStat} from '@shared/components/hg';
 import {LessonFacade} from '@features/learning/application/facades/lesson.facade';
@@ -19,10 +19,12 @@ import {ExerciseMatchComponent} from '@features/learning/presentation/components
 import {ExerciseTypeComponent} from '@features/learning/presentation/components/exercises/exercise-type.component';
 import {CompleteResult} from '@features/learning/domain/repositories/learning.repository';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {Mascot3dComponent, MascotAnimation} from '@shared/components/hg/mascot3d/mascot3d.component';
 
 @Component({
   selector: 'hg-lesson-page',
   imports: [
+    DialogComponent,
     ExerciseChoiceComponent,
     ExerciseListenComponent,
     ExerciseWordOrderComponent,
@@ -32,6 +34,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
     ButtonComponent,
     HgSessionResultCardComponent,
     TranslatePipe,
+    Mascot3dComponent,
   ],
   templateUrl: './lesson-page.component.html',
   styleUrl: './lesson-page.component.scss',
@@ -57,16 +60,63 @@ export class LessonPageComponent implements OnInit {
     };
   });
 
+  /** Тот же порядок веток, что и в шаблоне: loading → error → result → упражнение. */
+  readonly inExercise = computed(() =>
+    !this.facade.loading() && !this.facade.error() && !this.facade.result() && !!this.facade.current());
+
+  /** Server refused the lesson start for a paywall reason → explain why instead of the exercise. */
+  readonly paywallMessageKey = computed(() => {
+    const reason = this.facade.blockedBy();
+    return reason ? `learning.lesson.paywallBlocked.${reason}` : null;
+  });
+
+  /** В «сопоставь пары» сетка на всю ширину — Лупи рядом не ставим, иначе карточки сужаются. */
+  readonly loopyBesideTask = computed(() => this.facade.current()?.kind !== 'MATCH_PAIRS');
+
+  /** Короткая реакция на пару в «сопоставь пары» — итог там приходит только в конце. */
+  private readonly pairReaction = signal<MascotAnimation | null>(null);
+  private pairReactionTimer?: ReturnType<typeof setTimeout>;
+
+  reactToPair(matched: boolean): void {
+    this.pairReaction.set(matched ? 'happy' : 'sad');
+    clearTimeout(this.pairReactionTimer);
+    this.pairReactionTimer = setTimeout(() => this.pairReaction.set(null), 1200);
+  }
+
+  /** Лупи реагирует на состояние урока: здоровается, болеет за ответ, празднует финал. */
+  readonly loopyAnimation = computed<MascotAnimation>(() => {
+    const facade = this.facade;
+    if (facade.loading()) return 'wave';
+    if (facade.error()) return 'sad';
+    if (facade.result()) return 'celebrate';
+    if (this.inExercise()) {
+      const feedback = facade.feedback();
+      // Думает, пока пользователь не ответил; радуется верному, грустит от ошибки.
+      if (!feedback) return this.pairReaction() ?? 'think';
+      return feedback.correct ? 'happy' : 'sad';
+    }
+    if (facade.saveError()) return 'sad';
+    return facade.finishing() ? 'walk' : 'idle';
+  });
+
   readonly resultSubtitle = computed(() => `«${this.facade.lesson()?.title}»`);
 
   ngOnInit(): void {
     this.facade.start(this.id());
   }
 
+  readonly exitConfirmOpen = signal(false);
+
   exit(): void {
-    if (this.facade.inProgress && !confirm(this.translate.instant('learning.lesson.exitConfirmation'))) {
+    if (this.facade.inProgress) {
+      this.exitConfirmOpen.set(true);
       return;
     }
+    this.router.navigate(['/learn']);
+  }
+
+  confirmExit(): void {
+    this.exitConfirmOpen.set(false);
     this.router.navigate(['/learn']);
   }
 

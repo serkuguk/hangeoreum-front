@@ -18,7 +18,7 @@
   gap: var(--hg-space-4);
   margin-bottom: var(--hg-space-6);
 
-  .w { font-family: var(--hg-font-display); font-size: var(--hg-fs-display-sm); }
+  .w { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700; font-size: var(--hg-fs-display-sm); }
   .r { color: var(--hg-text-muted); font-size: var(--hg-fs-sm); }
 }
 
@@ -79,6 +79,38 @@ button.hg-native-button.hg-native-button.hg-native-button.wtok {
 
 // ---------- Кнопка "Проверить" (word-order, type) — тот же .cta, локальный отступ ----------
 .checkbtn { margin-top: var(--hg-space-5); }
+
+// ---------- type: ряд «Проверить» + переключатель экранной клавиатуры ----------
+.kbdrow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--hg-space-3);
+}
+
+button.hg-native-button.hg-native-button.hg-native-button.kbdtoggle {
+  display: inline-grid;
+  place-items: center;
+  width: var(--hg-touch-min);
+  height: var(--hg-touch-min);
+  padding: 0;
+  border: 1px solid var(--hg-border);
+  border-radius: var(--hg-radius-control);
+  background: var(--hg-surface);
+  color: var(--hg-text-muted);
+  cursor: pointer;
+  transition: border-color var(--hg-motion-feedback), color var(--hg-motion-feedback);
+
+  &:hover,
+  &.is-on {
+    border-color: var(--hg-route);
+    color: var(--hg-route);
+  }
+}
+
+.kbdpanel {
+  margin-top: var(--hg-space-4);
+}
 
 // ---------- Крупная кнопка воспроизведения (listen) ----------
 .bigsnd {

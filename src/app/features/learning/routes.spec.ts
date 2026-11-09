@@ -44,6 +44,10 @@ describe('Story route composition', () => {
         endMs: null,
       }],
     });
+    // Загруженная story открывает tracking-сессию (best-effort, см. LessonTracking).
+    const session = http.expectOne({method: 'POST', url: '/api/lessons/lesson-1/sessions'});
+    expect(session.request.body).toEqual({sessionId: expect.any(String)});
+    session.flush(null);
     harness.detectChanges();
 
     (harness.routeNativeElement!.querySelector('.dline-toggle') as HTMLButtonElement).click();

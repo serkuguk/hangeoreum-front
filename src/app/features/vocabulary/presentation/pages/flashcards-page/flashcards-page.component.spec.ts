@@ -20,6 +20,20 @@ describe('FlashcardsPageComponent route inputs', () => {
     fixture.componentInstance.ngOnInit();
 
     expect(facade.start).toHaveBeenCalledTimes(1);
-    expect(facade.start).toHaveBeenCalledWith('FLASHCARDS', {limit: 10, difficultOnly: true});
+    expect(facade.start).toHaveBeenCalledWith('FLASHCARDS', {limit: 10, difficultOnly: true, deckId: undefined});
+  });
+
+  it('passes deck query param as deckId', () => {
+    const facade = {start: jest.fn()};
+    TestBed.configureTestingModule({
+      imports: [FlashcardsPageComponent],
+      providers: [provideRouter([]), {provide: ReviewFacade, useValue: facade}],
+    });
+    const fixture = TestBed.createComponent(FlashcardsPageComponent);
+    fixture.componentRef.setInput('deck', 'd1');
+
+    fixture.componentInstance.ngOnInit();
+
+    expect(facade.start).toHaveBeenCalledWith('FLASHCARDS', {limit: undefined, difficultOnly: false, deckId: 'd1'});
   });
 });

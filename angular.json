@@ -33,6 +33,11 @@
                 "glob": "**/*",
                 "input": "src/assets/",
                 "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "assets/zanmang-loopy/exports",
+                "output": "/assets/zanmang-loopy"
               }
             ],
             "styles": [
@@ -47,12 +52,12 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1.2mb",
+                  "maximumWarning": "1.3mb",
                   "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "8kb",
+                  "maximumWarning": "10kb",
                   "maximumError": "16kb"
                 }
               ],

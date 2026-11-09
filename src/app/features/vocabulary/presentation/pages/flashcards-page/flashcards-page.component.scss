@@ -13,6 +13,14 @@
   .cta { color: #fff; }
 }
 
+.deck-label {
+  margin: 0 0 var(--hg-space-3);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hg-text-muted);
+  text-align: left;
+}
+
 .fc-top {
   display: flex;
   align-items: center;
@@ -72,8 +80,23 @@
   &--front {
     background: linear-gradient(150deg, var(--hg-route), #5a2bcf);
 
-    .ghost { font-size: 230px; right: -40px; bottom: -70px; color: rgba(255, 255, 255, .07); }
-    .big { font-family: var(--hg-font-display); font-size: var(--hg-fs-display-xl); text-shadow: 0 6px 30px rgba(0, 0, 0, .3); line-height: 1; }
+    // хангыль карточки — тем же шрифтом, что логотип в шапке
+    .ghost {
+      font-family: 'Gowun Batang', var(--hg-font-kr);
+      font-weight: 700;
+      font-size: 230px;
+      right: -40px;
+      bottom: -70px;
+      color: rgba(255, 255, 255, .07);
+    }
+
+    .big {
+      font-family: 'Gowun Batang', var(--hg-font-kr);
+      font-weight: 700;
+      font-size: var(--hg-fs-display-xl);
+      text-shadow: 0 6px 30px rgba(0, 0, 0, .3);
+      line-height: 1;
+    }
     .rom { opacity: .85; letter-spacing: 1px; }
     .ill { width: 64px; height: 64px; object-fit: cover; border-radius: var(--hg-radius-block); }
   }
@@ -146,7 +169,12 @@
   border-radius: var(--hg-radius-block);
   padding: var(--hg-space-3) var(--hg-space-4);
 
-  .hw { font-family: var(--hg-font-display); font-size: 22px; min-width: 84px; }
+  .hw {
+    font-family: var(--hg-font-display);
+    font-weight: 700;
+    font-size: 22px;
+    min-width: 84px;
+  }
   .tr { flex: 1; color: var(--hg-text-muted); font-size: 13.5px; }
 }
 

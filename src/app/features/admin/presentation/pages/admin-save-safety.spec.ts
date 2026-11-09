@@ -7,7 +7,7 @@ import {AdminMediaPageComponent} from './admin-media-page/admin-media-page.compo
 import {AdminCoursePageComponent} from './admin-course-page/admin-course-page.component';
 import {AdminLessonBuilderPageComponent} from './admin-lesson-builder-page/admin-lesson-builder-page.component';
 
-const clip: AdminClip = {title: null, position: null, id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null, published: false, videoUrl: null, audioUrl: null, thumbnailUrl: null};
+const clip: AdminClip = {title: null, position: null, id: 'clip', kind: 'IMMERSE', speakerId: null, wordId: null, unitId: null, durationMs: null, published: false, videoUrl: null, videoName: null, audioUrl: null, thumbnailUrl: null};
 const unit: AdminUnit = {id: 'unit', courseId: 'course', position: 1, title: 'Unit', description: null, color: null, published: false};
 const lesson: AdminLesson = {id: 'lesson', unitId: unit.id, position: 1, title: 'Lesson', type: 'LESSON', xpReward: 10, free: false, published: false};
 const word: AdminWord = {id: 'word', hangul: '가', romanization: 'ga', translation: 'a', imageUrl: null, audioUrl: null, partOfSpeech: null, topicId: null, exampleKo: null, exampleTranslation: null, grammarNote: null};
@@ -35,10 +35,10 @@ describe('admin save safety', () => {
     component.openSubtitles(clip);
     component.clips.set([clip]);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.subsbox app-button button').disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('.subsactions app-button button').disabled).toBe(true);
     component.saveSubtitles(clip);
     expect(api['putSubtitles']).not.toHaveBeenCalled();
-    expect(component.subsDraft()).toBe('');
+    expect(component.koDraft()).toBe('');
     pending.error(new Error('failed'));
     component.saveSubtitles(clip);
     expect(api['putSubtitles']).not.toHaveBeenCalled();
@@ -68,14 +68,16 @@ describe('admin save safety', () => {
     const pending = new Subject<never[]>();
     api['putSubtitles'].mockReturnValue(pending);
     const component = TestBed.createComponent(AdminMediaPageComponent).componentInstance;
+    const draft = '1\n00:00:00,000 --> 00:00:01,000\n안녕';
     component.openSubtitles(clip);
+    component.koDraft.set(draft);
     component.saveSubtitles(clip);
     component.saveSubtitles(clip);
     expect(api['putSubtitles']).toHaveBeenCalledTimes(1);
     pending.error(new Error('failed'));
     expect(component.subtitlesReady()).toBe(true);
     expect(component.subtitlesSaving()).toBe(false);
-    expect(component.subsDraft()).toBe('[]');
+    expect(component.koDraft()).toBe(draft);
   });
 
   it('blocks overlapping word changes, uses the latest response, and unlocks after failure', () => {
@@ -137,5 +139,31 @@ describe('admin save safety', () => {
     fixture.componentInstance.data.set({...data, exercises: [{...exercise, position: 1}, exercise]});
     fixture.componentInstance.addExercise();
     expect(api['createExercise']).toHaveBeenCalledWith(lesson.id, expect.objectContaining({position: 4}));
+  });
+
+  it('builds the exercise payload from the form and blocks saving an incomplete one', () => {
+    const payload = {question: '안녕하세요', options: [{text: 'здравствуйте', correct: true}, {text: 'спасибо'}]};
+    const exercise: AdminExercise = {id: 'exercise', position: 1, kind: 'CHOICE', payload};
+    api['lessonFull'].mockReturnValue(of({...data, exercises: [exercise]}));
+    api['updateExercise'] = jest.fn().mockReturnValue(of(exercise));
+    const fixture = TestBed.createComponent(AdminLessonBuilderPageComponent);
+    fixture.componentRef.setInput('id', lesson.id);
+    jest.runOnlyPendingTimers();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(fixture.nativeElement.querySelectorAll('hg-exercise-editor .grid__correct app-checkbox').length).toBe(2);
+
+    component.setDraft(exercise.id, {...component.drafts()[exercise.id], correctIndex: 1});
+    component.saveExercise(exercise);
+    expect(api['updateExercise']).toHaveBeenCalledWith(lesson.id, exercise.id, {
+      position: 1,
+      kind: 'CHOICE',
+      payload: {question: '안녕하세요', options: [{text: 'здравствуйте'}, {text: 'спасибо', correct: true}]},
+    });
+
+    component.setDraft(exercise.id, {...component.drafts()[exercise.id], question: ' '});
+    component.saveExercise(exercise);
+    expect(api['updateExercise']).toHaveBeenCalledTimes(1);
+    expect(component.draftErrors()[exercise.id]).toEqual(['admin.builder.validation.question']);
   });
 });

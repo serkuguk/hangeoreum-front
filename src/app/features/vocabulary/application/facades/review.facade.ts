@@ -1,6 +1,6 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {concatMap} from 'rxjs';
+import {concatMap, of, tap} from 'rxjs';
 import {SrsQuality, UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
 import {computeNextReview} from '@features/vocabulary/domain/services/srs';
 import {
@@ -23,6 +23,7 @@ export class ReviewFacade {
 
   private sessionId: string | null = null;
   private answers: {wordId: string; quality: number}[] = [];
+  private answersSubmitted = false;
 
   readonly queue = signal<UserWord[]>([]);
   readonly index = signal(0);
@@ -33,6 +34,8 @@ export class ReviewFacade {
   readonly result = signal<FinishResult | null>(null);
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
+  /** Название колоды, если сессия запущена по колоде. */
+  readonly deckTitle = signal<string | null>(null);
 
   loadSummary(): void {
     this.loading.set(true);
@@ -55,10 +58,13 @@ export class ReviewFacade {
     this.saving.set(false);
     this.saveError.set(null);
     this.answers = [];
+    this.answersSubmitted = false;
     this.correctCount.set(0);
     this.hardWords.set([]);
     this.index.set(0);
     this.queue.set([]);
+    this.deckTitle.set(null);
+    if (opts?.deckId) this.loadDeckTitle(opts.deckId);
     this.repository.startSession(mode, opts).subscribe({
       next: session => {
         this.sessionId = session.id;
@@ -71,6 +77,14 @@ export class ReviewFacade {
           : this.translate.instant('vocabulary.errors.startSession'));
         this.loading.set(false);
       },
+    });
+  }
+
+  // ponytail: тянем весь список колод ради одного названия — их у пользователя единицы; GET /decks/{id}, если станет много
+  private loadDeckTitle(deckId: string): void {
+    this.repository.decks().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: decks => this.deckTitle.set(decks.find(d => d.id === deckId)?.title ?? null),
+      error: () => this.deckTitle.set(null),
     });
   }
 
@@ -126,7 +140,11 @@ export class ReviewFacade {
     if (!sessionId || this.saving()) return;
     this.saving.set(true);
     this.saveError.set(null);
-    this.repository.submitAnswers(sessionId, this.answers).pipe(
+    // retry after a failed finish must not resubmit answers (API rejects them as already answered)
+    const submit$ = this.answersSubmitted
+      ? of(undefined)
+      : this.repository.submitAnswers(sessionId, this.answers).pipe(tap(() => this.answersSubmitted = true));
+    submit$.pipe(
       concatMap(() => this.repository.finishSession(sessionId)),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({

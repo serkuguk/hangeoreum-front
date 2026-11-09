@@ -1,7 +1,22 @@
 <div class="wrap lessonbox">
+  @if (!inExercise()) {
+    <div class="loopy">
+      <hg-mascot3d [size]="120" [animation]="loopyAnimation()" />
+    </div>
+  }
+
   @if (facade.loading()) {
     <div class="panel loadpanel">
       {{ "learning.lesson.loading" | translate }}
+    </div>
+  } @else if (paywallMessageKey(); as messageKey) {
+    <div class="panel loadpanel">
+      <p>{{ messageKey | translate }}</p>
+      <app-button
+        styleClass="hg-button hg-button--ghost"
+        [label]="'learning.lesson.backToMap' | translate"
+        (click)="exit()"
+      />
     </div>
   } @else if (facade.error(); as error) {
     <div class="panel loadpanel">
@@ -60,6 +75,11 @@
       <span class="pill p-b">{{ facade.solved() }} / {{ facade.total() }}</span>
     </div>
 
+    <!-- Один экземпляр на все упражнения: ветка не пересоздаётся при смене упражнения -->
+    <div class="loopy loopy--exercise" [class.loopy--above]="!loopyBesideTask()">
+      <hg-mascot3d [size]="110" [animation]="loopyAnimation()" />
+    </div>
+
     @switch (exercise.kind) {
       @case ("CHOICE") {
         <hg-exercise-choice
@@ -88,6 +108,7 @@
       @case ("MATCH_PAIRS") {
         <hg-exercise-match
           [payload]="asMatch(exercise.payload)"
+          (pairChecked)="reactToPair($event)"
           (result)="facade.answered($event)"
         />
       }
@@ -142,4 +163,17 @@
       {{ "learning.lesson.saving" | translate }}
     </div>
   }
+
+  <app-dialog
+    [closeAriaLabel]="'common.closeDialog' | translate"
+    [header]="'learning.lesson.exit' | translate"
+    [visible]="exitConfirmOpen()"
+    (visibleChange)="exitConfirmOpen.set($event)"
+  >
+    <p>{{ "learning.lesson.exitConfirmation" | translate }}</p>
+    <div dialogActions>
+      <app-button styleClass="hg-button hg-button--danger" [label]="'common.exit' | translate" (click)="confirmExit()" />
+      <app-button styleClass="hg-button hg-button--ghost" [label]="'common.cancel' | translate" (click)="exitConfirmOpen.set(false)" />
+    </div>
+  </app-dialog>
 </div>

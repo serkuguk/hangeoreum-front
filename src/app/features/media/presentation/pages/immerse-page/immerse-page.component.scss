@@ -9,6 +9,15 @@ a { color: var(--hg-route); }
 .subs p + p { margin-top: 8px; color: var(--hg-text-muted); }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 
+.clipword {
+  flex-basis: 100%;
+  margin: 0;
+
+  strong {
+    font-size: 1.25em;
+  }
+}
+
 .feednav {
   --card-w: min(72vw, 320px, calc((100dvh - 240px) * 9 / 16));
   // соседи уменьшены scale(.82) — съедаем пустое место вокруг них, оставляя щель в 4px

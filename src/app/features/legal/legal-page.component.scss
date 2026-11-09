@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+.legal {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--hg-space-7) 24px;
+  color: var(--hg-text);
+  line-height: 1.65;
+}
+
+.legal__back {
+  color: var(--hg-text-muted);
+  font-size: var(--hg-fs-sm);
+}
+
+.legal__title {
+  margin: 24px 0 8px;
+  font-size: var(--hg-fs-3xl);
+  overflow-wrap: break-word;
+}
+
+// «конфиденциальности» at the desktop size is wider than a 360px phone
+@media (max-width: 480px) {
+  .legal__title {
+    font-size: var(--hg-fs-xl);
+  }
+}
+
+.legal__updated {
+  color: var(--hg-text-muted);
+  font-size: var(--hg-fs-sm);
+}
+
+.legal__section {
+  margin-top: 28px;
+
+  h2 {
+    font-size: var(--hg-fs-lg);
+    margin-bottom: 8px;
+  }
+
+  p {
+    white-space: pre-line;
+    color: var(--hg-text);
+  }
+}

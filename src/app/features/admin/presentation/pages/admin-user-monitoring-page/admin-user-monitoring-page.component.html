@@ -1,0 +1,416 @@
+<header class="mon-head">
+  <div>
+    <h1 class="pagettl">{{ 'admin.monitoring.title' | translate }}</h1>
+    @if (summary(); as data) {
+      <h2>{{ data.user.name }} — {{ data.user.email }}</h2>
+      <p class="note">{{ (data.user.isActive ? 'admin.monitoring.active' : 'admin.monitoring.blocked') | translate }} · {{ data.user.role }}</p>
+      <p class="note">{{ 'admin.monitoring.lastSuccessfulAt' | translate }}: {{ lastSuccessfulAt() | date: dateTimeFormat }}</p>
+    }
+  </div>
+  <app-button [label]="'admin.monitoring.refresh' | translate" [styleClass]="actionButton" [disabled]="loading()" (click)="refresh()" />
+</header>
+
+@if (loading()) {
+  <p role="status">{{ 'admin.monitoring.loading' | translate }}</p>
+}
+@if (error()) {
+  <p class="errbar" role="alert">{{ error() }}</p>
+}
+
+@if (summary(); as data) {
+  <section class="panel">
+    <h2>{{ 'admin.monitoring.course.heading' | translate }}</h2>
+    <div class="cards">
+      <div class="card">
+        <p>{{ 'admin.monitoring.course.firstPublished' | translate }}: {{ data.course.title ?? ('admin.monitoring.course.noPublishedCourse' | translate) }}</p>
+        <p>{{ 'admin.monitoring.course.completedLessons' | translate }}: {{ data.course.completed }} / {{ data.course.total }}</p>
+        @if (data.course.percent !== null) {
+          <p class="big">{{ 'admin.monitoring.course.progress' | translate }}: {{ data.course.percent }}%</p>
+        } @else {
+          <p>{{ 'admin.monitoring.course.noPublishedLessons' | translate }}</p>
+        }
+        @if (courseChart(); as chart) {
+          <app-charts [data]="chart" [options]="chartOptions" />
+        }
+      </div>
+      <div class="card">
+        <h3>{{ 'admin.monitoring.alphabet.heading' | translate }}</h3>
+        <p>{{ 'admin.monitoring.alphabet.learned' | translate: {learned: data.alphabet.learned, total: data.alphabet.total} }}</p>
+        @if (alphabetChart(); as chart) {
+          <app-charts [data]="chart" [options]="chartOptions" />
+        }
+      </div>
+    </div>
+
+    @for (unit of data.course.units; track unit.id) {
+      <h3>{{ unit.title }} — {{ completionKey(unit.completed) | translate }}</h3>
+      <ul>
+        @for (lesson of unit.lessons; track lesson.id) {
+          <li>{{ lesson.title }} — {{ completionKey(lesson.completed) | translate }}</li>
+        }
+      </ul>
+    }
+
+    <h2>{{ 'admin.monitoring.lastLesson.heading' | translate }}</h2>
+    @if (data.lastLessonSession; as session) {
+      <p>{{ session.lessonTitle }} · {{ courseLocationKey(session.inCurrentCourseMap) | translate }}</p>
+      <p class="note">
+        {{ 'admin.monitoring.start' | translate }}: {{ session.startedAt | date: dateTimeFormat }} ·
+        {{ 'admin.monitoring.lastLesson.lastReceived' | translate }}: {{ session.lastReceivedAt | date: dateTimeFormat }}
+      </p>
+      <p>{{ receiptKey(session.receiptStatus, session.receiptSavedAt) | translate }}</p>
+      <app-button [label]="'admin.monitoring.lastLesson.open' | translate" [styleClass]="actionButton"
+                  [disabled]="loading() || lessonLoading()" (click)="openLesson(session.id)" />
+    } @else {
+      <p>{{ 'admin.monitoring.lastLesson.none' | translate }}</p>
+    }
+    <p class="note">
+      {{ 'admin.monitoring.counts.sessions' | translate }}: {{ data.counts.sessions }} ·
+      {{ 'admin.monitoring.counts.completions' | translate }}: {{ data.counts.completions }} ·
+      {{ 'admin.monitoring.counts.progress' | translate }}: {{ data.counts.progress }} ·
+      {{ 'admin.monitoring.counts.reviews' | translate }}: {{ data.counts.reviews }}
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>{{ 'admin.monitoring.activity.heading' | translate }}</h2>
+    <p class="note">
+      {{ 'admin.monitoring.activity.serverDate' | translate }}: {{ data.activity.serverDate | date: dateFormat }} ·
+      {{ 'admin.monitoring.activity.currentStreak' | translate }}: {{ data.activity.currentStreak }} ·
+      {{ 'admin.monitoring.activity.longestStreak' | translate }}: {{ data.activity.longestStreak }} ·
+      {{ 'admin.monitoring.activity.lastActive' | translate }}: {{ (data.activity.lastActiveDate | date: dateFormat) ?? ('admin.monitoring.noData' | translate) }}
+    </p>
+    <table class="atable">
+      <caption>{{ 'admin.monitoring.activity.caption' | translate }}</caption>
+      <thead>
+        <tr>
+          <th>{{ 'admin.monitoring.activity.date' | translate }}</th>
+          <th>{{ 'admin.monitoring.activity.xp' | translate }}</th>
+          <th>{{ 'admin.monitoring.activity.lessonsCompleted' | translate }}</th>
+          <th>{{ 'admin.monitoring.activity.reviewsDone' | translate }}</th>
+          <th>{{ 'admin.monitoring.activity.goalXp' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (day of activityDays(); track day.date) {
+          <tr>
+            <td>{{ day.date | date: dateFormat }}</td>
+            <td>{{ day.xpEarned }}</td>
+            <td>{{ day.lessonsCompleted }}</td>
+            <td>{{ day.reviewsDone }}</td>
+            <td>{{ day.goalXp ?? ('admin.monitoring.noData' | translate) }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5">{{ 'admin.monitoring.activity.empty' | translate }}</td></tr>
+        }
+      </tbody>
+    </table>
+    @if (hasActivityPages()) {
+      <app-pagination [rows]="activityPageSize" [first]="activityPage() * activityPageSize" [totalRecords]="data.activity.days.length"
+                      [attr.aria-label]="'admin.monitoring.activity.pagination' | translate" (pageChange)="activityPage.set($event.page ?? 0)" />
+    }
+  </section>
+
+  <section class="panel">
+    <h2>{{ 'admin.monitoring.difficult.heading' | translate }}</h2>
+    <p class="note">{{ 'admin.monitoring.difficult.total' | translate: {total: data.difficultWords.totalElements} }}</p>
+    <ul>
+      @for (word of data.difficultWords.content; track word.id) {
+        <li>
+          {{ word.hangul }} — {{ word.translation }} ·
+          {{ 'admin.monitoring.ef' | translate }} {{ word.easeFactor }} ·
+          {{ 'admin.monitoring.repetitions' | translate }}: {{ word.repetitions }} ·
+          {{ 'admin.monitoring.dueDate' | translate }}: {{ word.dueDate | date: dateFormat }} ·
+          {{ difficultKey(word.isDifficult) | translate }}
+        </li>
+      } @empty {
+        <li>{{ 'admin.monitoring.difficult.empty' | translate }}</li>
+      }
+    </ul>
+    @if (data.difficultWords.hasMore) {
+      <p class="note">{{ 'admin.monitoring.difficult.shownFirst' | translate: {count: data.difficultWords.content.length} }}</p>
+    }
+  </section>
+
+  <section class="panel">
+    <h2>{{ 'admin.monitoring.history.heading' | translate }}</h2>
+    <p class="note">{{ 'admin.monitoring.history.liveNote' | translate }}</p>
+    <div class="toolbar" [attr.aria-label]="'admin.monitoring.history.tabsAria' | translate">
+      @for (tab of historyTabs; track tab.kind) {
+        <app-button [label]="tab.label | translate" [styleClass]="tabClass(tab.kind)"
+                    [disabled]="loading() || historyLoading()" (click)="loadHistory(tab.kind)" />
+      }
+    </div>
+
+    @if (history(); as state) {
+      <h3>{{ historyTitle() | translate }}</h3>
+      @if (state.loading) {
+        <p role="status">{{ 'admin.monitoring.history.loading' | translate }}</p>
+      }
+      @if (state.error) {
+        <p class="errbar" role="alert">{{ state.error }}</p>
+        <app-button [label]="'admin.monitoring.history.retry' | translate" [styleClass]="actionButton" (click)="retryHistory()" />
+      }
+      @if (state.data; as page) {
+        <table class="atable">
+          <caption>{{ historyTitle() | translate }}</caption>
+          <thead>
+            <tr>
+              <th>{{ 'admin.monitoring.history.columns.subject' | translate }}</th>
+              <th>{{ 'admin.monitoring.history.columns.saved' | translate }}</th>
+              <th>{{ 'admin.monitoring.history.columns.details' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of sessionRows(); track row.id) {
+              <tr>
+                <td>
+                  {{ row.lessonTitle }}
+                  <p>{{ courseLocationKey(row.inCurrentCourseMap) | translate }}</p>
+                </td>
+                <td>
+                  {{ 'admin.monitoring.start' | translate }}: {{ row.startedAt | date: dateTimeFormat }} ·
+                  {{ 'admin.monitoring.lastAction' | translate }}: {{ row.lastReceivedAt | date: dateTimeFormat }}
+                  <p>
+                    {{ 'admin.monitoring.history.planned' | translate }}: {{ row.plannedExercises }} ·
+                    {{ 'admin.monitoring.history.savedAnswers' | translate }}: {{ row.savedAnswers }} ·
+                    {{ 'admin.monitoring.history.repeated' | translate }}: {{ row.repeatedExercises }}
+                  </p>
+                  {{ receiptKey(row.receiptStatus, row.receiptSavedAt) | translate }}
+                </td>
+                <td>
+                  <app-button [label]="'admin.monitoring.results' | translate" [styleClass]="actionButton"
+                              [disabled]="lessonLoading() || loading()" (click)="openLesson(row.id)" />
+                </td>
+              </tr>
+            }
+            @for (row of completionRows(); track row.id) {
+              <tr>
+                <td>
+                  {{ row.lessonTitle ?? row.lessonId }}
+                  <p>{{ courseLocationKey(row.inCurrentCourseMap) | translate }}</p>
+                </td>
+                <td>
+                  {{ 'admin.monitoring.history.score' | translate }}: {{ row.score }} ·
+                  {{ 'admin.monitoring.history.accuracy' | translate }}: {{ row.accuracy }}
+                  <p>{{ receiptKey(row.status, row.savedAt) | translate }}</p>
+                  {{ 'admin.monitoring.history.created' | translate }}: {{ row.createdAt | date: dateTimeFormat }} ·
+                  {{ 'admin.monitoring.history.saved' | translate }}: {{ (row.savedAt | date: dateTimeFormat) ?? ('admin.monitoring.noData' | translate) }}
+                </td>
+                <td>
+                  {{ 'admin.monitoring.source' | translate }}: {{ row.source }} ·
+                  {{ 'admin.monitoring.history.receipt' | translate }}: {{ row.id }}
+                  <p>{{ 'admin.monitoring.clientReported' | translate }}</p>
+                </td>
+              </tr>
+            }
+            @for (row of progressRows(); track row.lessonId) {
+              <tr>
+                <td>
+                  {{ row.lessonTitle ?? row.lessonId }}
+                  <p>{{ courseLocationKey(row.inCurrentCourseMap) | translate }}</p>
+                </td>
+                <td>
+                  {{ progressKey(row.status) | translate }} ·
+                  {{ 'admin.monitoring.history.score' | translate }}: {{ row.score ?? ('admin.monitoring.noData' | translate) }} ·
+                  {{ 'admin.monitoring.history.accuracy' | translate }}: {{ row.accuracy ?? ('admin.monitoring.noData' | translate) }}
+                  <p>
+                    {{ 'admin.monitoring.history.attempts' | translate }}: {{ row.attempts }} ·
+                    {{ 'admin.monitoring.history.completedAt' | translate }}: {{ (row.completedAt | date: dateTimeFormat) ?? ('admin.monitoring.noData' | translate) }} ·
+                    {{ 'admin.monitoring.history.updated' | translate }}: {{ row.updatedAt | date: dateTimeFormat }}
+                  </p>
+                </td>
+                <td>
+                  {{ 'admin.monitoring.source' | translate }}: {{ row.source }}
+                  <p>{{ 'admin.monitoring.clientReported' | translate }}</p>
+                </td>
+              </tr>
+            }
+            @for (row of reviewRows(); track row.id) {
+              <tr>
+                <td>{{ 'admin.monitoring.history.review' | translate }}: {{ row.mode }}</td>
+                <td>
+                  {{ 'admin.monitoring.start' | translate }}: {{ row.startedAt | date: dateTimeFormat }} ·
+                  @if (row.finishedAt) {
+                    {{ 'admin.monitoring.history.completedAt' | translate }}: {{ row.finishedAt | date: dateTimeFormat }}
+                  } @else {
+                    {{ 'admin.monitoring.history.notFinished' | translate }}
+                  }
+                  <p>
+                    {{ 'admin.monitoring.history.issued' | translate }}: {{ row.issuedCount }} ·
+                    {{ 'admin.monitoring.history.answered' | translate }}: {{ row.answeredCount }} ·
+                    {{ 'admin.monitoring.correctCount' | translate }}: {{ row.correctCount }} / {{ row.answeredCount }}
+                  </p>
+                  {{ 'admin.monitoring.history.savedTotal' | translate }}: {{ row.correct }} / {{ row.total }} ·
+                  {{ 'admin.monitoring.activity.xp' | translate }}: {{ row.xpEarned }} ·
+                  {{ 'admin.monitoring.history.streak' | translate }}: {{ row.streakAfter ?? ('admin.monitoring.noData' | translate) }}
+                </td>
+                <td>
+                  <app-button [label]="'admin.monitoring.answers' | translate" [styleClass]="actionButton"
+                              [disabled]="reviewLoading() || loading()" (click)="openReview(row.id)" />
+                </td>
+              </tr>
+            }
+            @for (word of wordRows(); track word.id) {
+              <tr>
+                <td>{{ word.hangul }} — {{ word.translation }}</td>
+                <td>
+                  {{ 'admin.monitoring.ef' | translate }}: {{ word.easeFactor }} ·
+                  {{ 'admin.monitoring.repetitions' | translate }}: {{ word.repetitions }} ·
+                  {{ 'admin.monitoring.dueDate' | translate }}: {{ word.dueDate | date: dateFormat }}
+                </td>
+                <td>{{ difficultKey(word.isDifficult) | translate }}</td>
+              </tr>
+            }
+            @if (!page.content.length) {
+              <tr><td colspan="3">{{ 'admin.monitoring.history.empty' | translate }}</td></tr>
+            }
+          </tbody>
+        </table>
+        <app-pagination [rows]="pageSize" [first]="state.page * pageSize" [totalRecords]="page.totalElements"
+                        [attr.aria-label]="'admin.monitoring.history.pagination' | translate" (pageChange)="changeHistoryPage($event.page ?? 0)" />
+      }
+    }
+    <p class="note">{{ 'admin.monitoring.history.progressNote' | translate }}</p>
+  </section>
+
+  <section class="panel">
+    <h2>{{ 'admin.monitoring.coverage.heading' | translate }}</h2>
+    <p>{{ 'admin.monitoring.coverage.trackedSince' | translate }}: {{ (data.firstTrackedAt | date: dateTimeFormat) ?? ('admin.monitoring.coverage.noTrackedStart' | translate) }}</p>
+    @if (!data.firstTrackedAt) {
+      <p>{{ 'admin.monitoring.coverage.notCollectedBefore' | translate }}</p>
+    }
+    <p class="note">{{ 'admin.monitoring.coverage.savedAnswersNote' | translate }}</p>
+    <p class="note">{{ data.coverage }}</p>
+  </section>
+}
+
+@if (lessonLoading()) {
+  <p role="status">{{ 'admin.monitoring.lesson.loading' | translate }}</p>
+}
+@if (lessonError()) {
+  <p class="errbar" role="alert">{{ lessonError() }}</p>
+  <app-button [label]="'admin.monitoring.lesson.retry' | translate" [styleClass]="actionButton" (click)="retryLesson()" />
+}
+@if (lessonDetail(); as detail) {
+  <section class="panel">
+    <h2>{{ 'admin.monitoring.lesson.heading' | translate: {title: detail.session.lessonTitle} }}</h2>
+    <p class="note">
+      {{ 'admin.monitoring.lesson.session' | translate }}: {{ detail.session.id }} ·
+      {{ receiptKey(detail.session.receiptStatus, detail.session.receiptSavedAt) | translate }}
+    </p>
+    <p class="note">{{ 'admin.monitoring.lesson.note' | translate }}</p>
+    <div class="cards">
+      <div class="card">
+        <p>
+          {{ 'admin.monitoring.lesson.incorrectCount' | translate }}: {{ detail.observedIncorrectCount }} / {{ detail.session.savedAnswers }} ·
+          {{ 'admin.monitoring.lesson.incorrectRatio' | translate }}: {{ detail.observedIncorrectRatio ?? ('admin.monitoring.noData' | translate) }}
+        </p>
+        <p>
+          {{ 'admin.monitoring.correctCount' | translate }}: {{ savedCorrectCount() }} / {{ detail.session.savedAnswers }} ·
+          {{ 'admin.monitoring.lesson.correctRatio' | translate }}: {{ savedCorrectRatio() ?? ('admin.monitoring.noData' | translate) }}
+        </p>
+        @if (lessonChart(); as chart) {
+          <app-charts [data]="chart" [options]="chartOptions" />
+        }
+      </div>
+    </div>
+
+    <h3>{{ 'admin.monitoring.lesson.exercises' | translate }}</h3>
+    <ol>
+      @for (exercise of detail.exercises; track exercise.exerciseId) {
+        <li>{{ exercise.position }} · {{ exercise.exerciseId }} · {{ exercise.kind }} · {{ exercise.context }}</li>
+      }
+    </ol>
+
+    <h3>{{ 'admin.monitoring.lesson.noSavedCorrect' | translate }}</h3>
+    <p class="note">{{ 'admin.monitoring.lesson.noSavedCorrectNote' | translate }}</p>
+    <ul>
+      @for (id of detail.exercisesWithoutSavedCorrect; track id) {
+        <li>{{ id }}</li>
+      } @empty {
+        <li>{{ 'admin.monitoring.lesson.noneFound' | translate }}</li>
+      }
+    </ul>
+
+    <h3>{{ 'admin.monitoring.lesson.gaps' | translate }}</h3>
+    <ul>
+      @for (gap of detail.sequenceGaps; track gap.firstSequence) {
+        <li>{{ gap.firstSequence }}–{{ gap.lastSequence }}</li>
+      } @empty {
+        <li>{{ 'admin.monitoring.lesson.gapsNone' | translate }}</li>
+      }
+    </ul>
+
+    <table class="atable">
+      <caption>{{ 'admin.monitoring.lesson.caption' | translate }}</caption>
+      <thead>
+        <tr>
+          <th>{{ 'admin.monitoring.lesson.columns.presentation' | translate }}</th>
+          <th>{{ 'admin.monitoring.lesson.columns.result' | translate }}</th>
+          <th>{{ 'admin.monitoring.timeSource' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (result of detail.results.content; track result.id) {
+          <tr>
+            <td>
+              {{ result.sequence }} · {{ result.exerciseId }} · {{ result.kind }}
+              <p>{{ result.context }}</p>
+            </td>
+            <td>
+              {{ correctnessKey(result.correct) | translate }}
+              <p>
+                {{ 'admin.monitoring.lesson.expected' | translate }}: {{ result.expected ?? ('admin.monitoring.lesson.notSaved' | translate) }} ·
+                {{ 'admin.monitoring.lesson.pairMistakes' | translate }}: {{ result.mistakes ?? ('admin.monitoring.lesson.notCollected' | translate) }}
+              </p>
+            </td>
+            <td>{{ result.receivedAt | date: dateTimeFormat }} · {{ result.source }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="3">{{ 'admin.monitoring.lesson.empty' | translate }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <p class="note">{{ detail.coverage }}</p>
+    <app-pagination [rows]="pageSize" [first]="lessonPage() * pageSize" [totalRecords]="detail.results.totalElements"
+                    [attr.aria-label]="'admin.monitoring.lesson.pagination' | translate" (pageChange)="changeLessonPage($event.page ?? 0)" />
+  </section>
+}
+
+@if (reviewLoading()) {
+  <p role="status">{{ 'admin.monitoring.review.loading' | translate }}</p>
+}
+@if (reviewError()) {
+  <p class="errbar" role="alert">{{ reviewError() }}</p>
+  <app-button [label]="'admin.monitoring.review.retry' | translate" [styleClass]="actionButton" (click)="retryReview()" />
+}
+@if (reviewAnswers(); as answers) {
+  <section class="panel">
+    <h2>{{ 'admin.monitoring.review.heading' | translate }}</h2>
+    <p class="note">{{ 'admin.monitoring.review.note' | translate }}</p>
+    <table class="atable">
+      <caption>{{ 'admin.monitoring.review.caption' | translate }}</caption>
+      <thead>
+        <tr>
+          <th>{{ 'admin.monitoring.review.columns.word' | translate }}</th>
+          <th>{{ 'admin.monitoring.review.columns.grade' | translate }}</th>
+          <th>{{ 'admin.monitoring.timeSource' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (answer of answers.content; track answer.id) {
+          <tr>
+            <td>{{ answer.hangul }} — {{ answer.translation }}</td>
+            <td>{{ answer.quality }} · {{ correctnessKey(answer.isCorrect) | translate }}</td>
+            <td>{{ answer.answeredAt | date: dateTimeFormat }} · {{ answer.source }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="3">{{ 'admin.monitoring.review.empty' | translate }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <app-pagination [rows]="pageSize" [first]="reviewPage() * pageSize" [totalRecords]="answers.totalElements"
+                    [attr.aria-label]="'admin.monitoring.review.pagination' | translate" (pageChange)="changeReviewPage($event.page ?? 0)" />
+  </section>
+}

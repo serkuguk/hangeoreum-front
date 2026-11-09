@@ -1,0 +1,76 @@
+<h2 class="pagettl">{{ 'admin.users.title' | translate }}</h2>
+<p class="pagesub">{{ 'admin.users.count' | translate: {count: total()} }}</p>
+
+<div class="toolbar">
+  <app-basic-input class="search" type="search" [label]="'admin.users.search' | translate"
+            [placeholder]="'admin.users.searchPlaceholder' | translate" [value]="search()"
+            (valueChange)="onSearch($event)" />
+</div>
+
+@if (error()) {
+  <div class="errbar">{{ error() }}</div>
+}
+
+<div class="panel">
+  <table class="atable">
+    <thead><tr><th>{{ 'admin.users.name' | translate }}</th><th>{{ 'common.email' | translate }}</th><th>{{ 'admin.users.role' | translate }}</th><th>{{ 'admin.users.registered' | translate }}</th><th></th></tr></thead>
+    <tbody>
+      @for (user of users(); track user.id) {
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            @if (canManage(user)) {
+              <app-basic-select class="role-select" [ariaLabel]="'admin.users.roleAria' | translate: {email: user.email}"
+                         [items]="roleOptions" placeholder=""
+                         [value]="selectedRoles()[user.id] || user.role"
+                         (valueChange)="openRoleAction(user, $event)" optionLabel="label" optionValue="value" />
+            } @else {
+              <div class="role-static">
+                <span class="pill" [class.p-r]="user.role === roles.Admin" [class.p-b]="user.role === roles.User">
+                  {{ user.role }}
+                </span>
+              </div>
+            }
+          </td>
+          <td>
+            <div class="registered-date">
+              {{ formatRegistrationDate(user.createdAt) }}
+            </div>
+          </td>
+          <td class="user-actions">
+            <div class="user-actions__buttons">
+              <app-button [label]="'admin.users.monitoring' | translate" (click)="openMonitoring(user)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+              @if (canManage(user)) {
+                <app-button [label]="statusLabelKey(user) | translate"
+                           (click)="openAction(user, actionKinds.Status)" [styleClass]="statusButtonClass(user)"></app-button>
+                <app-button [label]="'admin.users.delete' | translate"
+                           (click)="openAction(user, actionKinds.Delete)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
+              }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="empty">{{ 'admin.users.empty' | translate }}</td></tr>
+      }
+    </tbody>
+  </table>
+  @if (totalPages() > 1) {
+    <app-pagination [rows]="pageSize" [first]="page() * pageSize" [totalRecords]="total()"
+                   [attr.aria-label]="'admin.users.pagination' | translate" (pageChange)="goToPage($event.page ?? 0)" />
+  }
+</div>
+
+<app-dialog [closeAriaLabel]="'admin.users.close' | translate" [visible]="dialogOpen()" (visibleChange)="onDialogVisibleChange($event)"
+           [header]="actionTitle()" [closable]="!saving()" [closeOnEscape]="!saving()">
+  <p>{{ actionMessage() }}</p>
+  @if (actionError()) {
+    <div class="errbar" role="alert">{{ actionError() }}</div>
+  }
+  <div dialogActions>
+    <app-button [label]="confirmLabelKey() | translate"
+               [loading]="saving()" (click)="confirmAction()" [styleClass]="confirmButtonClass()"></app-button>
+    <app-button [label]="'admin.users.cancel' | translate" [disabled]="saving()"
+               (click)="closeAction()" styleClass="hg-button hg-button--ghost"></app-button>
+  </div>
+</app-dialog>

@@ -1,4 +1,5 @@
 import {DestroyRef, Injectable, computed, effect, inject, signal} from '@angular/core';
+import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {shuffle} from '@shared/utils/shuffle';
 import {UserWord} from '@features/vocabulary/domain/entities/user-word.entity';
 import {GameEngine, syllables} from '@features/vocabulary/domain/services/game-engine';
@@ -192,21 +193,43 @@ export class GamesFacade {
     this.schedule(() => this.nextWord(), correct ? 500 : 1100);
   }
 
+  readonly canCheck = computed(() => {
+    const word = this.currentWord();
+    return !!word && !this.lastAnswer() && this.typed().length === syllables(word.word.hangul).length;
+  });
+
   pickSyllable(index: number): void {
     const word = this.currentWord();
-    if (!word || this.lastAnswer()) return;
+    if (!word || this.lastAnswer() || this.typed().length >= syllables(word.word.hangul).length) return;
     const syllable = this.bank()[index];
+    if (syllable === undefined) return;
     this.typed.update(list => [...list, syllable]);
     this.bank.update(list => list.filter((_, i) => i !== index));
+  }
 
-    const target = syllables(word.word.hangul);
-    const typed = this.typed();
-    if (typed.length === target.length) {
-      const correct = typed.join('') === target.join('');
-      this.registerAnswer(word.word.id, correct);
-      this.lastAnswer.set(correct ? AnswerResult.OK : AnswerResult.BAD);
-      this.schedule(() => this.nextWord(), correct ? 500 : 1100);
-    }
+  returnSyllable(index: number): void {
+    const syllable = this.typed()[index];
+    if (this.lastAnswer() || syllable === undefined) return;
+    this.typed.update(list => list.filter((_, i) => i !== index));
+    this.bank.update(list => [...list, syllable]);
+  }
+
+  moveSyllable(from: number, to: number): void {
+    const length = this.typed().length;
+    const inRange = (i: number) => Number.isInteger(i) && i >= 0 && i < length;
+    if (this.lastAnswer() || from === to || !inRange(from) || !inRange(to)) return;
+    const next = [...this.typed()];
+    moveItemInArray(next, from, to);
+    this.typed.set(next);
+  }
+
+  checkAnswer(): void {
+    const word = this.currentWord();
+    if (!word || !this.canCheck()) return;
+    const correct = this.typed().join('') === syllables(word.word.hangul).join('');
+    this.registerAnswer(word.word.id, correct);
+    this.lastAnswer.set(correct ? AnswerResult.OK : AnswerResult.BAD);
+    this.schedule(() => this.nextWord(), correct ? 500 : 1100);
   }
 
   resetTyped(): void {

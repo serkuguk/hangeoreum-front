@@ -143,6 +143,7 @@ function humanizeError(error: HttpErrorResponse, translate: TranslateService): s
   if (body?.code === 'INVALID_RESET_TOKEN') return translate.instant('identity.passwordReset.invalidToken');
   if (body?.code === 'EMAIL_TAKEN' || error.status === 409) return translate.instant('identity.errors.emailTaken');
   if (body?.code === 'VALIDATION') return translate.instant('identity.errors.validation');
+  if (error.status === 429) return translate.instant('identity.errors.tooManyAttempts');
   if (error.status === 0) return translate.instant('common.errors.serverUnavailable');
   return body?.message || translate.instant('common.errors.generic');
 }

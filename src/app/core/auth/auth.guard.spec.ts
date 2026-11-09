@@ -1,3 +1,4 @@
+import {adminRoutes} from '@features/admin/routes';
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {Router} from '@angular/router';
@@ -21,6 +22,18 @@ describe('admin route permissions', () => {
   });
 
   afterEach(() => TestBed.resetTestingModule());
+
+  it('protects the direct monitoring route with adminOnlyGuard', () => {
+    const route = adminRoutes[0].children?.find(child => child.path === 'users/:id/monitoring');
+    expect(route?.canActivate).toEqual([adminOnlyGuard]);
+    expect(route?.loadComponent).toBeDefined();
+    for (const denied of ['EDITOR', 'USER'] as const) {
+      role = denied;
+      expect(TestBed.runInInjectionContext(() => adminOnlyGuard({} as never, {} as never))).not.toBe(true);
+    }
+    role = 'ADMIN';
+    expect(TestBed.runInInjectionContext(() => adminOnlyGuard({} as never, {} as never))).toBe(true);
+  });
 
   it('admits admins and editors to the admin area', () => {
     expect(TestBed.runInInjectionContext(() => adminGuard({} as never, {} as never))).toBe(true);

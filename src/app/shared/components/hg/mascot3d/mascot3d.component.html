@@ -1,0 +1,13 @@
+<div class="mascot3d" [class.mascot3d--interactive]="allowRotation()"
+     [attr.role]="allowRotation() ? 'group' : 'img'"
+     [attr.aria-label]="(allowRotation() ? 'mascot3d.rotationLabel' : 'mascot3d.ariaLabel') | translate"
+     [attr.tabindex]="allowRotation() ? 0 : null"
+     (keydown)="onKeyDown($event)"
+     (pointerdown)="onPointerDown($event)" (pointermove)="onPointerMove($event)"
+     (pointerup)="onPointerEnd()" (pointercancel)="onPointerEnd()" (lostpointercapture)="onPointerEnd()">
+  @if (!loaded()) {
+    <img class="mascot3d__fallback" [src]="fallback()" alt="" aria-hidden="true" />
+  }
+  <canvas #canvas class="mascot3d__canvas" [class.mascot3d__canvas--visible]="loaded()"
+          aria-hidden="true" (webglcontextlost)="onContextLost($event)"></canvas>
+</div>

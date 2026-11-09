@@ -1,0 +1,10 @@
+<div class="admin">
+  <hg-sidebar [items]="sidebarItems()" [navLabel]="'navigation.admin' | translate"
+              [expandLabel]="'navigation.expandMenu' | translate" [collapseLabel]="'navigation.collapseMenu' | translate"
+              [footerItem]="{link: '/dashboard', label: ('admin.backToApp' | translate), icon: 'pi-arrow-left'}">
+    <a class="logo han" routerLink="/dashboard">한걸음 <span>{{ 'admin.brand' | translate }}</span></a>
+  </hg-sidebar>
+  <main class="content">
+    <router-outlet/>
+  </main>
+</div>

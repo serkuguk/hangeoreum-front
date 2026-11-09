@@ -1,0 +1,32 @@
+<!-- mousedown.preventDefault: фокус и каретка остаются в поле ввода -->
+<div class="kbd" role="group" [attr.aria-label]="'learning.exercise.keyboardToggle' | translate"
+     (mousedown)="$event.preventDefault()">
+
+  @for (row of rows(); track $index; let isLast = $last) {
+    <div class="kbd-row">
+
+      @if (isLast) {
+        <app-button class="hg-native-host" [styleClass]="shiftClass()" type="button"
+                    [aria]="{'aria-label': ('learning.exercise.keyboardShift' | translate), 'aria-pressed': shift()}"
+                    (click)="toggleShift()">⇧</app-button>
+      }
+
+      @for (jamo of row; track $index) {
+        <app-button class="hg-native-host" styleClass="hg-native-button kbd-key kr" type="button"
+                    (click)="press(jamo)">{{ jamo }}</app-button>
+      }
+
+      @if (isLast) {
+        <app-button class="hg-native-host" styleClass="hg-native-button kbd-key kbd-key--wide" type="button"
+                    [aria]="{'aria-label': ('learning.exercise.keyboardBackspace' | translate)}"
+                    (click)="backspace.emit()">⌫</app-button>
+      }
+    </div>
+  }
+
+  <div class="kbd-row">
+    <app-button class="hg-native-host" styleClass="hg-native-button kbd-key kbd-key--space" type="button"
+                [aria]="{'aria-label': ('learning.exercise.keyboardSpace' | translate)}"
+                (click)="press(' ')"/>
+  </div>
+</div>

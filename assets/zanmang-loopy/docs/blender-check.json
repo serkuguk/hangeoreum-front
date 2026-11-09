@@ -1,0 +1,23 @@
+{
+  "idempotence_counts": [
+    [
+      44,
+      6,
+      35
+    ],
+    [
+      44,
+      6,
+      35
+    ]
+  ],
+  "minimum_foot_z": {
+    "Celebrate": -0.0,
+    "Idle": -0.0,
+    "Point": -0.0,
+    "Sad": -0.0,
+    "Walk": -0.0,
+    "Wave": -0.0
+  },
+  "unrelated_object_preserved": true
+}

@@ -80,6 +80,13 @@
       />
     </app-form-field>
 
+    <!-- new tab so the half-filled form survives reading the documents -->
+    <p class="consent-docs">
+      <a routerLink="/terms" target="_blank">{{ "identity.register.consentDocs.terms" | translate }}</a>
+      {{ "identity.register.consentDocs.and" | translate }}
+      <a routerLink="/privacy" target="_blank">{{ "identity.register.consentDocs.privacy" | translate }}</a>
+    </p>
+
     @if (facade.error(); as error) {
       <div class="apierr">{{ error }}</div>
     }

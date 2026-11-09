@@ -1,9 +1,10 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Subscription, filter, exhaustMap, take, timer} from 'rxjs';
+import {Subject, Subscription, filter, exhaustMap, take, takeUntil, timer} from 'rxjs';
 import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {Story, StoryLine} from '@features/learning/domain/entities/story.entity';
 import {LearnMapFacade} from './learn-map.facade';
+import {LessonTracking} from '../lesson-tracking';
 
 export const StoryMode = {WATCH: 'watch', READ: 'read', LISTEN: 'listen'} as const;
 export type StoryMode = typeof StoryMode[keyof typeof StoryMode];
@@ -14,6 +15,8 @@ export class StoryFacade {
   private readonly repository = inject(LEARNING_REPOSITORY);
   private readonly map = inject(LearnMapFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tracking = new LessonTracking(this.repository);
+  private readonly resetRequests = new Subject<void>();
   private attemptId: string | null = null;
   private completionPolling: Subscription | null = null;
 
@@ -30,10 +33,16 @@ export class StoryFacade {
   readonly hasVideo = computed(() => !!this.story()?.clip?.videoUrl);
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.cancelCompletionPolling());
+    this.destroyRef.onDestroy(() => {
+      this.cancelCompletionPolling();
+      this.tracking.reset();
+    });
   }
 
   load(lessonId: string): void {
+    this.resetRequests.next();
+    this.tracking.reset();
+    this.story.set(null);
     this.cancelCompletionPolling();
     this.loading.set(true);
     this.error.set(null);
@@ -41,8 +50,10 @@ export class StoryFacade {
     this.completing.set(false);
     this.completionError.set(null);
     this.attemptId = null;
-    this.repository.story(lessonId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.repository.story(lessonId).pipe(take(1), takeUntil(this.resetRequests), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: story => {
+        this.attemptId = crypto.randomUUID();
+        this.tracking.start(lessonId, this.attemptId);
         this.story.set(story);
         this.loading.set(false);
         if (!story.clip?.videoUrl) this.mode.set('read');
@@ -69,15 +80,14 @@ export class StoryFacade {
   }
 
   complete(lessonId: string): void {
-    if (this.completing() || this.completed()) return;
-    this.attemptId ??= crypto.randomUUID();
+    if (this.completing() || this.completed() || !this.attemptId || !this.story() || this.loading()) return;
     this.completing.set(true);
     this.completionError.set(null);
     this.repository.complete(lessonId, {
       attemptId: this.attemptId,
       score: 100,
       accuracy: 100,
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    }).pipe(takeUntil(this.resetRequests), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: accepted => this.pollCompletion(accepted.attemptId),
       error: () => {
         this.completing.set(false);

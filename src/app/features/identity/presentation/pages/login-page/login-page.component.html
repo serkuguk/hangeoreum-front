@@ -1,7 +1,19 @@
 <div class="formbox">
   <div class="eyebrow">{{ "identity.login.eyebrow" | translate }}</div>
-  <h1>{{ "identity.login.title" | translate }}</h1>
-  <p class="sub">{{ "identity.login.subtitle" | translate }}</p>
+  <div class="auth-head">
+    <div>
+      <h1>{{ "identity.login.title" | translate }}</h1>
+      <p class="sub">{{ "identity.login.subtitle" | translate }}</p>
+    </div>
+    <img
+      class="auth-mascot"
+      src="assets/images/loopy-login.webp"
+      alt=""
+      aria-hidden="true"
+      width="96"
+      height="96"
+    />
+  </div>
 
   @if (passwordChanged) {
     <div class="success" role="status">

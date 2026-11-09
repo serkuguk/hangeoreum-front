@@ -21,31 +21,34 @@
   <section class="panel panel--select">
     <div class="eyebrow">{{ 'admin.builder.exercisesTitle' | translate }}</div>
     @for (exercise of d.exercises; track exercise.id) {
-      <div class="exrow">
-        <span class="kind">{{ exercise.position }} · {{ exercise.kind }}</span>
-        <app-textarea
-          [ariaLabel]="payloadAria(exercise)"
-          [ariaInvalid]="badJson[exercise.id] || false"
-          [rows]="5"
-          [formField]="payloadFields[exercise.id]"
-        />
-        <div>
-          @if (badJson[exercise.id]) {
-            <p class="errbar" role="alert">{{ 'admin.builder.badJson' | translate }}</p>
-          }
+      <article class="exrow">
+        <header class="exrow__head">
+          <span class="exrow__kind">
+            {{ exercise.position }} · {{ 'admin.builder.kinds.' + exercise.kind | translate }}
+          </span>
           <app-button
             [label]="'common.save' | translate"
             (click)="saveExercise(exercise)"
-            styleClass="hg-button hg-button--ghost hg-button--sm"
+            styleClass="hg-button hg-button--ghost hg-button--field"
           ></app-button>
           <app-button
             (click)="removeExercise(exercise)"
             [aria]="{ 'aria-label': ('admin.builder.removeExercise' | translate) }"
-            styleClass="hg-button hg-button--danger hg-button--sm"
+            styleClass="hg-button hg-button--danger hg-button--field"
             ><span aria-hidden="true">✕</span></app-button
           >
-        </div>
-      </div>
+        </header>
+
+        @for (key of draftErrors()[exercise.id]; track key) {
+          <p class="errbar" role="alert">{{ key | translate }}</p>
+        }
+
+        <hg-exercise-editor
+          [kind]="kindOf(exercise)"
+          [draft]="drafts()[exercise.id]"
+          (draftChange)="setDraft(exercise.id, $event)"
+        />
+      </article>
     } @empty {
       <div class="empty">{{ 'admin.builder.noExercises' | translate }}</div>
     }
@@ -81,13 +84,47 @@
         [rows]="5"
         [formField]="tipBodyField"
       />
-      <app-textarea
-        class="mono"
-        [label]="'admin.tipExamples' | translate"
-        [rows]="5"
-        [placeholder]="'admin.tipExamplesPlaceholder' | translate"
-        [formField]="tipExamplesField"
-      />
+      <span class="fieldtitle">{{ 'admin.tipExamples' | translate }}</span>
+
+      <div class="tipgrid">
+        <span class="tipgrid__head">{{ 'admin.tipExampleKoLabel' | translate }}</span>
+        <span class="tipgrid__head">{{ 'admin.tipExampleTranslationLabel' | translate }}</span>
+        <span class="tipgrid__head">{{ 'admin.tipExampleHighlightLabel' | translate }}</span>
+        <span></span>
+
+        @for (example of tipExamplesField; track $index; let i = $index) {
+          <app-basic-input
+            lang="ko"
+            placeholder=""
+            [ariaLabel]="'admin.tipExampleKo' | translate: { n: i + 1 }"
+            [formField]="example.ko"
+          />
+          <app-basic-input
+            placeholder=""
+            [ariaLabel]="'admin.tipExampleTranslation' | translate: { n: i + 1 }"
+            [formField]="example.translation"
+          />
+          <app-basic-input
+            lang="ko"
+            placeholder=""
+            [ariaLabel]="'admin.tipExampleHighlight' | translate: { n: i + 1 }"
+            [formField]="example.highlight"
+          />
+          <app-button
+            (click)="removeTipExample(i)"
+            [aria]="{ 'aria-label': ('admin.tipExampleRemove' | translate: { n: i + 1 }) }"
+            styleClass="hg-button hg-button--ghost hg-button--field"
+            ><span aria-hidden="true">✕</span></app-button
+          >
+        }
+      </div>
+
+      <app-button
+        [label]="'admin.tipExampleAdd' | translate"
+        (click)="addTipExample()"
+        styleClass="hg-button hg-button--ghost hg-button--sm"
+        ><span aria-hidden="true">+</span></app-button
+      >
       <app-button
         [label]="'learning.saveTip' | translate"
         (click)="saveTip()"

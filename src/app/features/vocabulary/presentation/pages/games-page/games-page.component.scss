@@ -3,6 +3,15 @@
 :host ::ng-deep {
 .gamebox { max-width: 640px; }
 
+.loadpanel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hg-space-4);
+  padding: var(--hg-space-4) var(--hg-space-5);
+  p { margin: 0; flex: 1 1 auto; }
+}
+
 .errpanel {
   padding: var(--hg-space-3) var(--hg-space-4);
   border-color: var(--hg-danger);
@@ -22,6 +31,10 @@ button.hg-native-button.hg-native-button.hg-native-button.gcard {
   cursor: pointer;
   text-align: center;
   padding: 26px var(--hg-space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   color: var(--hg-text);
   transition: transform var(--hg-motion-nav), border-color var(--hg-motion-nav);
 
@@ -68,7 +81,9 @@ button.hg-native-button.hg-native-button.hg-native-button.mcell {
   font-size: 16px;
   color: var(--hg-text);
 
-  &.kr { font-family: var(--hg-font-display); font-size: 26px; }
+  &.kr { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700; font-size: 26px; }
+  &.syl { font-family: 'Gowun Batang', var(--hg-font-kr); font-weight: 700; }
+  &.syl--sm { padding: var(--hg-space-2) var(--hg-space-4); min-height: var(--hg-touch-min); min-width: 56px; font-size: 34px; line-height: 1.2; }
   &:hover { border-color: var(--hg-route); }
   &.hit { border-color: var(--hg-success); background: var(--hg-success-soft); opacity: .55; cursor: default; }
   &.sel { border-color: var(--hg-route); }
@@ -83,6 +98,18 @@ button.hg-native-button.hg-native-button.hg-native-button.mcell {
 
 .listenbox {
   text-align: center;
+
+  .opts { margin-top: var(--hg-space-6); }
+
+  .listenhead { display: flex; flex-direction: column; align-items: center; }
+
+  // колобок над динамиком: сбрасываем фиксированный размер хоста и отступ под подиум
+  .listenmascot {
+    width: auto;
+    height: auto;
+    margin-bottom: calc(var(--hg-space-2) * -1);
+    .hg-mascot__body { margin-bottom: 0; }
+  }
 
   .bigsnd {
     width: 84px;
@@ -109,15 +136,26 @@ button.hg-native-button.hg-native-button.hg-native-button.mcell {
     min-height: 74px;
     border: 2px dashed var(--hg-border);
     border-radius: var(--hg-radius-block);
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--hg-space-2);
+    padding: var(--hg-space-2);
     font-family: var(--hg-font-display);
+    font-weight: 700;
     font-size: 38px;
     margin-bottom: var(--hg-space-4);
     transition: border-color var(--hg-motion-feedback), color var(--hg-motion-feedback);
 
     .ph { font-family: var(--hg-font-ui); font-size: 13px; color: var(--hg-text-muted); }
 
+    .tile { touch-action: none; cursor: grab; }
+    .cdk-drag-preview { touch-action: none; }
+    .cdk-drag-placeholder { opacity: .4; }
+    .cdk-drag-animating { transition: transform 200ms ease; }
+
+    &.cdk-drop-list-disabled .tile { cursor: default; }
     &.ok { border-color: var(--hg-success); color: var(--hg-success); }
     &.bad { border-color: var(--hg-danger); color: var(--hg-danger); animation: shake .3s; }
   }
@@ -131,6 +169,8 @@ button.hg-native-button.hg-native-button.hg-native-button.mcell {
   }
 
   .syl { min-width: 64px; }
+
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--hg-space-3); }
 }
 
 @media (max-width: 880px) {

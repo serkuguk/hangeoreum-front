@@ -59,3 +59,7 @@ docs/*
 /output/
 /patches/
 /AGENTS.md
+
+# AI agent artifacts
+.context/
+.splc/

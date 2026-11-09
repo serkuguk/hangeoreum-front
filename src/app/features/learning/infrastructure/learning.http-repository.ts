@@ -11,7 +11,9 @@ import {
   CompleteRequest,
   CompletionAccepted,
   CompletionStatus,
+  ExerciseResultRequest,
   LearningRepository,
+  LessonSessionStartRequest,
   LetterLearnedResult,
 } from '../domain/repositories/learning.repository';
 
@@ -31,6 +33,14 @@ export class LearningHttpRepository implements LearningRepository {
 
   tip(lessonId: string): Observable<Tip> {
     return this.http.get<Tip>(`${this.base}/lessons/${lessonId}/tip`);
+  }
+
+  startSession(lessonId: string, request: LessonSessionStartRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/lessons/${lessonId}/sessions`, request);
+  }
+
+  recordExerciseResult(lessonId: string, sessionId: string, request: ExerciseResultRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/lessons/${lessonId}/sessions/${sessionId}/results`, request);
   }
 
   complete(lessonId: string, request: CompleteRequest): Observable<CompletionAccepted> {

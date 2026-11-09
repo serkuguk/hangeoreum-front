@@ -1,5 +1,5 @@
 import {FormField, form, required} from '@angular/forms/signals';
-import {ButtonComponent, BasicInputComponent, BasicSelectComponent, SegmentedControlComponent, DialogComponent, PaginationComponent} from 'springest';
+import {ButtonComponent, BasicInputComponent, SegmentedControlComponent, DialogComponent, PaginationComponent} from 'springest';
 import {ChangeDetectionStrategy, Component, computed, effect, inject, signal} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {toSignal} from '@angular/core/rxjs-interop';
@@ -11,6 +11,7 @@ import {Deck} from '@features/vocabulary/domain/repositories/vocabulary.reposito
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 const PAGE_SIZE = 20;
+const ALL_LEVELS = -1;
 
 const VocabularyTab = {WORDS: 'words', DECKS: 'decks'} as const;
 type VocabularyTab = typeof VocabularyTab[keyof typeof VocabularyTab];
@@ -24,7 +25,6 @@ type VocabularyTab = typeof VocabularyTab[keyof typeof VocabularyTab];
     ButtonComponent,
     DialogComponent,
     BasicInputComponent,
-    BasicSelectComponent,
     PaginationComponent,
     SegmentedControlComponent,
     TranslatePipe,
@@ -51,6 +51,11 @@ export class VocabularyPageComponent {
   readonly page = signal(0);
   readonly expandedId = signal<string | null>(null);
   readonly deckPickWord = signal<UserWord | null>(null);
+  readonly pendingDeleteDeck = signal<Deck | null>(null);
+  readonly deleteConfirmMessage = computed(() => {
+    const deck = this.pendingDeleteDeck();
+    return deck ? this.translate.instant('vocabulary.deck.deleteConfirm', {title: deck.title}) : '';
+  });
   readonly newDeckTitle = signal('');
   readonly deckForm = form(this.newDeckTitle, path => required(path));
   readonly defaultWordImage = '/assets/illustrations/word-default.svg';
@@ -66,8 +71,10 @@ export class VocabularyPageComponent {
     {value: VocabularyTab.DECKS, label: this.optionLabels()['vocabulary.tabs.decks'] ?? ''},
   ]);
 
+  readonly levelControl = computed(() => this.level() ?? ALL_LEVELS);
+
   readonly levels = computed(() => [
-    {value: null, label: this.optionLabels()['common.all'] ?? ''},
+    {value: ALL_LEVELS, label: this.optionLabels()['common.all'] ?? ''},
     {value: 0, label: this.optionLabels()['vocabulary.levels.new'] ?? ''},
     {value: 1, label: '★ 1'},
     {value: 2, label: '★ 2'},
@@ -114,8 +121,8 @@ export class VocabularyPageComponent {
   }
 
   setLevel(level: unknown): void {
-    if (level !== null && typeof level !== 'number') return;
-    this.level.set(level);
+    if (typeof level !== 'number') return;
+    this.level.set(level === ALL_LEVELS ? null : level);
     this.page.set(0);
   }
 
@@ -193,8 +200,27 @@ export class VocabularyPageComponent {
     if (title) this.facade.renameDeck(deck, title);
   }
 
+  canStudy(deck: Deck): boolean {
+    return deck.wordCount > 0;
+  }
+
+  studyDeck(deck: Deck): void {
+    this.router.navigate(['/review/flashcards'], {queryParams: {deck: deck.id}});
+  }
+
   deleteDeck(deck: Deck): void {
-    if (confirm(this.translate.instant('vocabulary.deck.deleteConfirm', {title: deck.title}))) this.facade.deleteDeck(deck);
+    this.pendingDeleteDeck.set(deck);
+  }
+
+  confirmDeleteDeck(): void {
+    const deck = this.pendingDeleteDeck();
+    if (!deck) return;
+    this.facade.deleteDeck(deck);
+    this.closeDeleteDialog();
+  }
+
+  closeDeleteDialog(): void {
+    this.pendingDeleteDeck.set(null);
   }
 
   addToDeck(deck: Deck): void {

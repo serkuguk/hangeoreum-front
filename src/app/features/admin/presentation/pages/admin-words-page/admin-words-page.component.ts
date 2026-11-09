@@ -11,7 +11,7 @@ import {
   PaginationComponent,
   BasicSelectComponent,
 } from 'springest';
-import {AdminApi, AdminWord, Topic, WordRequest} from '@features/admin/infrastructure/admin.api';
+import {ADMIN_PAGE_SIZE, AdminApi, AdminWord, Topic, WordMediaKind, WordRequest} from '@features/admin/infrastructure/admin.api';
 
 const EMPTY_DRAFT = {
   hangul: '', romanization: '', translation: '',
@@ -32,107 +32,8 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     PaginationComponent,
     BasicSelectComponent,
   ],
-  template: `
-    <h2 class="pagettl">{{ 'admin.words.title' | translate }}</h2>
-    <p class="pagesub">{{ 'admin.words.count' | translate: {count: total()} }}</p>
-
-    <div class="toolbar">
-      <app-basic-input class="search" type="search" [label]="'admin.words.search' | translate"
-                [placeholder]="'admin.words.searchPlaceholder' | translate" [value]="search()"
-                (valueChange)="onSearch($event)" />
-      <app-button [label]="'admin.words.create' | translate" (click)="openCreate()" styleClass="hg-button"><span aria-hidden="true">+</span></app-button>
-    </div>
-
-    @if (error()) {
-      <div class="errbar">{{ error() }}</div>
-    }
-
-    <div class="panel">
-      <div class="words-table-scroll">
-      <table class="atable admin-words-table">
-        <thead>
-          <tr><th>{{ 'admin.words.hangul' | translate }}</th><th>{{ 'admin.words.romanization' | translate }}</th><th>{{ 'admin.words.translation' | translate }}</th><th>{{ 'admin.words.media' | translate }}</th><th></th></tr>
-        </thead>
-        <tbody>
-          @for (word of words(); track word.id) {
-            <tr>
-              <td class="kr">{{ word.hangul }}</td>
-              <td>{{ word.romanization }}</td>
-              <td>{{ word.translation }}</td>
-              <td>
-                <div class="word-media">
-                  <img class="word-thumbnail" [src]="imageUrl(word.imageUrl)" (error)="onImageError($event)"
-                       alt="" width="48" height="48" loading="lazy" decoding="async" />
-                <app-file-picker class="audio-picker" #picker1 label="🔊" [ariaLabel]="'admin.words.uploadAudio' | translate"
-                                accept="audio/*" (changed)="$event[0] && upload(word, $event[0], 'audio'); picker1.value.set([])" />
-                </div>
-              </td>
-              <td>
-                <div class="word-actions">
-                  <app-button [label]="'admin.words.edit' | translate" (click)="openEdit(word)" styleClass="hg-button hg-button--ghost hg-button--sm"></app-button>
-                  <app-button [label]="'admin.words.delete' | translate" (click)="remove(word)" styleClass="hg-button hg-button--danger hg-button--sm"></app-button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr><td colspan="5" class="empty">{{ 'admin.words.empty' | translate }}</td></tr>
-          }
-        </tbody>
-      </table>
-      </div>
-      @if (totalPages() > 1) {
-        <app-pagination [rows]="20" [first]="page() * 20" [totalRecords]="total()"
-                       [attr.aria-label]="'admin.words.pagination' | translate" (pageChange)="goToPage($event.page ?? 0)" />
-      }
-    </div>
-
-    @if (dialogOpen()) {
-    <app-dialog [closeAriaLabel]="'admin.words.close' | translate" [visible]="true" (visibleChange)="!$event && closeDialog()"
-               [closable]="!saving()" [closeOnEscape]="!saving()" [dismissableMask]="false"
-               [header]="(editing() ? 'admin.words.editTitle' : 'admin.words.create') | translate">
-      <div class="word-image-field">
-        <img class="word-preview" [src]="previewImage()" (error)="onImageError($event)"
-             alt="" width="96" height="96" decoding="async" />
-        <div>
-          <app-file-picker #picker2 [label]="'admin.words.chooseImage' | translate" [ariaLabel]="'admin.words.image' | translate"
-                          accept="image/png,image/jpeg,image/webp" ariaDescribedBy="image-picker-hint"
-                          [disabled]="saving()" (changed)="$event[0] && onImageSelected($event[0]); picker2.value.set([])" />
-          <p id="image-picker-hint">{{ 'admin.words.imageHint' | translate }}</p>
-          @if (imageError()) { <p class="image-error" role="alert">{{ imageError() }}</p> }
-        </div>
-      </div>
-      @if (saveError()) { <div class="errbar" role="alert">{{ saveError() }}</div> }
-      <app-basic-input [label]="'admin.words.hangul' | translate" [formField]="fields.hangul" lang="ko" />
-      <app-basic-input [label]="'admin.words.romanizationLabel' | translate" [placeholder]="'admin.words.romanizationPlaceholder' | translate" [formField]="fields.romanization" />
-      <app-basic-input [label]="'admin.words.translation' | translate" [formField]="fields.translation" />
-      <app-basic-input [label]="'admin.words.partOfSpeech' | translate" [formField]="fields.partOfSpeech" [placeholder]="'admin.words.partOfSpeechPlaceholder' | translate" />
-      <app-basic-select [ariaLabel]="'admin.words.topic' | translate" [placeholder]="'admin.words.topic' | translate" [items]="topicOptions()" [formField]="fields.topicId" optionLabel="label" optionValue="value" />
-      <app-basic-input [label]="'admin.words.exampleKo' | translate" [formField]="fields.exampleKo" lang="ko" />
-      <app-basic-input [label]="'admin.words.exampleTranslation' | translate" [formField]="fields.exampleTranslation" />
-      <app-basic-input [label]="'admin.words.grammarNote' | translate" [formField]="fields.grammarNote" />
-      <div dialogActions class="btns">
-        <app-button [label]="(saving() ? 'admin.words.saving' : 'admin.words.save') | translate"
-                   [disabled]="saving() || !draft().hangul.trim() || !draft().romanization.trim() || !draft().translation.trim()"
-                   (click)="save()" styleClass="hg-button"></app-button>
-        <app-button [label]="'admin.words.cancel' | translate" [disabled]="saving()" (click)="closeDialog()" styleClass="hg-button hg-button--ghost"></app-button>
-      </div>
-    </app-dialog>
-    }
-  `,
-  styleUrl: '../_admin.scss',
-  styles: `
-    .word-media, .word-image-field { display: flex; align-items: center; gap: 1rem; }
-    .words-table-scroll { overflow-x: auto; }
-    .admin-words-table { min-width: 42rem; }
-    .word-media { flex-wrap: nowrap; gap: .5rem; }
-    .word-media app-file-picker.audio-picker { width: auto; flex: 0 0 auto; }
-    .word-actions { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; white-space: nowrap; }
-    .word-thumbnail, .word-preview { object-fit: contain; flex-shrink: 0; border-radius: var(--hg-radius-control); }
-    .word-thumbnail { width: 48px; height: 48px; }
-    .word-preview { width: 96px; height: 96px; }
-    .word-image-field > div { min-width: 0; overflow-wrap: anywhere; }
-    .image-error { color: var(--hg-danger); font-size: .85rem; margin-top: .5rem; }
-  `,
+  templateUrl: './admin-words-page.component.html',
+  styleUrls: ['../_admin.scss', './admin-words-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminWordsPageComponent {
@@ -168,7 +69,14 @@ export class AdminWordsPageComponent {
     disabled(path, () => this.saving());
   });
 
-  readonly totalPages = computed(() => Math.ceil(this.total() / 20));
+  readonly pageSize = ADMIN_PAGE_SIZE;
+  readonly totalPages = computed(() => Math.ceil(this.total() / this.pageSize));
+  readonly canSave = computed(() => {
+    const draft = this.draft();
+    return !this.saving() && !!draft.hangul.trim() && !!draft.romanization.trim() && !!draft.translation.trim();
+  });
+  readonly dialogTitleKey = computed(() => this.editing() ? 'admin.words.editTitle' : 'admin.words.create');
+  readonly saveLabelKey = computed(() => this.saving() ? 'admin.words.saving' : 'admin.words.save');
 
   private readonly search$ = new Subject<string>();
 
@@ -239,7 +147,7 @@ export class AdminWordsPageComponent {
   }
 
   save(): void {
-    if (this.saving() || !this.draft().hangul.trim() || !this.draft().romanization.trim() || !this.draft().translation.trim()) return;
+    if (!this.canSave()) return;
     const editing = this.editing();
     const draft = {...this.draft()};
     const image = this.selectedImage();
@@ -254,7 +162,7 @@ export class AdminWordsPageComponent {
         wordSaved = true;
         // Keep the saved ID so retrying a failed image upload updates this word instead of creating a duplicate.
         this.editing.set(word);
-        return image ? this.api.uploadWordMedia(word.id, image, 'image') : of(word);
+        return image ? this.api.uploadWordMedia(word.id, image, WordMediaKind.Image) : of(word);
       }),
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.saving.set(false)),
@@ -272,6 +180,18 @@ export class AdminWordsPageComponent {
         if (wordSaved) this.load();
       },
     });
+  }
+
+  onAudioPicked(word: AdminWord, files: File[]): void {
+    if (files[0]) this.upload(word, files[0], WordMediaKind.Audio);
+  }
+
+  onImagePicked(files: File[]): void {
+    if (files[0]) this.onImageSelected(files[0]);
+  }
+
+  onDialogVisibleChange(visible: boolean): void {
+    if (!visible) this.closeDialog();
   }
 
   onImageSelected(file: File): void {
@@ -323,7 +243,7 @@ export class AdminWordsPageComponent {
     });
   }
 
-  upload(word: AdminWord, file: File, kind: 'audio' | 'image'): void {
+  upload(word: AdminWord, file: File, kind: WordMediaKind): void {
     this.api.uploadWordMedia(word.id, file, kind).subscribe({
       next: () => this.load(),
       error: () => this.error.set(this.translate.instant('admin.words.uploadError')),

@@ -1,5 +1,5 @@
 import {ButtonComponent} from 'springest';
-import {ChangeDetectionStrategy, Component, booleanAttribute, computed, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, booleanAttribute, computed, inject, input, output, signal} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 import {ChapterDivider, ChapterState, CourseChapter, CourseNode, CourseNodeState, PlacedNode} from './course-path.model';
 
@@ -15,6 +15,8 @@ const CURRENT_NODE = 96;
 const NODE_COMPACT = 64;
 const CURRENT_COMPACT = 72;
 const COMPACT_MAX = 660;
+/** Narrowest canvas the compact layout still reads on (labels beside 64px nodes). */
+const MIN_CANVAS = 240;
 const DEAD = new Set<CourseNodeState>([CourseNodeState.LOCKED, CourseNodeState.FINAL]);
 
 @Component({
@@ -28,8 +30,24 @@ export class CoursePathComponent {
   readonly nodes = input.required<CourseNode[]>();
   readonly chapters = input.required<CourseChapter[]>();
 
-  /** Ширина холста: дашборд — 760, карта курса — 880, телефон — ширина контейнера. */
+  /** Желаемая ширина холста: дашборд — 760, карта курса — 880. Реальная не больше контейнера, см. canvasWidth. */
   readonly width = input(760, {transform: (value: number) => Math.max(320, value || 760)});
+
+  /** Width of the host box, measured — the page can't know it (side rail, paddings), so we never guess. */
+  private readonly available = signal<number | null>(null);
+
+  readonly canvasWidth = computed(() => {
+    const available = this.available();
+    return available ? Math.min(this.width(), Math.max(MIN_CANVAS, available)) : this.width();
+  });
+
+  constructor() {
+    if (typeof ResizeObserver === 'undefined') return;
+    const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+    const observer = new ResizeObserver(([entry]) => this.available.set(Math.floor(entry.contentRect.width)));
+    afterNextRender(() => observer.observe(host));
+    inject(DestroyRef).onDestroy(() => observer.disconnect());
+  }
   /** Вертикальный шаг между узлами. */
   readonly step = input(160);
   /** Дополнительный отбив на границе глав — чтобы разделитель не наезжал на подписи. */
@@ -40,11 +58,11 @@ export class CoursePathComponent {
   readonly nodeSelected = output<CourseNode>();
   readonly testOutSelected = output<CourseChapter>();
 
-  readonly compact = computed(() => this.width() < COMPACT_MAX);
+  readonly compact = computed(() => this.canvasWidth() < COMPACT_MAX);
 
   readonly placed = computed<PlacedNode[]>(() => {
     const nodes = this.nodes();
-    const width = this.width();
+    const width = this.canvasWidth();
     const step = this.step();
     const gap = this.chapterGap();
     const compact = this.compact();
@@ -65,7 +83,7 @@ export class CoursePathComponent {
     });
   });
 
-  readonly viewBox = computed(() => `0 0 ${this.width()} ${this.canvasHeight()}`);
+  readonly viewBox = computed(() => `0 0 ${this.canvasWidth()} ${this.canvasHeight()}`);
 
   /** Высота холста — последняя точка + запас на подпись */
   readonly canvasHeight = computed(() => {
@@ -111,8 +129,8 @@ export class CoursePathComponent {
       });
   });
 
-  readonly testOutLeft = computed(() => Math.round(this.width() * 0.08));
-  readonly testOutWidth = computed(() => Math.round(this.width() * 0.84));
+  readonly testOutLeft = computed(() => Math.round(this.canvasWidth() * 0.08));
+  readonly testOutWidth = computed(() => Math.round(this.canvasWidth() * 0.84));
 
   private readonly trackPoints = computed(() => this.placed().map(node => ({x: node.x, y: node.y + node.size / 2})));
 
@@ -144,7 +162,12 @@ export class CoursePathComponent {
   }
 
   labelRight(node: PlacedNode): number | null {
-    return node.side === 'left' ? this.width() - node.x + node.size / 2 + 26 : null;
+    return node.side === 'left' ? this.canvasWidth() - node.x + node.size / 2 + 26 : null;
+  }
+
+  /** Room between the node and the canvas edge, so a label never pushes a narrow phone page sideways. */
+  labelMaxWidth(node: PlacedNode): number {
+    return this.canvasWidth() - (this.labelLeft(node) ?? this.labelRight(node) ?? 0) - 4;
   }
 
   select(node: PlacedNode): void {

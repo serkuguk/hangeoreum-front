@@ -1,6 +1,40 @@
 :host { display: block; }
 
-.lessonbox { max-width: var(--hg-content-lesson); }
+.lessonbox {
+  max-width: var(--hg-content-lesson);
+}
+
+// Лупи: в загрузке/итоге — по центру сверху; в упражнении — справа от заголовка
+// задания. float, а не absolute: панели и сетки вариантов (BFC) сужаются рядом
+// с ним, а не уходят под него — у шести упражнений разные шапки.
+.loopy {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto var(--hg-space-4);
+  pointer-events: none;
+}
+
+.loopy--exercise {
+  float: right;
+  width: 110px;
+  height: 110px;
+  margin: calc(-1 * var(--hg-space-3)) 0 var(--hg-space-2) var(--hg-space-4);
+}
+
+// «Сопоставь пары»: сетка на всю ширину, Лупи — отдельной строкой справа над ней
+// (не float, чтобы не сужать карточки); карточки сдвинуты вниз на эту строку.
+.loopy--above {
+  float: none;
+  margin: calc(-1 * var(--hg-space-4)) 0 calc(-1 * var(--hg-space-9, 36px)) auto;
+}
+
+// На телефоне рядом с шапкой нет места: слово задания разваливается по слогам.
+@media (max-width: 767px) {
+  .loopy--exercise {
+    display: none;
+  }
+}
 
 .loadpanel {
   text-align: center;
