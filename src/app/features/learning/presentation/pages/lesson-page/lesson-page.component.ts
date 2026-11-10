@@ -70,9 +70,6 @@ export class LessonPageComponent implements OnInit {
     return reason ? `learning.lesson.paywallBlocked.${reason}` : null;
   });
 
-  /** В «сопоставь пары» сетка на всю ширину — Лупи рядом не ставим, иначе карточки сужаются. */
-  readonly loopyBesideTask = computed(() => this.facade.current()?.kind !== 'MATCH_PAIRS');
-
   /** Короткая реакция на пару в «сопоставь пары» — итог там приходит только в конце. */
   private readonly pairReaction = signal<MascotAnimation | null>(null);
   private pairReactionTimer?: ReturnType<typeof setTimeout>;

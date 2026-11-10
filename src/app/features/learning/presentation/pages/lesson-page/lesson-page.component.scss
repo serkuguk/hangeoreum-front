@@ -4,9 +4,9 @@
   max-width: var(--hg-content-lesson);
 }
 
-// Лупи: в загрузке/итоге — по центру сверху; в упражнении — справа от заголовка
-// задания. float, а не absolute: панели и сетки вариантов (BFC) сужаются рядом
-// с ним, а не уходят под него — у шести упражнений разные шапки.
+// Лупи: в загрузке/итоге — по центру сверху; в упражнении — отдельной строкой
+// справа между планкой прогресса и блоком урока. Без отрицательных отступов:
+// у шести упражнений шапки разной высоты, любой нахлёст где-то съезжает.
 .loopy {
   position: relative;
   width: 120px;
@@ -16,23 +16,29 @@
 }
 
 .loopy--exercise {
-  float: right;
+  width: 110px;
+  // Холст 110px, сам Лупи ~70px: строка по высоте модели, пустые поля холста
+  // выходят за неё (overflow visible), чтобы зазоры были видимыми 0.5rem.
+  height: 70px;
+  margin: 0 0 0.5rem auto;
+}
+
+.loopy__stage {
+  position: relative;
   width: 110px;
   height: 110px;
-  margin: calc(-1 * var(--hg-space-3)) 0 var(--hg-space-2) var(--hg-space-4);
+  margin-top: -26px;
 }
 
-// «Сопоставь пары»: сетка на всю ширину, Лупи — отдельной строкой справа над ней
-// (не float, чтобы не сужать карточки); карточки сдвинуты вниз на эту строку.
-.loopy--above {
-  float: none;
-  margin: calc(-1 * var(--hg-space-4)) 0 calc(-1 * var(--hg-space-9, 36px)) auto;
-}
-
-// На телефоне рядом с шапкой нет места: слово задания разваливается по слогам.
+// На телефоне лишняя строка съедает место под задание.
 @media (max-width: 767px) {
   .loopy--exercise {
     display: none;
+  }
+
+  // Лупи скрыт — зазор под планкой возвращаем.
+  .lessonbox .l-top {
+    margin-bottom: var(--hg-space-6);
   }
 }
 
@@ -48,7 +54,7 @@
   display: flex;
   align-items: center;
   gap: var(--hg-space-4);
-  margin-bottom: var(--hg-space-6);
+  margin-bottom: 0.5rem;
 
   .x {
     background: none;
