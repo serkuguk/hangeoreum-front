@@ -38,29 +38,32 @@
         }
         <div class="feed" (wheel)="onWheel($event)">
           @for (item of facade.clips(); track item.id) {
+            <!-- section — неподвижная коробка для scroll-snap и IntersectionObserver; сдвиг/масштаб стопки — на .card -->
             <section class="clip" [class]="clipClass($index)" [attr.data-index]="$index" (click)="focusClip($index)">
-              @if (youtubeId(item); as videoId) {
+              <div class="card">
+                @if (youtubeId(item); as videoId) {
 
-                @if (isActive($index)) {
-                  <hg-youtube-player
-                    [videoId]="videoId"
-                    [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"
-                    (timeChange)="timeMs.set($event)"
-                    (ended)="onEnded(item)"
-                    (failed)="playbackError.set(true)"
-                  />
+                  @if (isActive($index)) {
+                    <hg-youtube-player
+                      [videoId]="videoId"
+                      [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"
+                      (timeChange)="timeMs.set($event)"
+                      (ended)="onEnded(item)"
+                      (failed)="playbackError.set(true)"
+                    />
+                  } @else {
+                    <img [src]="poster(item)" alt="" loading="lazy" />
+                  }
+
                 } @else {
-                  <img [src]="poster(item)" alt="" loading="lazy" />
+                  <!-- один и тот же <video> для превью и плеера: пересоздание давало чёрную вспышку при переключении -->
+                  <video [src]="item.videoUrl ?? ''" [poster]="item.thumbnailUrl ?? ''" [controls]="isActive($index)" [muted]="!isActive($index)"
+                    playsinline preload="metadata"
+                    [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"
+                    (timeupdate)="updateTime($index, $event)" (seeked)="updateTime($index, $event)"
+                    (ended)="onVideoEnded($index, item)" (error)="onVideoError($index)"></video>
                 }
-
-              } @else if (isActive($index)) {
-                <video #player [src]="item.videoUrl ?? ''" [poster]="item.thumbnailUrl ?? ''" controls playsinline preload="metadata"
-                  [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"
-                  (timeupdate)="updateTime($event)" (seeked)="updateTime($event)" (ended)="onEnded(item)" (error)="playbackError.set(true)"></video>
-              } @else {
-                <video [src]="item.videoUrl ?? ''" [poster]="item.thumbnailUrl ?? ''" playsinline muted preload="metadata"
-                  [attr.aria-label]="'media.videoAria' | translate: {title: clipTitle(item)}"></video>
-              }
+              </div>
             </section>
           }
         </div>

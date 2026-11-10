@@ -4,7 +4,12 @@
 <div class="toolbar">
   <app-basic-input class="search" [label]="'admin.topics.code' | translate" [placeholder]="'admin.topics.codePlaceholder' | translate" [formField]="draftCodeField"/>
   <app-basic-input class="search" [label]="'admin.topics.name' | translate" [formField]="draftTitleField"/>
-  <app-basic-input class="search icon" [label]="'admin.topics.icon' | translate" placeholder="🍜" [formField]="draftIconField"/>
+  <div class="icon-field">
+    <app-basic-input class="icon" [label]="'admin.topics.icon' | translate" placeholder="🍜" [formField]="draftIconField"/>
+    <app-file-picker #draftPicker [label]="'admin.topics.uploadIcon' | translate" [ariaLabel]="'admin.topics.uploadIcon' | translate"
+                     [accept]="iconAccept" [disabled]="uploadingIcon()"
+                     (changed)="onIconPicked($event, draftIcon, error); draftPicker.value.set([])"/>
+  </div>
   <app-button [label]="'admin.topics.add' | translate" [disabled]="createDisabled()" (click)="create()" styleClass="hg-button"></app-button>
 </div>
 
@@ -18,7 +23,15 @@
     <tbody>
       @for (topic of topics(); track topic.id) {
         <tr>
-          <td>{{ topic.icon }}</td>
+          <td>
+
+            @if (isImageIcon(topic.icon)) {
+              <img class="topic-icon" [src]="topic.icon" alt="" width="28" height="28" loading="lazy" decoding="async"/>
+            } @else {
+              {{ topic.icon }}
+            }
+
+          </td>
           <td>{{ topic.code }}</td>
           <td>{{ topic.title }}</td>
           <td>
@@ -40,7 +53,12 @@
   <div class="dialog-fields">
     <app-basic-input [label]="'admin.topics.code' | translate" [formField]="editCodeField"/>
     <app-basic-input [label]="'admin.topics.name' | translate" [formField]="editTitleField"/>
-    <app-basic-input [label]="'admin.topics.icon' | translate" [formField]="editIconField"/>
+    <div class="icon-field">
+      <app-basic-input class="icon" [label]="'admin.topics.icon' | translate" [formField]="editIconField"/>
+      <app-file-picker #editPicker [label]="'admin.topics.uploadIcon' | translate" [ariaLabel]="'admin.topics.uploadIcon' | translate"
+                       [accept]="iconAccept" [disabled]="uploadingIcon() || saving()"
+                       (changed)="onIconPicked($event, editIcon, dialogError); editPicker.value.set([])"/>
+    </div>
   </div>
 
   @if (dialogError()) {

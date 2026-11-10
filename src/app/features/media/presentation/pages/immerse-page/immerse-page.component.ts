@@ -26,7 +26,6 @@ export class ImmersePageComponent implements OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
-  readonly player = viewChild<ElementRef<HTMLVideoElement>>('player');
   readonly youtubePlayer = viewChild(YoutubePlayerComponent);
   readonly subMode = signal<SubMode>(SubMode.BOTH);
   readonly subModeOptions = [
@@ -133,12 +132,14 @@ export class ImmersePageComponent implements OnDestroy {
     const offset = index - this.currentClipIndex();
     const distance = Math.abs(offset);
     if (distance === 0) return 'is-active';
-    if (distance === 1) return 'is-near';
-    return offset < 0 ? 'is-far is-before' : 'is-far';
+    const side = offset < 0 ? ' is-before' : '';
+    return (distance === 1 ? 'is-near' : 'is-far') + side;
   }
 
   private resetPlayback(): void {
-    this.player()?.nativeElement.pause();
+    const video = this.activeVideo();
+    video?.pause();
+    if (video) video.currentTime = 0;
     this.youtubePlayer()?.pause();
     this.timeMs.set(0);
     this.ended.set(false);
@@ -149,8 +150,21 @@ export class ImmersePageComponent implements OnDestroy {
     if (Object.values<unknown>(SubMode).includes(value)) this.subMode.set(value as SubMode);
   }
 
-  updateTime(event: Event): void {
-    this.timeMs.set((event.target as HTMLVideoElement).currentTime * 1000);
+  // события превью (неактивных <video>) игнорируем — плеер у ленты один, активный
+  updateTime(index: number, event: Event): void {
+    if (this.isActive(index)) this.timeMs.set((event.target as HTMLVideoElement).currentTime * 1000);
+  }
+
+  onVideoEnded(index: number, clip: Clip): void {
+    if (this.isActive(index)) this.onEnded(clip);
+  }
+
+  onVideoError(index: number): void {
+    if (this.isActive(index)) this.playbackError.set(true);
+  }
+
+  private activeVideo(): HTMLVideoElement | null {
+    return this.host.nativeElement.querySelector<HTMLVideoElement>('.clip.is-active video');
   }
 
   onEnded(clip: Clip): void {
@@ -160,7 +174,7 @@ export class ImmersePageComponent implements OnDestroy {
 
   repeat(): void {
     const youtube = this.youtubePlayer();
-    const video = this.player()?.nativeElement;
+    const video = this.activeVideo();
     if (!youtube && !video) return;
     this.timeMs.set(0);
     this.ended.set(false);

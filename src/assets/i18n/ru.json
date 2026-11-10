@@ -562,6 +562,8 @@
       "codePlaceholder": "Например, food",
       "name": "Название",
       "icon": "Иконка",
+      "uploadIcon": "⬆ Загрузить",
+      "uploadIconError": "Не получилось загрузить иконку (PNG, JPEG или WEBP).",
       "add": "Добавить",
       "rename": "Переименовать",
       "delete": "Удалить",

@@ -261,6 +261,12 @@ export class AdminApi {
     return this.http.delete<void>(`${this.base}/topics/${id}`);
   }
 
+  uploadTopicIcon(file: File): Observable<{url: string}> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{url: string}>(`${this.base}/topics/icon`, form);
+  }
+
   // ---- курс / юниты / уроки ----
   courses(): Observable<AdminCourse[]> {
     return this.http.get<AdminCourse[]>(`${this.base}/courses`);
