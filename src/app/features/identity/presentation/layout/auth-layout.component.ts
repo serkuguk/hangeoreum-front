@@ -39,7 +39,7 @@ import {filter, map, startWith} from 'rxjs/operators';
     .brand {
       position: relative;
       overflow: hidden;
-      background: url('/assets/img/fondo.png') center / cover no-repeat;
+      background: url('/assets/img/fondo.webp') center / cover no-repeat;
       color: var(--hg-on-route);
       display: flex;
       flex-direction: column;
