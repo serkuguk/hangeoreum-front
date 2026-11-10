@@ -44,12 +44,62 @@ a.is-active { background: var(--sidebar-active-bg, var(--hg-route-soft)); color:
 .footer { font-size: var(--hg-fs-xs); }
 :host:not(.expanded) a { gap: 0; padding-inline: 14px; }
 :host:not(.expanded) .label { max-width: 0; opacity: 0; }
-.backdrop { display: none; }
+.icon-close { display: none; }
 a:focus-visible, :host ::ng-deep button.hg-native-button.hg-native-button.toggle:focus-visible { outline: 2px solid var(--hg-focus); outline-offset: -2px; }
+
+// Mobile: no rail — a fixed ☰ in the top-left corner opens a fullscreen menu.
 @media (max-width: 767px) {
-  :host.expanded { width: 72px; }
-  .sidebar-panel { width: 72px; }
-  :host.expanded .sidebar-panel { width: 230px; z-index: 1; box-shadow: 12px 0 32px rgba(0, 0, 0, .25); }
-  .backdrop { display: block; position: fixed; inset: var(--sidebar-top, 0px) 0 0; background: rgba(0, 0, 0, .35); }
+  :host,
+  :host.expanded {
+    width: 0;
+    height: 0;
+    z-index: 50;
+  }
+
+  .sidebar-panel {
+    position: fixed;
+    inset: 12px auto auto 12px;
+    width: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  nav,
+  .footer {
+    display: none;
+  }
+
+  :host.expanded {
+    .sidebar-panel {
+      inset: 0;
+      width: 100%;
+      padding: var(--hg-space-3);
+      background: var(--sidebar-bg, var(--hg-bg));
+      overscroll-behavior: contain;
+    }
+
+    nav,
+    .footer {
+      display: flex;
+    }
+
+    a {
+      min-height: 52px;
+      font-size: var(--hg-fs-md);
+    }
+
+    .label {
+      max-width: none;
+    }
+
+    .icon-open {
+      display: none;
+    }
+
+    .icon-close {
+      display: inline;
+    }
+  }
 }
 @media (prefers-reduced-motion: reduce) { :host, .sidebar-panel, a, .label { transition: none; } }

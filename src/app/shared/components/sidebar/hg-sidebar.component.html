@@ -1,6 +1,3 @@
-@if (expanded()) {
-  <div class="backdrop" (click)="dismiss()"></div>
-}
 <aside class="sidebar-panel">
   <div class="header">
     <app-button
@@ -14,7 +11,8 @@
         'aria-label': toggleLabel(),
       }"
     >
-      <i class="pi pi-bars" aria-hidden="true"></i>
+      <i class="pi pi-bars icon-open" aria-hidden="true"></i>
+      <i class="pi pi-times icon-close" aria-hidden="true"></i>
     </app-button>
     @if (expanded()) {
       <div class="brand"><ng-content /></div>
