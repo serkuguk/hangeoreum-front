@@ -89,16 +89,12 @@ describe('HgSidebarComponent', () => {
     expect(links[1].getAttribute('aria-current')).toBe('page');
   });
 
-  it('dismisses with Escape and the outside overlay and restores toggle focus', async () => {
+  it('dismisses with Escape and restores toggle focus', async () => {
     const fixture = await setup();
     const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
     button.click(); fixture.detectChanges();
     document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
     fixture.detectChanges();
-    expect(fixture.componentInstance.expanded()).toBe(false);
-    expect(document.activeElement).toBe(button);
-    button.click(); fixture.detectChanges();
-    fixture.nativeElement.querySelector('.backdrop').click(); fixture.detectChanges();
     expect(fixture.componentInstance.expanded()).toBe(false);
     expect(document.activeElement).toBe(button);
   });

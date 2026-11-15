@@ -2,9 +2,9 @@ import {adminRoutes} from '@features/admin/routes';
 import {TestBed} from '@angular/core/testing';
 import {jest} from '@jest/globals';
 import {Router} from '@angular/router';
-import {adminGuard, adminOnlyGuard, authGuard} from './auth.guard';
+import {adminGuard, adminOnlyGuard, authGuard, redirectLoggedInGuard} from './auth.guard';
 import {AuthService} from './auth.service';
-import {firstValueFrom, of, throwError} from 'rxjs';
+import {Observable, firstValueFrom, of, throwError} from 'rxjs';
 import {AuthTokenStorageService} from '@core/services/auth-token-storage.service';
 
 describe('admin route permissions', () => {
@@ -77,6 +77,22 @@ describe('auth route session recovery', () => {
     const result = TestBed.runInInjectionContext(authGuard);
     expect(result).not.toBe(true);
     if (result !== true) expect(await firstValueFrom(result)).toBe(true);
+  });
+
+  it('sends a returning user with an expired access token to the dashboard', async () => {
+    const guard = () => redirectLoggedInGuard({} as never, {} as never);
+    const session = auth as typeof auth & {currentUser: () => unknown};
+
+    session.currentUser = () => null;
+    expect(TestBed.runInInjectionContext(guard)).toBe(true);
+    expect(auth.refreshAccessToken).not.toHaveBeenCalled();
+
+    session.currentUser = () => ({id: 'u'});
+    auth.refreshAccessToken.mockReturnValue(of({accessToken: 'fresh'}));
+    expect(await firstValueFrom(TestBed.runInInjectionContext(guard) as Observable<unknown>)).toEqual(['/dashboard']);
+
+    auth.refreshAccessToken.mockReturnValue(throwError(() => new Error('expired cookie')));
+    expect(await firstValueFrom(TestBed.runInInjectionContext(guard) as Observable<unknown>)).toBe(true);
   });
 
   it('returns login UrlTree when refresh fails', async () => {

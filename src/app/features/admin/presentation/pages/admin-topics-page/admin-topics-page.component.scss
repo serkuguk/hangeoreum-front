@@ -1,6 +1,27 @@
+.icon-field {
+  display: flex;
+  align-items: flex-end;
+  gap: .5rem;
+}
+
+// The picker label lives in the library's encapsulated view; match the 40px input height.
+.icon-field app-file-picker ::ng-deep label {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 0;
+  padding-block: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
 .icon {
-  max-width: 90px;
-  flex: 0;
+  max-width: 70px;
+  flex: 0 0 70px;
+}
+
+.topic-icon {
+  display: block;
+  object-fit: contain;
 }
 
 .topic-actions {

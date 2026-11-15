@@ -63,3 +63,6 @@ docs/*
 # AI agent artifacts
 .context/
 .splc/
+
+# Local dev-server logs
+ng-serve.*.log

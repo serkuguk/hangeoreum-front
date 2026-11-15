@@ -5,6 +5,7 @@ import {LEARNING_REPOSITORY} from '../learning-repository.token';
 import {Story, StoryLine} from '@features/learning/domain/entities/story.entity';
 import {LearnMapFacade} from './learn-map.facade';
 import {LessonTracking} from '../lesson-tracking';
+import {youtubeId} from '@shared/utils';
 
 export const StoryMode = {WATCH: 'watch', READ: 'read', LISTEN: 'listen'} as const;
 export type StoryMode = typeof StoryMode[keyof typeof StoryMode];
@@ -54,6 +55,8 @@ export class StoryFacade {
       next: story => {
         this.attemptId = crypto.randomUUID();
         this.tracking.start(lessonId, this.attemptId);
+        // story-плеер и <audio> не играют YouTube; бэкенд такого не допускает, но ссылку отсекаем и здесь
+        if (story.clip && youtubeId(story.clip.videoUrl)) story = {...story, clip: {...story.clip, videoUrl: null}};
         this.story.set(story);
         this.loading.set(false);
         if (!story.clip?.videoUrl) this.mode.set('read');

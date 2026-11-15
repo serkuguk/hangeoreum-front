@@ -31,7 +31,6 @@
   color: var(--hg-reward);
   text-decoration: none;
   line-height: 1;
-  transition: transform var(--hg-motion-route) ease;
   flex-shrink: 0;
 }
 
@@ -117,11 +116,10 @@
 
 @media (max-width: 767px) {
   :host ::ng-deep .userbtn .uname { display: none; }
-  .topbar { gap: var(--hg-space-2); padding-inline: var(--hg-space-3); }
-  .content { padding: var(--hg-space-5) var(--hg-space-3) 0; }
-  .mainnav { z-index: 50; }
-  :host:has(.mainnav.expanded) .logo { transform: translateX(158px); }
-  :host:has(.mainnav.expanded) .userbox { visibility: hidden; }
-}
+  .topbar {
+    gap: var(--hg-space-2);
+    padding-inline: 64px var(--hg-space-3); // start leaves room for the sidebar's fixed ☰
+  }
 
-@media (prefers-reduced-motion: reduce) { .logo { transition: none; } }
+  .content { padding: var(--hg-space-5) var(--hg-space-3) 0; }
+}

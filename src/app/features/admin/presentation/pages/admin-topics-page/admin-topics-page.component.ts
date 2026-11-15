@@ -1,12 +1,14 @@
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {FormField, form, required} from '@angular/forms/signals';
-import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, WritableSignal, computed, inject, signal} from '@angular/core';
 import {AdminApi, Topic} from '@features/admin/infrastructure/admin.api';
-import {ButtonComponent, BasicInputComponent, DialogComponent} from 'springest';
+import {ButtonComponent, BasicInputComponent, DialogComponent, FilePickerComponent} from 'springest';
+
+const TOPIC_ICON_ACCEPT = 'image/png,image/jpeg,image/webp';
 
 @Component({
   selector: 'hg-admin-topics-page',
-  imports: [TranslatePipe, FormField, ButtonComponent, BasicInputComponent, DialogComponent],
+  imports: [TranslatePipe, FormField, ButtonComponent, BasicInputComponent, DialogComponent, FilePickerComponent],
   templateUrl: './admin-topics-page.component.html',
   styleUrls: ['../_admin.scss', './admin-topics-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,8 +45,33 @@ export class AdminTopicsPageComponent {
   readonly deleteMessage = computed(() =>
     this.translate.instant('admin.topics.deleteConfirm', {title: this.deleting()?.title ?? ''}));
 
+  readonly iconAccept = TOPIC_ICON_ACCEPT;
+  readonly uploadingIcon = signal(false);
+
   constructor() {
     this.load();
+  }
+
+  /** Uploaded icons are stored as a media URL; anything else is an emoji/text icon. */
+  isImageIcon(icon: string | null): boolean {
+    return !!icon && (icon.startsWith('/') || icon.startsWith('http'));
+  }
+
+  onIconPicked(files: File[], target: WritableSignal<string>, errorTarget: WritableSignal<string | null>): void {
+    const file = files[0];
+    if (!file) return;
+    errorTarget.set(null);
+    this.uploadingIcon.set(true);
+    this.api.uploadTopicIcon(file).subscribe({
+      next: ({url}) => {
+        this.uploadingIcon.set(false);
+        target.set(url);
+      },
+      error: () => {
+        this.uploadingIcon.set(false);
+        errorTarget.set(this.translate.instant('admin.topics.uploadIconError'));
+      },
+    });
   }
 
   load(): void {
@@ -56,6 +83,7 @@ export class AdminTopicsPageComponent {
 
   create(): void {
     if (this.draftCodeField().invalid() || this.draftTitleField().invalid()) return;
+    this.error.set(null);
     this.api.createTopic({code: this.draftCode().trim(), title: this.draftTitle().trim(), icon: this.draftIcon().trim() || null})
       .subscribe({
         next: () => {

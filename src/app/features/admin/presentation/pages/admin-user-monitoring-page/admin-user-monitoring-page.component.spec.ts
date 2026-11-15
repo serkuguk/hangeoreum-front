@@ -157,7 +157,7 @@ describe('AdminUserMonitoringPageComponent read state', () => {
     component.loadHistory(MonitoringHistoryKind.Progress);
     expect(lessons[0].observed).toBe(false);
     expect(component.lessonSessionId()).toBeNull();
-    expect(api.monitoringHistory).toHaveBeenLastCalledWith('u', MonitoringHistoryKind.Progress, 0);
+    expect(api.monitoringHistory).toHaveBeenLastCalledWith('u', MonitoringHistoryKind.Progress, 0, 10);
     histories[2].error(new HttpErrorResponse({status: 500}));
     expect(component.history()?.error).toContain('Повторите');
     component.loadHistory(MonitoringHistoryKind.Progress);

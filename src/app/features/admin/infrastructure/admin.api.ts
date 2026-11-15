@@ -261,6 +261,12 @@ export class AdminApi {
     return this.http.delete<void>(`${this.base}/topics/${id}`);
   }
 
+  uploadTopicIcon(file: File): Observable<{url: string}> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{url: string}>(`${this.base}/topics/icon`, form);
+  }
+
   // ---- курс / юниты / уроки ----
   courses(): Observable<AdminCourse[]> {
     return this.http.get<AdminCourse[]>(`${this.base}/courses`);
@@ -400,6 +406,10 @@ export class AdminApi {
     form.append('file', file);
     form.append('type', kind); // бэкенд читает @RequestParam("type"); с 'kind' аудио/обложка затирали videoUrl
     return this.http.post<AdminClip>(`${this.base}/clips/${id}/media`, form);
+  }
+
+  setClipVideoLink(id: string, url: string): Observable<AdminClip> {
+    return this.http.put<AdminClip>(`${this.base}/clips/${id}/video-link`, {url});
   }
 
   publishClip(id: string, isPublished: boolean): Observable<AdminClip> {

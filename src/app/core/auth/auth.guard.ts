@@ -15,9 +15,16 @@ export const authGuard = () => {
 
 export const redirectLoggedInGuard: CanActivateFn = () => {
   const router = inject(Router);
-  return inject(AuthTokenStorageService).isAuthenticate()
-    ? router.createUrlTree(['/dashboard'])
-    : true;
+  const auth = inject(AuthService);
+  const dashboard = router.createUrlTree(['/dashboard']);
+  if (inject(AuthTokenStorageService).isAuthenticate()) return dashboard;
+  // access-токен живёт минуты, refresh-cookie — недели: вернувшегося пользователя пускаем без повторного входа.
+  // Анонимных посетителей (нет сохранённого профиля) на /auth/refresh не гоняем.
+  if (!auth.currentUser()) return true;
+  return auth.refreshAccessToken().pipe(
+    map(() => dashboard),
+    catchError(() => of(true as const)),
+  );
 };
 
 export const adminGuard: CanActivateFn = () => {

@@ -7,13 +7,15 @@ import {ImmerseFacade} from '@features/media/application/immerse.facade';
 import {Clip} from '@features/media/domain/clip.entity';
 import {WordAdditionFacade} from '@features/vocabulary/public-api';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {YoutubePlayerComponent} from '@features/media/presentation/components/youtube-player/youtube-player.component';
+import {youtubeId, youtubeThumbnail} from '@shared/utils';
 
 const SubMode = {KO: 'ko', RU: 'ru', BOTH: 'both'} as const;
 type SubMode = typeof SubMode[keyof typeof SubMode];
 
 @Component({
   selector: 'hg-immerse-page',
-  imports: [RouterLink, ButtonComponent, BasicSelectComponent, SegmentedControlComponent, TranslatePipe],
+  imports: [RouterLink, ButtonComponent, BasicSelectComponent, SegmentedControlComponent, TranslatePipe, YoutubePlayerComponent],
   templateUrl: './immerse-page.component.html',
   styleUrl: './immerse-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,7 +26,7 @@ export class ImmersePageComponent implements OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
-  readonly player = viewChild<ElementRef<HTMLVideoElement>>('player');
+  readonly youtubePlayer = viewChild(YoutubePlayerComponent);
   readonly subMode = signal<SubMode>(SubMode.BOTH);
   readonly subModeOptions = [
     {value: SubMode.KO, label: this.translate.instant('media.subtitles.korean')},
@@ -33,9 +35,12 @@ export class ImmersePageComponent implements OnDestroy {
   ];
   readonly currentClipIndex = signal(0);
   readonly currentClip = computed(() => this.facade.clips()[this.currentClipIndex()] ?? null);
+  readonly hasSubtitles = computed(() => !!this.currentClip()?.subtitles.length);
   readonly timeMs = signal(0);
   readonly ended = signal(false);
   readonly playbackError = signal(false);
+  readonly playbackErrorKey = computed(() => this.youtubeId(this.currentClip())
+    ? 'media.errors.youtubeUnavailable' : 'media.errors.playback');
   // подгрузка следующей страницы не должна вставлять статус над лентой и сдвигать её
   readonly initialLoading = computed(() => this.facade.loading() && !this.facade.clips().length);
   readonly hasNext =computed(() => this.currentClipIndex() + 1 < this.facade.clips().length);
@@ -127,12 +132,15 @@ export class ImmersePageComponent implements OnDestroy {
     const offset = index - this.currentClipIndex();
     const distance = Math.abs(offset);
     if (distance === 0) return 'is-active';
-    if (distance === 1) return 'is-near';
-    return offset < 0 ? 'is-far is-before' : 'is-far';
+    const side = offset < 0 ? ' is-before' : '';
+    return (distance === 1 ? 'is-near' : 'is-far') + side;
   }
 
   private resetPlayback(): void {
-    this.player()?.nativeElement.pause();
+    const video = this.activeVideo();
+    video?.pause();
+    if (video) video.currentTime = 0;
+    this.youtubePlayer()?.pause();
     this.timeMs.set(0);
     this.ended.set(false);
     this.playbackError.set(false);
@@ -142,8 +150,21 @@ export class ImmersePageComponent implements OnDestroy {
     if (Object.values<unknown>(SubMode).includes(value)) this.subMode.set(value as SubMode);
   }
 
-  updateTime(event: Event): void {
-    this.timeMs.set((event.target as HTMLVideoElement).currentTime * 1000);
+  // события превью (неактивных <video>) игнорируем — плеер у ленты один, активный
+  updateTime(index: number, event: Event): void {
+    if (this.isActive(index)) this.timeMs.set((event.target as HTMLVideoElement).currentTime * 1000);
+  }
+
+  onVideoEnded(index: number, clip: Clip): void {
+    if (this.isActive(index)) this.onEnded(clip);
+  }
+
+  onVideoError(index: number): void {
+    if (this.isActive(index)) this.playbackError.set(true);
+  }
+
+  private activeVideo(): HTMLVideoElement | null {
+    return this.host.nativeElement.querySelector<HTMLVideoElement>('.clip.is-active video');
   }
 
   onEnded(clip: Clip): void {
@@ -152,13 +173,28 @@ export class ImmersePageComponent implements OnDestroy {
   }
 
   repeat(): void {
-    const video = this.player()?.nativeElement;
-    if (!video) return;
-    video.currentTime = 0;
+    const youtube = this.youtubePlayer();
+    const video = this.activeVideo();
+    if (!youtube && !video) return;
     this.timeMs.set(0);
     this.ended.set(false);
     this.playbackError.set(false);
-    void video.play().catch(() => this.playbackError.set(true));
+    if (youtube) {
+      youtube.restart();
+      return;
+    }
+    video!.currentTime = 0;
+    void video!.play().catch(() => this.playbackError.set(true));
+  }
+
+  youtubeId(clip: Clip | null): string | null {
+    return youtubeId(clip?.videoUrl);
+  }
+
+  // своя обложка админа важнее; без неё YouTube отдаёт превью сам
+  poster(clip: Clip): string {
+    const id = this.youtubeId(clip);
+    return clip.thumbnailUrl ?? (id ? youtubeThumbnail(id) : '');
   }
 
   private subtitle(lang: string): string | null {

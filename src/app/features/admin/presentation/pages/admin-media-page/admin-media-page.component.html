@@ -168,13 +168,45 @@
 
       @if (isEditing(clip)) {
         <div class="editbox">
-          @if (clip.videoUrl) {
+          @if (editingYoutube(); as youtube) {
+            <div class="videobox">
+              <p>
+                {{ 'admin.media.youtubeVideo' | translate: { id: youtube.id } }} ·
+                <a [href]="youtube.watchUrl" target="_blank" rel="noopener noreferrer">{{ 'admin.media.openOnYoutube' | translate }}</a>
+              </p>
+              <iframe
+                [src]="youtube.embedUrl"
+                [title]="'admin.media.youtubePreviewTitle' | translate"
+                allow="encrypted-media; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          } @else if (clip.videoUrl) {
             <div class="videobox">
               <p>{{ 'admin.media.currentVideo' | translate: { name: videoName(clip) } }}</p>
               <video [src]="clip.videoUrl" controls preload="metadata"></video>
             </div>
           } @else {
             <p class="videobox muted">{{ 'admin.media.noVideoYet' | translate }}</p>
+          }
+
+          @if (canUseYoutube(clip)) {
+            <div class="videobox">
+              <app-basic-input
+                type="text"
+                [label]="'admin.media.youtubeLinkLabel' | translate"
+                [placeholder]="'admin.media.youtubeLinkPlaceholder' | translate"
+                [value]="youtubeLink()"
+                (valueChange)="youtubeLink.set($event)"
+              />
+              <p class="muted">{{ 'admin.media.youtubeLinkHint' | translate }}</p>
+              <app-button
+                [label]="'admin.media.saveYoutubeLink' | translate"
+                [disabled]="!youtubeLink().trim()"
+                (click)="saveYoutubeLink(clip)"
+                styleClass="hg-button hg-button--ghost hg-button--sm"
+              ></app-button>
+            </div>
           }
 
           <app-basic-select

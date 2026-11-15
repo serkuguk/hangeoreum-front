@@ -2,6 +2,9 @@ import {LessonType} from './course-map.entity';
 
 export type ExerciseKind = 'CHOICE' | 'LISTEN_CHOICE' | 'WORD_ORDER' | 'FILL_BLANK' | 'MATCH_PAIRS' | 'TYPE_WORD';
 
+/** Упражнения, где под заголовком только слово (без панели на всю ширину) — справа от него есть место. */
+export const WORD_HEADER_EXERCISE_KINDS: ReadonlySet<ExerciseKind> = new Set<ExerciseKind>(['CHOICE', 'LISTEN_CHOICE']);
+
 // Конвенция payload по kind (бэк проверяет только обязательные ключи,
 // admin/lesson-builder создаёт эти же формы)
 export interface ChoiceOption {
