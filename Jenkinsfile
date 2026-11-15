@@ -1,17 +1,18 @@
 pipeline {
-    agent { label 'windows' }
+    agent { label 'built-in' }
 
     options {
         timestamps()
+        skipDefaultCheckout()
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '20'))
     }
 
     environment {
-        DEPLOY_DIR = 'C:\\apps\\coreano-frontend'
-        DIST_DIR = 'dist\\hangeoreum'
-        HEALTH_URL = 'http://127.0.0.1/'
-        FRONTEND_MODE = 'static'
+        DEPLOY_HOST = 'deploy@207.180.212.3'
+        DEPLOY_DIR = '/home/deploy/projects/coreano-frontend'
+        DIST_DIR = 'dist/hangeoreum/browser'
+        HEALTH_URL = 'http://207.180.212.3/'
     }
 
     stages {
@@ -23,114 +24,91 @@ pipeline {
 
         stage('Install') {
             steps {
-                powershell '''
-                    $ErrorActionPreference = "Stop"
-                    corepack enable
-                    corepack install
-                    pnpm install --frozen-lockfile
-                '''
+                sh 'corepack pnpm install --frozen-lockfile'
             }
         }
 
         stage('Tests') {
             steps {
-                powershell '''
-                    $ErrorActionPreference = "Stop"
-                    pnpm test -- --runInBand
-                '''
+                sh 'corepack pnpm test --runInBand'
             }
         }
 
         stage('Build') {
             steps {
-                powershell '''
-                    $ErrorActionPreference = "Stop"
-                    pnpm exec ng build --configuration production
-
-                    if (!(Test-Path "$env:DIST_DIR")) {
-                        throw "Build output not found: $env:DIST_DIR"
-                    }
+                sh '''
+                    corepack pnpm exec ng build --configuration production
+                    test -s "$DIST_DIR/index.html"
                 '''
             }
         }
 
         stage('Deploy') {
             steps {
-                powershell '''
-                    $ErrorActionPreference = "Stop"
+                sshagent(credentials: ['vps-deploy']) {
+                    sh '''
+                        archive=$(mktemp)
+                        trap 'rm -f -- "$archive"' EXIT
+                        tar -C "$DIST_DIR" -cf "$archive" .
+                        checksum=$(sha256sum < "$archive")
 
-                    $deployRoot = $env:DEPLOY_DIR
-                    $releaseName = Get-Date -Format "yyyyMMdd-HHmmss"
-                    $releaseDir = Join-Path $deployRoot "releases\\$releaseName"
-                    $currentDir = Join-Path $deployRoot "current"
-                    $distDir = Join-Path $env:WORKSPACE $env:DIST_DIR
+                        remote_script='
+                            set -eu
+                            umask 022
+                            mkdir -p "$1/releases"
+                            cd "$1"
+                            incoming=$(mktemp .incoming-XXXXXXXX)
+                            trap "rm -f -- $incoming" EXIT
+                            cat > "$incoming"
+                            actual=$(sha256sum < "$incoming")
+                            test "${actual%% *}" = "$2"
+                            # shortcut: releases accumulate, add retention when disk usage warrants it.
+                            release=$(mktemp -d releases/build-XXXXXXXX)
+                            tar --no-same-owner --no-same-permissions -xf "$incoming" -C "$release"
+                            test -s "$release/index.html"
+                            chmod 755 "$release"
 
-                    New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
-                    New-Item -ItemType Directory -Force -Path (Join-Path $deployRoot "releases") | Out-Null
+                            exec 9> .deploy.lock
+                            flock -x 9
+                            previous=
+                            if test -L current; then
+                                previous=$(readlink current)
+                            else
+                                test ! -e current
+                            fi
 
-                    robocopy $distDir $releaseDir /MIR /NFL /NDL /NJH /NJS /NP
-                    if ($LASTEXITCODE -gt 7) {
-                        throw "robocopy failed with exit code $LASTEXITCODE"
-                    }
-
-                    $global:LASTEXITCODE = 0
-
-                    if (Test-Path $currentDir) {
-                        Remove-Item $currentDir -Recurse -Force
-                    }
-
-                    New-Item -ItemType Junction -Path $currentDir -Target $releaseDir | Out-Null
-
-                    Write-Host "Deployed: $releaseDir"
-                '''
-            }
-        }
-
-        stage('Reload frontend') {
-            steps {
-                powershell '''
-                    $ErrorActionPreference = "Stop"
-
-                    switch ($env:FRONTEND_MODE) {
-                        "nginx" {
-                           Restart-Service -DisplayName 'nginx' -ErrorAction Stop
-                        }
-                        "iis" {
-                            Import-Module WebAdministration
-                            Restart-WebItem "IIS:\\Sites\\coreano-frontend"
-                        }
-                        "static" {
-                            Write-Host "No reload needed"
-                        }
-                        default {
-                            throw "Unknown FRONTEND_MODE: $env:FRONTEND_MODE"
-                        }
-                    }
-                '''
-            }
-        }
-
-        stage('Health check') {
-            steps {
-                powershell '''
-                    $ErrorActionPreference = "Stop"
-
-                    for ($i = 1; $i -le 12; $i++) {
-                        try {
-                            $r = Invoke-WebRequest -Uri $env:HEALTH_URL -UseBasicParsing -TimeoutSec 10
-                            if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 400) {
-                                Write-Host "Health check passed: $($r.StatusCode)"
-                                exit 0
+                            finish() {
+                                status=$?
+                                trap "" HUP INT TERM
+                                if test "$status" -ne 0 && test "$(readlink current || true)" = "$release"; then
+                                    if test -n "$previous"; then
+                                        ln -s "$previous" "$release/.restore-current"
+                                        mv -Tf "$release/.restore-current" current
+                                    else
+                                        rm -- current
+                                    fi
+                                fi
+                                rm -f -- "$incoming"
                             }
-                        } catch {
-                            Write-Host "Attempt $i failed: $($_.Exception.Message)"
-                        }
+                            trap finish EXIT
+                            trap "exit 129" HUP
+                            trap "exit 130" INT
+                            trap "exit 143" TERM
+                            ln -s "$release" "$release/.next-current"
+                            mv -Tf "$release/.next-current" current
 
-                        Start-Sleep -Seconds 5
-                    }
+                            if curl --fail --silent --show-error --retry 3 --max-time 10 --output "$incoming" "$3" &&
+                                cmp "$release/index.html" "$incoming"; then
+                                exit 0
+                            fi
 
-                    throw "Health check failed: $env:HEALTH_URL"
-                '''
+                            echo "Frontend health check failed for $release" >&2
+                            exit 1
+                        '
+                        ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 "$DEPLOY_HOST" \
+                            "sh -c '$remote_script' sh '$DEPLOY_DIR' '${checksum%% *}' '$HEALTH_URL'" < "$archive"
+                    '''
+                }
             }
         }
     }
