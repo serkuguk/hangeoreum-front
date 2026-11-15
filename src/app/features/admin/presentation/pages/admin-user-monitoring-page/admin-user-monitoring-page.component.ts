@@ -1,4 +1,4 @@
-import {DatePipe} from '@angular/common';
+import {DatePipe, DecimalPipe, PercentPipe} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -44,7 +44,7 @@ interface HistoryState {
 @Component({
   selector: 'app-admin-user-monitoring-page',
   standalone: true,
-  imports: [ButtonComponent, ChartsComponent, DatePipe, PaginationComponent, TranslatePipe],
+  imports: [ButtonComponent, ChartsComponent, DatePipe, DecimalPipe, PercentPipe, PaginationComponent, TranslatePipe],
   templateUrl: './admin-user-monitoring-page.component.html',
   styleUrls: ['../_admin.scss', './admin-user-monitoring-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,6 +83,7 @@ export class AdminUserMonitoringPageComponent {
   readonly reviewLoading = signal(false);
   readonly reviewError = signal<string | null>(null);
   readonly pageSize = MONITORING_PAGE_SIZE;
+  readonly historyPageSize = 10;
   readonly historyTabs = [
     {kind: MonitoringHistoryKind.Sessions, label: `${I18N}.tabs.sessions`},
     {kind: MonitoringHistoryKind.Completions, label: `${I18N}.tabs.completions`},
@@ -104,6 +105,11 @@ export class AdminUserMonitoringPageComponent {
   readonly savedCorrectRatio = computed(() => {
     const count = this.lessonDetail()?.session.savedAnswers ?? 0;
     return count ? this.savedCorrectCount() / count : null;
+  });
+  readonly exercisesWithoutSavedCorrect = computed(() => {
+    const detail = this.lessonDetail();
+    const ids = new Set(detail?.exercisesWithoutSavedCorrect);
+    return detail?.exercises.filter(exercise => ids.has(exercise.exerciseId)) ?? [];
   });
   readonly activityPageSize = 10;
   readonly activityPage = signal(0);
@@ -218,7 +224,7 @@ export class AdminUserMonitoringPageComponent {
     this.resetDetails();
     this.activeHistory.set(kind);
     this.histories.update(states => ({...states, [kind]: {page, data: null, loading: true, error: null}}));
-    this.historyRequest = this.api.monitoringHistory(id, kind, page).subscribe({
+    this.historyRequest = this.api.monitoringHistory(id, kind, page, this.historyPageSize).subscribe({
       next: data => this.histories.update(states => ({...states, [kind]: {page, data, loading: false, error: null}})),
       error: error => {
         const message = this.failure(error);

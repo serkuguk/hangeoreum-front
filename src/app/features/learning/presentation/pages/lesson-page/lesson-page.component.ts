@@ -18,6 +18,7 @@ import {ExerciseFillBlankComponent} from '@features/learning/presentation/compon
 import {ExerciseMatchComponent} from '@features/learning/presentation/components/exercises/exercise-match.component';
 import {ExerciseTypeComponent} from '@features/learning/presentation/components/exercises/exercise-type.component';
 import {CompleteResult} from '@features/learning/domain/repositories/learning.repository';
+import {WORD_HEADER_EXERCISE_KINDS} from '@features/learning/domain/entities/exercise.entity';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {Mascot3dComponent, MascotAnimation} from '@shared/components/hg/mascot3d/mascot3d.component';
 
@@ -68,6 +69,12 @@ export class LessonPageComponent implements OnInit {
   readonly paywallMessageKey = computed(() => {
     const reason = this.facade.blockedBy();
     return reason ? `learning.lesson.paywallBlocked.${reason}` : null;
+  });
+
+  /** Лупи рядом с заголовком задания, а не отдельной строкой — карточки ближе к нему. */
+  readonly loopyBesideHeader = computed(() => {
+    const kind = this.facade.current()?.kind;
+    return !!kind && WORD_HEADER_EXERCISE_KINDS.has(kind);
   });
 
   /** Короткая реакция на пару в «сопоставь пары» — итог там приходит только в конце. */

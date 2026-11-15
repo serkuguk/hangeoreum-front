@@ -76,7 +76,7 @@
     </div>
 
     <!-- Один экземпляр на все упражнения: ветка не пересоздаётся при смене упражнения -->
-    <div class="loopy loopy--exercise">
+    <div class="loopy loopy--exercise" [class.loopy--beside]="loopyBesideHeader()">
       <div class="loopy__stage">
         <hg-mascot3d [size]="110" [animation]="loopyAnimation()" />
       </div>

@@ -25,7 +25,7 @@
         <p>{{ 'admin.monitoring.course.firstPublished' | translate }}: {{ data.course.title ?? ('admin.monitoring.course.noPublishedCourse' | translate) }}</p>
         <p>{{ 'admin.monitoring.course.completedLessons' | translate }}: {{ data.course.completed }} / {{ data.course.total }}</p>
         @if (data.course.percent !== null) {
-          <p class="big">{{ 'admin.monitoring.course.progress' | translate }}: {{ data.course.percent }}%</p>
+          <p class="big">{{ 'admin.monitoring.course.progress' | translate }}: {{ data.course.percent | number: '1.0-0' }}%</p>
         } @else {
           <p>{{ 'admin.monitoring.course.noPublishedLessons' | translate }}</p>
         }
@@ -267,7 +267,7 @@
             }
           </tbody>
         </table>
-        <app-pagination [rows]="pageSize" [first]="state.page * pageSize" [totalRecords]="page.totalElements"
+        <app-pagination [rows]="historyPageSize" [first]="state.page * historyPageSize" [totalRecords]="page.totalElements"
                         [attr.aria-label]="'admin.monitoring.history.pagination' | translate" (pageChange)="changeHistoryPage($event.page ?? 0)" />
       }
     }
@@ -296,7 +296,6 @@
   <section class="panel">
     <h2>{{ 'admin.monitoring.lesson.heading' | translate: {title: detail.session.lessonTitle} }}</h2>
     <p class="note">
-      {{ 'admin.monitoring.lesson.session' | translate }}: {{ detail.session.id }} ·
       {{ receiptKey(detail.session.receiptStatus, detail.session.receiptSavedAt) | translate }}
     </p>
     <p class="note">{{ 'admin.monitoring.lesson.note' | translate }}</p>
@@ -304,11 +303,11 @@
       <div class="card">
         <p>
           {{ 'admin.monitoring.lesson.incorrectCount' | translate }}: {{ detail.observedIncorrectCount }} / {{ detail.session.savedAnswers }} ·
-          {{ 'admin.monitoring.lesson.incorrectRatio' | translate }}: {{ detail.observedIncorrectRatio ?? ('admin.monitoring.noData' | translate) }}
+          {{ 'admin.monitoring.lesson.incorrectRatio' | translate }}: {{ (detail.observedIncorrectRatio | percent: '1.0-0') ?? ('admin.monitoring.noData' | translate) }}
         </p>
         <p>
           {{ 'admin.monitoring.correctCount' | translate }}: {{ savedCorrectCount() }} / {{ detail.session.savedAnswers }} ·
-          {{ 'admin.monitoring.lesson.correctRatio' | translate }}: {{ savedCorrectRatio() ?? ('admin.monitoring.noData' | translate) }}
+          {{ 'admin.monitoring.lesson.correctRatio' | translate }}: {{ (savedCorrectRatio() | percent: '1.0-0') ?? ('admin.monitoring.noData' | translate) }}
         </p>
         @if (lessonChart(); as chart) {
           <app-charts [data]="chart" [options]="chartOptions" />
@@ -319,15 +318,15 @@
     <h3>{{ 'admin.monitoring.lesson.exercises' | translate }}</h3>
     <ol>
       @for (exercise of detail.exercises; track exercise.exerciseId) {
-        <li>{{ exercise.position }} · {{ exercise.exerciseId }} · {{ exercise.kind }} · {{ exercise.context }}</li>
+        <li>{{ exercise.position }} · {{ exercise.kind }} · {{ exercise.context }}</li>
       }
     </ol>
 
     <h3>{{ 'admin.monitoring.lesson.noSavedCorrect' | translate }}</h3>
     <p class="note">{{ 'admin.monitoring.lesson.noSavedCorrectNote' | translate }}</p>
     <ul>
-      @for (id of detail.exercisesWithoutSavedCorrect; track id) {
-        <li>{{ id }}</li>
+      @for (exercise of exercisesWithoutSavedCorrect(); track exercise.exerciseId) {
+        <li>{{ exercise.position }} · {{ exercise.kind }} · {{ exercise.context }}</li>
       } @empty {
         <li>{{ 'admin.monitoring.lesson.noneFound' | translate }}</li>
       }
@@ -355,7 +354,7 @@
         @for (result of detail.results.content; track result.id) {
           <tr>
             <td>
-              {{ result.sequence }} · {{ result.exerciseId }} · {{ result.kind }}
+              {{ result.sequence }} · {{ result.kind }}
               <p>{{ result.context }}</p>
             </td>
             <td>
