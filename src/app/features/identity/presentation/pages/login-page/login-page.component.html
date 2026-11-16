@@ -75,13 +75,12 @@
         @if (facade.verificationResent()) {
           {{ "identity.verifyEmail.resent" | translate }}
         } @else {
-          <button
+          <app-button
             type="button"
-            class="linkbtn"
+            [label]="'identity.verifyEmail.resend' | translate"
+            styleClass="hg-button linkbtn"
             (click)="facade.resendEmailVerification()"
-          >
-            {{ "identity.verifyEmail.resend" | translate }}
-          </button>
+          />
         }
       </div>
     }
