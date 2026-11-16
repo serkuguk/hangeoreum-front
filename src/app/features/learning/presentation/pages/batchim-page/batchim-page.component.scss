@@ -55,13 +55,14 @@
 // ---------- Tabs ----------
 .tabs {
   position: sticky;
-  top: 14px;
+  top: 83px; // 69px sticky topbar + 14px gap; at 14px the strip slid under the topbar
   z-index: 5;
   display: flex;
   gap: 6px;
   width: fit-content;
   max-width: 100%;
   overflow-x: auto;
+  scrollbar-width: none; // swipeable strip, the bar only adds noise inside the pill
   margin-bottom: 30px;
   padding: 6px;
   border-radius: 99px;
@@ -74,6 +75,7 @@ button.hg-native-button.hg-native-button.hg-native-button.btab {
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0; // keep labels whole on a phone; the strip scrolls instead
   color: var(--hg-muted);
   background: none;
   border: none;
@@ -250,5 +252,21 @@ button.hg-native-button.hg-native-button.hg-native-button.qopt {
   .hero { padding: 28px 22px; }
   .quiz .qopts { grid-template-columns: 1fr; }
   .cx { flex-wrap: wrap; }
+  .quiz .next { display: block; } // let the shared phone rule stretch it
+
+  // Phone: all four tabs visible as a 2×2 grid instead of a strip cut off at the screen edge.
+  .tabs {
+    position: static; // a two-row sticky block would eat too much of a phone screen
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    border-radius: 22px;
+  }
+
+  button.hg-native-button.hg-native-button.hg-native-button.btab {
+    white-space: normal;
+    padding: 10px 8px;
+    border-radius: 16px;
+  }
 }
 }

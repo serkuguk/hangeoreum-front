@@ -415,6 +415,8 @@
   .hg-hero { padding: 28px 22px; }
   .hg-hero__copy h1 { font-size: 30px; }
   .hg-card { padding: 22px 20px 28px; }
+  // card padding shrinks to 20px here; the desktop -28px bleed pushed the chapter icons outside the card
+  .hg-course hg-course-path { margin-inline: -8px; }
 }
 
 // Phone: next to the side rail the hero is ~220px wide, «С возвращением,» at 30px ran past the card edge.
@@ -423,7 +425,13 @@
     padding: 24px 18px;
   }
 
+  .hg-hero hg-mascot {
+    margin-inline: auto;
+  }
+
   .hg-hero__copy {
+    // full row: beside the 290px mascot the copy collapsed to one letter per line
+    flex-basis: 100%;
     min-width: 0;
 
     h1 {

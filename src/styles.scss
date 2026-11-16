@@ -153,6 +153,12 @@ h2.pagettl {
   span { color: var(--hg-muted); }
 }
 
+// Hangul in headings wraps between words, not mid-word («안녕 / 하세요» on a phone).
+h1, h2, h3 {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 // ---------- Доступность ----------
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

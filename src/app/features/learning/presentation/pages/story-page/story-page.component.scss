@@ -135,3 +135,15 @@
 }
 
 }
+
+// Phone: error-panel actions stack full-width.
+@media (max-width: 560px) {
+  .loadpanel {
+    padding: 28px 20px;
+
+    .cta {
+      display: block;
+      margin: 0 0 12px;
+    }
+  }
+}

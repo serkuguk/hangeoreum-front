@@ -71,3 +71,24 @@
     color: #fff;
   }
 }
+
+// Phone: stacked full-width actions with centred labels, like a native bottom action group.
+@media (max-width: 560px) {
+  // smaller mascot and padding: beside the 120px float the title had ~120px and broke mid-word
+  .tipcard {
+    padding: 24px 20px;
+  }
+
+  .loopy {
+    width: 84px;
+    height: 84px;
+  }
+
+  h2.pagettl {
+    font-size: 22px;
+  }
+
+  .tipbtns {
+    flex-direction: column;
+  }
+}

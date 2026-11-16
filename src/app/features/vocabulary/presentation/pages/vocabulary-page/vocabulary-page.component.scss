@@ -263,6 +263,46 @@
 
 @media (max-width: 720px) {
   .word-list { grid-template-columns: minmax(0, 1fr); }
+
+  // field on top, full-width «create» button below
+  .newdeck {
+    flex-direction: column;
+    align-items: stretch;
+
+    app-button {
+      display: block;
+    }
+
+    app-button .default-button,
+    app-button p-button,
+    app-button .hg-button {
+      width: 100%;
+    }
+
+    app-button .hg-button {
+      justify-content: center;
+    }
+  }
+
+  // title on top, actions stacked below, each full width
+  .deckrow {
+    flex-direction: column;
+    align-items: stretch;
+
+    app-button {
+      display: block;
+    }
+
+    app-button .default-button,
+    app-button p-button,
+    app-button .hg-button {
+      width: 100%;
+    }
+
+    app-button .hg-button {
+      justify-content: center;
+    }
+  }
 }
 
 }
