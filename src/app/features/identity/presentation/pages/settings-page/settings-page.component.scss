@@ -143,3 +143,9 @@
 
   &:disabled { opacity: .5; cursor: default; }
 }
+
+@media (max-width: 560px) {
+  .inline {
+    max-width: none;
+  }
+}

@@ -152,3 +152,16 @@
   .cab-head { flex-direction: column; text-align: center; }
   .editbtn { align-self: center; }
 }
+
+@media (max-width: 600px) {
+  .subrow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+
+    .cta {
+      display: block;
+      text-align: center;
+    }
+  }
+}

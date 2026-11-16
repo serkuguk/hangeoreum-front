@@ -104,6 +104,9 @@
   &.pro {
     border-color: rgba(255, 194, 60, .4);
     background: linear-gradient(160deg, #2a2438, #211F2E);
+    // the card is dark in both themes, so its text must not follow the light theme's dark ink
+    color: #f4efe6;
+    --hg-muted: rgba(244, 239, 230, .72);
   }
 
   .poppill { position: absolute; top: 22px; right: 22px; }
@@ -166,4 +169,15 @@
 
 @media (max-width: 880px) {
   .feat3, .plans { grid-template-columns: 1fr; }
+
+  // stacked full-width hero actions, like a native app
+  .land-hero .btns {
+    flex-direction: column;
+  }
+
+  // one line, phone-sized: at 420px the brand glyphs stacked into a column behind the headline
+  .land-hero .ghost {
+    font-size: 170px;
+    white-space: nowrap;
+  }
 }

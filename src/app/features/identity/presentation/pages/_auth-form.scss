@@ -9,6 +9,12 @@
 
   h1 { font-size: var(--hg-fs-2xl); font-weight: 600; line-height: 1.15; margin-bottom: var(--hg-space-2); }
   .sub { color: var(--hg-text-muted); font-size: var(--hg-fs-sm); margin-bottom: var(--hg-space-6); }
+
+  // Фокус на заголовке ставится программно (a11y), рамка вокруг него не нужна.
+  h1:focus,
+  h1:focus-visible {
+    outline: none;
+  }
 }
 
 // Заголовок с маскотом справа (страница входа).
@@ -16,6 +22,12 @@
   display: flex;
   align-items: flex-start;
   gap: var(--hg-space-4);
+}
+
+// Рядом с маскотом места мало: заголовок меньше, чтобы «Войти в аккаунт» влезало в одну строку.
+.auth-head h1 {
+  font-size: 1.5rem;
+  white-space: nowrap;
 }
 
 .auth-mascot {

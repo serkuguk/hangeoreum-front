@@ -180,6 +180,17 @@ hg-settings-page {
   app-toggle.coming-toggle { width: auto; }
 }
 
+// Phone: label and control both start from the left edge; right-aligned wrapped rows read as broken.
+@media (max-width: 560px) {
+  hg-settings-page app-segmented-control.segpick.segpick {
+    justify-content: flex-start;
+
+    > span {
+      text-align: left;
+    }
+  }
+}
+
 app-toggle:has(.p-toggleswitch) {
   display: flex;
   width: 100%;
@@ -306,5 +317,42 @@ hg-dashboard-page .hg-btn.hg-btn.hg-btn.hg-btn.hg-btn {
     font-weight: 600;
 
     &:hover { background: rgba(255, 255, 255, 0.12); }
+  }
+}
+
+// Phone: hero actions stack full-width with centred labels, like a native action group.
+@media (max-width: 480px) {
+  hg-dashboard-page .hg-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    .hg-btn.hg-btn.hg-btn.hg-btn.hg-btn {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+  }
+}
+
+// Phone: primary actions fill their row with a centred label, like a native app.
+// --sm and --field buttons stay compact: they sit beside text or an input. Admin is out of scope.
+@media (max-width: 560px) {
+  app-button:has(.hg-button:not(.hg-button--sm, .hg-button--field)):not(hg-admin-layout app-button) {
+    display: block;
+    flex: 1 1 auto;
+
+    .default-button, p-button, .hg-button {
+      width: 100%;
+    }
+
+    .hg-button {
+      justify-content: center;
+      min-height: 3rem;
+    }
+  }
+
+  a.cta:not(hg-admin-layout a) {
+    display: block;
+    text-align: center;
   }
 }

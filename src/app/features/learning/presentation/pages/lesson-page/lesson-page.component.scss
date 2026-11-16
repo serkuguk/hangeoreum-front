@@ -145,6 +145,11 @@
     padding-bottom: calc(var(--hg-space-4) + env(safe-area-inset-bottom, 0px));
     border-radius: var(--hg-radius-block) var(--hg-radius-block) 0 0;
     box-shadow: 0 -8px 24px rgba(0, 0, 0, .12);
+    flex-wrap: wrap; // verdict on its own line, «next» full-width under it
+
+    app-button {
+      flex-basis: 100%;
+    }
   }
 }
 
