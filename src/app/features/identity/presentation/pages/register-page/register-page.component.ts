@@ -27,6 +27,10 @@ export class RegisterPageComponent {
     validate(path.consent, ({value}) => value() ? null : {kind: 'required'});
   });
 
+  constructor() {
+    this.facade.beginRegistration();
+  }
+
   submit(): void {
     this.submitted.set(true);
     if (this.facade.loading()) return;

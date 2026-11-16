@@ -4,6 +4,17 @@ import {AuthLayoutComponent} from './presentation/layout/auth-layout.component';
 
 export const identityRoutes: Routes = [
   {
+    // без redirectLoggedInGuard: ссылка из письма должна сработать, даже если в браузере открыта сессия
+    path: 'auth/verify-email',
+    component: AuthLayoutComponent,
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./presentation/pages/verify-email-page/verify-email-page.component').then(c => c.VerifyEmailPageComponent),
+      },
+    ],
+  },
+  {
     path: 'auth',
     component: AuthLayoutComponent,
     canActivate: [redirectLoggedInGuard],

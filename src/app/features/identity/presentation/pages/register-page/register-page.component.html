@@ -3,102 +3,127 @@
   <h1>{{ "identity.register.title" | translate }}</h1>
   <p class="sub">{{ "identity.register.subtitle" | translate }}</p>
 
-  <form novalidate (submit)="$event.preventDefault(); submit()">
-    <app-form-field
-      class="hg-auth-field"
-      [field]="form.name"
-      [isInline]="false"
-      [submitted]="submitted()"
-      [label]="'common.name' | translate"
-      [showLabel]="false"
-      [errorMessages]="{
-        required: ('identity.validation.name' | translate),
-        maxLength: ('identity.validation.name' | translate),
-      }"
-    >
-      <app-basic-input
-        type="text"
-        [formField]="form.name"
-        [placeholder]="'common.name' | translate"
-        autocomplete="name"
-      />
-    </app-form-field>
+  @if (facade.pendingVerificationEmail(); as pendingEmail) {
+    <div class="success" role="status">
+      {{ "identity.verifyEmail.sent" | translate: { email: pendingEmail } }}
+    </div>
 
-    <app-form-field
-      class="hg-auth-field"
-      [field]="form.email"
-      [isInline]="false"
-      [submitted]="submitted()"
-      [label]="'common.email' | translate"
-      [showLabel]="false"
-      [errorMessages]="{
-        required: ('identity.validation.email' | translate),
-        email: ('identity.validation.email' | translate),
-      }"
-    >
-      <app-basic-input
-        type="email"
-        [formField]="form.email"
-        [placeholder]="'common.email' | translate"
-        autocomplete="common.email' | translate"
-        autocapitalize="off"
-      />
-    </app-form-field>
-
-    <app-form-field
-      class="hg-auth-field"
-      [field]="form.password"
-      [isInline]="false"
-      [submitted]="submitted()"
-      [label]="'common.password' | translate"
-      [showLabel]="false"
-      [errorMessages]="{
-        required: ('identity.validation.passwordRequired' | translate),
-        minLength: ('identity.validation.passwordMin' | translate),
-      }"
-    >
-      <app-password-input
-        [toggleMask]="false"
-        [formField]="form.password"
-        [placeholder]="'common.password' | translate"
-        autocomplete="new-password"
-      />
-    </app-form-field>
-
-    <app-form-field
-      class="hg-auth-field hg-auth-consent"
-      [field]="form.consent"
-      [isInline]="false"
-      [submitted]="submitted()"
-      [errorMessages]="{
-        required: ('identity.validation.consent' | translate),
-      }"
-    >
-      <app-checkbox
-        [label]="'identity.register.consent' | translate"
-        [formField]="form.consent"
-      />
-    </app-form-field>
-
-    <!-- new tab so the half-filled form survives reading the documents -->
-    <p class="consent-docs">
-      <a routerLink="/terms" target="_blank">{{ "identity.register.consentDocs.terms" | translate }}</a>
-      {{ "identity.register.consentDocs.and" | translate }}
-      <a routerLink="/privacy" target="_blank">{{ "identity.register.consentDocs.privacy" | translate }}</a>
-    </p>
+    @if (facade.verificationResent()) {
+      <div class="recovery" role="status">
+        {{ "identity.verifyEmail.resent" | translate }}
+      </div>
+    }
 
     @if (facade.error(); as error) {
-      <div class="apierr">{{ error }}</div>
+      <div class="apierr" role="alert">{{ error }}</div>
     }
 
     <app-button
       class="btn"
-      type="submit"
-      [label]="'identity.register.submit' | translate"
+      type="button"
+      [label]="'identity.verifyEmail.resend' | translate"
       [loading]="facade.loading()"
       styleClass="hg-button hg-button--block"
+      (click)="facade.resendEmailVerification()"
     />
-  </form>
+  } @else {
+    <form novalidate (submit)="$event.preventDefault(); submit()">
+      <app-form-field
+        class="hg-auth-field"
+        [field]="form.name"
+        [isInline]="false"
+        [submitted]="submitted()"
+        [label]="'common.name' | translate"
+        [showLabel]="false"
+        [errorMessages]="{
+          required: ('identity.validation.name' | translate),
+          maxLength: ('identity.validation.name' | translate),
+        }"
+      >
+        <app-basic-input
+          type="text"
+          [formField]="form.name"
+          [placeholder]="'common.name' | translate"
+          autocomplete="name"
+        />
+      </app-form-field>
+
+      <app-form-field
+        class="hg-auth-field"
+        [field]="form.email"
+        [isInline]="false"
+        [submitted]="submitted()"
+        [label]="'common.email' | translate"
+        [showLabel]="false"
+        [errorMessages]="{
+          required: ('identity.validation.email' | translate),
+          email: ('identity.validation.email' | translate),
+        }"
+      >
+        <app-basic-input
+          type="email"
+          [formField]="form.email"
+          [placeholder]="'common.email' | translate"
+          autocomplete="common.email' | translate"
+          autocapitalize="off"
+        />
+      </app-form-field>
+
+      <app-form-field
+        class="hg-auth-field"
+        [field]="form.password"
+        [isInline]="false"
+        [submitted]="submitted()"
+        [label]="'common.password' | translate"
+        [showLabel]="false"
+        [errorMessages]="{
+          required: ('identity.validation.passwordRequired' | translate),
+          minLength: ('identity.validation.passwordMin' | translate),
+        }"
+      >
+        <app-password-input
+          [toggleMask]="false"
+          [formField]="form.password"
+          [placeholder]="'common.password' | translate"
+          autocomplete="new-password"
+        />
+      </app-form-field>
+
+      <app-form-field
+        class="hg-auth-field hg-auth-consent"
+        [field]="form.consent"
+        [isInline]="false"
+        [submitted]="submitted()"
+        [errorMessages]="{
+          required: ('identity.validation.consent' | translate),
+        }"
+      >
+        <app-checkbox
+          [label]="'identity.register.consent' | translate"
+          [formField]="form.consent"
+        />
+      </app-form-field>
+
+      <!-- new tab so the half-filled form survives reading the documents -->
+      <p class="consent-docs">
+        <a routerLink="/terms" target="_blank">{{ "identity.register.consentDocs.terms" | translate }}</a>
+        {{ "identity.register.consentDocs.and" | translate }}
+        <a routerLink="/privacy" target="_blank">{{ "identity.register.consentDocs.privacy" | translate }}</a>
+      </p>
+
+      @if (facade.error(); as error) {
+        <div class="apierr">{{ error }}</div>
+      }
+
+      <app-button
+        class="btn"
+        type="submit"
+        [label]="'identity.register.submit' | translate"
+        [loading]="facade.loading()"
+        styleClass="hg-button hg-button--block"
+      />
+    </form>
+  }
 
   <div class="alt">
     {{ "identity.register.hasAccount" | translate }}

@@ -21,6 +21,12 @@
     </div>
   }
 
+  @if (emailVerified) {
+    <div class="success" role="status">
+      {{ "identity.verifyEmail.confirmed" | translate }}
+    </div>
+  }
+
   <form novalidate (submit)="$event.preventDefault(); submit()">
     <app-form-field
       class="hg-auth-field"
@@ -62,6 +68,22 @@
 
     @if (facade.error(); as error) {
       <div class="apierr" role="alert">{{ error }}</div>
+    }
+
+    @if (facade.pendingVerificationEmail()) {
+      <div class="recovery" role="status">
+        @if (facade.verificationResent()) {
+          {{ "identity.verifyEmail.resent" | translate }}
+        } @else {
+          <button
+            type="button"
+            class="linkbtn"
+            (click)="facade.resendEmailVerification()"
+          >
+            {{ "identity.verifyEmail.resend" | translate }}
+          </button>
+        }
+      </div>
     }
 
     @if (facade.showPasswordRecovery()) {

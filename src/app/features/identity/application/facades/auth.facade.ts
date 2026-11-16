@@ -19,6 +19,9 @@ export class AuthFacade {
   readonly error = signal<string | null>(null);
   readonly user = this.authService.currentUser;
   readonly passwordResetRequested = signal(false);
+  /** Email, на который отправлено письмо с подтверждением и который ещё не подтверждён. */
+  readonly pendingVerificationEmail = signal<string | null>(null);
+  readonly verificationResent = signal(false);
   private readonly credentialFailureCount = signal(0);
   private loginSubscription: Subscription | null = null;
   private loginScope = 0;
@@ -29,6 +32,13 @@ export class AuthFacade {
     this.loading.set(false);
     this.credentialFailureCount.set(0);
     this.error.set(null);
+    this.resetVerification();
+  }
+
+  beginRegistration(): void {
+    this.loading.set(false);
+    this.error.set(null);
+    this.resetVerification();
   }
 
   endLogin(): void {
@@ -42,7 +52,12 @@ export class AuthFacade {
     this.passwordResetRequested.set(false);
   }
 
-  login(email: string, password: string): void {
+  /**
+   * firstLogin: вход сразу после подтверждения email — ведём на онбординг, как раньше вела регистрация.
+   * Флага «онбординг пройден» на сервере нет: при входе с другого устройства он пропускается,
+   * настройки остаются по умолчанию и меняются в профиле.
+   */
+  login(email: string, password: string, firstLogin = false): void {
     if (this.loading()) return;
     const scope = this.loginScope;
     const request = new Subscription();
@@ -55,12 +70,13 @@ export class AuthFacade {
         this.loginSubscription = null;
         this.loading.set(false);
         this.credentialFailureCount.set(0);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([firstLogin ? '/onboarding' : '/dashboard']);
       },
       error: (error: HttpErrorResponse) => {
         if (scope !== this.loginScope) return;
         this.loginSubscription = null;
         if (isInvalidCredentials(error)) this.credentialFailureCount.update(count => count + 1);
+        if (errorCode(error) === 'EMAIL_NOT_VERIFIED') this.pendingVerificationEmail.set(email);
         this.failAuth(error);
       },
     }));
@@ -73,7 +89,34 @@ export class AuthFacade {
     this.authService.register(name, email, password).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/onboarding']);
+        this.pendingVerificationEmail.set(email);
+      },
+      error: (error: HttpErrorResponse) => this.failAuth(error),
+    });
+  }
+
+  resendEmailVerification(): void {
+    const email = this.pendingVerificationEmail();
+    if (!email || this.loading()) return;
+    this.loading.set(true);
+    this.error.set(null);
+    this.authService.resendEmailVerification(email).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.verificationResent.set(true);
+      },
+      error: (error: HttpErrorResponse) => this.failAuth(error),
+    });
+  }
+
+  confirmEmail(token: string): void {
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.error.set(null);
+    this.authService.confirmEmail(token).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/auth/login'], {state: {emailVerified: true}});
       },
       error: (error: HttpErrorResponse) => this.failAuth(error),
     });
@@ -130,6 +173,11 @@ export class AuthFacade {
     this.error.set(humanizeError(error, this.translate));
   }
 
+  private resetVerification(): void {
+    this.pendingVerificationEmail.set(null);
+    this.verificationResent.set(false);
+  }
+
   private cancelLogin(): void {
     this.loginSubscription?.unsubscribe();
     this.loginSubscription = null;
@@ -139,6 +187,8 @@ export class AuthFacade {
 
 function humanizeError(error: HttpErrorResponse, translate: TranslateService): string {
   const body = error.error as {code?: string; message?: string} | null;
+  if (body?.code === 'EMAIL_NOT_VERIFIED') return translate.instant('identity.errors.emailNotVerified');
+  if (body?.code === 'INVALID_VERIFICATION_TOKEN') return translate.instant('identity.verifyEmail.invalidToken');
   if (error.status === 401 || body?.code === 'INVALID_CREDENTIALS') return translate.instant('identity.errors.invalidCredentials');
   if (body?.code === 'INVALID_RESET_TOKEN') return translate.instant('identity.passwordReset.invalidToken');
   if (body?.code === 'EMAIL_TAKEN' || error.status === 409) return translate.instant('identity.errors.emailTaken');
@@ -149,5 +199,9 @@ function humanizeError(error: HttpErrorResponse, translate: TranslateService): s
 }
 
 function isInvalidCredentials(error: HttpErrorResponse): boolean {
-  return error.status === 401 && (error.error as {code?: string} | null)?.code === 'INVALID_CREDENTIALS';
+  return error.status === 401 && errorCode(error) === 'INVALID_CREDENTIALS';
+}
+
+function errorCode(error: HttpErrorResponse): string | undefined {
+  return (error.error as {code?: string} | null)?.code;
 }
