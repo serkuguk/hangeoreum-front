@@ -22,6 +22,8 @@ describe('AuthFacade', () => {
     logout: jest.Mock;
     requestPasswordReset: jest.Mock;
     confirmPasswordReset: jest.Mock;
+    confirmEmail: jest.Mock;
+    resendEmailVerification: jest.Mock;
     updateStoredUser: jest.Mock;
   };
   let router: {navigate: jest.Mock};
@@ -34,6 +36,8 @@ describe('AuthFacade', () => {
       logout: jest.fn().mockReturnValue(of(null)),
       requestPasswordReset: jest.fn(),
       confirmPasswordReset: jest.fn(),
+      confirmEmail: jest.fn(),
+      resendEmailVerification: jest.fn(),
       updateStoredUser: jest.fn(),
     };
     router = {navigate: jest.fn()};
@@ -183,5 +187,33 @@ describe('AuthFacade', () => {
 
     facade.confirmPasswordReset('valid', 'new-password');
     expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {state: {passwordReset: true}});
+  });
+
+  it('keeps a new registration on the page until the mailed link is confirmed', () => {
+    auth.register.mockReturnValue(of(undefined));
+    auth.resendEmailVerification.mockReturnValue(of(undefined));
+
+    facade.register('Mina', 'mina@example.com', 'password1');
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(facade.pendingVerificationEmail()).toBe('mina@example.com');
+
+    facade.resendEmailVerification();
+    expect(auth.resendEmailVerification).toHaveBeenCalledWith('mina@example.com');
+    expect(facade.verificationResent()).toBe(true);
+  });
+
+  it('offers a resend when sign-in is refused for an unconfirmed email, and confirms a link', () => {
+    const refused = new Subject<AuthResponse>();
+    auth.login.mockReturnValue(refused);
+    facade.login('mina@example.com', 'password1');
+    refused.error(new HttpErrorResponse({status: 403, error: {code: 'EMAIL_NOT_VERIFIED'}}));
+
+    expect(facade.pendingVerificationEmail()).toBe('mina@example.com');
+    expect(facade.showPasswordRecovery()).toBe(false);
+
+    auth.confirmEmail.mockReturnValue(of(undefined));
+    facade.confirmEmail('signed.jwt.value');
+    expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {state: {emailVerified: true}});
   });
 });

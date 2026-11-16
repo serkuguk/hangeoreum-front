@@ -1,0 +1,22 @@
+<div class="formbox">
+  <div class="eyebrow">{{ "identity.verifyEmail.eyebrow" | translate }}</div>
+  <h1>{{ "identity.verifyEmail.title" | translate }}</h1>
+
+  @if (missingToken) {
+    <div class="apierr" role="alert">
+      {{ "identity.verifyEmail.invalidToken" | translate }}
+    </div>
+  } @else if (facade.error(); as error) {
+    <div class="apierr" role="alert">{{ error }}</div>
+  } @else {
+    <p class="sub" role="status">
+      {{ "identity.verifyEmail.checking" | translate }}
+    </p>
+  }
+
+  <div class="alt">
+    <a routerLink="/auth/login">{{
+      "identity.passwordReset.backToLogin" | translate
+    }}</a>
+  </div>
+</div>

@@ -14,7 +14,9 @@ import {TranslatePipe} from '@ngx-translate/core';
 })
 export class LoginPageComponent implements OnDestroy {
   readonly facade = inject(AuthFacade);
-  readonly passwordChanged = inject(Router).getCurrentNavigation()?.extras.state?.['passwordReset'] === true;
+  private readonly navigationState = inject(Router).getCurrentNavigation()?.extras.state;
+  readonly passwordChanged = this.navigationState?.['passwordReset'] === true;
+  readonly emailVerified = this.navigationState?.['emailVerified'] === true;
 
   readonly model = signal({email: '', password: ''});
   readonly submitted = signal(false);
@@ -41,6 +43,6 @@ export class LoginPageComponent implements OnDestroy {
       return;
     }
     const {email, password} = this.model();
-    this.facade.login(email, password);
+    this.facade.login(email, password, this.emailVerified);
   }
 }

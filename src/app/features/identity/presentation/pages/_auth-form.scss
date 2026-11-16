@@ -83,6 +83,17 @@ form {
   a { color: var(--hg-route-text); font-weight: 600; }
 }
 
+// Действие внутри текста (повторная отправка письма): выглядит как ссылка, но это кнопка.
+.linkbtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hg-route-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .alt {
   margin-top: var(--hg-space-2);
   font-size: var(--hg-fs-sm);

@@ -7,10 +7,15 @@ import {AuthFacade} from '@features/identity/application/facades/auth.facade';
 import {RegisterPageComponent} from './register-page.component';
 
 describe('RegisterPage Signal Forms integration', () => {
-  const facade = {loading: signal(false), error: signal<string | null>(null), register: jest.fn()};
+  const facade = {
+    loading: signal(false), error: signal<string | null>(null), register: jest.fn(), beginRegistration: jest.fn(),
+    pendingVerificationEmail: signal<string | null>(null), verificationResent: signal(false),
+    resendEmailVerification: jest.fn(),
+  };
   beforeEach(() => {
     facade.loading.set(false);
     facade.register.mockClear();
+    facade.pendingVerificationEmail.set(null);
     TestBed.configureTestingModule({imports: [RegisterPageComponent], providers: [
       provideRouter([]), provideTranslateService({lang: 'ru', fallbackLang: 'ru'}),
       {provide: AuthFacade, useValue: facade},
@@ -37,6 +42,16 @@ describe('RegisterPage Signal Forms integration', () => {
     facade.loading.set(true);
     component.submit();
     expect(facade.register).toHaveBeenCalledTimes(1);
+  });
+
+  it('replaces the form with the check-your-email notice once registration is accepted', () => {
+    const fixture = TestBed.createComponent(RegisterPageComponent);
+    facade.pendingVerificationEmail.set('mina@example.com');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.success[role="status"]')).not.toBeNull();
+    fixture.nativeElement.querySelector('app-button').click();
+    expect(facade.resendEmailVerification).toHaveBeenCalledTimes(1);
   });
 
   it('binds actual inner inputs and disables the submit button while loading', () => {

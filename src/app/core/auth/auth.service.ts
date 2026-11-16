@@ -46,9 +46,17 @@ export class AuthService {
       .pipe(tap(res => this.saveSession(res)));
   }
 
-  public register(name: string, email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.base}/register`, {name, email, password}, {withCredentials: true})
-      .pipe(tap(res => this.saveSession(res)));
+  /** Сессии не даёт: аккаунт заработает после перехода по ссылке из письма. */
+  public register(name: string, email: string, password: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/register`, {name, email, password});
+  }
+
+  public confirmEmail(token: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/email-verification/confirm`, {token});
+  }
+
+  public resendEmailVerification(email: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/email-verification/resend`, {email});
   }
 
   public requestPasswordReset(email: string): Observable<void> {
