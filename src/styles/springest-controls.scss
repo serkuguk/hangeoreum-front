@@ -64,6 +64,13 @@ app-button {
   }
 }
 
+hg-login-page app-button.btn .hg-button.p-button:hover:not(:disabled) {
+  background: var(--hg-route-soft);
+  color: var(--hg-route-text);
+  box-shadow: none;
+  transform: none;
+}
+
 :is(hg-admin-words-page, hg-admin-topics-page) .toolbar app-button .hg-button.p-button,
 hg-admin-course-page .addrow app-button .hg-button.p-button,
 hg-admin-media-page .addrow app-button .hg-button.p-button,
@@ -308,7 +315,7 @@ hg-dashboard-page .hg-btn.hg-btn.hg-btn.hg-btn.hg-btn {
   align-items: center;
   gap: 10px;
   border: none;
-  border-radius: var(--hg-radius-md);
+  border-radius: 0.3rem;
   font-family: inherit;
   font-size: var(--hg-fs-base);
   font-weight: 700;
