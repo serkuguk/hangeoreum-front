@@ -2,6 +2,29 @@
 
 .tipbox { max-width: 640px; }
 
+.tipbox .cta {
+  border-radius: 0.3rem;
+
+  &:hover {
+    background: var(--hg-route-soft);
+    color: var(--hg-route-text);
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+:host ::ng-deep .tipbtns app-button .hg-button.p-button {
+  border-radius: 0.3rem;
+  min-height: 3.125rem;
+
+  &:hover:not(:disabled) {
+    background: var(--hg-route-soft);
+    color: var(--hg-route-text);
+    box-shadow: none;
+    transform: none;
+  }
+}
+
 .loadpanel {
   text-align: center;
   padding: 40px;

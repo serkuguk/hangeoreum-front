@@ -33,7 +33,7 @@ import {filter, map, startWith} from 'rxjs/operators';
     .auth {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      min-height: 100vh;
+      min-height: 100dvh;
     }
 
     .brand {

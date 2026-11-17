@@ -10,11 +10,20 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  background: var(--hg-bg);
+}
+
+// Main layout is 100vw wide (see main-layout :host), so the scrollbar just overlays its right padding:
+// no reserved gutter strip next to the topbar, and no width jump when the scrollbar appears.
+html:has(hg-main-layout) {
+  scrollbar-gutter: auto;
+  overflow-x: clip;
 }
 
 body {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--hg-bg);
   color: var(--hg-text);
   font-family: var(--hg-font-ui);

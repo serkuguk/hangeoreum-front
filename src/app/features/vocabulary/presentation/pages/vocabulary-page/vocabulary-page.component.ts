@@ -52,6 +52,9 @@ export class VocabularyPageComponent {
   readonly expandedId = signal<string | null>(null);
   readonly deckPickWord = signal<UserWord | null>(null);
   readonly pendingDeleteDeck = signal<Deck | null>(null);
+  readonly pendingRenameDeck = signal<Deck | null>(null);
+  readonly renameTitle = signal('');
+  readonly renameForm = form(this.renameTitle, path => required(path));
   readonly deleteConfirmMessage = computed(() => {
     const deck = this.pendingDeleteDeck();
     return deck ? this.translate.instant('vocabulary.deck.deleteConfirm', {title: deck.title}) : '';
@@ -196,8 +199,20 @@ export class VocabularyPageComponent {
   }
 
   renameDeck(deck: Deck): void {
-    const title = prompt(this.translate.instant('vocabulary.deck.renamePrompt'), deck.title)?.trim();
-    if (title) this.facade.renameDeck(deck, title);
+    this.renameTitle.set(deck.title);
+    this.pendingRenameDeck.set(deck);
+  }
+
+  confirmRenameDeck(): void {
+    const deck = this.pendingRenameDeck();
+    const title = this.renameTitle().trim();
+    if (!deck || !title) return;
+    if (title !== deck.title) this.facade.renameDeck(deck, title);
+    this.closeRenameDialog();
+  }
+
+  closeRenameDialog(): void {
+    this.pendingRenameDeck.set(null);
   }
 
   canStudy(deck: Deck): boolean {

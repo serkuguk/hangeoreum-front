@@ -14,7 +14,7 @@
       <app-segmented-control [label]="'vocabulary.sortLabel' | translate" [items]="sorts()" [value]="sort()" (valueChange)="setSort($event)"/>
     </div>
 
-    @if (facade.loading()) {
+    @if (facade.loading() && facade.words().length === 0) {
       <div class="panel loadpanel">{{ 'common.loading' | translate }}</div>
     } @else if (facade.error(); as error) {
       <div class="panel loadpanel">{{ error }}</div>
@@ -24,7 +24,7 @@
         <a class="cta" routerLink="/learn">{{ 'common.toLessons' | translate }}</a>
       </div>
     } @else {
-      <div class="word-list" role="list">
+      <div class="word-list" role="list" [class.is-loading]="facade.loading()" [attr.aria-busy]="facade.loading()">
         @for (word of facade.words(); track word.id) {
           <div class="vrow" role="listitem" [class]="stateClass(word)" [class.open]="expandedId() === word.id">
             <div class="card-main">
@@ -102,6 +102,17 @@
         <app-button styleClass="hg-button hg-button--ghost hg-button--block" class="deckopt" [label]="deck.title" (click)="addToDeck(deck)"/>
       }
       <app-button styleClass="hg-button hg-button--ghost" dialogActions [label]="'common.cancel' | translate" (click)="closeDeckPicker()"/>
+    </app-dialog>
+  }
+
+  <!-- переименование колоды -->
+  @if (pendingRenameDeck()) {
+    <app-dialog [closeAriaLabel]="'common.closeDialog' | translate" [visible]="true" (visibleChange)="!$event && closeRenameDialog()" [header]="'common.rename' | translate">
+      <form novalidate (submit)="$event.preventDefault(); confirmRenameDeck()">
+        <app-basic-input [label]="'vocabulary.deck.renamePrompt' | translate" [formField]="renameForm"/>
+      </form>
+      <app-button styleClass="hg-button" dialogActions [label]="'common.save' | translate" [disabled]="!renameTitle().trim()" (click)="confirmRenameDeck()"/>
+      <app-button styleClass="hg-button hg-button--ghost" dialogActions [label]="'common.cancel' | translate" (click)="closeRenameDialog()"/>
     </app-dialog>
   }
 
