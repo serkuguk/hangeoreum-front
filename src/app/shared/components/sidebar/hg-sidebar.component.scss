@@ -16,7 +16,7 @@
   width: inherit;
   display: flex;
   flex-direction: column;
-  padding: var(--hg-space-3);
+  padding: var(--hg-space-5) var(--hg-space-3) var(--hg-space-3);
   border-right: 1px solid var(--hg-border);
   background: var(--sidebar-bg, var(--hg-bg));
   gap: var(--hg-space-3);
@@ -32,17 +32,17 @@
 nav { display: flex; flex-direction: column; gap: var(--hg-space-1); flex: 1; overflow-y: auto; min-height: 0; }
 a {
   display: flex; align-items: center; gap: var(--hg-space-3); min-height: 44px;
-  padding: var(--hg-space-2) var(--hg-space-3); border-radius: 6px;
+  padding: var(--hg-space-2) 14px; border-radius: 6px; // 14px centres the 20px icon in the 72px rail — same in both states so icons don't shift
   font-size: var(--hg-fs-sm); color: var(--sidebar-muted, var(--hg-text-muted));
   text-decoration: none; flex-shrink: 0;
-  transition: background var(--hg-motion-nav), color var(--hg-motion-nav), gap var(--hg-motion-route) ease, padding var(--hg-motion-route) ease;
+  transition: background var(--hg-motion-nav), color var(--hg-motion-nav), gap var(--hg-motion-route) ease;
 }
 .icon { flex: 0 0 20px; text-align: center; font-size: 18px; }
 .label { min-width: 0; max-width: 160px; opacity: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: max-width var(--hg-motion-route) ease, opacity var(--hg-motion-route) ease; }
 a:hover, :host ::ng-deep button.hg-native-button.hg-native-button.toggle:hover { background: var(--sidebar-hover, var(--hg-surface-muted)); color: var(--hg-text); }
 a.is-active { background: var(--sidebar-active-bg, var(--hg-route-soft)); color: var(--sidebar-active-text, var(--hg-route-text)); }
 .footer { font-size: var(--hg-fs-xs); }
-:host:not(.expanded) a { gap: 0; padding-inline: 14px; }
+:host:not(.expanded) a { gap: 0; }
 :host:not(.expanded) .label { max-width: 0; opacity: 0; }
 .icon-close { display: none; }
 a:focus-visible, :host ::ng-deep button.hg-native-button.hg-native-button.toggle:focus-visible { outline: 2px solid var(--hg-focus); outline-offset: -2px; }
