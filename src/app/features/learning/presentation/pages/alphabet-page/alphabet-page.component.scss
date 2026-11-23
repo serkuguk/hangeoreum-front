@@ -50,7 +50,7 @@
     animation: pop .5s;
   }
 
-  .congrats { margin-top: 12px; color: var(--hg-jade); font-weight: 600; font-size: 14px; }
+  .congrats { margin-top: 12px; color: var(--hg-success-deep); font-weight: 600; font-size: 14px; }
 }
 
 @keyframes pop {
@@ -88,11 +88,11 @@ button.hg-native-button.hg-native-button.hg-native-button.tile {
   color: var(--hg-txt);
   text-align: center;
 
-  &:hover { border-color: rgba(255, 255, 255, .22); transform: translateY(-2px); }
+  &:hover { border-color: var(--hg-text-muted); transform: translateY(-2px); }
 
   &.learned {
-    border-color: var(--hg-jade);
-    background: rgba(31, 199, 155, .08);
+    border-color: var(--hg-success-deep);
+    background: var(--hg-success-soft);
   }
 
   .jamo { display: block; font-size: 40px; line-height: 1.1; }
@@ -102,7 +102,7 @@ button.hg-native-button.hg-native-button.hg-native-button.tile {
     position: absolute;
     top: 8px;
     right: 10px;
-    color: var(--hg-jade);
+    color: var(--hg-success-deep);
     font-weight: 700;
     font-size: 13px;
   }

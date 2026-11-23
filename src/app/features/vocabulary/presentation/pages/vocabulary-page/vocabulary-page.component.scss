@@ -12,20 +12,9 @@
   .cta {
     display: inline-block;
     text-decoration: none;
-    color: #fff;
+    color: var(--hg-on-route);
     border-radius: 0.3rem;
-    transition: color var(--hg-motion-nav), background var(--hg-motion-nav);
-
-    &:hover {
-      transform: none;
-      box-shadow: none;
-      background: linear-gradient(
-        135deg,
-        color-mix(in oklch, var(--hg-blue) 80%, black),
-        color-mix(in oklch, #5a2bcf 80%, black)
-      );
-      color: #d9dcff;
-    }
+    transition: background var(--hg-motion-nav);
   }
 }
 

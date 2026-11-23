@@ -18,7 +18,7 @@
   flex-direction: column;
   padding: var(--hg-space-5) var(--hg-space-3) var(--hg-space-3);
   border-right: 1px solid var(--hg-border);
-  background: var(--sidebar-bg, var(--hg-bg));
+  background: var(--sidebar-bg, var(--hg-surface));
   gap: var(--hg-space-3);
   transition: width var(--hg-motion-route) ease;
 }
@@ -75,7 +75,7 @@ a:focus-visible, :host ::ng-deep button.hg-native-button.hg-native-button.toggle
       inset: 0;
       width: 100%;
       padding: var(--hg-space-3);
-      background: var(--sidebar-bg, var(--hg-bg));
+      background: var(--sidebar-bg, var(--hg-surface));
       overscroll-behavior: contain;
     }
 
