@@ -3,7 +3,7 @@
 
   <div class="userbox">
     @if (canAccessAdmin()) {
-      <a class="pill p-r adminlink" routerLink="/admin">{{ 'navigation.admin' | translate }}</a>
+      <a class="pill p-b adminlink" routerLink="/admin">{{ 'navigation.admin' | translate }}</a>
     }
     <app-button type="button" class="hg-native-host" styleClass="hg-native-button userbtn" (click)="menuOpen.set(!menuOpen())"
             [aria]="{'aria-label': 'navigation.userMenu' | translate, 'aria-haspopup': 'menu', 'aria-expanded': menuOpen()}">

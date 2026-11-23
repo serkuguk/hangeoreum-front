@@ -105,14 +105,29 @@ h2.pagettl {
   border-radius: var(--hg-radius-pill);
 }
 
-.p-y { background: rgba(255, 194, 60, .14); color: var(--hg-yellow); }
-.p-j { background: rgba(31, 199, 155, .12); color: var(--hg-jade); }
-.p-b { background: rgba(59, 107, 255, .14); color: var(--hg-blue); }
-.p-r { background: rgba(255, 77, 94, .12); color: var(--hg-red); }
+.p-y {
+  background: var(--hg-reward-soft);
+  color: var(--hg-reward-deep);
+}
+
+.p-j {
+  background: var(--hg-success-soft);
+  color: var(--hg-success-deep);
+}
+
+.p-b {
+  background: var(--hg-route-soft);
+  color: var(--hg-route-text);
+}
+
+.p-r {
+  background: var(--hg-danger-soft);
+  color: var(--hg-danger);
+}
 
 .cta {
-  background: linear-gradient(135deg, var(--hg-blue), #5a2bcf);
-  color: #fff;
+  background: var(--hg-route);
+  color: var(--hg-on-route);
   border: none;
   font-weight: 700;
   font-size: var(--hg-fs-base);
@@ -122,8 +137,7 @@ h2.pagettl {
   transition: .2s;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--hg-shadow-cta);
+    background: var(--hg-route-deep);
   }
 
   &:disabled {
@@ -145,7 +159,7 @@ h2.pagettl {
   transition: .2s;
 
   &:hover {
-    border-color: rgba(255, 255, 255, .2);
+    border-color: var(--hg-text-muted);
   }
 }
 
@@ -159,7 +173,8 @@ h2.pagettl {
 
   &:last-child { border: none; }
 
-  span { color: var(--hg-muted); }
+  // только подпись строки: вложенный span — это лейбл кнопки PrimeNG, его не трогаем
+  > span { color: var(--hg-muted); }
 }
 
 // Hangul in headings wraps between words, not mid-word («안녕 / 하세요» on a phone).

@@ -44,8 +44,8 @@
   transition: .18s;
   width: 100%;
 
-  &:hover { border-color: rgba(255, 255, 255, .22); }
-  &.is-picked { border-color: var(--hg-blue); background: rgba(59, 107, 255, .08); }
+  &:hover { border-color: var(--hg-text-muted); }
+  &.is-picked { border-color: var(--hg-blue); background: var(--hg-route-soft); }
 
   .obic {
     width: 48px;
@@ -56,9 +56,9 @@
     font-size: 22px;
     flex-shrink: 0;
 
-    &.c-jade { background: rgba(31, 199, 155, .15); color: var(--hg-jade); }
-    &.c-blue { background: rgba(59, 107, 255, .15); color: var(--hg-blue); }
-    &.c-yellow { background: rgba(255, 194, 60, .15); color: var(--hg-yellow); }
+    &.c-jade { background: var(--hg-success-soft); color: var(--hg-success-deep); }
+    &.c-blue { background: var(--hg-route-soft); color: var(--hg-blue); }
+    &.c-yellow { background: var(--hg-reward-soft); color: var(--hg-reward-deep); }
   }
 
   b { display: block; font-size: 15px; font-weight: 600; }
@@ -70,9 +70,9 @@
     font-weight: 700;
     flex-shrink: 0;
 
-    &.t-jade { color: var(--hg-jade); }
+    &.t-jade { color: var(--hg-success-deep); }
     &.t-blue { color: var(--hg-blue); }
-    &.t-yellow { color: var(--hg-yellow); }
+    &.t-yellow { color: var(--hg-reward-deep); }
   }
 }
 
@@ -93,9 +93,9 @@
     transition: .18s;
 
     &.is-picked {
-      border-color: var(--hg-yellow);
-      background: rgba(255, 194, 60, .1);
-      color: var(--hg-yellow);
+      border-color: var(--hg-reward-deep);
+      background: var(--hg-reward-soft);
+      color: var(--hg-reward-deep);
       font-weight: 700;
     }
   }

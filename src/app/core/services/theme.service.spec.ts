@@ -38,4 +38,14 @@ describe('ThemeService radius persistence', () => {
     expect(document.documentElement.style.getPropertyValue('--hg-radius-lg')).toBe(value);
     expect(restored.stored()).toEqual(theme);
   });
+
+  it('leaves --hg-blue to the theme for the default accent and overrides it for a custom one', () => {
+    const service = new ThemeService();
+
+    service.apply({...DEFAULT_THEME, accent: '#FF4D5E'});
+    expect(document.documentElement.style.getPropertyValue('--hg-blue')).toBe('#FF4D5E');
+
+    service.apply(DEFAULT_THEME);
+    expect(document.documentElement.style.getPropertyValue('--hg-blue')).toBe('');
+  });
 });

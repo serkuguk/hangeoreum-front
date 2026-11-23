@@ -29,7 +29,12 @@ app-button {
       }
       &.hg-button--ghost { &, &:hover:not(:disabled), &:disabled { background: transparent; } }
     }
-    &.hg-button--danger { &, &:hover:not(:disabled), &:disabled { background: var(--hg-danger); } }
+    &.hg-button--danger {
+      &, &:hover:not(:disabled), &:disabled {
+        background: var(--hg-danger);
+        color: var(--hg-on-danger);
+      }
+    }
     &.hg-button--sm { min-height: 2.25rem; padding: .4rem .7rem; font-size: .875rem; }
     &.linkbtn {
       min-width: 0;

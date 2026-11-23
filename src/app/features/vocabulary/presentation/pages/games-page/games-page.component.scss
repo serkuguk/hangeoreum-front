@@ -19,7 +19,7 @@
   font-size: 14px;
   margin-bottom: var(--hg-space-4);
 
-  a { color: var(--hg-reward); }
+  a { color: var(--hg-reward-deep); }
 }
 
 .gpick { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--hg-space-4); }
@@ -60,7 +60,7 @@ button.hg-native-button.hg-native-button.hg-native-button.gcard {
     &.low { color: var(--hg-danger); }
   }
 
-  .combo { color: var(--hg-reward); font-weight: 700; font-size: 15px; flex: 1; }
+  .combo { color: var(--hg-reward-deep); font-weight: 700; font-size: 15px; flex: 1; }
 }
 
 .match, .opts {

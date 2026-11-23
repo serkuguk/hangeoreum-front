@@ -54,7 +54,12 @@ export class ThemeService {
 
   apply(theme: ThemeChoice): void {
     const root = document.documentElement.style;
-    root.setProperty('--hg-blue', theme.accent);
+    // Дефолтный акцент не пишем инлайном — иначе он перебивает --hg-route темы (light/dark).
+    if (theme.accent === DEFAULT_THEME.accent) {
+      root.removeProperty('--hg-blue');
+    } else {
+      root.setProperty('--hg-blue', theme.accent);
+    }
     root.setProperty('--hg-fs-base', `${15 * theme.fontScale}px`);
     root.setProperty('--hg-radius-lg', theme.radius);
     localStorage.setItem(THEME_KEY, JSON.stringify(theme));

@@ -76,10 +76,41 @@
   gap: 10px;
   padding: 30px;
   overflow: hidden;
+  color: var(--hg-text);
+  // «ханджи»: светлая бумага с лёгкими тинтами 오방색 по углам
+  background:
+    radial-gradient(circle at 100% 0%, var(--hg-reward-soft), transparent 42%),
+    radial-gradient(circle at 0% 100%, var(--hg-route-soft), transparent 48%),
+    var(--hg-surface);
+  box-shadow: 0 24px 48px -28px color-mix(in oklch, var(--hg-route-deep) 45%, transparent);
+
+  // тонкая внутренняя рамка, как у карточки-открытки
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid var(--hg-border);
+    border-radius: calc(var(--hg-radius-scene) - 10px);
+    pointer-events: none;
+  }
+
+  // полоса 색동 (полосатый рукав ханбока) — пять цветов 오방색
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 6px;
+    background: linear-gradient(
+      90deg,
+      var(--hg-route) 0 20%,
+      var(--hg-danger) 20% 40%,
+      var(--hg-reward) 40% 60%,
+      var(--hg-success) 60% 80%,
+      var(--hg-text) 80% 100%
+    );
+  }
 
   &--front {
-    background: linear-gradient(150deg, var(--hg-route), #5a2bcf);
-
     // хангыль карточки — тем же шрифтом, что логотип в шапке
     .ghost {
       font-family: 'Gowun Batang', var(--hg-font-kr);
@@ -87,22 +118,33 @@
       font-size: 230px;
       right: -40px;
       bottom: -70px;
-      color: rgba(255, 255, 255, .07);
+      color: var(--hg-route);
+      opacity: .06;
     }
 
     .big {
       font-family: 'Gowun Batang', var(--hg-font-kr);
       font-weight: 700;
       font-size: var(--hg-fs-display-xl);
-      text-shadow: 0 6px 30px rgba(0, 0, 0, .3);
       line-height: 1;
+      color: var(--hg-text);
     }
-    .rom { opacity: .85; letter-spacing: 1px; }
-    .ill { width: 64px; height: 64px; object-fit: cover; border-radius: var(--hg-radius-block); }
+
+    .rom {
+      color: var(--hg-text-muted);
+      letter-spacing: 2px;
+      font-size: 14px;
+    }
+
+    .ill {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: var(--hg-radius-block);
+    }
   }
 
   &--back {
-    background: var(--hg-surface);
     transform: rotateY(180deg);
 
     .mean { font-size: 32px; font-weight: 700; }

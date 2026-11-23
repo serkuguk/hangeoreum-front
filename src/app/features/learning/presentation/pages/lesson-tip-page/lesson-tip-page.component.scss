@@ -72,9 +72,9 @@
   .kr { font-size: 19px; }
 
   ::ng-deep .p {
-    color: var(--hg-jade);
+    color: var(--hg-success-deep);
     font-weight: 700;
-    background: rgba(31, 199, 155, .1);
+    background: var(--hg-success-soft);
     border-radius: 6px;
     padding: 0 4px;
   }

@@ -30,7 +30,7 @@
   font-size: 38px;
   font-weight: 700;
   flex-shrink: 0;
-  border: 3px solid rgba(255, 255, 255, .12);
+  border: 3px solid var(--hg-border);
   cursor: pointer;
   overflow: hidden;
 
@@ -51,26 +51,48 @@
   &:hover .cam { opacity: 1; }
 }
 
+// аватар | имя | [Сменить аватар] [Настройки]
+.cab-head app-file-picker {
+  flex: none;
+  width: auto;
+  order: 1;
+  align-self: flex-start;
+
+  > label {
+    min-height: 0;
+    padding: 9px 16px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+.cab-head .editbtn {
+  order: 2;
+}
+
 .who {
   flex: 1;
+  min-width: 0;
 
   h1 { font-size: 26px; font-weight: 600; margin-bottom: 8px; }
   p { color: var(--hg-muted); font-size: 14px; margin-top: 8px; }
 }
 
 .editbtn {
-  background: var(--hg-card-2);
+  background: var(--hg-card);
   border: 1px solid var(--hg-line);
   color: var(--hg-txt);
   font-size: 13px;
-  padding: 10px 18px;
+  padding: 9px 16px;
   border-radius: 99px;
+  font-weight: 500;
   cursor: pointer;
   align-self: flex-start;
   text-decoration: none;
   transition: .2s;
 
-  &:hover { border-color: rgba(255, 255, 255, .2); }
+  &:hover { border-color: var(--hg-text-muted); }
 }
 
 .levelbox {
@@ -104,8 +126,8 @@
   span { font-size: 12px; color: var(--hg-muted); }
 }
 
-.j { color: var(--hg-jade); }
-.y { color: var(--hg-yellow); }
+.j { color: var(--hg-success-deep); }
+.y { color: var(--hg-reward-deep); }
 .r { color: var(--hg-red); }
 .bl { color: var(--hg-blue); }
 
@@ -134,7 +156,7 @@
     border: 1px solid var(--hg-line);
   }
 
-  &.got .ic { background: rgba(255, 194, 60, .14); border-color: transparent; }
+  &.got .ic { background: var(--hg-reward-soft); border-color: transparent; }
   &.locked { opacity: .4; }
 }
 
